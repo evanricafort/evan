@@ -484,8 +484,20 @@
     </section>
 
             
+    <script type="text/javascript">
+      function toggleText(btn, id){
+        var e = document.getElementById(id);
+        if (e.style.display == 'block') {
+          e.style.display = 'none';
+          btn.innerHTML = "Read More";
+        }
+        else{
+          e.style.display = 'block';
+          btn.innerHTML = "Show Less";
+        }
+      }
+    </script>
 
-    <section>
  
                   <img src="https://s09.flagcounter.com/count/iwvj/bg_FFFFFF/txt_000000/border_FFFFFF/columns_6/maxflags_50/viewers_0/labels_1/pageviews_1/flags_1/" alt="Free counters!" border="0"> 
 
