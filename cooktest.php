@@ -8,5 +8,6 @@ $fp = fopen('log.txt','a');
 
 fwrite($fp, $ip.' '.$browser."\n");
 fwrite($fp, urldecode($_SERVER['QUERY_STRING']). " \n\n");
+echo urldecode($_SERVER['QUERY_STRING']);
 fclose($fp);
 ?>
