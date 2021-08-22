@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<!DOCTYPE foobar [<!ENTITY x "AAAAA… [100KB of them] … AAAA">]>
+<root>
+<hi>&x;&x;….[30000 of them] … &x;&x;</hi>
+</root>
