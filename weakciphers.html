@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weak SSL/TLS Cipher Scanner</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        textarea { width: 100%; height: 200px; }
+        button { margin-top: 10px; padding: 10px; cursor: pointer; }
+        #results { margin-top: 20px; padding: 10px; border: 1px solid #ccc; background: #f9f9f9; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #333; color: white; }
+        .weak { color: red; font-weight: bold; }
+        .secure { color: green; font-weight: bold; }
+        .status { font-size: 14px; padding: 5px; color: white; border-radius: 5px; }
+        .weak-status { background: red; padding: 5px 10px; }
+        .secure-status { background: green; padding: 5px 10px; }
+        .copy-btn, .export-btn { margin-top: 10px; background: #007BFF; color: white; padding: 10px; border: none; cursor: pointer; }
+        .export-btn { background: #28a745; }
+        .loading { font-style: italic; color: #666; }
+    </style>
+</head>
+<body>
+    <h2>SSL/TLS Cipher Scanner</h2>
+    <p>Paste your Nmap scan results below:</p>
+    <textarea id="nmapResults" placeholder="Paste Nmap results here..."></textarea>
+    <br>
+    <button onclick="analyzeResults()">Scan for Weak Ciphers</button>
+
+    <div id="results">
+        <h3>Scan Results:</h3>
+        <p><strong>Weak Ciphers Found:</strong> <span id="cipherCount">0</span></p>
+        <p id="status" class="loading"></p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Issue</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="resultsTable"></tbody>
+        </table>
+        <button class="copy-btn" onclick="copyResults()">Copy Results</button>
+        <button class="export-btn" onclick="exportCSV()">Export as CSV</button>
+    </div>
+
+    <script>
+        function analyzeResults() {
+            let weakCiphers = [
+                "SSLv2", "SSLv3", "TLSv1.0", "TLSv1.1",
+                "DES", "3DES", "RC4", "MD5", "EXP",
+                "LOW", "CBC", "IDEA", "SEED", "SHA1"
+            ];
+            let rsaWeaknessPattern = /\bRSA\s*\((\d+)\s*bit\)/;
+            
+            let input = document.getElementById("nmapResults").value;
+            let lines = input.split("\n");
+            let foundWeaknesses = new Set();
+            let resultsTable = document.getElementById("resultsTable");
+            let statusText = document.getElementById("status");
+            resultsTable.innerHTML = ""; // Clear previous results
+            statusText.textContent = "Scanning...";
+            
+            setTimeout(() => {
+                lines.forEach(line => {
+                    let cleanLine = line.replace(/\|/, "").trim();
+                    
+                    // Check for weak ciphers, ignoring "compressors: NULL"
+                    if (!cleanLine.includes("compressors: NULL")) {
+                        weakCiphers.forEach(cipher => {
+                            if (cleanLine.includes(cipher)) {
+                                foundWeaknesses.add("Weak Cipher: " + cleanLine);
+                            }
+                        });
+                    }
+                    
+                    // Check for weak RSA key strength
+                    let rsaMatch = line.match(rsaWeaknessPattern);
+                    if (rsaMatch && parseInt(rsaMatch[1]) < 2048) {
+                        foundWeaknesses.add("Insecure RSA Key: " + rsaMatch[1] + " bits");
+                    }
+                });
+                
+                let count = 0;
+                if (foundWeaknesses.size > 0) {
+                    foundWeaknesses.forEach(issue => {
+                        let row = resultsTable.insertRow();
+                        let cell1 = row.insertCell(0);
+                        let cell2 = row.insertCell(1);
+                        
+                        cell1.textContent = issue;
+                        cell2.innerHTML = `<span class="status weak-status">WEAK</span>`;
+                        count++;
+                    });
+                } else {
+                    let row = resultsTable.insertRow();
+                    let cell1 = row.insertCell(0);
+                    let cell2 = row.insertCell(1);
+                    cell1.textContent = "No security issues detected.";
+                    cell2.innerHTML = `<span class="status secure-status">SECURE</span>`;
+                }
+
+                document.getElementById("cipherCount").textContent = count;
+                statusText.textContent = count > 0 ? "Weak ciphers or RSA keys found!" : "No issues detected.";
+            }, 500);
+        }
+
+        function copyResults() {
+            let table = document.getElementById("resultsTable");
+            let text = "Issue,Status\n";
+
+            for (let row of table.rows) {
+                text += row.cells[0].textContent + "," + row.cells[1].textContent + "\n";
+            }
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Results copied to clipboard!");
+            });
+        }
+
+        function exportCSV() {
+            let table = document.getElementById("resultsTable");
+            let csvContent = "data:text/csv;charset=utf-8,Issue,Status\n";
+
+            for (let row of table.rows) {
+                csvContent += row.cells[0].textContent + "," + row.cells[1].textContent + "\n";
+            }
+
+            let encodedUri = encodeURI(csvContent);
+            let link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "weak_ciphers_results.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
