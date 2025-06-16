@@ -6,8 +6,12 @@
   <title>CORS Misconfiguration Scanner</title>
   <style>
     html, body {
-      margin: 0; padding: 0; height: 100%; overflow: hidden;
-      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+      transition: background 0.3s, color 0.3s;
     }
 
     canvas#bg {
@@ -16,27 +20,90 @@
       width: 100vw;
       height: 100vh;
       z-index: -1;
+      background: #0d1117;
     }
 
     .container {
       position: relative;
       padding: 2rem;
       z-index: 1;
-      background-color: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(4px);
       height: 100%;
       overflow-y: auto;
+      background-color: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(3px);
+      transition: background-color 0.3s;
     }
 
-    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background-color: #f9f9f9; }
+    body.dark .container {
+      background-color: rgba(15, 15, 15, 0.85);
+      color: #eee;
+    }
+
+    .theme-toggle {
+      float: right;
+      margin-top: -2rem;
+      margin-right: 1rem;
+    }
+
+    textarea, input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      background: white;
+      color: black;
+      border: 1px solid #ccc;
+    }
+
+    body.dark textarea, body.dark input {
+      background: #222;
+      color: #fff;
+      border: 1px solid #555;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      margin-bottom: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+    }
+
+    body.dark th, body.dark td {
+      border-color: #444;
+    }
+
+    th {
+      background: #f0f0f0;
+    }
+
+    body.dark th {
+      background: #333;
+    }
+
     .ok { color: green; }
     .warn { color: orange; }
     .vuln { color: red; font-weight: bold; }
-    textarea, input { width: 100%; padding: 0.5rem; margin-bottom: 1rem; }
-    button { padding: 0.5rem 1rem; font-weight: bold; }
-    #log { background: #111; color: #0f0; padding: 1rem; font-family: monospace; max-height: 400px; overflow-y: auto; white-space: pre-wrap; border-radius: 5px; margin-top: 1rem; }
+
+    #log {
+      background: #111;
+      color: #0f0;
+      padding: 1rem;
+      font-family: monospace;
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body>
@@ -44,152 +111,98 @@
 <canvas id="bg"></canvas>
 
 <div class="container">
-  <h1>🔍 CORS Misconfiguration Scanner</h1>
+  <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Dark Mode</button>
+  <h1>🌐 CORS Misconfiguration Scanner</h1>
 
-  <label for="urls">Target URLs (one per line):</label>
-  <textarea id="urls" rows="8" placeholder="https://example.com&#10;https://api.example.com/data"></textarea>
+  <label>Target URLs (one per line):</label>
+  <textarea id="urls" rows="8" placeholder="https://example.com&#10;https://api.example.com"></textarea>
 
-  <label for="origin">Malicious Origin (e.g., https://evil.com):</label>
-  <input type="text" id="origin" value="https://evil.com" />
+  <label>Malicious Origin:</label>
+  <input type="text" id="origin" value="https://evil.com">
 
-  <label for="webhook">Discord Webhook URL (optional):</label>
-  <input type="text" id="webhook" placeholder="https://discord.com/api/webhooks/..." />
+  <label>Discord Webhook (optional):</label>
+  <input type="text" id="webhook" placeholder="https://discord.com/api/webhooks/...">
 
   <button onclick="startScan()">Start Scan</button>
 
   <table id="results">
     <thead>
-      <tr>
-        <th>URL</th>
-        <th>Status</th>
-        <th>Notes</th>
-      </tr>
+      <tr><th>URL</th><th>Status</th><th>Notes</th></tr>
     </thead>
     <tbody></tbody>
   </table>
 
-  <h3>📝 Live Scan Log</h3>
+  <h3>📝 Live Log</h3>
   <pre id="log">[Scanner Ready]</pre>
 </div>
 
 <script>
-  // Background animation
-  const canvas = document.getElementById('bg');
-  const ctx = canvas.getContext('2d');
-  let width, height, points = [];
-
-  function resize() {
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
-    points = Array.from({ length: 60 }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.6,
-      vy: (Math.random() - 0.5) * 0.6
-    }));
+  function toggleTheme() {
+    document.body.classList.toggle('dark');
   }
 
-  function draw() {
-    ctx.clearRect(0, 0, width, height);
-    points.forEach((p, i) => {
-      p.x += p.vx;
-      p.y += p.vy;
-
-      if (p.x < 0 || p.x > width) p.vx *= -1;
-      if (p.y < 0 || p.y > height) p.vy *= -1;
-
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-      ctx.fillStyle = "#00f8ff";
-      ctx.fill();
-
-      for (let j = i + 1; j < points.length; j++) {
-        let p2 = points[j];
-        let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-        if (dist < 120) {
-          ctx.strokeStyle = `rgba(0,248,255,${1 - dist / 120})`;
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(p.x, p.y);
-          ctx.lineTo(p2.x, p2.y);
-          ctx.stroke();
-        }
-      }
-    });
-
-    requestAnimationFrame(draw);
-  }
-
-  window.addEventListener('resize', resize);
-  resize();
-  draw();
-</script>
-
-<script>
   function log(message) {
-    const logArea = document.getElementById("log");
-    logArea.textContent += `\n${message}`;
-    logArea.scrollTop = logArea.scrollHeight;
+    const el = document.getElementById("log");
+    el.textContent += `\n${message}`;
+    el.scrollTop = el.scrollHeight;
   }
 
   function formatHeaders(headers) {
-    const out = [];
-    for (let pair of headers.entries()) {
-      out.push(`    ${pair[0]}: ${pair[1]}`);
+    const arr = [];
+    for (let [k, v] of headers.entries()) {
+      arr.push(`    ${k}: ${v}`);
     }
-    return out.join('\n');
+    return arr.join('\n');
   }
 
   async function checkCORS(url, customOrigin) {
     try {
-      log(`\n[>] Scanning: ${url}`);
+      log(`\n[>] Scanning ${url}`);
       const res = await fetch(url, {
         method: 'GET',
         mode: 'cors',
         headers: { 'Origin': customOrigin }
       });
 
-      log(`    ↳ Status: ${res.status} ${res.statusText}`);
+      log(`    ↳ Status: ${res.status}`);
       log(`    ↳ Headers:\n${formatHeaders(res.headers)}`);
 
-      const allowedOrigin = res.headers.get("Access-Control-Allow-Origin");
-      const allowCreds = res.headers.get("Access-Control-Allow-Credentials");
+      const ao = res.headers.get("Access-Control-Allow-Origin");
+      const ac = res.headers.get("Access-Control-Allow-Credentials");
 
-      if (allowedOrigin === customOrigin) {
-        if (allowCreds === 'true') {
-          log("    ⚠️  Reflected with credentials! Potentially vulnerable.");
-          return { status: "vuln", notes: "Origin reflected with credentials" };
-        } else {
-          log("    ⚠️  Reflected without credentials.");
-          return { status: "warn", notes: "Origin reflected without credentials" };
-        }
+      if (ao === customOrigin && ac === 'true') {
+        log(`    ⚠️ Reflected with credentials`);
+        return { status: "vuln", notes: "Reflected w/ credentials" };
+      } else if (ao === customOrigin) {
+        log(`    ⚠️ Reflected (no credentials)`);
+        return { status: "warn", notes: "Reflected origin only" };
       } else {
-        log("    ✅ No origin reflection.");
-        return { status: "ok", notes: "No origin reflection" };
+        log(`    ✅ Safe`);
+        return { status: "ok", notes: "No reflection" };
       }
-    } catch (err) {
-      log(`    ❌ Error: ${err.message}`);
-      return { status: "warn", notes: `Request failed or blocked by CORS: ${err.message}` };
+    } catch (e) {
+      log(`    ❌ Error: ${e.message}`);
+      return { status: "warn", notes: "Request failed" };
     }
   }
 
   function appendResult(url, status, notes) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${url}</td><td class="${status}">${status.toUpperCase()}</td><td>${notes}</td>`;
-    document.querySelector("#results tbody").appendChild(tr);
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>${url}</td><td class="${status}">${status.toUpperCase()}</td><td>${notes}</td>`;
+    document.querySelector("#results tbody").appendChild(row);
   }
 
-  async function sendToDiscord(webhook, message) {
+  async function sendToDiscord(webhook, msg) {
     if (!webhook) return;
     try {
       await fetch(webhook, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: message })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: msg })
       });
-      log(`    📤 Alert sent to Discord`);
+      log("    📤 Sent to Discord");
     } catch (err) {
-      log(`    ❌ Failed to send to Discord: ${err.message}`);
+      log(`    ❌ Discord error: ${err.message}`);
     }
   }
 
@@ -200,23 +213,58 @@
     document.querySelector("#results tbody").innerHTML = "";
     document.getElementById("log").textContent = "[Scan started...]";
 
-    for (const rawUrl of urls) {
-      const url = rawUrl.trim();
+    for (const raw of urls) {
+      const url = raw.trim();
       if (!url) continue;
 
-      appendResult(url, '...', 'Scanning...');
+      appendResult(url, "...", "Scanning...");
       const result = await checkCORS(url, origin);
       document.querySelector("#results tbody").lastChild.remove();
       appendResult(url, result.status, result.notes);
 
-      if (["vuln", "warn"].includes(result.status) && webhook) {
-        const alert = `🚨 **CORS Alert**\nURL: ${url}\nStatus: ${result.status.toUpperCase()}\nNotes: ${result.notes}`;
+      if ((result.status === "warn" || result.status === "vuln") && webhook) {
+        const alert = `🚨 **CORS Issue Detected**\nURL: ${url}\nStatus: ${result.status.toUpperCase()}\nNotes: ${result.notes}`;
         await sendToDiscord(webhook, alert);
       }
     }
 
-    log("\n✅ Scan complete.");
+    log("\n✅ Scan Complete");
   }
+</script>
+
+<!-- 🎨 Topography Background Animation -->
+<script>
+  const canvas = document.getElementById("bg");
+  const ctx = canvas.getContext("2d");
+  let w, h, t = 0;
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+
+  function drawTopography() {
+    ctx.clearRect(0, 0, w, h);
+    ctx.strokeStyle = "rgba(0,255,255,0.06)";
+    ctx.lineWidth = 1;
+    const gridSize = 30;
+
+    for (let y = 0; y < h; y += gridSize) {
+      ctx.beginPath();
+      for (let x = 0; x < w; x++) {
+        const wave = Math.sin((x + t) * 0.01) * 10 + Math.sin((y + t) * 0.02) * 10;
+        ctx.lineTo(x, y + wave);
+      }
+      ctx.stroke();
+    }
+
+    t += 1.5;
+    requestAnimationFrame(drawTopography);
+  }
+
+  window.addEventListener("resize", resize);
+  resize();
+  drawTopography();
 </script>
 
 </body>
