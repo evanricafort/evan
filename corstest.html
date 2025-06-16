@@ -134,9 +134,9 @@
       case "vuln":
         return "The target reflects the malicious origin and allows credentials. This allows attackers to access sensitive data from the target application using cross-origin requests. Immediate mitigation is required.";
       case "warn":
-        return "The server reflects the malicious origin but does not allow credentials. This still poses a security risk as it may enable exploitation of less sensitive endpoints or combine with other vulnerabilities.";
+        return "The server reflects the malicious origin but does not allow credentials. While this may not be as severe as a 'vuln' status, it still poses a security risk and can be exploited in some contexts (e.g., when used with other vulnerabilities).";
       case "ok":
-        return "The server did not reflect the malicious origin. It is correctly configured against CORS attacks. No action needed.";
+        return "The server did not reflect the malicious origin. It is correctly configured to prevent CORS-based attacks. No action needed.";
       case "error":
         return "The scan could not be completed due to a network or CORS error. Check the URL or try again later.";
       default:
@@ -158,7 +158,7 @@
 
   async function checkCORS(url, customOrigin) {
     try {
-      log(`\n[>] Scanning ${url}`);
+      log(`[>] Scanning ${url}`);
       const res = await fetch(url, {
         method: 'GET',
         mode: 'cors',
@@ -217,11 +217,10 @@
       document.querySelector("#results tbody").lastChild.remove();
       appendResult(url, result.status, result.notes);
 
-      if ((result.status === "warn" || result.status === "vuln") && webhook) {
-        const explanation = getExplanation(result.status);
-        const alert = `🚨 **CORS Issue Detected**\n**URL:** ${url}\n**Status:** ${result.status.toUpperCase()}\n**Notes:** ${result.notes}\n**Explanation:** ${explanation}`;
-        await sendToDiscord(webhook, alert);
-      }
+      // Send the result to Discord, no matter the status
+      const explanation = getExplanation(result.status);
+      const alert = `🔍 **Scan Result**\n**URL:** ${url}\n**Status:** ${result.status.toUpperCase()}\n**Notes:** ${result.notes}\n**Explanation:** ${explanation}`;
+      await sendToDiscord(webhook, alert);
     }
 
     log("\n✅ Scan Complete");
