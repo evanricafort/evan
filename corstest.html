@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CORS Misconfiguration Scanner</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f9f9f9; }
+    .ok { color: green; }
+    .warn { color: orange; }
+    .vuln { color: red; font-weight: bold; }
+    textarea, input { width: 100%; padding: 0.5rem; margin-bottom: 1rem; }
+    button { padding: 0.5rem 1rem; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>🔍 CORS Misconfiguration Scanner</h1>
+
+  <label for="urls">Target URLs (one per line):</label>
+  <textarea id="urls" rows="8" placeholder="https://example.com&#10;https://api.example.com/data"></textarea>
+
+  <label for="origin">Malicious Origin (e.g., https://evil.com):</label>
+  <input type="text" id="origin" value="https://evil.com" />
+
+  <label for="webhook">Discord Webhook URL (optional):</label>
+  <input type="text" id="webhook" placeholder="https://discord.com/api/webhooks/..." />
+
+  <button onclick="startScan()">Start Scan</button>
+
+  <table id="results">
+    <thead>
+      <tr>
+        <th>URL</th>
+        <th>Status</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    async function checkCORS(url, customOrigin) {
+      try {
+        const res = await fetch(url, {
+          method: 'GET',
+          mode: 'cors',
+          headers: {
+            'Origin': customOrigin
+          }
+        });
+
+        const allowedOrigin = res.headers.get("Access-Control-Allow-Origin");
+        const allowCreds = res.headers.get("Access-Control-Allow-Credentials");
+
+        if (allowedOrigin === customOrigin) {
+          if (allowCreds === 'true') {
+            return { status: "vuln", notes: "Origin reflected with credentials" };
+          } else {
+            return { status: "warn", notes: "Origin reflected without credentials" };
+          }
+        } else {
+          return { status: "ok", notes: "No origin reflection" };
+        }
+      } catch (err) {
+        return { status: "warn", notes: `Request failed or blocked by CORS: ${err.message}` };
+      }
+    }
+
+    function appendResult(url, status, notes) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${url}</td><td class="${status}">${status.toUpperCase()}</td><td>${notes}</td>`;
+      document.querySelector("#results tbody").appendChild(tr);
+    }
+
+    async function sendToDiscord(webhook, message) {
+      if (!webhook) return;
+      try {
+        await fetch(webhook, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: message })
+        });
+      } catch (err) {
+        console.warn("Failed to send Discord alert:", err.message);
+      }
+    }
+
+    async function startScan() {
+      const urls = document.getElementById("urls").value.trim().split("\n");
+      const origin = document.getElementById("origin").value.trim();
+      const webhook = document.getElementById("webhook").value.trim();
+      document.querySelector("#results tbody").innerHTML = "";
+
+      for (const rawUrl of urls) {
+        const url = rawUrl.trim();
+        if (!url) continue;
+
+        appendResult(url, '...', 'Scanning...');
+        const result = await checkCORS(url, origin);
+        document.querySelector("#results tbody").lastChild.remove();
+        appendResult(url, result.status, result.notes);
+
+        if (["vuln", "warn"].includes(result.status) && webhook) {
+          const alert = `🚨 **CORS Alert**\nURL: ${url}\nStatus: ${result.status.toUpperCase()}\nNotes: ${result.notes}`;
+          await sendToDiscord(webhook, alert);
+        }
+      }
+    }
+  </script>
+</body>
+</html>
