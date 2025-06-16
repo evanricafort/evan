@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>CORS Scanner (with Wildcard Check & Graphical Summary)</title>
+  <title>CORS Misconfiguration Scanner (with Wildcard Check & Graphical Summary)</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
@@ -68,7 +68,7 @@
   <input type="text" id="customMethod" placeholder="PUT, DELETE, PATCH...">
 </div>
 
-<label>Custom Headers (JSON):</label>
+<label>Custom Headers (JSON - Optional):</label>
 <textarea id="headers" rows="3" placeholder='{"X-Auth": "abc123"}'></textarea>
 
 <label><input type="checkbox" id="withCreds"> Simulate Credentials (send cookies/session)</label><br>
@@ -247,8 +247,9 @@
     const origin = document.getElementById("origin").value.trim();
     const scanType = document.getElementById("scanType").value;
     const method = scanType === "OTHER" ? document.getElementById("customMethod").value.trim().toUpperCase() : scanType;
-    const customHeaders = parseHeaders(document.getElementById("headers").value);
-    const withCreds = document.getElementById("withCreds").checked;
+    const customHeadersInput = document.getElementById("headers").value.trim();
+    const customHeaders = customHeadersInput ? parseHeaders(customHeadersInput) : {};
+    const withCreds = document.getElementById("withCreds").checked; // Simulate credentials option
     const webhook = document.getElementById("webhook").value.trim();
 
     document.querySelector("#results tbody").innerHTML = "";
@@ -267,6 +268,15 @@
     }
 
     log("\n✅ Scan complete.");
+  }
+
+  function parseHeaders(headers) {
+    try {
+      return JSON.parse(headers);
+    } catch (e) {
+      log(`❌ Invalid headers format`);
+      return {};
+    }
   }
 </script>
 
