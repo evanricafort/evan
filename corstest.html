@@ -115,9 +115,13 @@
     document.body.classList.toggle('dark');
   }
 
+  function timestamp() {
+    return new Date().toISOString().split("T").join(" ").split(".")[0];
+  }
+
   function log(message) {
     const el = document.getElementById("log");
-    el.textContent += `\n${message}`;
+    el.textContent += `\n[${timestamp()}] ${message}`;
     el.scrollTop = el.scrollHeight;
   }
 
@@ -134,9 +138,9 @@
       case "vuln":
         return "The target reflects the malicious origin and allows credentials. This allows attackers to access sensitive data from the target application using cross-origin requests. Immediate mitigation is required.";
       case "warn":
-        return "The server reflects the malicious origin but does not allow credentials. While this may not be as severe as a 'vuln' status, it still poses a security risk and can be exploited in some contexts (e.g., when used with other vulnerabilities).";
+        return "The server reflects the malicious origin but does not allow credentials. This still poses a security risk as it may enable exploitation of less sensitive endpoints or combine with other vulnerabilities.";
       case "ok":
-        return "The server did not reflect the malicious origin. It is correctly configured to prevent CORS-based attacks. No action needed.";
+        return "The server did not reflect the malicious origin. It is correctly configured against CORS attacks. No action needed.";
       case "error":
         return "The scan could not be completed due to a network or CORS error. Check the URL or try again later.";
       default:
@@ -158,31 +162,32 @@
 
   async function checkCORS(url, customOrigin) {
     try {
-      log(`[>] Scanning ${url}`);
+      log(`\n==============================`);
+      log(`🔍 Scanning ${url}`);
       const res = await fetch(url, {
         method: 'GET',
         mode: 'cors',
         headers: { 'Origin': customOrigin }
       });
 
-      log(`    ↳ Status: ${res.status}`);
-      log(`    ↳ Headers:\n${formatHeaders(res.headers)}`);
+      log(`↳ Status: ${res.status}`);
+      log(`↳ Headers:\n${formatHeaders(res.headers)}`);
 
       const ao = res.headers.get("Access-Control-Allow-Origin");
       const ac = res.headers.get("Access-Control-Allow-Credentials");
 
       if (ao === customOrigin && ac === 'true') {
-        log(`    ⚠️ Reflected with credentials`);
+        log(`⚠️ Reflected with credentials`);
         return { status: "vuln", notes: "Reflected w/ credentials" };
       } else if (ao === customOrigin) {
-        log(`    ⚠️ Reflected origin only`);
+        log(`⚠️ Reflected origin only`);
         return { status: "warn", notes: "Reflected origin only" };
       } else {
-        log(`    ✅ Safe`);
+        log(`✅ Safe`);
         return { status: "ok", notes: "No reflection" };
       }
     } catch (e) {
-      log(`    ❌ Error: ${e.message}`);
+      log(`❌ Error: ${e.message}`);
       return { status: "error", notes: "Request failed" };
     }
   }
@@ -195,9 +200,9 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: msg })
       });
-      log("    📤 Sent to Discord");
+      log("📤 Sent to Discord");
     } catch (err) {
-      log(`    ❌ Discord error: ${err.message}`);
+      log(`❌ Discord error: ${err.message}`);
     }
   }
 
@@ -206,7 +211,7 @@
     const origin = document.getElementById("origin").value.trim();
     const webhook = document.getElementById("webhook").value.trim();
     document.querySelector("#results tbody").innerHTML = "";
-    document.getElementById("log").textContent = "[Scan started...]";
+    document.getElementById("log").textContent = `[${timestamp()}] Scan started...\n`;
 
     for (const raw of urls) {
       const url = raw.trim();
@@ -217,13 +222,15 @@
       document.querySelector("#results tbody").lastChild.remove();
       appendResult(url, result.status, result.notes);
 
-      // Send the result to Discord, no matter the status
+      // Send results to Discord regardless of status
       const explanation = getExplanation(result.status);
-      const alert = `🔍 **Scan Result**\n**URL:** ${url}\n**Status:** ${result.status.toUpperCase()}\n**Notes:** ${result.notes}\n**Explanation:** ${explanation}`;
+      const alert = `📡 **CORS Scan Result**\n🔗 **URL:** ${url}\n📊 **Status:** ${result.status.toUpperCase()}\n📝 **Notes:** ${result.notes}\nℹ️ **Explanation:** ${explanation}`;
       await sendToDiscord(webhook, alert);
+
+      log(`==============================\n`);
     }
 
-    log("\n✅ Scan Complete");
+    log("✅ Scan Complete");
   }
 </script>
 
