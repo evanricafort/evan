@@ -9,33 +9,36 @@
       margin: 0;
       padding: 0;
       height: 100%;
-      overflow: hidden;
       font-family: 'Segoe UI', sans-serif;
-      transition: background 0.3s, color 0.3s;
     }
 
-    canvas#bg {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: -1;
-      background: #0d1117;
+    body {
+      background-image: url('data:image/svg+xml;utf8,\
+        <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 100 100">\
+          <path fill="none" stroke="%23cccccc" stroke-width="0.5" d="M0 0 L100 100 M0 100 L100 0 M50 0 L50 100 M0 50 L100 50"/>\
+        </svg>');
+      background-size: 200px 200px;
+      background-attachment: fixed;
+      background-color: #f8f8f8;
+    }
+
+    body.dark {
+      background-image: url('data:image/svg+xml;utf8,\
+        <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 100 100">\
+          <path fill="none" stroke="%23333" stroke-width="0.5" d="M0 0 L100 100 M0 100 L100 0 M50 0 L50 100 M0 50 L100 50"/>\
+        </svg>');
+      background-color: #0d1117;
     }
 
     .container {
-      position: relative;
       padding: 2rem;
-      z-index: 1;
-      height: 100%;
-      overflow-y: auto;
-      background-color: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(3px);
-      transition: background-color 0.3s;
+      background-color: rgba(255,255,255,0.85);
+      backdrop-filter: blur(2px);
+      transition: background-color 0.3s, color 0.3s;
     }
 
     body.dark .container {
-      background-color: rgba(15, 15, 15, 0.85);
+      background-color: rgba(15, 15, 15, 0.9);
       color: #eee;
     }
 
@@ -49,8 +52,6 @@
       width: 100%;
       padding: 0.5rem;
       margin-bottom: 1rem;
-      background: white;
-      color: black;
       border: 1px solid #ccc;
     }
 
@@ -107,8 +108,6 @@
   </style>
 </head>
 <body>
-
-<canvas id="bg"></canvas>
 
 <div class="container">
   <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Dark Mode</button>
@@ -230,41 +229,6 @@
 
     log("\n✅ Scan Complete");
   }
-</script>
-
-<!-- 🎨 Topography Background Animation -->
-<script>
-  const canvas = document.getElementById("bg");
-  const ctx = canvas.getContext("2d");
-  let w, h, t = 0;
-
-  function resize() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
-  }
-
-  function drawTopography() {
-    ctx.clearRect(0, 0, w, h);
-    ctx.strokeStyle = "rgba(0,255,255,0.06)";
-    ctx.lineWidth = 1;
-    const gridSize = 30;
-
-    for (let y = 0; y < h; y += gridSize) {
-      ctx.beginPath();
-      for (let x = 0; x < w; x++) {
-        const wave = Math.sin((x + t) * 0.01) * 10 + Math.sin((y + t) * 0.02) * 10;
-        ctx.lineTo(x, y + wave);
-      }
-      ctx.stroke();
-    }
-
-    t += 1.5;
-    requestAnimationFrame(drawTopography);
-  }
-
-  window.addEventListener("resize", resize);
-  resize();
-  drawTopography();
 </script>
 
 </body>
