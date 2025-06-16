@@ -14,6 +14,7 @@
     .vuln { color: red; font-weight: bold; }
     textarea, input { width: 100%; padding: 0.5rem; margin-bottom: 1rem; }
     button { padding: 0.5rem 1rem; font-weight: bold; }
+    #log { background: #111; color: #0f0; padding: 1rem; font-family: monospace; max-height: 400px; overflow-y: auto; white-space: pre-wrap; border-radius: 5px; margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -41,30 +42,53 @@
     <tbody></tbody>
   </table>
 
+  <h3>📝 Live Scan Log</h3>
+  <pre id="log">[Scanner Ready]</pre>
+
   <script>
+    function log(message) {
+      const logArea = document.getElementById("log");
+      logArea.textContent += `\n${message}`;
+      logArea.scrollTop = logArea.scrollHeight;
+    }
+
+    function formatHeaders(headers) {
+      const out = [];
+      for (let pair of headers.entries()) {
+        out.push(`    ${pair[0]}: ${pair[1]}`);
+      }
+      return out.join('\n');
+    }
+
     async function checkCORS(url, customOrigin) {
       try {
+        log(`\n[>] Scanning: ${url}`);
         const res = await fetch(url, {
           method: 'GET',
           mode: 'cors',
-          headers: {
-            'Origin': customOrigin
-          }
+          headers: { 'Origin': customOrigin }
         });
+
+        log(`    ↳ Status: ${res.status} ${res.statusText}`);
+        log(`    ↳ Headers:\n${formatHeaders(res.headers)}`);
 
         const allowedOrigin = res.headers.get("Access-Control-Allow-Origin");
         const allowCreds = res.headers.get("Access-Control-Allow-Credentials");
 
         if (allowedOrigin === customOrigin) {
           if (allowCreds === 'true') {
+            log("    ⚠️  Reflected with credentials! Potentially vulnerable.");
             return { status: "vuln", notes: "Origin reflected with credentials" };
           } else {
+            log("    ⚠️  Reflected without credentials.");
             return { status: "warn", notes: "Origin reflected without credentials" };
           }
         } else {
+          log("    ✅ No origin reflection.");
           return { status: "ok", notes: "No origin reflection" };
         }
       } catch (err) {
+        log(`    ❌ Error: ${err.message}`);
         return { status: "warn", notes: `Request failed or blocked by CORS: ${err.message}` };
       }
     }
@@ -83,8 +107,9 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ content: message })
         });
+        log(`    📤 Alert sent to Discord`);
       } catch (err) {
-        console.warn("Failed to send Discord alert:", err.message);
+        log(`    ❌ Failed to send to Discord: ${err.message}`);
       }
     }
 
@@ -93,6 +118,7 @@
       const origin = document.getElementById("origin").value.trim();
       const webhook = document.getElementById("webhook").value.trim();
       document.querySelector("#results tbody").innerHTML = "";
+      document.getElementById("log").textContent = "[Scan started...]";
 
       for (const rawUrl of urls) {
         const url = rawUrl.trim();
@@ -108,6 +134,8 @@
           await sendToDiscord(webhook, alert);
         }
       }
+
+      log("\n✅ Scan complete.");
     }
   </script>
 </body>
