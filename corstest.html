@@ -5,7 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CORS Misconfiguration Scanner</title>
   <style>
-    body { font-family: sans-serif; padding: 2rem; }
+    html, body {
+      margin: 0; padding: 0; height: 100%; overflow: hidden;
+      font-family: sans-serif;
+    }
+
+    canvas#bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+    }
+
+    .container {
+      position: relative;
+      padding: 2rem;
+      z-index: 1;
+      background-color: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(4px);
+      height: 100%;
+      overflow-y: auto;
+    }
+
     table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
     th { background-color: #f9f9f9; }
@@ -18,6 +40,10 @@
   </style>
 </head>
 <body>
+
+<canvas id="bg"></canvas>
+
+<div class="container">
   <h1>🔍 CORS Misconfiguration Scanner</h1>
 
   <label for="urls">Target URLs (one per line):</label>
@@ -44,99 +70,154 @@
 
   <h3>📝 Live Scan Log</h3>
   <pre id="log">[Scanner Ready]</pre>
+</div>
 
-  <script>
-    function log(message) {
-      const logArea = document.getElementById("log");
-      logArea.textContent += `\n${message}`;
-      logArea.scrollTop = logArea.scrollHeight;
-    }
+<script>
+  // Background animation
+  const canvas = document.getElementById('bg');
+  const ctx = canvas.getContext('2d');
+  let width, height, points = [];
 
-    function formatHeaders(headers) {
-      const out = [];
-      for (let pair of headers.entries()) {
-        out.push(`    ${pair[0]}: ${pair[1]}`);
+  function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+    points = Array.from({ length: 60 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.6,
+      vy: (Math.random() - 0.5) * 0.6
+    }));
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, width, height);
+    points.forEach((p, i) => {
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.x < 0 || p.x > width) p.vx *= -1;
+      if (p.y < 0 || p.y > height) p.vy *= -1;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+      ctx.fillStyle = "#00f8ff";
+      ctx.fill();
+
+      for (let j = i + 1; j < points.length; j++) {
+        let p2 = points[j];
+        let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+        if (dist < 120) {
+          ctx.strokeStyle = `rgba(0,248,255,${1 - dist / 120})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+        }
       }
-      return out.join('\n');
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  draw();
+</script>
+
+<script>
+  function log(message) {
+    const logArea = document.getElementById("log");
+    logArea.textContent += `\n${message}`;
+    logArea.scrollTop = logArea.scrollHeight;
+  }
+
+  function formatHeaders(headers) {
+    const out = [];
+    for (let pair of headers.entries()) {
+      out.push(`    ${pair[0]}: ${pair[1]}`);
     }
+    return out.join('\n');
+  }
 
-    async function checkCORS(url, customOrigin) {
-      try {
-        log(`\n[>] Scanning: ${url}`);
-        const res = await fetch(url, {
-          method: 'GET',
-          mode: 'cors',
-          headers: { 'Origin': customOrigin }
-        });
+  async function checkCORS(url, customOrigin) {
+    try {
+      log(`\n[>] Scanning: ${url}`);
+      const res = await fetch(url, {
+        method: 'GET',
+        mode: 'cors',
+        headers: { 'Origin': customOrigin }
+      });
 
-        log(`    ↳ Status: ${res.status} ${res.statusText}`);
-        log(`    ↳ Headers:\n${formatHeaders(res.headers)}`);
+      log(`    ↳ Status: ${res.status} ${res.statusText}`);
+      log(`    ↳ Headers:\n${formatHeaders(res.headers)}`);
 
-        const allowedOrigin = res.headers.get("Access-Control-Allow-Origin");
-        const allowCreds = res.headers.get("Access-Control-Allow-Credentials");
+      const allowedOrigin = res.headers.get("Access-Control-Allow-Origin");
+      const allowCreds = res.headers.get("Access-Control-Allow-Credentials");
 
-        if (allowedOrigin === customOrigin) {
-          if (allowCreds === 'true') {
-            log("    ⚠️  Reflected with credentials! Potentially vulnerable.");
-            return { status: "vuln", notes: "Origin reflected with credentials" };
-          } else {
-            log("    ⚠️  Reflected without credentials.");
-            return { status: "warn", notes: "Origin reflected without credentials" };
-          }
+      if (allowedOrigin === customOrigin) {
+        if (allowCreds === 'true') {
+          log("    ⚠️  Reflected with credentials! Potentially vulnerable.");
+          return { status: "vuln", notes: "Origin reflected with credentials" };
         } else {
-          log("    ✅ No origin reflection.");
-          return { status: "ok", notes: "No origin reflection" };
+          log("    ⚠️  Reflected without credentials.");
+          return { status: "warn", notes: "Origin reflected without credentials" };
         }
-      } catch (err) {
-        log(`    ❌ Error: ${err.message}`);
-        return { status: "warn", notes: `Request failed or blocked by CORS: ${err.message}` };
+      } else {
+        log("    ✅ No origin reflection.");
+        return { status: "ok", notes: "No origin reflection" };
+      }
+    } catch (err) {
+      log(`    ❌ Error: ${err.message}`);
+      return { status: "warn", notes: `Request failed or blocked by CORS: ${err.message}` };
+    }
+  }
+
+  function appendResult(url, status, notes) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${url}</td><td class="${status}">${status.toUpperCase()}</td><td>${notes}</td>`;
+    document.querySelector("#results tbody").appendChild(tr);
+  }
+
+  async function sendToDiscord(webhook, message) {
+    if (!webhook) return;
+    try {
+      await fetch(webhook, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: message })
+      });
+      log(`    📤 Alert sent to Discord`);
+    } catch (err) {
+      log(`    ❌ Failed to send to Discord: ${err.message}`);
+    }
+  }
+
+  async function startScan() {
+    const urls = document.getElementById("urls").value.trim().split("\n");
+    const origin = document.getElementById("origin").value.trim();
+    const webhook = document.getElementById("webhook").value.trim();
+    document.querySelector("#results tbody").innerHTML = "";
+    document.getElementById("log").textContent = "[Scan started...]";
+
+    for (const rawUrl of urls) {
+      const url = rawUrl.trim();
+      if (!url) continue;
+
+      appendResult(url, '...', 'Scanning...');
+      const result = await checkCORS(url, origin);
+      document.querySelector("#results tbody").lastChild.remove();
+      appendResult(url, result.status, result.notes);
+
+      if (["vuln", "warn"].includes(result.status) && webhook) {
+        const alert = `🚨 **CORS Alert**\nURL: ${url}\nStatus: ${result.status.toUpperCase()}\nNotes: ${result.notes}`;
+        await sendToDiscord(webhook, alert);
       }
     }
 
-    function appendResult(url, status, notes) {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${url}</td><td class="${status}">${status.toUpperCase()}</td><td>${notes}</td>`;
-      document.querySelector("#results tbody").appendChild(tr);
-    }
+    log("\n✅ Scan complete.");
+  }
+</script>
 
-    async function sendToDiscord(webhook, message) {
-      if (!webhook) return;
-      try {
-        await fetch(webhook, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ content: message })
-        });
-        log(`    📤 Alert sent to Discord`);
-      } catch (err) {
-        log(`    ❌ Failed to send to Discord: ${err.message}`);
-      }
-    }
-
-    async function startScan() {
-      const urls = document.getElementById("urls").value.trim().split("\n");
-      const origin = document.getElementById("origin").value.trim();
-      const webhook = document.getElementById("webhook").value.trim();
-      document.querySelector("#results tbody").innerHTML = "";
-      document.getElementById("log").textContent = "[Scan started...]";
-
-      for (const rawUrl of urls) {
-        const url = rawUrl.trim();
-        if (!url) continue;
-
-        appendResult(url, '...', 'Scanning...');
-        const result = await checkCORS(url, origin);
-        document.querySelector("#results tbody").lastChild.remove();
-        appendResult(url, result.status, result.notes);
-
-        if (["vuln", "warn"].includes(result.status) && webhook) {
-          const alert = `🚨 **CORS Alert**\nURL: ${url}\nStatus: ${result.status.toUpperCase()}\nNotes: ${result.notes}`;
-          await sendToDiscord(webhook, alert);
-        }
-      }
-
-      log("\n✅ Scan complete.");
-    }
-  </script>
 </body>
 </html>
