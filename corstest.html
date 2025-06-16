@@ -1,284 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>CORS Misconfiguration Scanner</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f5f5f5;
-      padding: 2rem;
-    }
-    textarea, input, select {
-      width: 100%;
-      padding: 0.6rem;
-      margin-bottom: 1rem;
-      font-size: 1rem;
-    }
-    button {
-      padding: 0.6rem 1.2rem;
-      font-weight: bold;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-    }
-    th, td {
-      padding: 8px;
-      border: 1px solid #ccc;
-      vertical-align: top;
-    }
-    #log {
-      white-space: pre-wrap;
-      background: #111;
-      color: #0f0;
-      padding: 1rem;
-      font-family: monospace;
-      max-height: 300px;
-      overflow: auto;
-    }
-    .vuln { color: red; font-weight: bold; }
-    .warn { color: orange; }
-    .ok { color: green; }
-    .error { color: gray; }
-    #charts { margin-top: 2rem; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Misconfiguration Scanner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .log-container {
+            margin-top: 20px;
+            background-color: #222;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            height: 300px;
+            overflow-y: auto;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .vuln {
+            background-color: #ff4d4d;
+            color: white;
+        }
+        .warn {
+            background-color: #ffcc00;
+            color: black;
+        }
+        .ok {
+            background-color: #4caf50;
+            color: white;
+        }
+        .error {
+            background-color: #f44336;
+            color: white;
+        }
+        .noCORS {
+            background-color: #f1f1f1;
+            color: black;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <h1>CORS Misconfiguration Scanner</h1>
 
-<h2>🛡️ CORS Scanner (with Wildcard Check & Graphical Summary)</h2>
+        <label for="url">Target URL:</label>
+        <input type="text" id="url" placeholder="Enter target URL" style="width: 100%; padding: 10px;">
+        
+        <label for="origin">Origin URL:</label>
+        <input type="text" id="origin" placeholder="Enter Origin URL" style="width: 100%; padding: 10px;">
+        
+        <label for="method">HTTP Method (GET, POST, etc.):</label>
+        <input type="text" id="method" placeholder="Enter HTTP Method" value="GET" style="width: 100%; padding: 10px;">
 
-<label>Target URLs (one per line):</label>
-<textarea id="urls" rows="5" placeholder="https://example.com"></textarea>
+        <button onclick="startScan()">Start Scan</button>
 
-<label>Malicious Origin:</label>
-<input type="text" id="origin" value="https://evil.com">
+        <div id="scanResult"></div>
 
-<label>Scan Type:</label>
-<select id="scanType" onchange="toggleCustomMethod()">
-  <option value="GET">GET</option>
-  <option value="POST">POST</option>
-  <option value="OTHER">OTHER (Custom Method)</option>
-</select>
+        <div class="log-container" id="logContainer"></div>
+    </div>
 
-<div id="customMethodBox" style="display: none;">
-  <label>Custom Method:</label>
-  <input type="text" id="customMethod" placeholder="PUT, DELETE, PATCH...">
-</div>
+    <script>
+        const log = (message) => {
+            const logContainer = document.getElementById('logContainer');
+            logContainer.textContent += message + '\n';
+            logContainer.scrollTop = logContainer.scrollHeight;
+        };
 
-<label>Custom Headers (JSON - Optional):</label>
-<textarea id="headers" rows="3" placeholder='{"X-Auth": "abc123"}'></textarea>
+        const resultDetails = {
+            vuln: {
+                message: "🔴 Vulnerable: Wildcard Origin or Exploitable CORS Misconfiguration",
+                explanation: `
+A vulnerable CORS configuration has been identified. This means that the target server has either:
+- Allowed all origins by setting 'Access-Control-Allow-Origin' to '*' (Wildcard).
+- Reflected the origin back and allowed credentials, which may allow attackers to perform Cross-Site Request Forgery (CSRF) or steal sensitive data (such as cookies) from authenticated users.
 
-<label><input type="checkbox" id="withCreds"> Simulate Credentials (send cookies/session)</label><br>
+Attackers can exploit this by making unauthorized API calls from malicious sites or stealing sensitive data from the user’s session.
 
-<label>Discord Webhook (optional):</label>
-<input type="text" id="webhook" placeholder="https://discord.com/api/webhooks/...">
+**Recommendation:**
+- Restrict CORS to a specific set of trusted origins.
+- Avoid sending sensitive data to a wildcard origin or allowing credentials with CORS headers.
+                `
+            },
+            warn: {
+                message: "🟠 Warning: Reflective Origin Detected, Credentials Not Allowed",
+                explanation: `
+A reflective origin has been detected, which indicates that the target server is vulnerable to potential cross-origin attacks. However, credentials (cookies, session) are not accepted.
 
-<button onclick="startScan()">🚀 Start Scan</button>
+While this may not be as critical as an issue with wildcard origins or credentials acceptance, this still poses a risk. Attackers could potentially exploit the reflected CORS origin to launch social engineering attacks or gain insight into the server's CORS configuration.
 
-<table id="results">
-  <thead>
-    <tr>
-      <th>URL</th>
-      <th>Status</th>
-      <th>Explanation</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+If sensitive information is included in the response headers, or if the endpoint is capable of manipulating user data, this could escalate into a significant issue.
 
-<h3>📄 Detailed Logs:</h3>
-<pre id="log">[Ready to scan]</pre>
+**Recommendation:**
+- Restrict the CORS policy to specific origins.
+- Consider adding the `Access-Control-Allow-Credentials` header only for trusted origins.
+                `
+            },
+            ok: {
+                message: "🟢 Safe: Proper CORS Configuration Detected",
+                explanation: `
+The target server has a proper CORS configuration in place. The 'Access-Control-Allow-Origin' header reflects a specific, trusted origin, and credentials are either not required or not allowed.
 
-<div id="charts">
-  <h3>📊 Graphical Summary</h3>
-  <canvas id="vulnChart"></canvas>
-  <canvas id="headerChart"></canvas>
-</div>
+This indicates that the server is not vulnerable to cross-origin attacks, such as Cross-Site Request Forgery (CSRF) or unauthorized data access from malicious websites.
 
-<script>
-  let vulnData = { vuln: 0, warn: 0, safe: 0 };
-  let headerData = { wildcard: 0, specific: 0, noCORS: 0 };
+This is a positive outcome, but the security posture can be further strengthened by ensuring sensitive endpoints have stricter CORS policies or other security mechanisms like Anti-CSRF tokens.
 
-  function log(msg) {
-    const el = document.getElementById("log");
-    el.textContent += `\n${msg}`;
-    el.scrollTop = el.scrollHeight;
-  }
+**Recommendation:**
+- Continue enforcing a restrictive CORS policy.
+- Ensure that all sensitive data and authentication tokens are protected against unauthorized cross-origin access.
+                `
+            },
+            error: {
+                message: "❌ Error: Scan Failed or Misconfigured",
+                explanation: `
+The scan encountered an issue during execution. This could be due to a misconfigured URL, server failure, or unexpected CORS behavior. This result may also be indicative of network issues or incorrect configuration in the CORS headers.
 
-  function appendResult(url, status, notes) {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${url}</td>
-      <td class="${status}">${status.toUpperCase()}</td>
-      <td>${notes}</td>
-    `;
-    document.querySelector("#results tbody").appendChild(row);
+While this doesn't indicate a direct vulnerability, it does highlight that the test couldn't be completed successfully for this particular URL. It's important to ensure the URL is reachable and the server is properly configured to handle CORS preflight and actual requests.
 
-    // Update graphical data
-    if (status === 'vuln') vulnData.vuln++;
-    else if (status === 'warn') vulnData.warn++;
-    else vulnData.safe++;
+**Recommendation:**
+- Verify the URL and check if the server is properly configured to handle OPTIONS requests (preflight) and the expected method (GET, POST, etc.).
+- Investigate the server logs for any issues that may have prevented the scan from completing.
+                `
+            },
+            noCORS: {
+                message: "⚪ No CORS Headers Found",
+                explanation: `
+No CORS headers were returned for the target endpoint. This typically indicates that the server is configured to block cross-origin requests entirely, which is a good security practice for public APIs or endpoints that shouldn't be accessible from other origins.
 
-    if (notes.includes("Wildcard origin")) headerData.wildcard++;
-    else if (notes.includes("No CORS headers")) headerData.noCORS++;
-    else headerData.specific++;
+While this reduces the attack surface for cross-origin attacks, it’s also important to ensure that the server is not unintentionally rejecting legitimate requests that need to access the resources from different origins.
 
-    updateCharts();
-  }
+**Recommendation:**
+- If the endpoint is meant to be accessed cross-origin, make sure the correct CORS headers are configured.
+- If the server intentionally blocks cross-origin requests, verify that no functionality is broken as a result.
+                `
+            }
+        };
 
-  function updateCharts() {
-    const vulnChartCtx = document.getElementById('vulnChart').getContext('2d');
-    new Chart(vulnChartCtx, {
-      type: 'bar',
-      data: {
-        labels: ['Vulnerable', 'Warning', 'Safe'],
-        datasets: [{
-          label: 'Scan Results',
-          data: [vulnData.vuln, vulnData.warn, vulnData.safe],
-          backgroundColor: ['red', 'orange', 'green'],
-        }],
-      },
-    });
+        async function startScan() {
+            const url = document.getElementById('url').value;
+            const origin = document.getElementById('origin').value;
+            const method = document.getElementById('method').value;
 
-    const headerChartCtx = document.getElementById('headerChart').getContext('2d');
-    new Chart(headerChartCtx, {
-      type: 'pie',
-      data: {
-        labels: ['Wildcard Origins', 'Specific Origins', 'No CORS Headers'],
-        datasets: [{
-          data: [headerData.wildcard, headerData.specific, headerData.noCORS],
-          backgroundColor: ['red', 'blue', 'gray'],
-        }],
-      },
-    });
-  }
+            if (!url || !origin || !method) {
+                alert("Please enter a URL, Origin, and HTTP Method.");
+                return;
+            }
 
-  async function sendToDiscord(webhook, msg) {
-    if (!webhook) return;
-    try {
-      await fetch(webhook, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ content: msg })
-      });
-      log("📤 Discord alert sent");
-    } catch (e) {
-      log("❌ Discord webhook failed");
-    }
-  }
+            log(`Starting scan on ${url} with method ${method} and origin ${origin}`);
+            const result = await checkCORS(url, origin, method);
+            displayResult(result);
+        }
 
-  async function checkCORS(url, origin, method, headers = {}, withCreds = false) {
-    try {
-      log(`\n🌐 Scanning ${url} using ${method} (credentials: ${withCreds})`);
-      const preflightHeaders = {
-        "Origin": origin,
-        "Access-Control-Request-Method": method,
-        ...headers
-      };
+        async function checkCORS(url, origin, method) {
+            try {
+                log(`\n🌐 Scanning ${url} using ${method}`);
+                const preflightHeaders = {
+                    "Origin": origin,
+                    "Access-Control-Request-Method": method
+                };
 
-      // Preflight OPTIONS
-      log(`OPTIONS ${url}`);
-      const optionsRes = await fetch(url, {
-        method: "OPTIONS",
-        headers: preflightHeaders
-      });
-      log(`OPTIONS Status: ${optionsRes.status}`);
-      optionsRes.headers.forEach((v, k) => log(`  ${k}: ${v}`));
+                // Preflight OPTIONS
+                log(`OPTIONS ${url}`);
+                const optionsRes = await fetch(url, {
+                    method: "OPTIONS",
+                    headers: preflightHeaders
+                });
+                log(`OPTIONS Status: ${optionsRes.status}`);
+                optionsRes.headers.forEach((v, k) => log(`  ${k}: ${v}`));
 
-      // Actual request
-      const actualRes = await fetch(url, {
-        method: method,
-        headers: {
-          "Origin": origin,
-          ...headers
-        },
-        mode: "cors",
-        credentials: withCreds ? "include" : "omit",
-        body: ["POST", "PUT", "PATCH"].includes(method) ? "data=test" : undefined
-      });
+                // Actual request
+                const actualRes = await fetch(url, {
+                    method: method,
+                    headers: {
+                        "Origin": origin
+                    },
+                    mode: "cors",
+                    body: ["POST", "PUT", "PATCH"].includes(method) ? "data=test" : undefined
+                });
 
-      const ao = actualRes.headers.get("Access-Control-Allow-Origin");
-      const ac = actualRes.headers.get("Access-Control-Allow-Credentials");
-      const status = actualRes.status;
-      log(`\n${method} ${url}`);
-      log(`Status: ${status}`);
-      log(`Access-Control-Allow-Origin: ${ao}`);
-      log(`Access-Control-Allow-Credentials: ${ac}`);
+                const ao = actualRes.headers.get("Access-Control-Allow-Origin");
+                const ac = actualRes.headers.get("Access-Control-Allow-Credentials");
+                const status = actualRes.status;
+                log(`\n${method} ${url}`);
+                log(`Status: ${status}`);
+                log(`Access-Control-Allow-Origin: ${ao}`);
+                log(`Access-Control-Allow-Credentials: ${ac}`);
 
-      let resultStatus, resultNotes;
+                let resultStatus, resultNotes;
 
-      // Check for wildcard origin
-      if (ao === "*") {
-        resultStatus = "vuln";
-        resultNotes = `🔴 Wildcard origin detected: CORS is open to all origins (unsafe). This is a security risk if credentials are allowed.`;
-      }
-      // Check for allowed origin and credentials
-      else if (ao === origin && ac === "true" && withCreds) {
-        resultStatus = "vuln";
-        resultNotes = `🔴 Full exploit possible: Malicious origin is reflected AND credentials accepted.
-        Attackers can steal authenticated data cross-origin using cookies/session.`;
-      } else if (ao === origin) {
-        resultStatus = "warn";
-        resultNotes = `🟠 Warning: Origin reflected but credentials not allowed.
-        Still risky if responses are exposed to JS or sensitive metadata is returned.`;
-      } else if (ao) {
-        resultStatus = "ok";
-        resultNotes = `🟢 Origin not reflected. CORS policy appears safe (explicit origin: ${ao}).`;
-      } else {
-        resultStatus = "ok";
-        resultNotes = "🟢 No CORS headers found. Server likely blocks cross-origin access.";
-      }
+                // Check for wildcard origin
+                if (ao === "*") {
+                    resultStatus = "vuln";
+                    resultNotes = resultDetails.vuln.explanation;
+                }
+                // Check for allowed origin and credentials
+                else if (ao === origin && ac === "true") {
+                    resultStatus = "vuln";
+                    resultNotes = resultDetails.vuln.explanation;
+                } else if (ao === origin) {
+                    resultStatus = "warn";
+                    resultNotes = resultDetails.warn.explanation;
+                } else if (ao) {
+                    resultStatus = "ok";
+                    resultNotes = resultDetails.ok.explanation;
+                } else {
+                    resultStatus = "noCORS";
+                    resultNotes = resultDetails.noCORS.explanation;
+                }
 
-      return { status: resultStatus, notes: resultNotes };
-    } catch (err) {
-      log(`❌ Error: ${err.message}`);
-      return {
-        status: "error",
-        notes: `❌ Could not complete scan: ${err.message}`
-      };
-    }
-  }
+                return { status: resultStatus, notes: resultNotes };
+            } catch (err) {
+                log(`❌ Error: ${err.message}`);
+                return {
+                    status: "error",
+                    notes: resultDetails.error.explanation
+                };
+            }
+        }
 
-  async function startScan() {
-    const urls = document.getElementById("urls").value.trim().split("\n").map(u => u.trim()).filter(Boolean);
-    const origin = document.getElementById("origin").value.trim();
-    const scanType = document.getElementById("scanType").value;
-    const method = scanType === "OTHER" ? document.getElementById("customMethod").value.trim().toUpperCase() : scanType;
-    const customHeadersInput = document.getElementById("headers").value.trim();
-    const customHeaders = customHeadersInput ? parseHeaders(customHeadersInput) : {};
-    const withCreds = document.getElementById("withCreds").checked; // Simulate credentials option
-    const webhook = document.getElementById("webhook").value.trim();
-
-    document.querySelector("#results tbody").innerHTML = "";
-    document.getElementById("log").textContent = "[Starting scan...]";
-
-    for (const url of urls) {
-      appendResult(url, "...", "Scanning...");
-      const result = await checkCORS(url, origin, method, customHeaders, withCreds);
-      document.querySelector("#results tbody").lastChild.remove();
-      appendResult(url, result.status, result.notes);
-
-      if ((result.status === "vuln" || result.status === "warn") && webhook) {
-        const msg = `🚨 CORS Alert\n**URL:** ${url}\n**Status:** ${result.status}\n**Details:** ${result.notes}`;
-        await sendToDiscord(webhook, msg);
-      }
-    }
-
-    log("\n✅ Scan complete.");
-  }
-
-  function parseHeaders(headers) {
-    try {
-      return JSON.parse(headers);
-    } catch (e) {
-      log(`❌ Invalid headers format`);
-      return {};
-    }
-  }
-</script>
-
+        function displayResult(result) {
+            const resultDiv = document.getElementById("scanResult");
+            const statusClass = result.status;
+            resultDiv.innerHTML = `
+                <div class="result ${statusClass}">
+                    <h3>${resultDetails[statusClass].message}</h3>
+                    <p>${result.notes}</p>
+                </div>
+            `;
+        }
+    </script>
 </body>
 </html>
