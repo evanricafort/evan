@@ -15,19 +15,28 @@
     body {
       background-image: url('data:image/svg+xml;utf8,\
         <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 100 100">\
-          <path fill="none" stroke="%23cccccc" stroke-width="0.5" d="M0 0 L100 100 M0 100 L100 0 M50 0 L50 100 M0 50 L100 50"/>\
+          <polygon points="0,100 20,50 40,70 60,40 80,70 100,30 100,100" fill="%23a4c3b2" />\
+          <polygon points="0,100 20,60 40,90 60,60 80,80 100,100" fill="%2393b7a3" />\
+          <polygon points="0,100 20,50 40,70 60,30 80,50 100,40 100,100" fill="%2382a797" />\
+          <polygon points="0,100 20,30 40,50 60,20 80,60 100,50 100,100" fill="%23778b7d" />\
         </svg>');
-      background-size: 200px 200px;
+      background-size: 200px 200px; 
+      background-repeat: repeat;
       background-attachment: fixed;
-      background-color: #f8f8f8;
+      background-color: #e6f1f1;
+      height: 100vh; /* Ensure background fills viewport */
+      position: relative;
     }
 
     body.dark {
       background-image: url('data:image/svg+xml;utf8,\
         <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 100 100">\
-          <path fill="none" stroke="%23333" stroke-width="0.5" d="M0 0 L100 100 M0 100 L100 0 M50 0 L50 100 M0 50 L100 50"/>\
+          <polygon points="0,100 20,50 40,70 60,40 80,70 100,30 100,100" fill="%23222f2a" />\
+          <polygon points="0,100 20,60 40,90 60,60 80,80 100,100" fill="%23272f29" />\
+          <polygon points="0,100 20,50 40,70 60,30 80,50 100,40 100,100" fill="%231f2824" />\
+          <polygon points="0,100 20,30 40,50 60,20 80,60 100,50 100,100" fill="%231a2421" />\
         </svg>');
-      background-color: #0d1117;
+      background-color: #1b1f23;
     }
 
     .container {
@@ -35,6 +44,8 @@
       background-color: rgba(255,255,255,0.85);
       backdrop-filter: blur(2px);
       transition: background-color 0.3s, color 0.3s;
+      position: relative;
+      z-index: 10;
     }
 
     body.dark .container {
@@ -104,6 +115,20 @@
       overflow-y: auto;
       white-space: pre-wrap;
       border-radius: 5px;
+    }
+
+    /* Parallax Background Effect */
+    body {
+      animation: parallax 15s infinite linear;
+    }
+
+    @keyframes parallax {
+      0% {
+        background-position: 0 0;
+      }
+      100% {
+        background-position: 0 50px;
+      }
     }
   </style>
 </head>
