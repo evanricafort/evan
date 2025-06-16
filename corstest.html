@@ -10,79 +10,60 @@
       padding: 0;
       height: 100%;
       font-family: 'Segoe UI', sans-serif;
-      background-color: #f9f9f9; /* Default light background color */
+      background-color: #f9f9f9;
     }
-
     body.dark {
-      background-color: #2a2a2a; /* Dark background color for dark mode */
+      background-color: #1e1e1e;
+      color: #f0f0f0;
     }
-
     .container {
       padding: 2rem;
-      background-color: rgba(255,255,255,0.85);
-      backdrop-filter: blur(2px);
-      transition: background-color 0.3s, color 0.3s;
-      position: relative;
-      z-index: 10;
+      max-width: 900px;
+      margin: auto;
     }
-
-    body.dark .container {
-      background-color: rgba(15, 15, 15, 0.9);
-      color: #eee;
-    }
-
     .theme-toggle {
       float: right;
       margin-top: -2rem;
-      margin-right: 1rem;
     }
-
     textarea, input {
       width: 100%;
       padding: 0.5rem;
       margin-bottom: 1rem;
       border: 1px solid #ccc;
     }
-
     body.dark textarea, body.dark input {
-      background: #222;
+      background: #2c2c2c;
       color: #fff;
       border: 1px solid #555;
     }
-
     button {
       padding: 0.5rem 1rem;
       margin-bottom: 1rem;
       font-weight: bold;
       cursor: pointer;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 1rem;
     }
-
     th, td {
       border: 1px solid #ccc;
       padding: 8px;
     }
-
     body.dark th, body.dark td {
       border-color: #444;
     }
-
     th {
       background: #f0f0f0;
     }
-
     body.dark th {
       background: #333;
     }
-
     .ok { color: green; }
     .warn { color: orange; }
     .vuln { color: red; font-weight: bold; }
+    .error { color: gray; }
 
     #log {
       background: #111;
@@ -115,7 +96,12 @@
 
   <table id="results">
     <thead>
-      <tr><th>URL</th><th>Status</th><th>Notes</th></tr>
+      <tr>
+        <th>URL</th>
+        <th>Status</th>
+        <th>Notes</th>
+        <th>Explanation</th>
+      </tr>
     </thead>
     <tbody></tbody>
   </table>
@@ -143,6 +129,33 @@
     return arr.join('\n');
   }
 
+  function getExplanation(status) {
+    switch (status) {
+      case "vuln":
+        return "The target reflects the malicious origin and allows credentials. This allows attackers to access sensitive data from the target application using cross-origin requests. Immediate mitigation is required.";
+      case "warn":
+        return "The server reflects the malicious origin but does not allow credentials. This still poses a security risk as it may enable exploitation of less sensitive endpoints or combine with other vulnerabilities.";
+      case "ok":
+        return "The server did not reflect the malicious origin. It is correctly configured against CORS attacks. No action needed.";
+      case "error":
+        return "The scan could not be completed due to a network or CORS error. Check the URL or try again later.";
+      default:
+        return "Unknown result.";
+    }
+  }
+
+  function appendResult(url, status, notes) {
+    const explanation = getExplanation(status);
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${url}</td>
+      <td class="${status}">${status.toUpperCase()}</td>
+      <td>${notes}</td>
+      <td>${explanation}</td>
+    `;
+    document.querySelector("#results tbody").appendChild(row);
+  }
+
   async function checkCORS(url, customOrigin) {
     try {
       log(`\n[>] Scanning ${url}`);
@@ -162,7 +175,7 @@
         log(`    ⚠️ Reflected with credentials`);
         return { status: "vuln", notes: "Reflected w/ credentials" };
       } else if (ao === customOrigin) {
-        log(`    ⚠️ Reflected (no credentials)`);
+        log(`    ⚠️ Reflected origin only`);
         return { status: "warn", notes: "Reflected origin only" };
       } else {
         log(`    ✅ Safe`);
@@ -170,14 +183,8 @@
       }
     } catch (e) {
       log(`    ❌ Error: ${e.message}`);
-      return { status: "warn", notes: "Request failed" };
+      return { status: "error", notes: "Request failed" };
     }
-  }
-
-  function appendResult(url, status, notes) {
-    const row = document.createElement('tr');
-    row.innerHTML = `<td>${url}</td><td class="${status}">${status.toUpperCase()}</td><td>${notes}</td>`;
-    document.querySelector("#results tbody").appendChild(row);
   }
 
   async function sendToDiscord(webhook, msg) {
@@ -211,7 +218,8 @@
       appendResult(url, result.status, result.notes);
 
       if ((result.status === "warn" || result.status === "vuln") && webhook) {
-        const alert = `🚨 **CORS Issue Detected**\nURL: ${url}\nStatus: ${result.status.toUpperCase()}\nNotes: ${result.notes}`;
+        const explanation = getExplanation(result.status);
+        const alert = `🚨 **CORS Issue Detected**\n**URL:** ${url}\n**Status:** ${result.status.toUpperCase()}\n**Notes:** ${result.notes}\n**Explanation:** ${explanation}`;
         await sendToDiscord(webhook, alert);
       }
     }
