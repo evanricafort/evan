@@ -144,14 +144,6 @@
     el.scrollTop = el.scrollHeight;
   }
 
-  function formatHeaders(headers) {
-    const arr = [];
-    for (let [k, v] of headers.entries()) {
-      arr.push(`    ${k}: ${v}`);
-    }
-    return arr.join('\n');
-  }
-
   function getExplanation(status) {
     switch (status) {
       case "vuln":
@@ -191,135 +183,143 @@
   }
 
   async function checkCORS(url, customOrigin) {
-  function randomStr(len = 8) {
-    return Math.random().toString(36).substring(2, 2 + len);
-  }
-
-  const spoofedOrigin = `https://${randomStr()}.${customOrigin.replace(/^https?:\/\//, '')}`;
-  const newlineOrigin = `${customOrigin}\nInjected:evil`;
-  const protocolOrigin = customOrigin.startsWith("https://")
-    ? customOrigin.replace("https://", "http://")
-    : customOrigin.replace("http://", "https://");
-  const nullOrigin = "null";
-
-  const headersToSend = {
-    'X-Fake-Header': randomStr(),
-    'Authorization': `Bearer ${randomStr(24)}`
-  };
-
-  async function corsRequest(origin, method = "GET", creds = true, additionalHeaders = {}) {
-    try {
-      const fullHeaders = {
-        'Origin': origin,
-        ...headersToSend,
-        ...additionalHeaders
-      };
-
-      log(`\n📤 Request`);
-      log(`→ ${method} ${url}`);
-      log(`→ Origin: ${origin}`);
-      Object.entries(fullHeaders).forEach(([key, value]) => {
-        log(`→ ${key}: ${value}`);
-      });
-
-      const res = await fetch(url, {
-        method,
-        mode: 'cors',
-        credentials: creds ? 'include' : 'omit',
-        headers: fullHeaders
-      });
-
-      const ao = res.headers.get("Access-Control-Allow-Origin");
-      const ac = res.headers.get("Access-Control-Allow-Credentials");
-      const ah = res.headers.get("Access-Control-Allow-Headers");
-
-      log(`\n📥 Response (status ${res.status})`);
-      res.headers.forEach((value, key) => {
-        log(`← ${key}: ${value}`);
-      });
-
-      return { status: res.status, headers: res.headers, ao, ac, ah };
-    } catch (err) {
-      log(`❌ Error during request: ${err.message}`);
-      return { error: err.message };
+    function randomStr(len = 8) {
+      return Math.random().toString(36).substring(2, 2 + len);
     }
+
+    const spoofedOrigin = `https://${randomStr()}.${customOrigin.replace(/^https?:\/\//, '')}`;
+    const newlineOrigin = `${customOrigin}\nInjected:evil`;
+    const protocolOrigin = customOrigin.startsWith("https://")
+      ? customOrigin.replace("https://", "http://")
+      : customOrigin.replace("http://", "https://");
+    const nullOrigin = "null";
+
+    const headersToSend = {
+      'X-Fake-Header': randomStr(),
+      'Authorization': `Bearer ${randomStr(24)}`
+    };
+
+    async function corsRequest(origin, method = "GET", creds = true, additionalHeaders = {}) {
+      try {
+        const fullHeaders = {
+          'Origin': origin,
+          ...headersToSend,
+          ...additionalHeaders
+        };
+
+        log(`\n📤 Request`);
+        log(`→ ${method} ${url}`);
+        log(`→ Origin: ${origin}`);
+        Object.entries(fullHeaders).forEach(([key, value]) => {
+          log(`→ ${key}: ${value}`);
+        });
+
+        const res = await fetch(url, {
+          method,
+          mode: 'cors',
+          credentials: creds ? 'include' : 'omit',
+          headers: fullHeaders
+        });
+
+        const ao = res.headers.get("Access-Control-Allow-Origin");
+        const ac = res.headers.get("Access-Control-Allow-Credentials");
+        const ah = res.headers.get("Access-Control-Allow-Headers");
+
+        log(`\n📥 Response (status ${res.status})`);
+        res.headers.forEach((value, key) => {
+          log(`← ${key}: ${value}`);
+        });
+
+        return { status: res.status, headers: res.headers, ao, ac, ah };
+      } catch (err) {
+        log(`❌ Error during request: ${err.message}`);
+        return { error: err.message };
+      }
+    }
+
+    log(`\n==============================`);
+    log(`🔍 Starting scan on ${url}`);
+
+    log(`\n🔹 Scan Method: Basic Origin Reflection`);
+    const base = await corsRequest(customOrigin);
+
+    log(`\n🔹 Scan Method: Spoofed Subdomain Origin`);
+    const spoofed = await corsRequest(spoofedOrigin);
+
+    log(`\n🔹 Scan Method: Newline Injection in Origin`);
+    const newline = await corsRequest(newlineOrigin);
+
+    log(`\n🔹 Scan Method: Protocol Mismatch Origin`);
+    const proto = await corsRequest(protocolOrigin);
+
+    log(`\n🔹 Scan Method: Null Origin Test`);
+    const nullO = await corsRequest(nullOrigin);
+
+    log(`\n🔹 Scan Method: Preflight OPTIONS Request`);
+    const preflight = await corsRequest(customOrigin, "OPTIONS", false, {
+      'Access-Control-Request-Method': 'POST',
+      'Access-Control-Request-Headers': 'X-Fake-Header,Authorization'
+    });
+
+    const findings = [];
+    const normalize = str => (str || '').toLowerCase().trim();
+
+    if (normalize(base.ao) === normalize(customOrigin) && normalize(base.ac) === 'true') {
+      findings.push("Reflected origin with credentials");
+    }
+
+    if (normalize(base.ao) === '*' && normalize(base.ac) === 'true') {
+      findings.push("Wildcard ACAO with ACAC=true (critical misconfig)");
+    }
+
+    if (normalize(base.ac) === 'true' && (!base.ao || base.ao === '')) {
+      findings.push("ACAC set without ACAO");
+    }
+
+    if (spoofed.ao && spoofed.ao.includes(spoofedOrigin)) {
+      findings.push("Subdomain spoofing accepted");
+    }
+
+    if (newline.ao && newline.ao.includes('\n')) {
+      findings.push("Header injection via newline in Origin");
+    }
+
+    if (proto.ao && proto.ao === protocolOrigin) {
+      findings.push("Protocol mismatch origin accepted");
+    }
+
+    if (nullO.ao === 'null') {
+      findings.push("Null origin is accepted");
+    }
+
+    if ((base.ao || '').includes(',') || (preflight.ao || '').includes(',')) {
+      findings.push("Multiple ACAO headers detected");
+    }
+
+    if (preflight.ah && preflight.ah.includes('Authorization')) {
+      findings.push("ACAH allows Authorization header");
+    }
+
+    if (base.ao !== preflight.ao || base.ac !== preflight.ac) {
+      findings.push("Mismatch between GET and OPTIONS ACAO/ACAC");
+    }
+
+    if (findings.length === 0) {
+      log("✅ Safe");
+      return { status: "ok", notes: "No CORS misconfig detected" };
+    }
+
+    const vuln = findings.some(f =>
+      f.includes("credentials") ||
+      f.includes("spoofing") ||
+      f.includes("Wildcard") ||
+      f.includes("injection")
+    );
+    const level = vuln ? "vuln" : "warn";
+
+    log(`⚠️ Findings: ${findings.join('; ')}`);
+    return { status: level, notes: findings.join('; ') };
   }
-
-  log(`\n==============================`);
-  log(`🔍 Scanning ${url}`);
-
-  const base = await corsRequest(customOrigin);
-  const spoofed = await corsRequest(spoofedOrigin);
-  const newline = await corsRequest(newlineOrigin);
-  const proto = await corsRequest(protocolOrigin);
-  const nullO = await corsRequest(nullOrigin);
-
-  const preflight = await corsRequest(customOrigin, "OPTIONS", false, {
-    'Access-Control-Request-Method': 'POST',
-    'Access-Control-Request-Headers': 'X-Fake-Header,Authorization'
-  });
-
-  const findings = [];
-
-  const normalize = str => (str || '').toLowerCase().trim();
-
-  if (normalize(base.ao) === normalize(customOrigin) && normalize(base.ac) === 'true') {
-    findings.push("Reflected origin with credentials");
-  }
-
-  if (normalize(base.ao) === '*' && normalize(base.ac) === 'true') {
-    findings.push("Wildcard ACAO with ACAC=true (critical misconfig)");
-  }
-
-  if (normalize(base.ac) === 'true' && (!base.ao || base.ao === '')) {
-    findings.push("ACAC set without ACAO");
-  }
-
-  if (spoofed.ao && spoofed.ao.includes(spoofedOrigin)) {
-    findings.push("Subdomain spoofing accepted");
-  }
-
-  if (newline.ao && newline.ao.includes('\n')) {
-    findings.push("Header injection via newline in Origin");
-  }
-
-  if (proto.ao && proto.ao === protocolOrigin) {
-    findings.push("Protocol mismatch origin accepted");
-  }
-
-  if (nullO.ao === 'null') {
-    findings.push("Null origin is accepted");
-  }
-
-  if ((base.ao || '').includes(',') || (preflight.ao || '').includes(',')) {
-    findings.push("Multiple ACAO headers detected");
-  }
-
-  if (preflight.ah && preflight.ah.includes('Authorization')) {
-    findings.push("ACAH allows Authorization header");
-  }
-
-  if (base.ao !== preflight.ao || base.ac !== preflight.ac) {
-    findings.push("Mismatch between GET and OPTIONS ACAO/ACAC");
-  }
-
-  // Determine status
-  if (findings.length === 0) {
-    log("✅ Safe");
-    return { status: "ok", notes: "No CORS misconfig detected" };
-  }
-
-  const vuln = findings.some(f =>
-    f.includes("credentials") ||
-    f.includes("spoofing") ||
-    f.includes("Wildcard") ||
-    f.includes("injection")
-  );
-  const level = vuln ? "vuln" : "warn";
-
-  log(`⚠️ Findings: ${findings.join('; ')}`);
-  return { status: level, notes: findings.join('; ') };
-}
 
   async function sendToDiscord(webhook, msg) {
     if (!webhook) return;
@@ -342,7 +342,6 @@
     document.querySelector("#results tbody").innerHTML = "";
     document.getElementById("log").textContent = `[Scan started...]\n`;
 
-    // Reset counters
     ['ok', 'warn', 'vuln', 'error'].forEach(id => {
       document.getElementById(`${id}-count`).textContent = "0";
     });
