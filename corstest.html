@@ -191,36 +191,82 @@
   }
 
   async function checkCORS(url, customOrigin) {
-    try {
-      log(`\n==============================`);
-      log(`🔍 Scanning ${url}`);
-      const res = await fetch(url, {
-        method: 'GET',
-        mode: 'cors',
-        headers: { 'Origin': customOrigin }
-      });
-
-      log(`↳ Status: ${res.status}`);
-      log(`↳ Headers:\n${formatHeaders(res.headers)}`);
-
-      const ao = res.headers.get("Access-Control-Allow-Origin");
-      const ac = res.headers.get("Access-Control-Allow-Credentials");
-
-      if (ao === customOrigin && ac === 'true') {
-        log(`⚠️ Reflected with credentials`);
-        return { status: "vuln", notes: "Reflected w/ credentials" };
-      } else if (ao === customOrigin) {
-        log(`⚠️ Reflected origin only`);
-        return { status: "warn", notes: "Reflected origin only" };
-      } else {
-        log(`✅ Safe`);
-        return { status: "ok", notes: "No reflection" };
-      }
-    } catch (e) {
-      log(`❌ Error: ${e.message}`);
-      return { status: "error", notes: "Request failed" };
-    }
+  function randomStr(len = 12) {
+    return Math.random().toString(36).substring(2, 2 + len);
   }
+
+  try {
+    log(`\n==============================`);
+    log(`🔍 Scanning ${url}`);
+
+    const fakeToken = `Bearer ${randomStr(24)}`;
+    const fakeCookie = `session=${randomStr(32)}`;
+    const customHeaders = {
+      'X-Fake-Header': randomStr(8),
+      'X-Custom-User': `user-${randomStr(5)}`,
+      'Authorization': fakeToken
+    };
+
+    // Step 1: Simple GET with origin + random auth + cookie + custom headers
+    const getRes = await fetch(url, {
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+        'Origin': customOrigin,
+        ...customHeaders
+      },
+      credentials: 'include' // simulate sending cookies
+    });
+
+    log(`↳ [GET] Status: ${getRes.status}`);
+    log(`↳ [GET] Headers:\n${formatHeaders(getRes.headers)}`);
+
+    const aoGet = getRes.headers.get("Access-Control-Allow-Origin");
+    const acGet = getRes.headers.get("Access-Control-Allow-Credentials");
+
+    // Step 2: OPTIONS (Preflight) request
+    const optRes = await fetch(url, {
+      method: 'OPTIONS',
+      mode: 'cors',
+      headers: {
+        'Origin': customOrigin,
+        'Access-Control-Request-Method': 'POST',
+        'Access-Control-Request-Headers': Object.keys(customHeaders).join(', ')
+      }
+    });
+
+    log(`↳ [OPTIONS] Status: ${optRes.status}`);
+    log(`↳ [OPTIONS] Headers:\n${formatHeaders(optRes.headers)}`);
+
+    const aoOpt = optRes.headers.get("Access-Control-Allow-Origin");
+    const acOpt = optRes.headers.get("Access-Control-Allow-Credentials");
+
+    const vulnByGet = (aoGet === customOrigin && acGet === 'true');
+    const vulnByOpt = (aoOpt === customOrigin && acOpt === 'true');
+    const reflectedWildcard = (aoGet === '*' || aoOpt === '*');
+
+    if (vulnByGet || vulnByOpt) {
+      log(`⚠️ Reflected with credentials (GET/OPTIONS)`);
+      return { status: "vuln", notes: "Reflected w/ credentials & auth sim" };
+    } else if (aoGet === customOrigin || aoOpt === customOrigin) {
+      log(`⚠️ Reflected origin only`);
+      return { status: "warn", notes: "Reflected origin only w/ fake headers" };
+    } else if (reflectedWildcard && (acGet === 'true' || acOpt === 'true')) {
+      log(`⚠️ Wildcard origin with credentials`);
+      return { status: "vuln", notes: "Wildcard + credentials (critical)" };
+    } else if (reflectedWildcard) {
+      log(`⚠️ Wildcard origin`);
+      return { status: "warn", notes: "Wildcard origin" };
+    } else {
+      log(`✅ Safe`);
+      return { status: "ok", notes: "No reflection (headers, token, cookie)" };
+    }
+
+  } catch (e) {
+    log(`❌ Error: ${e.message}`);
+    return { status: "error", notes: "Request failed" };
+  }
+}
 
   async function sendToDiscord(webhook, msg) {
     if (!webhook) return;
