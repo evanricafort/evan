@@ -79,13 +79,44 @@
     .container{position: relative; display: inline-block;}
     .cool-link::after{content: ""; display: block; width: 0; height: 2px; background: #080FAD; transition: width .3s}
     .cool-link:hover::after{width: 100%; transition: width .3s;}
+
+    /* Dark Mode Styles */
+  	body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+  	}
+  	body.dark-mode a {
+    color: #81a1c1;
+  	}
+  	body.dark-mode h1, 
+  	body.dark-mode h2, 
+  	body.dark-mode p, 
+  	body.dark-mode ul li {
+    color: #e0e0e0;
+  	}
+  	.dark-toggle {
+    position: fixed;
+    top: 10px;
+    right: 15px;
+    background-color: #222;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    z-index: 9999;
+    border-radius: 6px;
+    font-family: "Bitter", serif;
+  	}
+  	.dark-toggle:hover {
+    background-color: #444;
+  	}
     </style>
 
 
     </head>
 
       <body>
-          
+          	<button class="dark-toggle" onclick="toggleDarkMode()">🌓 Dark Mode</button>
 
     <header>
 
@@ -550,6 +581,21 @@
         }
       }
     </script>
+
+
+    	<script>
+  function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+  }
+
+  // Apply saved theme on load
+  window.onload = function() {
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
+  };
+		</script>
 
  
                   <img src="https://s09.flagcounter.com/count/iwvj/bg_FFFFFF/txt_000000/border_FFFFFF/columns_6/maxflags_50/viewers_0/labels_1/pageviews_1/flags_1/" alt="Free counters!" border="0"> 
