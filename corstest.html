@@ -202,7 +202,6 @@
     : customOrigin.replace("http://", "https://");
   const nullOrigin = "null";
 
-  const results = [];
   const headersToSend = {
     'X-Fake-Header': randomStr(),
     'Authorization': `Bearer ${randomStr(24)}`
@@ -210,21 +209,38 @@
 
   async function corsRequest(origin, method = "GET", creds = true, additionalHeaders = {}) {
     try {
+      const fullHeaders = {
+        'Origin': origin,
+        ...headersToSend,
+        ...additionalHeaders
+      };
+
+      log(`\n📤 Request`);
+      log(`→ ${method} ${url}`);
+      log(`→ Origin: ${origin}`);
+      Object.entries(fullHeaders).forEach(([key, value]) => {
+        log(`→ ${key}: ${value}`);
+      });
+
       const res = await fetch(url, {
         method,
         mode: 'cors',
         credentials: creds ? 'include' : 'omit',
-        headers: {
-          'Origin': origin,
-          ...headersToSend,
-          ...additionalHeaders
-        }
+        headers: fullHeaders
       });
+
       const ao = res.headers.get("Access-Control-Allow-Origin");
       const ac = res.headers.get("Access-Control-Allow-Credentials");
       const ah = res.headers.get("Access-Control-Allow-Headers");
+
+      log(`\n📥 Response (status ${res.status})`);
+      res.headers.forEach((value, key) => {
+        log(`← ${key}: ${value}`);
+      });
+
       return { status: res.status, headers: res.headers, ao, ac, ah };
     } catch (err) {
+      log(`❌ Error during request: ${err.message}`);
       return { error: err.message };
     }
   }
@@ -245,7 +261,6 @@
 
   const findings = [];
 
-  // Normalize header keys
   const normalize = str => (str || '').toLowerCase().trim();
 
   if (normalize(base.ao) === normalize(customOrigin) && normalize(base.ac) === 'true') {
