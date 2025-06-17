@@ -1,61 +1,372 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <style>
-        body {
-            background-color: white;
-            width: 100%;
-            height: 100vh;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            font-family: Arial, sans-serif;
-        }
-        #message {
-            color: black;
-            font-size: 20px;
-        }
-    </style>
-    <script>
-        function tParam(qParam) {
-            const frmURL = window.location.search.substring(1);
-            const varURL = frmURL.split('&');
-            for (let i = 0; i < varURL.length; i++) {
-                const vParam = varURL[i].split('=');
-                if (vParam[0] === qParam) {
-                    return vParam[1];
-                }
-            }
-            window.location.href = "https://evanricafort.com";
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CORS Misconfiguration Scanner</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f9f9;
+    }
+    body.dark {
+      background-color: #1e1e1e;
+      color: #f0f0f0;
+    }
+    .container {
+      padding: 2rem;
+      max-width: 900px;
+      margin: auto;
+    }
+    .theme-toggle {
+      float: right;
+      margin-top: -2rem;
+    }
+    textarea, input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+    }
+    body.dark textarea, body.dark input {
+      background: #2c2c2c;
+      color: #fff;
+      border: 1px solid #555;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      margin-bottom: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+    }
+    body.dark th, body.dark td {
+      border-color: #444;
+    }
+    th {
+      background: #f0f0f0;
+    }
+    body.dark th {
+      background: #333;
+    }
+    .ok { color: green; }
+    .warn { color: orange; }
+    .vuln { color: red; font-weight: bold; }
+    .error { color: gray; }
 
-        function init() {
-            console.log("Redirecting to attacker's controlled site");
-            foo.location.href = "https://evanricafort.com/testlogin.html";
-        }
+    #log {
+      background: #111;
+      color: #0f0;
+      padding: 1rem;
+      font-family: monospace;
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      border-radius: 5px;
+    }
 
-        function launch() {
-            const target = tParam("target");
-            foo = window.open(target, "foo", "");
-            console.log("Target site opened successfully");
-            setTimeout(init, 6000);
-        }
-
-        function setup() {
-            const target = tParam("target");
-            document.body.addEventListener('click', launch);
-            const message = document.createElement('div');
-            message.id = 'message';
-            message.innerText = `If the site did not automatically redirect to ${target}, click anywhere in the white background`;
-            document.body.appendChild(message);
-            launch();
-        }
-
-        window.onload = setup;
-</script>
+    #summary {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+    .summary-box {
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      color: white;
+    }
+    .ok-box { background-color: green; }
+    .warn-box { background-color: orange; }
+    .vuln-box { background-color: red; }
+    .error-box { background-color: gray; }
+  </style>
 </head>
-<body></body>
+<body>
+
+<div class="container">
+  <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Dark Mode</button>
+  <h1>🌐 CORS Misconfiguration Scanner</h1>
+
+  <label>Target URLs (one per line):</label>
+  <textarea id="urls" rows="8" placeholder="https://example.com&#10;https://api.example.com"></textarea>
+
+  <label>Malicious Origin:</label>
+  <input type="text" id="origin" value="https://evil.com">
+
+  <label>Discord Webhook (optional):</label>
+  <input type="text" id="webhook" placeholder="https://discord.com/api/webhooks/...">
+
+  <button onclick="startScan()">Start Scan</button>
+
+  <table id="results">
+    <thead>
+      <tr>
+        <th>URL</th>
+        <th>Status</th>
+        <th>Notes</th>
+        <th>Explanation</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h3>📝 Live Log</h3>
+  <pre id="log">[Scanner Ready]</pre>
+
+  <div id="summary">
+    <div class="summary-box ok-box">OK: <span id="ok-count">0</span></div>
+    <div class="summary-box warn-box">WARN: <span id="warn-count">0</span></div>
+    <div class="summary-box vuln-box">VULN: <span id="vuln-count">0</span></div>
+    <div class="summary-box error-box">ERROR: <span id="error-count">0</span></div>
+  </div>
+</div>
+
+<script>
+  function toggleTheme() {
+    document.body.classList.toggle('dark');
+  }
+
+  function log(message) {
+    const el = document.getElementById("log");
+    el.textContent += `\n${message}`;
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function formatHeaders(headers) {
+    const arr = [];
+    for (let [k, v] of headers.entries()) {
+      arr.push(`    ${k}: ${v}`);
+    }
+    return arr.join('\n');
+  }
+
+  function getExplanation(status) {
+    switch (status) {
+      case "vuln":
+        return "The target reflects the malicious origin and allows credentials. This allows attackers to access sensitive data from the target application using cross-origin requests. Immediate mitigation is required.";
+      case "warn":
+        return "The server reflects the malicious origin but does not allow credentials. This still poses a security risk as it may enable exploitation of less sensitive endpoints or combine with other vulnerabilities.";
+      case "ok":
+        return "The server did not reflect the malicious origin. It is correctly configured against CORS attacks. No action needed.";
+      case "error":
+        return "The scan could not be completed due to a network or CORS error. Check the URL or try again later.";
+      default:
+        return "Unknown result.";
+    }
+  }
+
+  function appendResult(url, status, notes) {
+    const explanation = getExplanation(status);
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${url}</td>
+      <td class="${status}">${status.toUpperCase()}</td>
+      <td>${notes}</td>
+      <td>${explanation}</td>
+    `;
+    document.querySelector("#results tbody").appendChild(row);
+  }
+
+  function updateSummary(status) {
+    const idMap = {
+      ok: 'ok-count',
+      warn: 'warn-count',
+      vuln: 'vuln-count',
+      error: 'error-count'
+    };
+    const el = document.getElementById(idMap[status]);
+    el.textContent = parseInt(el.textContent) + 1;
+  }
+
+  async function checkCORS(url, customOrigin) {
+  function randomStr(len = 8) {
+    return Math.random().toString(36).substring(2, 2 + len);
+  }
+
+  const spoofedOrigin = `https://${randomStr()}.${customOrigin.replace(/^https?:\/\//, '')}`;
+  const newlineOrigin = `${customOrigin}\nInjected:evil`;
+  const protocolOrigin = customOrigin.startsWith("https://")
+    ? customOrigin.replace("https://", "http://")
+    : customOrigin.replace("http://", "https://");
+  const nullOrigin = "null";
+
+  const headersToSend = {
+    'X-Fake-Header': randomStr(),
+    'Authorization': `Bearer ${randomStr(24)}`
+  };
+
+  async function corsRequest(origin, method = "GET", creds = true, additionalHeaders = {}) {
+    try {
+      const fullHeaders = {
+        'Origin': origin,
+        ...headersToSend,
+        ...additionalHeaders
+      };
+
+      log(`\n📤 Request`);
+      log(`→ ${method} ${url}`);
+      log(`→ Origin: ${origin}`);
+      Object.entries(fullHeaders).forEach(([key, value]) => {
+        log(`→ ${key}: ${value}`);
+      });
+
+      const res = await fetch(url, {
+        method,
+        mode: 'cors',
+        credentials: creds ? 'include' : 'omit',
+        headers: fullHeaders
+      });
+
+      const ao = res.headers.get("Access-Control-Allow-Origin");
+      const ac = res.headers.get("Access-Control-Allow-Credentials");
+      const ah = res.headers.get("Access-Control-Allow-Headers");
+
+      log(`\n📥 Response (status ${res.status})`);
+      res.headers.forEach((value, key) => {
+        log(`← ${key}: ${value}`);
+      });
+
+      return { status: res.status, headers: res.headers, ao, ac, ah };
+    } catch (err) {
+      log(`❌ Error during request: ${err.message}`);
+      return { error: err.message };
+    }
+  }
+
+  log(`\n==============================`);
+  log(`🔍 Scanning ${url}`);
+
+  const base = await corsRequest(customOrigin);
+  const spoofed = await corsRequest(spoofedOrigin);
+  const newline = await corsRequest(newlineOrigin);
+  const proto = await corsRequest(protocolOrigin);
+  const nullO = await corsRequest(nullOrigin);
+
+  const preflight = await corsRequest(customOrigin, "OPTIONS", false, {
+    'Access-Control-Request-Method': 'POST',
+    'Access-Control-Request-Headers': 'X-Fake-Header,Authorization'
+  });
+
+  const findings = [];
+
+  const normalize = str => (str || '').toLowerCase().trim();
+
+  if (normalize(base.ao) === normalize(customOrigin) && normalize(base.ac) === 'true') {
+    findings.push("Reflected origin with credentials");
+  }
+
+  if (normalize(base.ao) === '*' && normalize(base.ac) === 'true') {
+    findings.push("Wildcard ACAO with ACAC=true (critical misconfig)");
+  }
+
+  if (normalize(base.ac) === 'true' && (!base.ao || base.ao === '')) {
+    findings.push("ACAC set without ACAO");
+  }
+
+  if (spoofed.ao && spoofed.ao.includes(spoofedOrigin)) {
+    findings.push("Subdomain spoofing accepted");
+  }
+
+  if (newline.ao && newline.ao.includes('\n')) {
+    findings.push("Header injection via newline in Origin");
+  }
+
+  if (proto.ao && proto.ao === protocolOrigin) {
+    findings.push("Protocol mismatch origin accepted");
+  }
+
+  if (nullO.ao === 'null') {
+    findings.push("Null origin is accepted");
+  }
+
+  if ((base.ao || '').includes(',') || (preflight.ao || '').includes(',')) {
+    findings.push("Multiple ACAO headers detected");
+  }
+
+  if (preflight.ah && preflight.ah.includes('Authorization')) {
+    findings.push("ACAH allows Authorization header");
+  }
+
+  if (base.ao !== preflight.ao || base.ac !== preflight.ac) {
+    findings.push("Mismatch between GET and OPTIONS ACAO/ACAC");
+  }
+
+  // Determine status
+  if (findings.length === 0) {
+    log("✅ Safe");
+    return { status: "ok", notes: "No CORS misconfig detected" };
+  }
+
+  const vuln = findings.some(f =>
+    f.includes("credentials") ||
+    f.includes("spoofing") ||
+    f.includes("Wildcard") ||
+    f.includes("injection")
+  );
+  const level = vuln ? "vuln" : "warn";
+
+  log(`⚠️ Findings: ${findings.join('; ')}`);
+  return { status: level, notes: findings.join('; ') };
+}
+
+  async function sendToDiscord(webhook, msg) {
+    if (!webhook) return;
+    try {
+      await fetch(webhook, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: msg })
+      });
+      log("📤 Sent to Discord");
+    } catch (err) {
+      log(`❌ Discord error: ${err.message}`);
+    }
+  }
+
+  async function startScan() {
+    const urls = document.getElementById("urls").value.trim().split("\n");
+    const origin = document.getElementById("origin").value.trim();
+    const webhook = document.getElementById("webhook").value.trim();
+    document.querySelector("#results tbody").innerHTML = "";
+    document.getElementById("log").textContent = `[Scan started...]\n`;
+
+    // Reset counters
+    ['ok', 'warn', 'vuln', 'error'].forEach(id => {
+      document.getElementById(`${id}-count`).textContent = "0";
+    });
+
+    for (const raw of urls) {
+      const url = raw.trim();
+      if (!url) continue;
+
+      appendResult(url, "...", "Scanning...");
+      const result = await checkCORS(url, origin);
+      document.querySelector("#results tbody").lastChild.remove();
+      appendResult(url, result.status, result.notes);
+      updateSummary(result.status);
+
+      const explanation = getExplanation(result.status);
+      const alert = `📡 **CORS Scan Result**\n🔗 **URL:** ${url}\n📊 **Status:** ${result.status.toUpperCase()}\n📝 **Notes:** ${result.notes}\nℹ️ **Explanation:** ${explanation}`;
+      await sendToDiscord(webhook, alert);
+
+      log(`==============================\n`);
+    }
+
+    log("✅ Scan Complete");
+  }
+</script>
+
+</body>
 </html>
