@@ -52,7 +52,6 @@
         <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
 
         <style>
-            /* General Reset */
             * {
                 margin: 0px;
                 padding: 0px;
@@ -226,6 +225,7 @@
                 color: #7ec8ff; 
             }
 
+            /* Loading Bar */
             #loading-bar {
                 position: fixed;
                 top: 0;
@@ -249,6 +249,7 @@
                  }
             }
 
+            /* Sroll Progress */
             #scroll-progress {
                 position: fixed;
                 top: 0;
@@ -260,6 +261,7 @@
                 transition: width 0.2s ease-out;
             }
 
+            /* Read More */
             #more {
                 max-height: 0;
                 opacity: 0;
@@ -725,8 +727,7 @@
           <h2>Write Ups</h2>
           <p>To read my write ups, just click <a href="https://blog.evanricafort.com" target="_blank" title="Blog" class="container cool-link">here!</a></p>
     </section>
-
-            
+           
 <script>
   function toggleText(btn, id) {
     const content = document.getElementById(id);
