@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weak SSL/TLS Cipher Scanner</title>
-    <link href="profile.jpg" type="image/gif" rel="shortcut icon" />
+        <link href="profile.jpg" type="image/gif" rel="shortcut icon" />
     <!-- Include Font Awesome for icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
@@ -195,8 +195,8 @@
 <body>
     <button class="toggle-btn" onclick="toggleDarkMode()">🌓</button>
     <h2><i class="fas fa-shield-alt"></i> Weak SSL/TLS Cipher Scanner</h2>
-    <p>Paste your nmap scan results below:</p>
-    <textarea id="nmapResults" placeholder="Paste nmap results here..."></textarea><br>
+    <p>Paste your Nmap scan results below:</p>
+    <textarea id="nmapResults" placeholder="Paste Nmap results here..."></textarea><br>
     <button onclick="analyzeResults()"><i class="fas fa-search"></i> Scan for Weak Ciphers & Protocols</button>
 
     <div id="results">
@@ -250,48 +250,78 @@
             "KRB5": ["Kerberos-based cipher suites are rare and often misconfigured.", "Use standard TLS cipher suites instead."]
         };
 
-        function analyzeResults() {
-            const input = document.getElementById("nmapResults").value;
-            const lines = input.split("\n");
-            const resultsTable = document.getElementById("resultsTable");
-            const statusText = document.getElementById("status");
-            const weakCiphersAndProtocols = Object.keys(cipherDescriptions);
-            const rsaWeakPattern = /RSA\s*\((\d+)\s*bit\)/;
-            resultsTable.innerHTML = "";
-            statusText.textContent = "Scanning...";
-            const found = new Set();
-            setTimeout(() => {
-                let count = 0;
-                lines.forEach(line => {
-                    let clean = line.replace(/\|/, "").trim();
-                    weakCiphersAndProtocols.forEach(cipher => {
-                        if (clean.includes(cipher)) {
-                            const issueLabel = (cipher.includes("TLS") || cipher.includes("SSL")) ? "Weak Protocol" : "Weak Cipher";
-                            if (!found.has(clean)) {
-                                const [desc, fix] = cipherDescriptions[cipher] || ["Weak cipher.", "Disable or replace."];
-                                addResultRow(`${issueLabel}: ${clean}`, "WEAK", desc, fix);
+                    function analyzeResults() {
+                const input = document.getElementById("nmapResults").value.trim();
+                const resultsTable = document.getElementById("resultsTable");
+                const statusText = document.getElementById("status");
+
+                // Clear previous results and reset counter
+                resultsTable.innerHTML = "";
+                document.getElementById("cipherCount").textContent = "0";
+
+                // Validate empty input
+                if (!input) {
+                    statusText.textContent = "Please paste your Nmap scan results before running the scan.";
+                    statusText.style.color = "red";
+                    return;
+                }
+
+                // Basic Nmap format check
+                const nmapIndicators = [/ssl-|tls|SSL|TLS|open\s+ssl/i, /\d+\/tcp\s+(open|closed)/i, /^PORT/i, /^Service/i];
+                const isLikelyNmap = nmapIndicators.some(pattern => pattern.test(input));
+
+                if (!isLikelyNmap) {
+                    statusText.textContent = "The input does not appear to be a valid Nmap SSL scan result. Please check your input.";
+                    statusText.style.color = "red";
+                    return;
+                }
+
+                statusText.style.color = ""; // Reset color
+                statusText.textContent = "Scanning...";
+
+                const lines = input.split("\n");
+                const weakCiphersAndProtocols = Object.keys(cipherDescriptions);
+                const rsaWeakPattern = /RSA\s*\((\d+)\s*bit\)/;
+                const found = new Set();
+
+                setTimeout(() => {
+                    let count = 0;
+                    lines.forEach(line => {
+                        let clean = line.replace(/\|/, "").trim();
+                        weakCiphersAndProtocols.forEach(cipher => {
+                            if (clean.includes(cipher)) {
+                                const issueLabel = (cipher.includes("TLS") || cipher.includes("SSL")) ? "Weak Protocol" : "Weak Cipher";
+                                if (!found.has(clean)) {
+                                    const [desc, fix] = cipherDescriptions[cipher] || ["Weak cipher.", "Disable or replace."];
+                                    addResultRow(`${issueLabel}: ${clean}`, "WEAK", desc, fix);
+                                    count++;
+                                    found.add(clean);
+                                }
+                            }
+                        });
+                        const rsaMatch = line.match(rsaWeakPattern);
+                        if (rsaMatch && parseInt(rsaMatch[1]) < 2048) {
+                            const desc = "RSA keys below 2048 bits are vulnerable to factorization attacks and not recommended for production use.";
+                            const fix = "Regenerate your RSA certificate with a 2048-bit or higher key length.";
+                            const issue = `Insecure RSA Key: ${rsaMatch[1]} bits`;
+                            if (!found.has(issue)) {
+                                addResultRow(issue, "WEAK", desc, fix);
                                 count++;
-                                found.add(clean);
+                                found.add(issue);
                             }
                         }
                     });
-                    const rsaMatch = line.match(rsaWeakPattern);
-                    if (rsaMatch && parseInt(rsaMatch[1]) < 2048) {
-                        const desc = "RSA keys below 2048 bits are vulnerable to factorization attacks and not recommended for production use.";
-                        const fix = "Regenerate your RSA certificate with a 2048-bit or higher key length.";
-                        const issue = `Insecure RSA Key: ${rsaMatch[1]} bits`;
-                        if (!found.has(issue)) {
-                            addResultRow(issue, "WEAK", desc, fix);
-                            count++;
-                            found.add(issue);
-                        }
+
+                    if (count === 0) {
+                        addResultRow("No security issues detected.", "SECURE", "All detected ciphers and protocols meet current best practices.", "No changes required.");
                     }
-                });
-                if (count === 0) addResultRow("No security issues detected.", "SECURE", "All detected ciphers and protocols meet current best practices.", "No changes required.");
-                document.getElementById("cipherCount").textContent = count;
-                statusText.textContent = count > 0 ? "Weak ciphers or RSA keys found!" : "No issues detected.";
-            }, 500);
-        }
+
+                    document.getElementById("cipherCount").textContent = count;
+                    statusText.textContent = count > 0 ? "Weak ciphers or RSA keys found!" : "No issues detected.";
+                }, 500);
+            }
+
+
 
         function addResultRow(issue, status, explanation, fix) {
             const row = document.getElementById("resultsTable").insertRow();
