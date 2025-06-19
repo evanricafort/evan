@@ -48,7 +48,7 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-
+        <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
         <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
 
         <style>
@@ -217,25 +217,83 @@
                 font-size: 1.6rem;
                 cursor: pointer;
             }
+
+            body.dark-mode a {
+                color: #4ea3ff; 
+            }
+
+            body.dark-mode a:hover {
+                color: #7ec8ff; 
+            }
+
+            #loading-bar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 4px;
+                background-color: #054b82; 
+                width: 0;
+                z-index: 9999;
+                animation: loadingBarGrow 2s ease-out forwards;
+            }
+
+            @keyframes loadingBarGrow {
+                 0% {
+                   width: 0%;
+                 }
+                 80% {
+                   width: 90%;
+                 }
+                 100% {
+                   width: 100%;
+                 }
+            }
+
+            #scroll-progress {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 4px;
+                background-color: #113959;
+                width: 0%;
+                z-index: 9999;
+                transition: width 0.2s ease-out;
+            }
+
+            #more {
+                max-height: 0;
+                opacity: 0;
+                overflow: hidden;
+                transition: max-height 0.8s ease, opacity 0.8s ease;
+                will-change: max-height, opacity;
+            }
+
+            #more.show {
+                max-height: 10000px;
+                opacity: 1;
+            }
         </style>
 
     </head>
 
+            <div id="loading-bar"></div>
+            <div id="scroll-progress"></div>
+
       <body>
-          	<button class="dark-toggle" onclick="toggleDarkMode()">🌓</button>
+            <button class="dark-toggle" onclick="toggleDarkMode()">🌓</button>
 
     <header>
 
 
             <br />
-            <div class="circle-1">
+            <div class="circle-1" data-aos="fade-down" data-aos-delay="200">
               <img src="profile.jpg" class="center">
             </div>
-        <h1>Evan Ricafort</h1>
+        <h1 data-aos="fade-down">Evan Ricafort</h1>
         <div id="i">
               <p><span class="typing"></span></p>
         </div>
-        <div id="bio_left">
+        <div id="bio_left" data-aos="fade-right">
           Poblacion, Ipil<br />
           Zamboanga Sibugay<br />
           7001, Philippines
@@ -255,12 +313,12 @@
               </script>
 
 
-        <div id="bio_right">
+        <div id="bio_right" data-aos="fade-left">
           Work Email: <a href="mailto:root@evanricafort.com" target="_blank" title="Hit me up!" class="container cool-link">root@evanricafort.com</a><br>
           Download my CV: <a href="/Evan - Resume.pdf" target="_blank" class="container cool-link">Click Here!</a><br />
           <a href="#" class="container cool-link">https://evanricafort.com</a>
         </div>
-        <div id="bio_center"> 
+        <div id="bio_center" data-aos="fade-up"> 
         <a href="https://instagram.com/evanricafort" target="_blank" title="Follow me on Instagram"><img src="/socialicons/instagram.png" width="17"/></a> 
         <a href="https://twitter.com/evanricafort" target="_blank" title="Follow me on Twitter"><img src="/socialicons/twitter.png" width="17"/></a> 
         <a href="https://github.com/evanricafort" target="_blank" title="Follow me on Github"><img src="/socialicons/github.png" width="17"/></a>
@@ -271,12 +329,12 @@
         <br />
     </header>
 
-  <section>
+  <section data-aos="zoom-out">
         <h2>About</h2>
           <p>I'm <strong>Evan Ricafort</strong>, a security consultant/bug hunter from the Philippines who is interested in web application security testing. I was born and raised in the little town of Ipil, Zamboanga Sibugay. studied computer networking at <i><a href="https://adzu.edu.ph/" target="_blank" class="container cool-link">Ateneo de Zamboanga University</a></i>. I am currently working remotely as an Offensive Security Engineer for a Chicago, Illinois-based cybersecurity firm. I've been an active member of the bug bounty community since early 2013, disclosing many types of security vulnerabilities on famous websites such as Microsoft, Google, Twitter, and others. In my spare time, I enjoy biking, playing video games, and other outdoor activities. If you wish to include me in your bug bounty program, please contact me through email or direct message on Twitter (@evanricafort). I'll do my best to provide you with excellent research.</p>
     </section>
 
-    <section>
+    <section data-aos="fade-up">
         <h2>Languages</h2>
         <ul>
           <li><p>Visayan</p></li>
@@ -285,7 +343,7 @@
         </ul>
     </section>
 
-    <section>
+    <section data-aos="fade-up">
         <h2>Technical Skills</h2>
         <ul>
           <li><p>Web Application Assessment</p></li>
@@ -294,7 +352,7 @@
         </ul>
     </section>
 
-    <section>
+    <section data-aos="fade-up">
         <h2>Work Experience</h2>
         <ul>
           <li><p><strong>Offensive Security Engineer (Junior)</strong> at VikingCloud - <a href="https://www.vikingcloud.com" target="_blank" class="container cool-link">https://www.vikingcloud.com</a> (April 2022 - April 2025)</p></li>
@@ -308,7 +366,7 @@
         </ul>
     </section>
 
-    <section>
+    <section data-aos="fade-up">
         <h2>Badge & Certificate</h2>
         <ul>
           <li><p><strong>Cyber Security and Privacy Foundation Pte Ltd</strong> - Certified Whitehat Hacker v1 (CWHH) - Certificate ID. <a href="https://www.udemy.com/certificate/UC-SD45SNW8/" target="_blank" class="container cool-link">UC-SD45SNW8</a></p></li>
@@ -322,7 +380,7 @@
         </ul>
     </section>
 
-    <section>
+    <section data-aos="fade-up">
         <h2>News & Press</h2>
         <ul>
           <p><strong>Featured in SecurityWeek (Google Nest Findings)</strong></p>
@@ -371,7 +429,7 @@
   </section>
 
 
-  <section>
+  <section data-aos="fade-up">
         <h2>Project</h2>
         <ul>
           <p><strong>Lazymap</strong></p>
@@ -382,7 +440,7 @@
   </section>
 
 
-  <section>
+  <section data-aos="fade-up">
       <h2>Testimonials</h2>
       <ul>
         <p><strong><li>Dominic Yeadon</strong> - Managing Director at Data Harvesting U.K</li></p>
@@ -397,10 +455,10 @@
     </section>
 
 
-    <section>
+    <section data-aos="fade-up">
         <h2>Achievements</h2>
         <ul>
-          <p>I reported valid security vulnerability to the following companies. (Last Update May 4, 2025)</p>
+          <p>I reported valid security vulnerability to the following companies. (Last Update June 19, 2025)</p>
         </ul>
           
                      <strong>• 123 Contact Form</strong> — http://www.123contactform.com/security-acknowledgements.htm<br/>
@@ -424,7 +482,7 @@
                      <strong>• Automattic</strong> — https://hackerone.com/automattic/thanks<br/>
                      <strong>• AVG Technologies</strong> — https://support.avg.com/support_contact_form?l=en_US<br/>
                      <strong>• AwardWallet</strong> — https://app.cobalt.io/awardwallet/awardwallet/hall-of-fame/all<br/>
-                     <p id="more" style="display: none;">
+                     <p id="more">
                      <strong>• Bandcamp</strong> — https://get.bandcamp.help/hc/en-us<br/> 
                      <strong>• Barracuda Labs</strong> — https://barracudalabs.com/research-resources/bug-bounty-program/bug-bounty-hall-of-fame-2/<br/>
                      <strong>• Base CRM</strong> — https://getbase.com/security/<br/>
@@ -663,22 +721,22 @@
                                       <a href="#" onclick="toggleText(this, 'more'); return false;" class="container cool-link">Read More</a>
     </section>
 
-    <section>
+    <section data-aos="fade-up">
           <h2>Write Ups</h2>
           <p>To read my write ups, just click <a href="https://blog.evanricafort.com" target="_blank" title="Blog" class="container cool-link">here!</a></p>
     </section>
 
             
-<script type="text/javascript">
-  // Toggle text visibility on button click
+<script>
   function toggleText(btn, id) {
-    var element = document.getElementById(id);
-    if (element.style.display === 'block') {
-      element.style.display = 'none';
-      btn.innerHTML = "Read More";
+    const content = document.getElementById(id);
+
+    if (content.classList.contains("show")) {
+      content.classList.remove("show");
+      btn.textContent = "Read More";
     } else {
-      element.style.display = 'block';
-      btn.innerHTML = "Show Less";
+      content.classList.add("show");
+      btn.textContent = "Show Less";
     }
   }
 </script>
@@ -701,8 +759,40 @@
   };
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+
+<script>
+  AOS.init({
+    duration: 700,
+    easing: 'ease-out-quad',
+    once: true,
+    mirror: false,
+  });
+</script>
+
+<script>
+  // Remove the loading bar when the page finishes
+  window.addEventListener('load', function () {
+    const bar = document.getElementById('loading-bar');
+    bar.style.transition = 'opacity 0.5s ease';
+    bar.style.opacity = 0;
+    setTimeout(() => bar.remove(), 500);
+  });
+</script>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const scrollBar = document.getElementById('scroll-progress');
+    const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrollPercent = (scrollTop / scrollHeight) * 100;
+    scrollBar.style.width = scrollPercent + '%';
+  });
+</script>
+
+
  
-                  <img src="https://s09.flagcounter.com/count/iwvj/bg_FFFFFF/txt_000000/border_FFFFFF/columns_6/maxflags_50/viewers_0/labels_1/pageviews_1/flags_1/" alt="Free counters!" border="0"> 
-<footer>Copyright &copy; 2012-2025 Evan Ricafort - <a href="#" class="container cool-link">https://www.evanricafort.com</a></footer>
+                  <img src="https://s09.flagcounter.com/count/iwvj/bg_FFFFFF/txt_000000/border_FFFFFF/columns_6/maxflags_50/viewers_0/labels_1/pageviews_1/flags_1/" alt="Free counters!" border="0" data-aos="fade-up"> 
+<footer data-aos="fade-up">Copyright &copy; 2012-2025 Evan Ricafort - <a href="#" class="container cool-link">https://www.evanricafort.com</a></footer>
  </body>
     </html>
