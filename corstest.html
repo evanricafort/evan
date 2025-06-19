@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="profile.jpg" type="image/gif" rel="shortcut icon" />
   <title>CORS Misconfiguration Scanner</title>
   <style>
     html, body {
@@ -11,6 +12,7 @@
       height: 100%;
       font-family: 'Segoe UI', sans-serif;
       background-color: #f9f9f9;
+      color: #333;
     }
     body.dark {
       background-color: #1e1e1e;
@@ -23,24 +25,44 @@
     }
     .theme-toggle {
       float: right;
-      margin-top: -2rem;
+      background: none;
+      border: none;
+      color: inherit;
+      font-size: 1.5rem;
+      cursor: pointer;
     }
     textarea, input {
       width: 100%;
-      padding: 0.5rem;
+      padding: 1rem;
       margin-bottom: 1rem;
       border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+      transition: background-color 0.3s ease, border 0.3s ease;
     }
     body.dark textarea, body.dark input {
       background: #2c2c2c;
       color: #fff;
       border: 1px solid #555;
     }
+    textarea:focus, input:focus {
+      border-color: #007bff;
+      outline: none;
+    }
     button {
-      padding: 0.5rem 1rem;
+      padding: 0.8rem 1.5rem;
       margin-bottom: 1rem;
       font-weight: bold;
       cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: white;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
     }
     table {
       width: 100%;
@@ -49,16 +71,24 @@
     }
     th, td {
       border: 1px solid #ccc;
-      padding: 8px;
+      padding: 10px;
+      text-align: left;
+      transition: background-color 0.3s ease;
     }
     body.dark th, body.dark td {
       border-color: #444;
     }
     th {
-      background: #f0f0f0;
+      background-color: #f0f0f0;
     }
     body.dark th {
-      background: #333;
+      background-color: #333;
+    }
+    td {
+      background-color: #fff;
+    }
+    body.dark td {
+      background-color: #444;
     }
     .ok { color: green; }
     .warn { color: orange; }
@@ -81,11 +111,15 @@
       gap: 1rem;
       margin-top: 1rem;
       font-weight: bold;
+      flex-wrap: wrap;
     }
     .summary-box {
       padding: 0.5rem 1rem;
       border-radius: 4px;
       color: white;
+      flex: 1;
+      text-align: center;
+      box-sizing: border-box;
     }
     .ok-box { background-color: green; }
     .warn-box { background-color: orange; }
@@ -99,13 +133,13 @@
   <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
   <h1>🌐 CORS Misconfiguration Scanner</h1>
 
-  <label>Target URLs (one per line):</label>
+  <label for="urls">Target URLs (one per line):</label>
   <textarea id="urls" rows="8" placeholder="https://example.com&#10;https://api.example.com"></textarea>
 
-  <label>Malicious Origin:</label>
+  <label for="origin">Malicious Origin:</label>
   <input type="text" id="origin" value="https://evil.com">
 
-  <label>Discord Webhook (optional):</label>
+  <label for="webhook">Discord Webhook (optional):</label>
   <input type="text" id="webhook" placeholder="https://discord.com/api/webhooks/...">
 
   <button onclick="startScan()">Start Scan</button>
@@ -193,6 +227,8 @@
       ? customOrigin.replace("https://", "http://")
       : customOrigin.replace("http://", "https://");
     const nullOrigin = "null";
+    const trailingDotOrigin = `${customOrigin}.`; // Trailing dot injection
+    const unicodeOrigin = `https://xn--${randomStr()}-${randomStr()}.com`; // Unicode encoding test
 
     const headersToSend = {
       'X-Fake-Header': randomStr(),
@@ -207,11 +243,10 @@
           ...additionalHeaders
         };
 
-        log(`\n📤 Request`);
-        log(`→ ${method} ${url}`);
-        log(`→ Origin: ${origin}`);
+        log(`\nRequest ${method} ${url}`);
+        log(`Origin: ${origin}`);
         Object.entries(fullHeaders).forEach(([key, value]) => {
-          log(`→ ${key}: ${value}`);
+          log(`${key}: ${value}`);
         });
 
         const res = await fetch(url, {
@@ -225,37 +260,43 @@
         const ac = res.headers.get("Access-Control-Allow-Credentials");
         const ah = res.headers.get("Access-Control-Allow-Headers");
 
-        log(`\n📥 Response (status ${res.status})`);
+        log(`\nResponse (status ${res.status})`);
         res.headers.forEach((value, key) => {
-          log(`← ${key}: ${value}`);
+          log(`${key}: ${value}`);
         });
 
         return { status: res.status, headers: res.headers, ao, ac, ah };
       } catch (err) {
-        log(`❌ Error during request: ${err.message}`);
+        log(`Error during request: ${err.message}`);
         return { error: err.message };
       }
     }
 
     log(`\n==============================`);
-    log(`🔍 Starting scan on ${url}`);
+    log(`Starting scan on ${url}`);
 
-    log(`\n🔹 Scan Method: Basic Origin Reflection`);
+    log(`\nScan Method 1: Basic Origin Reflection`);
     const base = await corsRequest(customOrigin);
 
-    log(`\n🔹 Scan Method: Spoofed Subdomain Origin`);
+    log(`\nScan Method 2: Spoofed Subdomain Origin`);
     const spoofed = await corsRequest(spoofedOrigin);
 
-    log(`\n🔹 Scan Method: Newline Injection in Origin`);
+    log(`\nScan Method 3: Newline Injection in Origin`);
     const newline = await corsRequest(newlineOrigin);
 
-    log(`\n🔹 Scan Method: Protocol Mismatch Origin`);
+    log(`\nScan Method 4: Protocol Mismatch Origin`);
     const proto = await corsRequest(protocolOrigin);
 
-    log(`\n🔹 Scan Method: Null Origin Test`);
+    log(`\nScan Method 5: Null Origin Test`);
     const nullO = await corsRequest(nullOrigin);
 
-    log(`\n🔹 Scan Method: Preflight OPTIONS Request`);
+    log(`\nScan Method 6: Trailing Dot Injection in Origin`);
+    const trailingDot = await corsRequest(trailingDotOrigin);
+
+    log(`\nScan Method 7: Unicode Encoding in Origin`);
+    const unicode = await corsRequest(unicodeOrigin);
+
+    log(`\nScan Method 8: Preflight OPTIONS Request`);
     const preflight = await corsRequest(customOrigin, "OPTIONS", false, {
       'Access-Control-Request-Method': 'POST',
       'Access-Control-Request-Headers': 'X-Fake-Header,Authorization'
@@ -292,6 +333,14 @@
       findings.push("Null origin is accepted");
     }
 
+    if (trailingDot.ao && trailingDot.ao.includes(customOrigin)) {
+      findings.push("Trailing dot in origin accepted");
+    }
+
+    if (unicode.ao && unicode.ao.includes(unicodeOrigin)) {
+      findings.push("Unicode encoded origin accepted");
+    }
+
     if ((base.ao || '').includes(',') || (preflight.ao || '').includes(',')) {
       findings.push("Multiple ACAO headers detected");
     }
@@ -305,7 +354,7 @@
     }
 
     if (findings.length === 0) {
-      log("✅ Safe");
+      log("Safe");
       return { status: "ok", notes: "No CORS misconfig detected" };
     }
 
@@ -313,11 +362,13 @@
       f.includes("credentials") ||
       f.includes("spoofing") ||
       f.includes("Wildcard") ||
-      f.includes("injection")
+      f.includes("injection") ||
+      f.includes("dot") ||
+      f.includes("Unicode")
     );
     const level = vuln ? "vuln" : "warn";
 
-    log(`⚠️ Findings: ${findings.join('; ')}`);
+    log(`Findings: ${findings.join('; ')}`);
     return { status: level, notes: findings.join('; ') };
   }
 
@@ -329,9 +380,9 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: msg })
       });
-      log("📤 Sent to Discord");
+      log("Sent to Discord");
     } catch (err) {
-      log(`❌ Discord error: ${err.message}`);
+      log(`Discord error: ${err.message}`);
     }
   }
 
@@ -363,7 +414,7 @@
       log(`==============================\n`);
     }
 
-    log("✅ Scan Complete");
+    log("Scan Complete");
   }
 </script>
 
