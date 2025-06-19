@@ -55,61 +55,151 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-
-            <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+    <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
 
     <style>
-    * {margin: 0px;  padding: 0px; border: 0px; text-decoration: none;}
-    a {text-decoration: none;}
-    p {padding-bottom: 5px;}
-    body {padding: 10px; font-size: 80%; font-optical-sizing: auto; font-family: "Bitter", serif; font-weight: 400; font-style: normal;}
-    header {padding: 5px;}
-    footer {padding-top: 30px;}
-    section {padding-top: 12px;}
-    h1 {margin-bottom: 5px ; text-align: center;}
-    #i {margin: 0 auto; margin-bottom: 5px ; text-align: center;}
-    h2 {border-bottom: 1px solid #ddd; margin: 10px 0 10px 0; padding: 0 0 5px 0;}
-    ul > li {margin: 0 0 1px 20px;}
-    ul ul {list-style-type: none; padding-left: 0; margin-left: 0;}
-    ul ul li {position: relative; padding-left: 1.4em;}
-    ul ul li::before {content: "\21B3"; position: absolute; font-weight: bold; left: 0; top: 0; width: 0.8em; text-align: center;}
-    #bio_left {float: left;}
-    #bio_right {float: right;}
-    #bio_center {margin: 0 auto; text-align: center; width: 200px;}
-    .container{position: relative; display: inline-block;}
-    .cool-link::after{content: ""; display: block; width: 0; height: 2px; background: #080FAD; transition: width .3s}
-    .cool-link:hover::after{width: 100%; transition: width .3s;}
+    * {
+      margin: 0;
+      padding: 0;
+      border: 0;
+      text-decoration: none;
+      box-sizing: border-box;
+    }
 
-  	/* Dim (light dark mode) Styles */
-  	body.dark-mode {
-    background-color: #1e1e1e;
-    color: #f0f0f0;
-  	}
-  	body.dark-mode a {
-    color: #9abce0;
-  	}
-  	body.dark-mode h1, 
-  	body.dark-mode h2, 
- 	 body.dark-mode p, 
- 	 body.dark-mode ul li {
-    color: #f0f0f0;
- 	}
-  	.dark-toggle {
-    position: fixed;
-    top: 10px;
-    right: 15px;
-    background-color: #2e2e2e;
-    color: #ffffff;
-    border: none;
-    padding: 8px 12px;
-    cursor: pointer;
-    z-index: 9999;
-    border-radius: 6px;
-    font-family: "Bitter", serif;
-  	}
-  	.dark-toggle:hover {
-    background-color: #444;
-  	}
+    body {
+      padding: 10px;
+      font-size: 80%;
+      font-family: "Bitter", serif;
+      background-color: #fff;
+      color: #000;
+      transition: background-color 0.5s ease, color 0.5s ease;
+    }
+
+    a, h1, h2, p, ul li {
+      transition: color 0.5s ease;
+    }
+
+    header, section, footer {
+      transition: background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+    }
+
+    img {
+      transition: filter 0.5s ease;
+    }
+
+    .dark-toggle {
+      position: fixed;
+      top: 10px;
+      right: 15px;
+      background-color: #2e2e2e;
+      color: #ffffff;
+      border: none;
+      padding: 8px 12px;
+      cursor: pointer;
+      z-index: 9999;
+      border-radius: 6px;
+      font-family: "Bitter", serif;
+      transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .dark-toggle:hover {
+      background-color: #444;
+    }
+
+    body.dark-mode {
+      background-color: #1e1e1e;
+      color: #f0f0f0;
+    }
+
+    body.dark-mode a {
+      color: #9abce0;
+    }
+
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode p,
+    body.dark-mode ul li {
+      color: #f0f0f0;
+    }
+
+    body.dark-mode img {
+      filter: brightness(0.8);
+    }
+
+    h1 {
+      margin-bottom: 5px;
+      text-align: center;
+    }
+
+    #i {
+      margin: 0 auto;
+      margin-bottom: 5px;
+      text-align: center;
+    }
+
+    h2 {
+      border-bottom: 1px solid #ddd;
+      margin: 10px 0;
+      padding: 0 0 5px 0;
+    }
+
+    ul > li {
+      margin-left: 20px;
+    }
+
+    ul ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    ul ul li {
+      position: relative;
+      padding-left: 1.4em;
+    }
+
+    ul ul li::before {
+      content: "\21B3";
+      position: absolute;
+      font-weight: bold;
+      left: 0;
+      top: 0;
+      width: 0.8em;
+      text-align: center;
+    }
+
+    #bio_left {
+      float: left;
+    }
+
+    #bio_right {
+      float: right;
+    }
+
+    #bio_center {
+      margin: 0 auto;
+      text-align: center;
+      width: 200px;
+    }
+
+    .container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .cool-link::after {
+      content: "";
+      display: block;
+      width: 0;
+      height: 2px;
+      background: #080FAD;
+      transition: width .3s;
+    }
+
+    .cool-link:hover::after {
+      width: 100%;
+    }
+  </style>
+
     </style>
 
 
