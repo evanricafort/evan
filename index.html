@@ -188,32 +188,6 @@
                 color: #f0f0f0;
               }
 
-              /* Dark mode toggle button positioning and base styling (note: some properties might be overridden below) */
-              .dark-toggle {
-                position: fixed;
-                top: 10px;
-                right: 15px;
-                background-color: #2e2e2e; /* This will be overridden by `background: none;` later */
-                color: #ffffff; /* This will be overridden by `color: inherit;` later */
-                border: none;
-                padding: 8px 12px;
-                cursor: pointer;
-                z-index: 9999;
-                border-radius: 6px;
-                font-family: "Bitter", serif;
-                /* The following properties moved here for logical grouping: */
-                transition: background-color 0.3s ease, color 0.3s ease;
-                background: none; /* Override previous background-color */
-                border: none; /* Ensure no border */
-                float: right; /* Note: `position: fixed` makes `float` ineffective here */
-                color: inherit; /* Inherit color from parent (body) */
-                font-size: 1.6rem;
-              }
-
-              .dark-toggle:hover {
-                background-color: #444; /* This hover effect will not apply due to `background: none;` */
-              }
-
               /* Dark mode specific color transitions for various elements */
               body.dark-mode a,
               body.dark-mode h1,
@@ -292,6 +266,165 @@
               #bio_center a:hover {
                 color: #0073e6;
               }
+
+            .glow-text {
+              text-align: center;
+              color: inherit; /* supports dark and light mode */
+              }
+
+            .glow-text span {
+              display: inline-block;
+              transition: text-shadow 0.3s ease;
+              cursor: default;
+              }
+
+            /* Default shadow for dark mode (lighter glow for dark mode) */
+            .glow-text span:hover {
+              text-shadow:
+                0 0 10px rgba(255, 255, 255, 0.9), /* Light shadow */
+                0 0 20px rgba(255, 255, 255, 0.7),
+                0 0 30px rgba(255, 255, 255, 0.5);
+              }
+
+            /* Dark mode specific shadow (brighter glow for dark mode) */
+            body.dark-mode .glow-text span:hover {
+              text-shadow:
+                0 0 12px rgba(255, 255, 255, 0.9),  /* Brighter glow for dark mode */
+                0 0 25px rgba(255, 255, 255, 0.8),
+                0 0 40px rgba(255, 255, 255, 0.6);
+              }
+
+            /* Light mode specific shadow (darker shadow for light mode) */
+            body:not(.dark-mode) .glow-text span:hover {
+              text-shadow:
+                0 0 10px rgba(0, 0, 0, 0.5),  /* Darker shadow for light mode */
+                0 0 20px rgba(0, 0, 0, 0.4),
+                0 0 30px rgba(0, 0, 0, 0.3);
+              }
+
+            /* Map */
+            #map-circle {
+              position: fixed;
+              width: 250px;
+              height: 250px;
+              border-radius: 50%;
+              overflow: hidden;
+              border: 3px solid rgba(255, 255, 255, 0.9); /* white border for visibility */
+              box-shadow: 0 0 12px rgba(0, 0, 0, 0.35);
+              pointer-events: none;
+              z-index: 9999;
+              transform: scale(0);
+              transition: transform 0.2s ease;
+              }
+
+            body:not(.dark-mode) #map-circle {
+              border-color: rgba(0, 0, 0, 0.4); /* dark border in light mode */
+              }
+
+            #map-circle iframe {
+              width: 100%;
+              height: 100%;
+              border: none;
+              }
+
+            /* Dark Mode Toggle */
+            .dark-toggle {
+              position: fixed;
+              top: 35px;
+              right: 35px;
+              background-color: #e4e4e4;
+              color: #1e1e1e;
+              border: none;
+              padding: 8px 12px;
+              cursor: pointer;
+              z-index: 9999;
+              border-radius: 6px;
+              font-family: "Bitter", serif;
+              font-size: 1.6rem;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              transition:
+                background-color 0.3s ease,
+                color 0.3s ease,
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+              }
+
+            .dark-toggle:hover {
+              transform: scale(1.08);
+              background-color: #d5d5d5;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              }
+
+            /* Emoji icons inside the button */
+            .dark-toggle span {
+              position: absolute;
+              font-size: 1.6rem;
+              transition: opacity 0.4s ease, transform 0.6s ease;
+              transform-origin: center;
+              }
+
+
+            /* Light mode default */
+            .icon-sun {
+              opacity: 1;
+              transform: rotate(0deg);
+              }
+
+            .icon-moon {
+              opacity: 0;
+              transform: rotate(-90deg);
+              }
+
+            /* Dark mode overrides */
+            body.dark-mode .dark-toggle {
+              background-color: #2e2e2e;
+              color: #fff;
+              }
+
+            body.dark-mode .dark-toggle:hover {
+              background-color: #3a3a3a;
+              box-shadow: 0 4px 16px rgba(255, 255, 255, 0.1);
+              }
+
+            body.dark-mode .icon-sun {
+              opacity: 0;
+              transform: rotate(90deg);
+              }
+
+            body.dark-mode .icon-moon {
+              opacity: 1;
+              transform: rotate(0deg);
+              }
+  
+            @keyframes icon-pulse-rotate {
+              0% {
+                transform: scale(1) rotate(0deg);
+              }
+              50% {
+                transform: scale(1.2) rotate(15deg);
+              }
+              100% {
+                transform: scale(1) rotate(0deg);
+              }
+            }
+
+            /* Button hover — existing style */
+            .dark-toggle:hover {
+              transform: scale(1.08);
+              background-color: #d5d5d5;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              }
+
+            /* Add icon animation only when hovering and icon is visible */
+            .dark-toggle:hover .icon-sun {
+              animation: icon-pulse-rotate 0.5s ease;
+              }
+
+            .dark-toggle:hover .icon-moon {
+              animation: icon-pulse-rotate 0.5s ease;
+              }
             </style>
 
     </head>
@@ -300,7 +433,17 @@
             <div id="scroll-progress"></div>
 
       <body>
-            <button class="dark-toggle" onclick="toggleDarkMode()">🌓</button>
+            
+                <button
+                  class="dark-toggle"
+                  onclick="toggleDarkMode()"
+                  data-aos="fade-left"
+                  data-aos-delay="200"
+                  data-aos-duration="800"
+                >
+                  <span class="icon-sun">🌞</span>
+                  <span class="icon-moon">🌕</span>
+                </button>
 
     <header>
 
@@ -309,15 +452,30 @@
             <div class="circle-1" data-aos="fade-down" data-aos-delay="200">
               <img src="profile.jpg" class="center">
             </div>
-        <h1 data-aos="fade-down">Evan Ricafort</h1>
+                <h1 data-aos="fade-down" class="glow-text">
+                      <span>E</span><span>v</span><span>a</span><span>n</span> 
+                      <span>R</span><span>i</span><span>c</span><span>a</span><span>f</span><span>o</span><span>r</span><span>t</span>
+                </h1>
+
         <div id="i">
               <p><span class="typing"></span></p>
         </div>
-        <div id="bio_left" data-aos="fade-right">
-          Poblacion, Ipil<br />
-          Zamboanga Sibugay<br />
-          7001, Philippines
+            <div id="bio_left" data-aos="fade-right" class="address-hover">
+              Poblacion, Ipil<br />
+              Zamboanga Sibugay<br />
+              7001, Philippines
+            </div>
+
+            <!-- Circular Map Preview -->
+            <div id="map-circle">
+              <iframe
+                src="https://www.google.com/maps?q=7.7840,122.5869&z=10&output=embed"
+                loading="lazy"
+                allowfullscreen
+                referrerpolicy="no-referrer-when-downgrade">
+              </iframe>
         </div>
+
 
 
               <script src="typed.js"></script>
@@ -351,7 +509,7 @@
 
   <section data-aos="fade-up">
         <h2>About</h2>
-          <p>I'm <strong>Evan Ricafort</strong>, a security consultant/bug hunter from the Philippines who is interested in web application security testing. I was born and raised in the little town of Ipil, Zamboanga Sibugay. studied computer networking at <i><a href="https://adzu.edu.ph/" target="_blank" class="container cool-link">Ateneo de Zamboanga University</a></i>. I am currently working remotely as an Offensive Security Engineer for a Chicago, Illinois-based cybersecurity firm. I've been an active member of the bug bounty community since early 2013, disclosing many types of security vulnerabilities on famous websites such as Microsoft, Google, Twitter, and others. In my spare time, I enjoy biking, playing video games, and other outdoor activities. If you wish to include me in your bug bounty program, please contact me through email or direct message on Twitter (@evanricafort). I'll do my best to provide you with excellent research.</p>
+          <p>I'm <strong>Evan Ricafort</strong>, a cybersecurity consultant from the Philippines with a strong focus on web application security testing. Born and raised in the little town of Ipil, Zamboanga Sibugay. I studied computer networking and analysis at <i><a href="https://adzu.edu.ph/" target="_blank" class="container cool-link">Ateneo de Zamboanga University</a></i>. Currently, I work as an Offensive Security Engineer for a cybersecurity firm based in Chicago, Illinois, delivering comprehensive security assessments to organizations worldwide. With over a decade of experience in the cybersecurity field, I have been actively contributing to the bug bounty community since 2013. Throughout my career, I have successfully disclosed high-impact vulnerabilities for prominent companies, including Microsoft, Google, and Twitter, among others. Outside of my professional life, I maintain a balanced lifestyle, enjoying activities like mountain biking, trail riding, trail running, video games, and other outdoor adventures. If you're looking to strengthen the security of your platform, I’d be happy to collaborate. Feel free to reach out via email or direct message on Twitter/X (@evanricafort). I am committed to providing thorough and impactful security research to help safeguard your digital assets.</p>
     </section>
 
     <section data-aos="fade-up">
@@ -809,6 +967,26 @@
                               });
                             </script>
 
+
+                            <script>
+                                  const mapCircle = document.getElementById('map-circle');
+                                  const address = document.getElementById('bio_left');
+
+                                  address.addEventListener('mouseenter', () => {
+                                    mapCircle.style.transform = 'scale(1)';
+                                  });
+
+                                  address.addEventListener('mouseleave', () => {
+                                    mapCircle.style.transform = 'scale(0)';
+                                  });
+
+                                  address.addEventListener('mousemove', (e) => {
+                                    const offsetX = 20;
+                                    const offsetY = 20;
+                                    mapCircle.style.top = `${e.clientY + offsetY}px`;
+                                    mapCircle.style.left = `${e.clientX + offsetX}px`;
+                              });
+                            </script>
 
                   <img src="https://s09.flagcounter.com/count/iwvj/bg_FFFFFF/txt_000000/border_FFFFFF/columns_6/maxflags_50/viewers_0/labels_1/pageviews_1/flags_1/" alt="Free counters!" border="0" data-aos="fade-up"> 
 <footer data-aos="fade-up">Copyright &copy; 2012-2025 Evan Ricafort - <a href="#" class="container cool-link">https://www.evanricafort.com</a></footer>
