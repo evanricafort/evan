@@ -43,7 +43,7 @@
         <meta content="Evan Ricafort." property="og:site_name" />
         <meta content="website" property="og:type" />
         <meta name="google-site-verification" content="rsX_5ZLQ2CLU43PcjKI6psdvB6HWeFvnkaOj8nXDyeo" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512..." crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link rel="stylesheet" type="text/css" href="css/style.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -51,206 +51,213 @@
         <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
         <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
 
-        <style>
-            * {
-                margin: 0px;
-                padding: 0px;
-                border: 0px;
+            <style>
+              /* Universal box-model reset */
+              * {
+                margin: 0;
+                padding: 0;
+                border: 0;
                 text-decoration: none;
-            }
+              }
 
-            a {
+              /* Base link styling */
+              a {
                 text-decoration: none;
-            }
+              }
 
-            p {
+              /* Paragraph bottom padding */
+              p {
                 padding-bottom: 5px;
-            }
+              }
 
-            body {
+              /* Body base styles */
+              body {
                 padding: 10px;
                 font-size: 80%;
                 font-optical-sizing: auto;
                 font-family: "Bitter", serif;
                 font-weight: 400;
                 font-style: normal;
-            }
+                background-color: #fff; /* Default light mode background */
+                color: #000; /* Default light mode text color */
+                transition: background-color 0.5s ease, color 0.5s ease; /* Smooth transition for dark mode */
+              }
 
-            header {
+              /* Header and Footer padding */
+              header {
                 padding: 5px;
-            }
+              }
 
-            footer {
+              footer {
                 padding-top: 30px;
-            }
+              }
 
-            section {
+              /* Section top padding */
+              section {
                 padding-top: 12px;
-            }
+              }
 
-            h1 {
+              /* Heading 1 styles */
+              h1 {
                 margin-bottom: 5px;
                 text-align: center;
-            }
+              }
 
-            #i {
+              /* Id 'i' styles (consider renaming for clarity, e.g., 'intro-text') */
+              #i {
                 margin: 0 auto;
                 margin-bottom: 5px;
                 text-align: center;
-            }
+              }
 
-            h2 {
+              /* Heading 2 styles with bottom border */
+              h2 {
                 border-bottom: 1px solid #ddd;
-                margin: 10px 0 10px 0;
-                padding: 0 0 5px 0;
-            }
+                margin: 10px 0; /* Shorthand for top/bottom and left/right margin */
+                padding: 0 0 5px;
+              }
 
-            ul > li {
+              /* List item styling for direct children of ul */
+              ul > li {
                 margin: 0 0 1px 20px;
-            }
+              }
 
-            ul ul {
+              /* Nested unordered list reset */
+              ul ul {
                 list-style-type: none;
                 padding-left: 0;
                 margin-left: 0;
-            }
+              }
 
-            ul ul li {
+              /* Nested list item positioning */
+              ul ul li {
                 position: relative;
                 padding-left: 1.4em;
-            }
+              }
 
-            ul ul li::before {
-                content: "\21B3";
+              /* Custom bullet point for nested list items */
+              ul ul li::before {
+                content: "\21B3"; /* Unicode for a right arrow with down stroke */
                 position: absolute;
                 font-weight: bold;
                 left: 0;
                 top: 0;
                 width: 0.8em;
                 text-align: center;
-            }
+              }
 
-            #bio_left {
+              /* Floating elements for bio layout */
+              #bio_left {
                 float: left;
-            }
+              }
 
-            #bio_right {
+              #bio_right {
                 float: right;
-            }
+              }
 
-            #bio_center {
+              /* Centered bio content */
+              #bio_center {
                 margin: 0 auto;
                 text-align: center;
                 width: 200px;
-            }
+              }
 
-            .container {
+              /* Container for relative positioning */
+              .container {
                 position: relative;
                 display: inline-block;
-            }
+              }
 
-            .cool-link::after {
+              /* Cool link hover effect (underline animation) */
+              .cool-link::after {
                 content: "";
                 display: block;
                 width: 0;
                 height: 2px;
-                background: #080FAD;
-                transition: width .3s;
-            }
+                background: #080fad;
+                transition: width 0.3s ease-in-out; /* Added ease-in-out for smoother transition */
+              }
 
-            .cool-link:hover::after {
+              .cool-link:hover::after {
                 width: 100%;
-                transition: width .3s;
-            }
+              }
 
-            /* Dark Mode Styles */
-            body {
-                padding: 10px;
-                font-size: 80%;
-                font-optical-sizing: auto;
-                font-family: "Bitter", serif;
-                font-weight: 400;
-                font-style: normal;
-                background-color: #fff;
-                color: #000;
-                transition: background-color 0.5s ease, color 0.5s ease;
-            }
-
-            body.dark-mode {
+              /* --- Dark Mode Styles --- */
+              body.dark-mode {
                 background-color: #1e1e1e;
                 color: #f0f0f0;
-            }
+              }
 
-            .dark-toggle {
+              /* Dark mode toggle button positioning and base styling (note: some properties might be overridden below) */
+              .dark-toggle {
                 position: fixed;
                 top: 10px;
                 right: 15px;
-                background-color: #2e2e2e;
-                color: #ffffff;
+                background-color: #2e2e2e; /* This will be overridden by `background: none;` later */
+                color: #ffffff; /* This will be overridden by `color: inherit;` later */
                 border: none;
                 padding: 8px 12px;
                 cursor: pointer;
                 z-index: 9999;
                 border-radius: 6px;
                 font-family: "Bitter", serif;
-            }
-
-            .dark-toggle:hover {
-                background-color: #444;
-            }
-
-            body.dark-mode a,
-            body.dark-mode h1,
-            body.dark-mode h2,
-            body.dark-mode p,
-            body.dark-mode ul li {
-                transition: color 0.5s ease;
-            }
-
-            .dark-toggle {
+                /* The following properties moved here for logical grouping: */
                 transition: background-color 0.3s ease, color 0.3s ease;
-                background: none;
-                border: none;
-                float: right;
-                color: inherit;
+                background: none; /* Override previous background-color */
+                border: none; /* Ensure no border */
+                float: right; /* Note: `position: fixed` makes `float` ineffective here */
+                color: inherit; /* Inherit color from parent (body) */
                 font-size: 1.6rem;
-                cursor: pointer;
-            }
+              }
 
-            body.dark-mode a {
-                color: #4ea3ff; 
-            }
+              .dark-toggle:hover {
+                background-color: #444; /* This hover effect will not apply due to `background: none;` */
+              }
 
-            body.dark-mode a:hover {
-                color: #7ec8ff; 
-            }
+              /* Dark mode specific color transitions for various elements */
+              body.dark-mode a,
+              body.dark-mode h1,
+              body.dark-mode h2,
+              body.dark-mode p,
+              body.dark-mode ul li {
+                transition: color 0.5s ease;
+              }
 
-            /* Loading Bar */
-            #loading-bar {
+              /* Dark mode link colors */
+              body.dark-mode a {
+                color: #4ea3ff;
+              }
+
+              body.dark-mode a:hover {
+                color: #7ec8ff;
+              }
+
+              /* --- Loading Bar --- */
+              #loading-bar {
                 position: fixed;
                 top: 0;
                 left: 0;
                 height: 4px;
-                background-color: #054b82; 
+                background-color: #054b82;
                 width: 0;
                 z-index: 9999;
                 animation: loadingBarGrow 2s ease-out forwards;
-            }
+              }
 
-            @keyframes loadingBarGrow {
-                 0% {
-                   width: 0%;
-                 }
-                 80% {
-                   width: 90%;
-                 }
-                 100% {
-                   width: 100%;
-                 }
-            }
+              @keyframes loadingBarGrow {
+                0% {
+                  width: 0%;
+                }
+                80% {
+                  width: 90%;
+                }
+                100% {
+                  width: 100%;
+                }
+              }
 
-            /* Sroll Progress */
-            #scroll-progress {
+              /* --- Scroll Progress Bar --- */
+              #scroll-progress {
                 position: fixed;
                 top: 0;
                 left: 0;
@@ -259,22 +266,33 @@
                 width: 0%;
                 z-index: 9999;
                 transition: width 0.2s ease-out;
-            }
+              }
 
-            /* Read More */
-            #more {
+              /* --- "Read More" Content Toggle --- */
+              #more {
                 max-height: 0;
                 opacity: 0;
                 overflow: hidden;
                 transition: max-height 0.8s ease, opacity 0.8s ease;
-                will-change: max-height, opacity;
-            }
+                will-change: max-height, opacity; /* Hint to the browser for performance */
+              }
 
-            #more.show {
-                max-height: 10000px;
+              #more.show {
+                max-height: 10000px; /* Large enough value to reveal content */
                 opacity: 1;
-            }
-        </style>
+              }
+
+              /* Bio center links */
+              #bio_center a {
+                margin: 0 6px;
+                color: inherit; /* Inherit color from parent for better dark mode integration */
+                transition: color 0.3s;
+              }
+
+              #bio_center a:hover {
+                color: #0073e6;
+              }
+            </style>
 
     </head>
 
@@ -321,17 +339,17 @@
           <a href="#" class="container cool-link">https://evanricafort.com</a>
         </div>
         <div id="bio_center" data-aos="fade-up"> 
-        <a href="https://instagram.com/evanricafort" target="_blank" title="Follow me on Instagram"><img src="/socialicons/instagram.png" width="17"/></a> 
-        <a href="https://twitter.com/evanricafort" target="_blank" title="Follow me on Twitter"><img src="/socialicons/twitter.png" width="17"/></a> 
-        <a href="https://github.com/evanricafort" target="_blank" title="Follow me on Github"><img src="/socialicons/github.png" width="17"/></a>
-        <a href="https://www.linkedin.com/in/evanricafort" target="_blank" title="Follow me on LinkedIn"><img src="/socialicons/linkedin.png" width="17"/></a>
-      </div>
+          <a href="https://instagram.com/evanricafort" target="_blank" title="Instagram"><i class="fab fa-instagram fa-lg"></i></a>
+          <a href="https://twitter.com/evanricafort" target="_blank" title="Twitter"><i class="fab fa-twitter fa-lg"></i></a>
+          <a href="https://github.com/evanricafort" target="_blank" title="GitHub"><i class="fab fa-github fa-lg"></i></a>
+          <a href="https://www.linkedin.com/in/evanricafort" target="_blank" title="LinkedIn"><i class="fab fa-linkedin fa-lg"></i></a>
+        </div>
         <br />
         <br />
         <br />
     </header>
 
-  <section data-aos="zoom-out">
+  <section data-aos="fade-up">
         <h2>About</h2>
           <p>I'm <strong>Evan Ricafort</strong>, a security consultant/bug hunter from the Philippines who is interested in web application security testing. I was born and raised in the little town of Ipil, Zamboanga Sibugay. studied computer networking at <i><a href="https://adzu.edu.ph/" target="_blank" class="container cool-link">Ateneo de Zamboanga University</a></i>. I am currently working remotely as an Offensive Security Engineer for a Chicago, Illinois-based cybersecurity firm. I've been an active member of the bug bounty community since early 2013, disclosing many types of security vulnerabilities on famous websites such as Microsoft, Google, Twitter, and others. In my spare time, I enjoy biking, playing video games, and other outdoor activities. If you wish to include me in your bug bounty program, please contact me through email or direct message on Twitter (@evanricafort). I'll do my best to provide you with excellent research.</p>
     </section>
@@ -727,72 +745,71 @@
           <h2>Write Ups</h2>
           <p>To read my write ups, just click <a href="https://blog.evanricafort.com" target="_blank" title="Blog" class="container cool-link">here!</a></p>
     </section>
-           
-<script>
-  function toggleText(btn, id) {
-    const content = document.getElementById(id);
+                                               
+                            <script>
+                              function toggleText(btn, id) {
+                                const content = document.getElementById(id);
 
-    if (content.classList.contains("show")) {
-      content.classList.remove("show");
-      btn.textContent = "Read More";
-    } else {
-      content.classList.add("show");
-      btn.textContent = "Show Less";
-    }
-  }
-</script>
+                                if (content.classList.contains("show")) {
+                                  content.classList.remove("show");
+                                  btn.textContent = "Read More";
+                                } else {
+                                  content.classList.add("show");
+                                  btn.textContent = "Show Less";
+                                }
+                              }
+                            </script>
 
-<script>
-  // Toggle dark mode
-  function toggleDarkMode() {
-    document.body.classList.toggle('dark-mode');
-    localStorage.setItem(
-      'theme', 
-      document.body.classList.contains('dark-mode') ? 'dark' : 'light'
-    );
-  }
+                            <script>
+                              // Toggle dark mode
+                              function toggleDarkMode() {
+                                document.body.classList.toggle('dark-mode');
+                                localStorage.setItem(
+                                  'theme', 
+                                  document.body.classList.contains('dark-mode') ? 'dark' : 'light'
+                                );
+                              }
 
-  // Apply saved theme on page load
-  window.onload = function() {
-    if (localStorage.getItem('theme') === 'dark') {
-      document.body.classList.add('dark-mode');
-    }
-  };
-</script>
+                              // Apply saved theme on page load
+                              window.onload = function() {
+                                if (localStorage.getItem('theme') === 'dark') {
+                                  document.body.classList.add('dark-mode');
+                                }
+                              };
+                            </script>
 
-<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+                            <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
 
-<script>
-  AOS.init({
-    duration: 700,
-    easing: 'ease-out-quad',
-    once: true,
-    mirror: false,
-  });
-</script>
+                            <script>
+                              AOS.init({
+                                duration: 700,
+                                easing: 'ease-out-quad',
+                                once: true,
+                                mirror: false,
+                              });
+                            </script>
 
-<script>
-  // Remove the loading bar when the page finishes
-  window.addEventListener('load', function () {
-    const bar = document.getElementById('loading-bar');
-    bar.style.transition = 'opacity 0.5s ease';
-    bar.style.opacity = 0;
-    setTimeout(() => bar.remove(), 500);
-  });
-</script>
+                            <script>
+                              // Remove the loading bar when the page finishes
+                              window.addEventListener('load', function () {
+                                const bar = document.getElementById('loading-bar');
+                                bar.style.transition = 'opacity 0.5s ease';
+                                bar.style.opacity = 0;
+                                setTimeout(() => bar.remove(), 500);
+                              });
+                            </script>
 
-<script>
-  window.addEventListener('scroll', () => {
-    const scrollBar = document.getElementById('scroll-progress');
-    const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-    const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-    const scrollPercent = (scrollTop / scrollHeight) * 100;
-    scrollBar.style.width = scrollPercent + '%';
-  });
-</script>
+                            <script>
+                              window.addEventListener('scroll', () => {
+                                const scrollBar = document.getElementById('scroll-progress');
+                                const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+                                const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                                const scrollPercent = (scrollTop / scrollHeight) * 100;
+                                scrollBar.style.width = scrollPercent + '%';
+                              });
+                            </script>
 
 
- 
                   <img src="https://s09.flagcounter.com/count/iwvj/bg_FFFFFF/txt_000000/border_FFFFFF/columns_6/maxflags_50/viewers_0/labels_1/pageviews_1/flags_1/" alt="Free counters!" border="0" data-aos="fade-up"> 
 <footer data-aos="fade-up">Copyright &copy; 2012-2025 Evan Ricafort - <a href="#" class="container cool-link">https://www.evanricafort.com</a></footer>
  </body>
