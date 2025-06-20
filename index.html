@@ -454,6 +454,56 @@
               body.dark-mode a:hover {
                 color: #7ec8ff;
               }
+
+              .glitch-wrapper {
+                position: relative;
+                display: inline-block;
+              }
+
+              .typing {
+                position: relative;
+                z-index: 1;
+              }
+
+              /* Glitch clone on hover */
+              .glitch-wrapper:hover::after {
+                content: attr(data-text);
+                position: absolute;
+                top: 0;
+                left: 0;
+                color: #ff00c8;
+                z-index: 0;
+                opacity: 0.7;
+                animation: glitch-animation 0.3s infinite linear;
+                pointer-events: none;
+              }
+
+              @keyframes glitch-animation {
+                0% {
+                  transform: translate(0px, 0px);
+                }
+                20% {
+                  transform: translate(-1px, 1px);
+                }
+                40% {
+                  transform: translate(-1px, -1px);
+                }
+                60% {
+                  transform: translate(1px, 1px);
+                }
+                80% {
+                  transform: translate(1px, -1px);
+                }
+                100% {
+                  transform: translate(0px, 0px);
+                }
+              }
+
+              .glitch-wrapper {
+                position: relative;
+                display: inline-block;
+                cursor: pointer;
+              }
             </style>
 
     </head>
@@ -475,7 +525,10 @@
                 </h1>
 
         <div id="i">
-              <p><span class="typing"></span></p>
+              <p class="glitch-wrapper">
+                <span class="typing" id="typing-text" data-text=""></span>
+              </p>
+
         </div>
             <div id="bio_left" data-aos="fade-right" class="address-hover">
               Poblacion, Ipil<br />
@@ -495,17 +548,49 @@
 
 
 
-              <script src="typed.js"></script>
-              <script type="text/javascript">
-                    var typed = new Typed('.typing', {
-                      strings: ["pWning since 2006", "infosec, nature, music, trail running and bikes", "will hack for burger and fries"],
-                      loop: true,
-                      typeSpeed: 50,
-                      backSpeed: 50,
-                      backDelay: 1000,
-                      smartBackspace: true // Default value
-                    });
-              </script>
+                <script src="typed.js"></script>
+                <script>
+                  const typingEl = document.getElementById('typing-text');
+                  const glitchWrapper = document.querySelector('.glitch-wrapper');
+
+                  const phrases = [
+                    "pWning since 2006",
+                    "infosec, nature, music, trail running and bikes",
+                    "will hack for burger and fries"
+                  ];
+
+                  const typed = new Typed(typingEl, {
+                    strings: phrases,
+                    loop: true,
+                    typeSpeed: 50,
+                    backSpeed: 50,
+                    backDelay: 1000,
+                    smartBackspace: true
+                  });
+
+                  const glitchChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()-=_+[]{}|;:,.<>?';
+                  let glitchInterval;
+                  let originalText = '';
+
+                  function startGlitch() {
+                    originalText = typingEl.textContent;
+                    glitchInterval = setInterval(() => {
+                      const glitched = originalText
+                        .split('')
+                        .map((char, i) => (Math.random() < 0.3 ? glitchChars[Math.floor(Math.random() * glitchChars.length)] : char))
+                        .join('');
+                      typingEl.textContent = glitched;
+                    }, 60); // adjust speed here
+                  }
+
+                  function stopGlitch() {
+                    clearInterval(glitchInterval);
+                    typingEl.textContent = originalText;
+                  }
+
+                  glitchWrapper.addEventListener('mouseenter', startGlitch);
+                  glitchWrapper.addEventListener('mouseleave', stopGlitch);
+                </script>
 
 
         <div id="bio_right" data-aos="fade-left">
