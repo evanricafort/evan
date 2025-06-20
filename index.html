@@ -185,7 +185,7 @@
               /* --- Dark Mode Styles --- */
               body.dark-mode {
                 background-color: #1e1e1e;
-                color: #f0f0f0;
+                color: #cccccc;
               }
 
               /* Dark mode specific color transitions for various elements */
@@ -425,6 +425,35 @@
             .dark-toggle:hover .icon-moon {
               animation: icon-pulse-rotate 0.5s ease;
               }
+
+              /* Ensure the image is responsive */
+              .center {
+                max-width: 100%;
+                height: auto;
+                display: block;
+                margin: 0 auto;
+                cursor: pointer; /* Changes cursor to pointer to indicate it's interactive */
+                transition: transform 0.3s ease; /* Optional, smooth zoom effect on hover */
+              }
+
+              /* Slight zoom effect on hover */
+              .center:hover {
+                transform: scale(1.05);
+              }
+
+              /* Dark mode styles */
+              body.dark-mode {
+                background-color: #1e1e1e; /* Dark background */
+                color: #f0f0f0; /* Light text for dark mode */
+              }
+
+              body.dark-mode a {
+                color: #4ea3ff;
+              }
+
+              body.dark-mode a:hover {
+                color: #7ec8ff;
+              }
             </style>
 
     </head>
@@ -433,25 +462,13 @@
             <div id="scroll-progress"></div>
 
       <body>
-            
-                <button
-                  class="dark-toggle"
-                  onclick="toggleDarkMode()"
-                  data-aos="fade-left"
-                  data-aos-delay="200"
-                  data-aos-duration="800"
-                >
-                  <span class="icon-sun">🌞</span>
-                  <span class="icon-moon">🌕</span>
-                </button>
+          
 
-    <header>
-
-
+      <header>
             <br />
-            <div class="circle-1" data-aos="fade-down" data-aos-delay="200">
-              <img src="profile.jpg" class="center">
-            </div>
+                <div class="circle-1" data-aos="fade-down" data-aos-delay="200">
+                  <img src="506612609_1883905235791929_9018781858387966423_n.jpg" class="center" id="dark-mode-toggle" title="Hello!">
+                </div>
                 <h1 data-aos="fade-down" class="glow-text">
                       <span>E</span><span>v</span><span>a</span><span>n</span> 
                       <span>R</span><span>i</span><span>c</span><span>a</span><span>f</span><span>o</span><span>r</span><span>t</span>
@@ -636,7 +653,7 @@
     <section data-aos="fade-up">
         <h2>Achievements</h2>
         <ul>
-          <p>I reported valid security vulnerability to the following companies. (Last Update June 19, 2025)</p>
+          <p>I reported valid security vulnerability to the following companies. (Last Update June 20, 2025)</p>
         </ul>
           
                      <strong>• 123 Contact Form</strong> — http://www.123contactform.com/security-acknowledgements.htm<br/>
@@ -919,16 +936,26 @@
                             </script>
 
                             <script>
-                              // Toggle dark mode
-                              function toggleDarkMode() {
-                                document.body.classList.toggle('dark-mode');
-                                localStorage.setItem(
-                                  'theme', 
-                                  document.body.classList.contains('dark-mode') ? 'dark' : 'light'
-                                );
-                              }
+                              // Initialize flag to control toggle on hover
+                              let canToggle = true;
 
-                              // Apply saved theme on page load
+                              const imageToggle = document.getElementById('dark-mode-toggle');
+
+                              // Hover logic — only trigger once per entry
+                              imageToggle.addEventListener('mouseenter', () => {
+                                if (canToggle) {
+                                  document.body.classList.toggle('dark-mode');
+                                  const mode = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+                                  localStorage.setItem('theme', mode);
+                                  canToggle = false; // prevent multiple toggles while hovered
+                                }
+                              });
+
+                              imageToggle.addEventListener('mouseleave', () => {
+                                canToggle = true; // allow toggle again on next hover
+                              });
+
+                              // On page load, restore theme
                               window.onload = function() {
                                 if (localStorage.getItem('theme') === 'dark') {
                                   document.body.classList.add('dark-mode');
