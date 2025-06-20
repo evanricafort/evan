@@ -561,24 +561,6 @@
               #bio_center a[href*="linkedin.com"]:hover i {
                 color: #0077B5;
               }
-
-              .twitter-hover-card {
-                position: absolute;
-                z-index: 9999;
-                display: none;
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity 0.3s ease;
-                width: 320px;
-                height: 250px;
-              }
-
-              /* Optional: responsive adjustment */
-              @media (max-width: 600px) {
-                .twitter-hover-card {
-                  width: 100%;
-                }
-              }
             </style>
 
     </head>
@@ -592,7 +574,7 @@
       <header>
             <br />
                 <div class="circle-1" data-aos="fade-down" data-aos-delay="200">
-                  <img src="profile.jpg" class="center" id="dark-mode-toggle" title="Hello!">
+                  <img src="506612609_1883905235791929_9018781858387966423_n.jpg" class="center" id="dark-mode-toggle" title="Hello!">
                 </div>
                 <h1 data-aos="fade-down" class="glow-text">
                       <span>E</span><span>v</span><span>a</span><span>n</span> 
@@ -620,6 +602,8 @@
                 referrerpolicy="no-referrer-when-downgrade">
               </iframe>
         </div>
+
+
 
                 <script src="typed.js"></script>
                 <script>
@@ -662,19 +646,9 @@
         <br />
     </header>
 
-    <section data-aos="fade-up">
+  <section data-aos="fade-up">
         <h2>About</h2>
-          <p>I'm <strong>Evan Ricafort</strong>, a cybersecurity consultant based in the Philippines with a specialized focus on web application security testing. Born and raised in Ipil, a little town of Zamboanga Sibugay. I studied computer networking and analysis at <i><a href="https://adzu.edu.ph/" target="_blank" class="container cool-link">Ateneo de Zamboanga University</a></i>. Currently, I work as an Offensive Security Engineer for a cybersecurity firm based in Chicago, Illinois, where I conduct in-depth security assessments and penetration tests for organizations across various industries. With over a decade of experience in the cybersecurity field, I have honed my expertise in identifying and exploiting vulnerabilities in web applications. I have been actively contributing to the bug bounty community since 2013. Throughout my career, I have successfully disclosed high-impact vulnerabilities for prominent companies, including Microsoft, Google, and Twitter, among others. Outside of my professional life, I maintain a balanced lifestyle, enjoying activities like mountain biking, trail riding, trail running, video games, and other outdoor adventures. If you're looking to strengthen the security of your platform, I’d be happy to collaborate. Feel free to reach out via email or direct message on Twitter/X <span class="twitter-handle" id="twitterHandle">(@evanricafort)</span>. I am committed to providing thorough and impactful security research to help safeguard your digital assets.</p>
-              <!-- Live Twitter Embed -->
-              <div class="twitter-hover-card" id="twitterHoverCard">
-                <a class="twitter-timeline" 
-                   data-theme="light" 
-                   data-height="250" 
-                   data-chrome="nofooter noheader noscrollbar transparent"
-                   href="https://twitter.com/evanricafort">
-                  Tweets by @evanricafort
-                </a>
-              </div>
+          <p>I'm <strong>Evan Ricafort</strong>, a cybersecurity consultant based in the Philippines with a specialized focus on web application security testing. Born and raised in Ipil, a little town of Zamboanga Sibugay. I studied computer networking and analysis at <i><a href="https://adzu.edu.ph/" target="_blank" class="container cool-link">Ateneo de Zamboanga University</a></i>. Currently, I work as an Offensive Security Engineer for a cybersecurity firm based in Chicago, Illinois, where I conduct in-depth security assessments and penetration tests for organizations across various industries. With over a decade of experience in the cybersecurity field, I have honed my expertise in identifying and exploiting vulnerabilities in web applications. I have been actively contributing to the bug bounty community since 2013. Throughout my career, I have successfully disclosed high-impact vulnerabilities for prominent companies, including Microsoft, Google, and Twitter, among others. Outside of my professional life, I maintain a balanced lifestyle, enjoying activities like mountain biking, trail riding, trail running, video games, and other outdoor adventures. If you're looking to strengthen the security of your platform, I’d be happy to collaborate. Feel free to reach out via email or direct message on Twitter/X (@evanricafort). I am committed to providing thorough and impactful security research to help safeguard your digital assets.</p>
     </section>
 
     <section data-aos="fade-up">
@@ -1184,56 +1158,6 @@
                                   }
                                 }, 40);
                               });
-                            });
-                            </script>
-
-                            <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-                            <script>
-                            const handle = document.getElementById('twitterHandle');
-                            const card = document.getElementById('twitterHoverCard');
-
-                            // Adapt Twitter widget theme to dark mode
-                            function reloadTwitterWidget() {
-                              const isDark = document.body.classList.contains('dark-mode');
-                              const widgetHTML = `
-                                <a class="twitter-timeline"
-                                   data-theme="${isDark ? 'dark' : 'light'}"
-                                   data-height="250"
-                                   data-chrome="nofooter noheader noscrollbar transparent"
-                                   href="https://twitter.com/evanricafort">
-                                  Tweets by @evanricafort
-                                </a>`;
-                              card.innerHTML = widgetHTML;
-                              twttr.widgets.load(card);
-                            }
-
-                            // Follow cursor and fade in
-                            handle.addEventListener('mouseenter', (e) => {
-                              reloadTwitterWidget();
-                              card.style.display = 'block';
-                              setTimeout(() => {
-                                card.style.opacity = 1;
-                              }, 50);
-                            });
-
-                            handle.addEventListener('mousemove', (e) => {
-                              card.style.top = (e.clientY + 20 + window.scrollY) + 'px';
-                              card.style.left = (e.clientX + 20) + 'px';
-                            });
-
-                            handle.addEventListener('mouseleave', () => {
-                              card.style.opacity = 0;
-                              setTimeout(() => {
-                                card.style.display = 'none';
-                              }, 300);
-                            });
-
-                            // Also hide if mouse leaves the card itself
-                            card.addEventListener('mouseleave', () => {
-                              card.style.opacity = 0;
-                              setTimeout(() => {
-                                card.style.display = 'none';
-                              }, 300);
                             });
                             </script>
 
