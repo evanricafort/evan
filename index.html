@@ -465,44 +465,47 @@
                 z-index: 1;
               }
 
-              /* Glitch clone on hover */
-              .glitch-wrapper:hover::after {
+              .glitch-wrapper {
+                display: inline-block;
+                position: relative;
+                cursor: pointer;
+              }
+
+              #typing-text {
+                position: relative;
+                display: inline-block;
+                transition: all 0.3s ease;
+              }
+
+              /* RGB glitch effect on hover */
+              .glitch-wrapper:hover #typing-text::before,
+              .glitch-wrapper:hover #typing-text::after {
                 content: attr(data-text);
                 position: absolute;
                 top: 0;
                 left: 0;
-                color: #ff00c8;
-                z-index: 0;
-                opacity: 0.7;
-                animation: glitch-animation 0.3s infinite linear;
+                opacity: 0.6;
                 pointer-events: none;
+                animation: rgb-glitch 0.25s infinite;
+                font-family: inherit;
               }
 
-              @keyframes glitch-animation {
-                0% {
-                  transform: translate(0px, 0px);
-                }
-                20% {
-                  transform: translate(-1px, 1px);
-                }
-                40% {
-                  transform: translate(-1px, -1px);
-                }
-                60% {
-                  transform: translate(1px, 1px);
-                }
-                80% {
-                  transform: translate(1px, -1px);
-                }
-                100% {
-                  transform: translate(0px, 0px);
-                }
+              .glitch-wrapper:hover #typing-text::before {
+                color: #ff00ff; /* Magenta shadow */
+                transform: translate(-2px, -1px);
               }
 
-              .glitch-wrapper {
-                position: relative;
-                display: inline-block;
-                cursor: pointer;
+              .glitch-wrapper:hover #typing-text::after {
+                color: #00ffff; /* Cyan shadow */
+                transform: translate(2px, 1px);
+              }
+
+              @keyframes rgb-glitch {
+                0%   { clip-path: inset(0% 0 90% 0); }
+                25%  { clip-path: inset(10% 0 80% 0); }
+                50%  { clip-path: inset(20% 0 60% 0); }
+                75%  { clip-path: inset(5% 0 85% 0); }
+                100% { clip-path: inset(0% 0 90% 0); }
               }
             </style>
 
@@ -517,7 +520,7 @@
       <header>
             <br />
                 <div class="circle-1" data-aos="fade-down" data-aos-delay="200">
-                  <img src="profile.jpg" class="center" id="dark-mode-toggle" title="Hello!">
+                  <img src="506612609_1883905235791929_9018781858387966423_n.jpg" class="center" id="dark-mode-toggle" title="Hello!">
                 </div>
                 <h1 data-aos="fade-down" class="glow-text">
                       <span>E</span><span>v</span><span>a</span><span>n</span> 
@@ -551,8 +554,6 @@
                 <script src="typed.js"></script>
                 <script>
                   const typingEl = document.getElementById('typing-text');
-                  const glitchWrapper = document.querySelector('.glitch-wrapper');
-
                   const phrases = [
                     "pWning since 2006",
                     "infosec, nature, music, trail running and bikes",
@@ -565,31 +566,14 @@
                     typeSpeed: 50,
                     backSpeed: 50,
                     backDelay: 1000,
-                    smartBackspace: true
+                    smartBackspace: true,
+                    onStringTyped: function(pos, self) {
+                      typingEl.setAttribute('data-text', self.strings[pos]);
+                    },
+                    onComplete: function(self) {
+                      typingEl.setAttribute('data-text', self.strings[0]);
+                    }
                   });
-
-                  const glitchChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()-=_+[]{}|;:,.<>?';
-                  let glitchInterval;
-                  let originalText = '';
-
-                  function startGlitch() {
-                    originalText = typingEl.textContent;
-                    glitchInterval = setInterval(() => {
-                      const glitched = originalText
-                        .split('')
-                        .map((char, i) => (Math.random() < 0.3 ? glitchChars[Math.floor(Math.random() * glitchChars.length)] : char))
-                        .join('');
-                      typingEl.textContent = glitched;
-                    }, 60); // adjust speed here
-                  }
-
-                  function stopGlitch() {
-                    clearInterval(glitchInterval);
-                    typingEl.textContent = originalText;
-                  }
-
-                  glitchWrapper.addEventListener('mouseenter', startGlitch);
-                  glitchWrapper.addEventListener('mouseleave', stopGlitch);
                 </script>
 
 
