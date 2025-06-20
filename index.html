@@ -477,7 +477,7 @@
                 transition: all 0.3s ease;
               }
 
-              /* RGB glitch with blur and scanline effect */
+              /* RGB glitch effect on hover */
               .glitch-wrapper:hover #typing-text::before,
               .glitch-wrapper:hover #typing-text::after {
                 content: attr(data-text);
@@ -486,12 +486,10 @@
                 left: 0;
                 opacity: 0.6;
                 pointer-events: none;
-                animation: rgb-glitch 0.25s infinite, scanline 0.5s infinite;
+                animation: rgb-glitch 0.25s infinite;
                 font-family: inherit;
-                filter: blur(2px); /* Add blur to glitch effect */
               }
 
-              /* Magenta and Cyan color for glitch */
               .glitch-wrapper:hover #typing-text::before {
                 color: #ff00ff; /* Magenta shadow */
                 transform: translate(-2px, -1px);
@@ -502,20 +500,12 @@
                 transform: translate(2px, 1px);
               }
 
-              /* RGB glitch animation */
               @keyframes rgb-glitch {
                 0%   { clip-path: inset(0% 0 90% 0); }
                 25%  { clip-path: inset(10% 0 80% 0); }
                 50%  { clip-path: inset(20% 0 60% 0); }
                 75%  { clip-path: inset(5% 0 85% 0); }
                 100% { clip-path: inset(0% 0 90% 0); }
-              }
-
-              /* Scanline effect */
-              @keyframes scanline {
-                0%   { background: rgba(255, 255, 255, 0.2); }
-                50%  { background: rgba(255, 255, 255, 0.5); }
-                100% { background: rgba(255, 255, 255, 0.2); }
               }
             </style>
 
@@ -585,7 +575,6 @@
                     }
                   });
                 </script>
-
 
         <div id="bio_right" data-aos="fade-left">
           Work Email: <a href="mailto:root@evanricafort.com" target="_blank" title="Hit me up!" class="container cool-link">root@evanricafort.com</a><br>
