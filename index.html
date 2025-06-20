@@ -536,12 +536,30 @@
 
               #bio_center a {
                 display: inline-block;
-                transition: transform 0.3s ease;
+                transition: transform 0.3s ease, color 0.3s ease;
+                color: inherit;
+                font-size: 0.8rem;
               }
 
+              /* Zoom on hover */
               #bio_center a:hover {
-                transform: scale(1.5);
-                filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
+                transform: scale(1.7);
+              }
+
+              #bio_center a[href*="instagram.com"]:hover i {
+                color: #E4405F;
+              }
+
+              #bio_center a[href*="twitter.com"]:hover i {
+                color: #1DA1F2;
+              }
+
+              #bio_center a[href*="github.com"]:hover i {
+                color: #333;
+              }
+
+              #bio_center a[href*="linkedin.com"]:hover i {
+                color: #0077B5;
               }
             </style>
 
