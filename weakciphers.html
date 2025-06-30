@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weak SSL/TLS Cipher Scanner</title>
-        <link href="profile.jpg" type="image/gif" rel="shortcut icon" />
-    <!-- Include Font Awesome for icons -->
+    <link href="profile.jpg" type="image/gif" rel="shortcut icon" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -116,17 +115,22 @@
             border-collapse: collapse;
             margin-top: 15px;
             font-size: 0.95rem;
+            table-layout: fixed;
         }
 
         th, td {
             padding: 12px;
             text-align: left;
-            border-bottom: 1px solid #444;
+            border: 1px solid #888;
+            word-wrap: break-word;
+            white-space: normal;
+            vertical-align: top;
         }
 
         th {
             background-color: #333;
             color: white;
+            text-align: left;
         }
 
         body.dark-mode th {
@@ -190,6 +194,62 @@
             margin-top: 12px;
         }
 
+        td ul {
+            list-style-type: disc;
+            margin-left: 1em;
+            padding-left: 0;
+            line-height: 1.6;
+            word-wrap: break-word;
+            white-space: normal;
+        }
+
+        td {
+            vertical-align: top;
+        }
+
+        #pagination {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 15px;
+        }
+
+        #pagination button {
+            margin: 0 5px;
+            padding: 6px 10px;
+            border-radius: 5px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #pagination button:hover {
+            background-color: #0056b3;
+        }
+
+        body.dark-mode #pagination button {
+            background-color: #1890ff;
+        }
+
+        body.dark-mode #pagination button:hover {
+            background-color: #0f66c2;
+        }
+
+        #pagination button.active-page {
+            background-color: #ffc107;
+            color: #000;
+            font-weight: bold;
+            border: 2px solid #ff9800;
+        }
+
+        body.dark-mode #pagination button.active-page {
+            background-color: #ffa000;
+            color: #fff;
+            border: 2px solid #ffca28;
+        }        
     </style>
 </head>
 <body>
@@ -198,23 +258,23 @@
     <p>Paste your Nmap scan results below:</p>
     <textarea id="nmapResults" placeholder="Paste Nmap results here..."></textarea><br>
     <button onclick="analyzeResults()"><i class="fas fa-search"></i> Scan for Weak Ciphers & Protocols</button>
-
     <div id="results">
         <h3>Scan Results:</h3>
         <p><strong>Weak Ciphers & Protocols Found:</strong> <span id="cipherCount">0</span></p>
         <p id="status" class="loading"></p>
         <table>
-            <thead>
-                <tr>
-                    <th>Issue</th>
-                    <th>Status</th>
-                    <th>Explanation</th>
-                    <th>Fix Suggestion</th>
-                </tr>
-            </thead>
-            <tbody id="resultsTable"></tbody>
+          <thead>
+            <tr>
+              <th>IP / Host</th>
+              <th>Issue</th>
+              <th>Status</th>
+              <th>Explanation</th>
+              <th>Fix Suggestion</th>
+            </tr>
+          </thead>
+          <tbody id="resultsTable"></tbody>
         </table>
-        <!-- Create a div with the "button-group" class to align buttons horizontally -->
+        <div id="pagination" style="text-align:center; margin-top:15px;"></div>
         <div class="button-group">
             <button class="copy-btn" onclick="copyResults(true)"><i class="fas fa-copy"></i> Copy Results</button>
             <button class="copy-btn" onclick="copyResults(false)"><i class="fas fa-clipboard-list"></i> Copy Issue + Status Only</button>
@@ -250,109 +310,192 @@
             "KRB5": ["Kerberos-based cipher suites are rare and often misconfigured.", "Use standard TLS cipher suites instead."]
         };
 
-                    function analyzeResults() {
-                const input = document.getElementById("nmapResults").value.trim();
-                const resultsTable = document.getElementById("resultsTable");
-                const statusText = document.getElementById("status");
+        const ipIssuesMap = new Map();
+        const itemsPerPage = 5;
+        let currentPage = 1;
 
-                // Clear previous results and reset counter
-                resultsTable.innerHTML = "";
-                document.getElementById("cipherCount").textContent = "0";
+        function analyzeResults() {
+            const input = document.getElementById("nmapResults").value.trim();
+            const statusText = document.getElementById("status");
+            const cipherCount = document.getElementById("cipherCount");
+            const lines = input.split("\n");
 
-                // Validate empty input
-                if (!input) {
-                    statusText.textContent = "Please paste your Nmap scan results before running the scan.";
-                    statusText.style.color = "red";
-                    return;
-                }
+            ipIssuesMap.clear();
+            currentPage = 1;
+            cipherCount.textContent = "0";
+            document.getElementById("resultsTable").innerHTML = "";
+            statusText.textContent = "";
 
-                // Basic Nmap format check
-                const nmapIndicators = [/ssl-|tls|SSL|TLS|open\s+ssl/i, /\d+\/tcp\s+(open|closed)/i, /^PORT/i, /^Service/i];
-                const isLikelyNmap = nmapIndicators.some(pattern => pattern.test(input));
-
-                if (!isLikelyNmap) {
-                    statusText.textContent = "The input does not appear to be a valid Nmap SSL scan result. Please check your input.";
-                    statusText.style.color = "red";
-                    return;
-                }
-
-                statusText.style.color = ""; // Reset color
-                statusText.textContent = "Scanning...";
-
-                const lines = input.split("\n");
-                const weakCiphersAndProtocols = Object.keys(cipherDescriptions);
-                const rsaWeakPattern = /RSA\s*\((\d+)\s*bit\)/;
-                const found = new Set();
-
-                setTimeout(() => {
-                    let count = 0;
-                    lines.forEach(line => {
-                        let clean = line.replace(/\|/, "").trim();
-                        weakCiphersAndProtocols.forEach(cipher => {
-                            if (clean.includes(cipher)) {
-                                const issueLabel = (cipher.includes("TLS") || cipher.includes("SSL")) ? "Weak Protocol" : "Weak Cipher";
-                                if (!found.has(clean)) {
-                                    const [desc, fix] = cipherDescriptions[cipher] || ["Weak cipher.", "Disable or replace."];
-                                    addResultRow(`${issueLabel}: ${clean}`, "WEAK", desc, fix);
-                                    count++;
-                                    found.add(clean);
-                                }
-                            }
-                        });
-                        const rsaMatch = line.match(rsaWeakPattern);
-                        if (rsaMatch && parseInt(rsaMatch[1]) < 2048) {
-                            const desc = "RSA keys below 2048 bits are vulnerable to factorization attacks and not recommended for production use.";
-                            const fix = "Regenerate your RSA certificate with a 2048-bit or higher key length.";
-                            const issue = `Insecure RSA Key: ${rsaMatch[1]} bits`;
-                            if (!found.has(issue)) {
-                                addResultRow(issue, "WEAK", desc, fix);
-                                count++;
-                                found.add(issue);
-                            }
-                        }
-                    });
-
-                    if (count === 0) {
-                        addResultRow("No security issues detected.", "SECURE", "All detected ciphers and protocols meet current best practices.", "No changes required.");
-                    }
-
-                    document.getElementById("cipherCount").textContent = count;
-                    statusText.textContent = count > 0 ? "Weak ciphers or RSA keys found!" : "No issues detected.";
-                }, 500);
+            if (!input) {
+                statusText.textContent = "Please paste your Nmap scan results.";
+                statusText.style.color = "red";
+                return;
             }
 
+            let currentIP = "";
+            const rsaPattern = /RSA\s*\((\d+)\s*bit\)/;
 
+            lines.forEach(line => {
+                const ipMatch = line.match(/Nmap scan report for ([^\s]+)/i);
+                if (ipMatch) currentIP = ipMatch[1];
 
-        function addResultRow(issue, status, explanation, fix) {
-            const row = document.getElementById("resultsTable").insertRow();
-            row.insertCell(0).textContent = issue;
-            row.insertCell(1).innerHTML = `<span class="status ${status === 'WEAK' ? 'weak-status' : 'secure-status'}">${status}</span>`;
-            row.insertCell(2).textContent = explanation;
-            row.insertCell(3).textContent = fix;
+                if (!ipIssuesMap.has(currentIP)) ipIssuesMap.set(currentIP, []);
+
+                for (const cipher of Object.keys(cipherDescriptions)) {
+                    if (line.includes(cipher)) {
+                        const [desc, fix] = cipherDescriptions[cipher];
+                        const category = (cipher.includes("TLS") || cipher.includes("SSL")) ? "Weak Protocol" : "Weak Cipher";
+                        const issueObj = {
+                            category,
+                            output: line.trim(),
+                            status: "WEAK",
+                            explanation: desc,
+                            fix
+                        };
+                        const key = JSON.stringify(issueObj);
+                        if (!ipIssuesMap.get(currentIP).some(item => JSON.stringify(item) === key)) {
+                            ipIssuesMap.get(currentIP).push(issueObj);
+                        }
+                    }
+                }
+
+                const rsaMatch = line.match(rsaPattern);
+                if (rsaMatch && parseInt(rsaMatch[1]) < 2048) {
+                    const issueObj = {
+                        category: "Insecure RSA Key",
+                        output: `RSA Key: ${rsaMatch[1]} bits`,
+                        status: "WEAK",
+                        explanation: "RSA keys below 2048 bits are vulnerable to factorization attacks.",
+                        fix: "Use a 2048-bit or longer RSA key."
+                    };
+                    ipIssuesMap.get(currentIP).push(issueObj);
+                }
+            });
+
+            const total = Array.from(ipIssuesMap.values()).reduce((sum, list) => sum + list.length, 0);
+            cipherCount.textContent = total;
+            statusText.textContent = total > 0 ? "Weak ciphers or keys found!" : "No issues detected.";
+            renderTable();
+            renderPagination();
+            renderTable();
+            const resultsSection = document.getElementById("results");
+            if (resultsSection) {
+                resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+        }
+
+        function renderTable() {
+            const table = document.getElementById("resultsTable");
+            table.innerHTML = "";
+
+            const allIPs = [...ipIssuesMap.keys()].filter(ip => ipIssuesMap.get(ip).length > 0);
+            const pagedIPs = allIPs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+            for (const ip of pagedIPs) {
+                const issues = ipIssuesMap.get(ip);
+                const issueCount = issues.length;
+                if (issueCount === 0) continue;
+
+                issues.forEach((issue, index) => {
+                    const row = table.insertRow();
+
+                    // First column only for the first issue of the group (use rowspan)
+                    if (index === 0) {
+                        const ipCell = row.insertCell(0);
+                        ipCell.innerHTML = `<strong>${ip}</strong>`;
+                        ipCell.rowSpan = issueCount;
+                        ipCell.style.verticalAlign = "top";
+                    }
+
+                    // Issue details
+                    row.insertCell(-1).innerHTML = `<div style="white-space: normal;">${issue.output.replace(/^\|\s*/, '')}</div>`;
+                    row.insertCell(-1).innerHTML = `<div><span class="status weak-status">${issue.status}</span></div>`;
+                    row.insertCell(-1).innerHTML = `<div style="white-space: normal;">${issue.explanation}</div>`;
+                    row.insertCell(-1).innerHTML = `<div style="white-space: normal;">${issue.fix}</div>`;
+                });
+            }
+
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const pagination = document.getElementById("pagination");
+            pagination.innerHTML = "";
+
+            const allIPs = [...ipIssuesMap.keys()].filter(ip => ipIssuesMap.get(ip).length > 0);
+            const totalPages = Math.ceil(allIPs.length / itemsPerPage);
+
+            if (totalPages <= 1) {
+                pagination.style.display = "none";
+                return;
+            }
+
+            pagination.style.display = "flex";
+            pagination.style.flexDirection = "column";
+            pagination.style.alignItems = "center";
+
+            const btnContainer = document.createElement("div");
+            btnContainer.style.display = "flex";
+            btnContainer.style.gap = "6px";
+            btnContainer.style.flexWrap = "wrap";
+            btnContainer.style.justifyContent = "center";
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement("button");
+                btn.textContent = i;
+                btn.onclick = () => {
+                    currentPage = i;
+                    renderTable();
+
+                    const resultsSection = document.getElementById("results");
+                    if (resultsSection) {
+                        resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }
+                };
+                if (i === currentPage) btn.classList.add("active-page");
+                btnContainer.appendChild(btn);
+            }
+
+            const pageInfo = document.createElement("div");
+            pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+            pageInfo.style.marginTop = "10px";
+            pageInfo.style.fontSize = "0.9rem";
+
+            pagination.appendChild(btnContainer);
+            pagination.appendChild(pageInfo);
         }
 
         function copyResults(includeAll = true) {
-            const table = document.getElementById("resultsTable");
-            let text = includeAll ? "Issue,Status,Explanation,Fix\n" : "Issue,Status\n";
-            for (let row of table.rows) {
-                if (includeAll) {
-                    text += [...row.cells].map(c => c.textContent).join(",") + "\n";
-                } else {
-                    text += `${row.cells[0].textContent},${row.cells[1].textContent}\n`;
-                }
-            }
+            let text = includeAll ? "IP,Issue,Description,Fix\n" : "IP,Issue,Status\n";
+            ipIssuesMap.forEach((issues, ip) => {
+                issues.forEach(item => {
+                    const issue = item.output.replace(/,/g, " ");
+                    const explanation = item.explanation.replace(/,/g, " ");
+                    const fix = item.fix.replace(/,/g, " ");
+                    if (includeAll) {
+                        text += `${ip},${issue},${explanation},${fix}\n`;
+                    } else {
+                        text += `${ip},${issue},${item.status}\n`;
+                    }
+                });
+            });
             navigator.clipboard.writeText(text).then(() => alert("Results copied to clipboard!"));
         }
 
         function exportCSV() {
-            let csv = "Issue,Status,Explanation,Fix\n";
-            for (let row of document.getElementById("resultsTable").rows) {
-                csv += [...row.cells].map(c => c.textContent).join(",") + "\n";
-            }
-            let uri = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-            let link = document.createElement("a");
-            link.setAttribute("href", uri);
-            link.setAttribute("download", "ssl_tls_results.csv");
+            let csv = "IP,Issue,Description,Fix\n";
+            ipIssuesMap.forEach((issues, ip) => {
+                issues.forEach(item => {
+                    const issue = item.output.replace(/,/g, " ");
+                    const explanation = item.explanation.replace(/,/g, " ");
+                    const fix = item.fix.replace(/,/g, " ");
+                    csv += `${ip},${issue},${explanation},${fix}\n`;
+                });
+            });
+            const uri = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+            const link = document.createElement("a");
+            link.href = uri;
+            link.download = "ssl_tls_results.csv";
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
