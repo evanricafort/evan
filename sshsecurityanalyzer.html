@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SSH Security Analyzer</title>
-    <!-- Load Tailwind CSS -->
+    <link href="profile.jpg" type="image/gif" rel="shortcut icon" />
+    <!-- Tailwind CDN: This is required for live compilation in a single file setup. -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom styles for Dark Mode Toggle SVG icon */
@@ -27,6 +28,7 @@
             darkMode: 'class', // Enable dark mode based on the 'dark' class on the html element
             theme: {
                 extend: {
+                    // Setting Inter as the default sans font
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                     },
@@ -61,7 +63,7 @@
         </button>
     </header>
 
-    <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-xl p-6 sm:p-8 mb-8 ring-1 ring-gray-100 dark:ring-gray-700 transition-colors duration-300">
+    <div class="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 sm:p-8 mb-8 ring-1 ring-gray-100 dark:ring-gray-700 transition-colors duration-300">
         <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-4 border-b pb-2 border-gray-100 dark:border-gray-700">Input Data</h3>
         <textarea id="configInput" 
                   class="w-full h-40 p-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-indigo focus:border-primary-indigo dark:bg-gray-700 dark:text-gray-100 font-mono text-sm resize-y transition-colors duration-300" 
@@ -88,7 +90,7 @@
     
     <!-- 1. Analysis Report Tab Content -->
     <div id="tab-report" class="tab-content">
-        <div id="resultsPanel" class="bg-white dark:bg-gray-800 shadow-2xl rounded-xl p-6 sm:p-8 mb-8 ring-1 ring-gray-100 dark:ring-gray-700 transition-colors duration-300" style="display:none;">
+        <div id="resultsPanel" class="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 sm:p-8 mb-8 ring-1 ring-gray-100 dark:ring-gray-700 transition-colors duration-300" style="display:none;">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 border-gray-100 dark:border-gray-700">
                 <div class="flex items-center gap-4 mb-4 sm:mb-0">
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Vulnerability Findings</h2>
@@ -135,7 +137,7 @@
 
     <!-- 2. Algorithm Database Tab Content -->
     <div id="tab-database" class="tab-content" style="display:none;">
-        <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-xl p-6 sm:p-8 mb-8 ring-1 ring-gray-100 dark:ring-gray-700 transition-colors duration-300">
+        <div class="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 sm:p-8 mb-8 ring-1 ring-gray-100 dark:ring-gray-700 transition-colors duration-300">
             <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 border-b pb-2 border-gray-100 dark:border-gray-700">Known Algorithm Definitions</h2>
             <div class="mb-4">
                 <input type="text" id="databaseSearch" onkeyup="filterDatabase()" placeholder="Search by name, status, or description..."
