@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSH Security Analyzer</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for Dark Mode Toggle SVG icon */
+        .sun-icon, .moon-icon {
+            transition: opacity 0.3s;
+        }
+        [data-theme="light"] .moon-icon { opacity: 0; }
+        [data-theme="dark"] .sun-icon { opacity: 0; }
+        
+        /* Transition for the detail arrow icon */
+        .toggle-button svg {
+            transition: transform 0.2s ease-in-out;
+        }
+        .toggle-button svg.rotate-90 {
+            transform: rotate(90deg);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class', // Enable dark mode based on the 'dark' class on the html element
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-indigo': '#4f46e5',
+                        'primary-dark': '#1e293b',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans min-h-screen transition-colors duration-300 p-4 sm:p-8">
+
+<div class="max-w-7xl mx-auto">
+    <header class="text-center mb-10 relative">
+        <h1 class="text-4xl font-extrabold text-gray-900 dark:text-gray-50 mb-2">
+            <span class="text-primary-indigo dark:text-indigo-400">SSH</span> Security Analyzer
+        </h1>
+        <p class="text-lg text-gray-500 dark:text-gray-400">
+            Analyze SSH configurations or Nmap SSH scan result for cryptographic risks.
+        </p>
+
+        <!-- Dark Mode Toggle Button -->
+        <button id="darkModeToggle" class="absolute top-0 right-0 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition" onclick="toggleDarkMode()">
+            <svg class="sun-icon w-6 h-6 text-yellow-500" data-theme="light" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.5-4.5l-1.591 1.591M3 12h2.25m.386-6.364l1.591 1.591M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z" />
+            </svg>
+            <svg class="moon-icon w-6 h-6 text-indigo-400 absolute top-2 right-2" data-theme="dark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a1.5 1.5 0 01-1.5 1.5h-15a1.5 1.5 0 01-1.5-1.5V6.75m19.5 0A.75.75 0 0021 6H3a.75.75 0 00-.75.75m19.5 0v.243a2.75 2.75 0 01-5.698 0l-.821 5.378a2.75 2.75 0 01-5.32 0l-.82-5.378A2.75 2.75 0 013.75 6.993V6.75M10.375 13.5l1.625-2.25 1.625 2.25M12 10.5a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75z" />
+            </svg>
+        </button>
+    </header>
+
+    <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-xl p-6 sm:p-8 mb-8 ring-1 ring-gray-100 dark:ring-gray-700 transition-colors duration-300">
+        <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-4 border-b pb-2 border-gray-100 dark:border-gray-700">Input Data</h3>
+        <textarea id="configInput" 
+                  class="w-full h-40 p-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-indigo focus:border-primary-indigo dark:bg-gray-700 dark:text-gray-100 font-mono text-sm resize-y transition-colors duration-300" 
+                  placeholder="Paste Nmap SSH scan result or sshd_config here..."></textarea>
+        <div class="flex justify-end mt-4">
+            <button class="px-6 py-2 font-semibold text-white bg-primary-indigo rounded-lg shadow-lg hover:bg-indigo-700 transition duration-200 ease-in-out transform hover:scale-[1.02]" 
+                    onclick="analyzeInput()">
+                Analyze Data
+            </button>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="flex border-b border-gray-200 dark:border-gray-700 mb-6">
+        <button id="tab-report-btn" onclick="setActiveTab('report')" class="tab-btn px-4 py-3 text-lg font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-primary-indigo hover:border-primary-indigo dark:hover:text-indigo-400 dark:hover:border-indigo-400 transition-colors duration-200">
+            Analysis Report
+        </button>
+        <button id="tab-database-btn" onclick="setActiveTab('database')" class="tab-btn px-4 py-3 text-lg font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-primary-indigo hover:border-primary-indigo dark:hover:text-indigo-400 dark:hover:border-indigo-400 transition-colors duration-200">
+            Algorithm Database
+        </button>
+    </div>
+
+    <!-- Tab Content -->
+    
+    <!-- 1. Analysis Report Tab Content -->
+    <div id="tab-report" class="tab-content">
+        <div id="resultsPanel" class="bg-white dark:bg-gray-800 shadow-2xl rounded-xl p-6 sm:p-8 mb-8 ring-1 ring-gray-100 dark:ring-gray-700 transition-colors duration-300" style="display:none;">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 border-gray-100 dark:border-gray-700">
+                <div class="flex items-center gap-4 mb-4 sm:mb-0">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Vulnerability Findings</h2>
+                    <span id="securityScore" class="px-4 py-1.5 text-sm font-extrabold rounded-full shadow-lg transition duration-200">Checking...</span>
+                </div>
+                
+                <!-- Copy Results button Group -->
+                <div class="flex flex-wrap gap-3">
+                    <button id="copyConciseButton" 
+                            class="px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-lg shadow-md hover:bg-gray-800 transition duration-150 ease-in-out" 
+                            onclick="copyConciseResults()">
+                        Copy Concise List
+                    </button>
+                    <button id="copyButton" 
+                            class="px-4 py-2 text-sm font-medium text-white bg-cyan-600 rounded-lg shadow-md hover:bg-cyan-700 transition duration-150 ease-in-out" 
+                            onclick="copyDetailedResults()">
+                        Copy Detailed Results
+                    </button>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto rounded-lg shadow-md ring-1 ring-gray-200 dark:ring-gray-700">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700" id="resultsTable">
+                    <thead class="bg-gray-100 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer text-gray-500 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition" onclick="sortTable(0)">
+                                Host / IP <span class="text-primary-indigo">&#x2195;</span>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer text-gray-500 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition" onclick="sortTable(1)">
+                                Overall Status <span class="text-primary-indigo">&#x2195;</span>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
+                                Details
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <!-- Rows injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Algorithm Database Tab Content -->
+    <div id="tab-database" class="tab-content" style="display:none;">
+        <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-xl p-6 sm:p-8 mb-8 ring-1 ring-gray-100 dark:ring-gray-700 transition-colors duration-300">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 border-b pb-2 border-gray-100 dark:border-gray-700">Known Algorithm Definitions</h2>
+            <div class="mb-4">
+                <input type="text" id="databaseSearch" onkeyup="filterDatabase()" placeholder="Search by name, status, or description..."
+                       class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-indigo focus:border-primary-indigo dark:bg-gray-700 dark:text-gray-100 transition-colors duration-300">
+            </div>
+            <div class="overflow-x-auto rounded-lg shadow-md ring-1 ring-gray-200 dark:ring-gray-700">
+                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700" id="databaseTable">
+                    <thead class="bg-gray-100 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">Algorithm Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">Reason / Description</th>
+                        </tr>
+                    </thead>
+                    <tbody id="databaseBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <!-- Database rows generated via JavaScript -->
+                    </tbody>
+                 </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div id="copyMessage" class="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-xl opacity-0 transition-opacity duration-300 z-50">Copied to clipboard!</div>
+
+<script>
+    const apiKey = ""; 
+    let currentFindings = []; 
+    let activeTab = 'report';
+
+    const DATABASE = {
+        ciphers: {
+            'arcfour': { status: 'CRITICAL', reason: 'RC4 is broken.' },
+            'arcfour128': { status: 'CRITICAL', reason: 'RC4 is broken.' },
+            'arcfour256': { status: 'CRITICAL', reason: 'RC4 is broken.' },
+            '3des-cbc': { status: 'WEAK', reason: 'Sweet32 vulnerability (64-bit block).' },
+            'blowfish-cbc': { status: 'WEAK', reason: 'Sweet32 vulnerability (64-bit block).' },
+            'cast128-cbc': { status: 'WEAK', reason: 'Sweet32 vulnerability (64-bit block).' },
+            'aes128-cbc': { status: 'LEGACY', reason: 'CBC mode is malleable. Prefer CTR/GCM.' },
+            'aes192-cbc': { status: 'LEGACY', reason: 'CBC mode is malleable. Prefer CTR/GCM.' },
+            'aes256-cbc': { status: 'LEGACY', reason: 'CBC mode is malleable. Prefer CTR/GCM.' },
+            'rijndael-cbc@lysator.liu.se': { status: 'LEGACY', reason: 'CBC mode is malleable.' },
+            'aes128-ctr': { status: 'SECURE', reason: 'Standard secure symmetric cipher.' },
+            'aes192-ctr': { status: 'SECURE', reason: 'Standard secure symmetric cipher.' },
+            'aes256-ctr': { status: 'SECURE', reason: 'Standard secure symmetric cipher.' },
+            'aes128-gcm@openssh.com': { status: 'SECURE', reason: 'Modern AEAD cipher.' },
+            'aes256-gcm@openssh.com': { status: 'SECURE', reason: 'Modern AEAD cipher.' },
+            'chacha20-poly1305@openssh.com': { status: 'SECURE', reason: 'Modern AEAD cipher, fast & secure.' }
+        },
+        macs: {
+            'hmac-md5': { status: 'CRITICAL', reason: 'MD5 is collision-vulnerable.' },
+            'hmac-md5-96': { status: 'CRITICAL', reason: 'MD5 obsolete + truncation too short.' },
+            'hmac-sha1-96': { status: 'WEAK', reason: '96-bit truncation too short.' },
+            'hmac-sha1': { status: 'LEGACY', reason: 'SHA1 deprecated. Use SHA-2.' },
+            'hmac-sha1-etm@openssh.com': { status: 'LEGACY', reason: 'SHA1 deprecated (EtM mitigation).' },
+            'hmac-sha2-256': { status: 'SECURE', reason: 'Standard secure MAC.' },
+            'hmac-sha2-512': { status: 'SECURE', reason: 'Standard secure MAC.' },
+            'hmac-sha2-256-etm@openssh.com': { status: 'SECURE', reason: 'Secure Encrypt-then-MAC.' },
+            'hmac-sha2-512-etm@openssh.com': { status: 'SECURE', reason: 'Secure Encrypt-then-MAC.' },
+            'umac-128@openssh.com': { status: 'SECURE', reason: 'Optimized secure MAC.' }
+        },
+        kex: {
+            'diffie-hellman-group1-sha1': { status: 'CRITICAL', reason: 'Logjam (1024-bit) & SHA1.' },
+            'diffie-hellman-group14-sha1': { status: 'WEAK', reason: 'SHA1 deprecated. Prefer SHA2.' },
+            'diffie-hellman-group-exchange-sha1': { status: 'WEAK', reason: 'SHA1 deprecated.' },
+            'curve25519-sha256': { status: 'SECURE', reason: 'Modern ECDH.' },
+            'curve25519-sha256@libssh.org': { status: 'SECURE', reason: 'Modern ECDH.' },
+            'diffie-hellman-group14-sha256': { status: 'SECURE', reason: 'Secure FFDH with SHA2.' },
+            'diffie-hellman-group16-sha512': { status: 'SECURE', reason: 'Secure FFDH with SHA2.' },
+            'diffie-hellman-group18-sha512': { status: 'SECURE', reason: 'Secure FFDH with SHA2.' },
+            'diffie-hellman-group-exchange-sha256': { status: 'SECURE', reason: 'Secure (if modulus > 2048).' },
+            'ecdh-sha2-nistp256': { status: 'SECURE', reason: 'NIST curve.' },
+            'ecdh-sha2-nistp384': { status: 'SECURE', reason: 'NIST curve.' },
+            'ecdh-sha2-nistp521': { status: 'SECURE', reason: 'NIST curve.' }
+        },
+        keys: {
+            'ssh-dss': { status: 'CRITICAL', reason: 'DSA is insecure (disabled in OpenSSH).' },
+            'ssh-rsa': { status: 'WEAK', reason: 'RSA w/ SHA1 signatures deprecated.' },
+            'rsa-sha2-256': { status: 'SECURE', reason: 'Secure RSA signature.' },
+            'rsa-sha2-512': { status: 'SECURE', reason: 'Secure RSA signature.' },
+            'ssh-ed25519': { status: 'SECURE', reason: 'Modern EdDSA key.' },
+            'ecdsa-sha2-nistp256': { status: 'SECURE', reason: 'NIST curve key.' }
+        }
+    };
+
+    /** Utility Functions **/
+
+    function getStatusClasses(status) {
+        switch (status) {
+            case 'CRITICAL': return 'bg-red-500 dark:bg-red-600 text-white';
+            case 'WEAK': return 'bg-amber-300 dark:bg-amber-600 text-amber-900 dark:text-white';
+            case 'LEGACY': return 'bg-yellow-100 dark:bg-yellow-600 text-yellow-800 dark:text-white';
+            case 'SECURE': return 'bg-green-600 dark:bg-green-700 text-white';
+            default: return 'bg-gray-400 dark:bg-gray-500 text-gray-800 dark:text-gray-100';
+        }
+    }
+
+    function showCopyMessage(message) {
+        const messageEl = document.getElementById('copyMessage');
+        messageEl.textContent = message;
+        messageEl.classList.remove('opacity-0');
+        messageEl.classList.add('opacity-100');
+        setTimeout(() => {
+            messageEl.classList.remove('opacity-100');
+            messageEl.classList.add('opacity-0');
+        }, 3000);
+    }
+    
+    function copyToClipboard(text) {
+        const tempTextArea = document.createElement('textarea');
+        tempTextArea.value = text;
+        document.body.appendChild(tempTextArea);
+        tempTextArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempTextArea);
+        showCopyMessage("Results copied to clipboard!");
+    }
+
+    /** Dark Mode Logic **/
+
+    function toggleDarkMode() {
+        const html = document.documentElement;
+        const isDark = html.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        updateDarkModeIcon(isDark ? 'dark' : 'light');
+    }
+
+    function updateDarkModeIcon(theme) {
+        const button = document.getElementById('darkModeToggle');
+        if (button) {
+            button.setAttribute('data-theme', theme);
+        }
+    }
+
+    function initializeDarkMode() {
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        let themeToSet = 'light';
+        if (savedTheme) {
+            themeToSet = savedTheme;
+        } else if (systemPrefersDark) {
+            themeToSet = 'dark';
+        }
+
+        if (themeToSet === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+        updateDarkModeIcon(themeToSet);
+        renderDatabase(); // Ensure DB is rendered once dark mode state is known
+    }
+
+    /** Tab Logic **/
+
+    function setActiveTab(tabId) {
+        activeTab = tabId;
+        document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.tab-btn').forEach(el => {
+            el.classList.remove('border-primary-indigo', 'text-primary-indigo', 'dark:border-indigo-400', 'dark:text-indigo-400');
+            el.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+        });
+
+        document.getElementById(`tab-${tabId}`).style.display = 'block';
+        const activeBtn = document.getElementById(`tab-${tabId}-btn`);
+        activeBtn.classList.add('border-primary-indigo', 'text-primary-indigo', 'dark:border-indigo-400', 'dark:text-indigo-400');
+        activeBtn.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+    }
+
+    /** Database Tab Logic **/
+
+    function renderDatabase() {
+        const databaseBody = document.getElementById('databaseBody');
+        databaseBody.innerHTML = '';
+        let allAlgos = [];
+
+        // Flatten the DATABASE structure for rendering
+        Object.keys(DATABASE).forEach(typeKey => {
+            Object.keys(DATABASE[typeKey]).forEach(name => {
+                const typeLabel = typeKey.charAt(0).toUpperCase() + typeKey.slice(1);
+                allAlgos.push({
+                    type: typeLabel,
+                    name: name,
+                    status: DATABASE[typeKey][name].status,
+                    reason: DATABASE[typeKey][name].reason
+                });
+            });
+        });
+
+        allAlgos.forEach(algo => {
+            const row = databaseBody.insertRow();
+            row.className = 'hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150';
+            const statusClass = getStatusClasses(algo.status);
+
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600 dark:text-indigo-300">${algo.type.toUpperCase()}</td>
+                <td class="px-6 py-4 text-sm font-mono text-pink-600 dark:text-pink-400">${algo.name}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-3 py-1 text-xs font-extrabold rounded-full ${statusClass}">${algo.status}</span>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">${algo.reason}</td>
+            `;
+        });
+    }
+
+    function filterDatabase() {
+        const input = document.getElementById('databaseSearch').value.toLowerCase();
+        const table = document.getElementById('databaseTable');
+        const rows = table.getElementsByTagName('tr');
+
+        for (let i = 1; i < rows.length; i++) {
+            let row = rows[i];
+            let cells = row.getElementsByTagName('td');
+            let found = false;
+            for (let j = 0; j < cells.length; j++) {
+                if (cells[j].textContent.toLowerCase().includes(input)) {
+                    found = true;
+                    break;
+                }
+            }
+            row.style.display = found ? '' : 'none';
+        }
+    }
+
+
+    /** Analysis and Copy Logic (Retained & Enhanced) **/
+    
+    function toggleDetails(button) {
+        const row = button.closest('tr');
+        const nextRow = row.nextElementSibling;
+        
+        // Ensure the next element is the details row and it's hidden
+        if (nextRow && nextRow.classList.contains('details-row')) {
+            nextRow.classList.toggle('hidden');
+            
+            // Toggle the arrow icon direction
+            const icon = button.querySelector('svg');
+            icon.classList.toggle('rotate-90');
+        }
+    }
+
+
+    function getProblematicGroups() {
+        // Filter out secure and unknown algorithms
+        const problematicFindings = currentFindings.filter(f => 
+            f.status === 'CRITICAL' || f.status === 'WEAK' || f.status === 'LEGACY'
+        );
+
+        const groupedResults = {};
+        problematicFindings.forEach(f => {
+            const host = f.host;
+            const status = f.status;
+
+            if (!groupedResults[host]) {
+                groupedResults[host] = {
+                    worstStatus: status,
+                    findings: []
+                };
+            } else {
+                // Determine the worst status for the host (CRITICAL > WEAK > LEGACY)
+                const currentWorst = groupedResults[host].worstStatus;
+                if (status === 'CRITICAL') {
+                    groupedResults[host].worstStatus = 'CRITICAL';
+                } else if (status === 'WEAK' && currentWorst === 'LEGACY') {
+                    groupedResults[host].worstStatus = 'WEAK';
+                }
+            }
+            groupedResults[host].findings.push(f);
+        });
+        return groupedResults;
+    }
+
+    /**
+     * Deduplicates findings based on the combination of host, type, and name.
+     * @param {Array} findings - The list of raw findings.
+     * @returns {Array} - The list of unique findings.
+     */
+    function deduplicateFindings(findings) {
+        const seen = new Set();
+        const uniqueFindings = [];
+        
+        findings.forEach(f => {
+            // Create a unique identifier: Host|Type|Name
+            const key = `${f.host}|${f.type}|${f.name}`;
+            if (!seen.has(key)) {
+                seen.add(key);
+                uniqueFindings.push(f);
+            }
+        });
+        return uniqueFindings;
+    }
+
+
+    function analyzeInput() {
+        const input = document.getElementById('configInput').value;
+        const resultsPanel = document.getElementById('resultsPanel');
+        const resultsBody = document.getElementById('resultsBody');
+        const scoreBadge = document.getElementById('securityScore');
+        
+        setActiveTab('report');
+        resultsPanel.style.display = 'block';
+        resultsBody.innerHTML = '';
+        scoreBadge.className = 'px-4 py-1.5 text-sm font-extrabold rounded-full shadow-lg transition duration-200'; // Reset classes
+
+        if (!input.trim()) {
+            resultsBody.innerHTML = '<tr><td colspan="3" class="p-6 text-center text-gray-500 dark:text-gray-400">Please enter data to analyze.</td></tr>';
+            scoreBadge.style.display = 'none';
+            return;
+        }
+
+        let findings = [];
+        
+        const isNmap = /\|\s+(kex_|encryption_|mac_|server_host_key_)/i.test(input) || /ssh2-enum-algos/i.test(input);
+        
+        if (isNmap) {
+            findings = parseNmap(input);
+        } else {
+            findings = parseConfig(input);
+        }
+
+        // Apply deduplication here
+        findings = deduplicateFindings(findings);
+
+        currentFindings = findings.filter(f => f.status !== 'UNKNOWN');
+        const problematicFindings = currentFindings.filter(f => f.status !== 'SECURE');
+
+        if (currentFindings.length === 0) {
+             resultsBody.innerHTML = '<tr><td colspan="3" class="p-6 text-center text-gray-500 dark:text-gray-400">No valid cryptographic primitives found in input.</td></tr>';
+             scoreBadge.style.display = 'none';
+             return;
+        }
+
+        if (problematicFindings.length === 0 && currentFindings.length > 0) {
+            resultsBody.innerHTML = '<tr><td colspan="3" class="p-8 text-center text-green-600 dark:text-green-400 font-bold">No weak ciphers detected!<br><span class="font-normal text-sm text-gray-500 dark:text-gray-400">All ' + currentFindings.length + ' detected algorithms are marked as SECURE.</span></td></tr>';
+        }
+
+        const groupedFindings = {};
+        // Only group problematic findings for the expandable table
+        problematicFindings.forEach(f => {
+            if (!groupedFindings[f.host]) {
+                groupedFindings[f.host] = [];
+            }
+            groupedFindings[f.host].push(f);
+        });
+
+        let counts = { CRITICAL: 0, WEAK: 0, LEGACY: 0, SECURE: 0, UNKNOWN: 0 };
+        currentFindings.forEach(f => counts[f.status]++);
+
+        Object.keys(groupedFindings).forEach((host, index) => {
+            const items = groupedFindings[host];
+            
+            let hostStatus = 'LEGACY';
+            if (items.some(i => i.status === 'CRITICAL')) hostStatus = 'CRITICAL';
+            else if (items.some(i => i.status === 'WEAK')) hostStatus = 'WEAK';
+
+            let hostStatusClass = getStatusClasses(hostStatus);
+
+            // --- 1. Generate the Main Row (Host, Status, Toggle Button) ---
+            const mainRow = document.createElement('tr');
+            mainRow.className = 'hover:bg-indigo-50/50 dark:hover:bg-gray-700/50 transition-colors duration-150 cursor-pointer'; 
+            mainRow.onclick = (e) => { 
+                // Toggle details when clicking the row, but ignore clicks on the status badge itself
+                if (!e.target.closest('.status-badge')) {
+                     const toggleButton = mainRow.querySelector('.toggle-button');
+                     if (toggleButton) toggleDetails(toggleButton);
+                }
+            };
+            
+            mainRow.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">${host}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <span class="px-3 py-1 text-xs font-extrabold rounded-full ${hostStatusClass} status-badge">${hostStatus}</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <button class="toggle-button text-gray-400 hover:text-primary-indigo dark:hover:text-indigo-400 transition transform duration-200" title="Toggle details" onclick="event.stopPropagation();">
+                        <!-- Down/Right Arrow Icon -->
+                        <svg class="w-5 h-5 transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                        </svg>
+                    </button>
+                </td>
+            `;
+            resultsBody.appendChild(mainRow);
+            
+            // --- 2. Generate the Details Row (Hidden Nested Table) ---
+            const detailsRow = document.createElement('tr');
+            detailsRow.className = 'details-row hidden bg-gray-50 dark:bg-gray-800/80';
+            detailsRow.innerHTML = `
+                <td colspan="3" class="p-0 border-t border-gray-200 dark:border-gray-700">
+                    <div class="p-4 sm:p-6">
+                        <h4 class="text-md font-semibold mb-3 text-gray-700 dark:text-gray-300">Vulnerable Algorithms Detected:</h4>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead class="bg-gray-100 dark:bg-gray-700/50">
+                                    <tr>
+                                        <th class="py-2 px-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">Type</th>
+                                        <th class="py-2 px-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">Algorithm</th>
+                                        <th class="py-2 px-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">Status</th>
+                                        <th class="py-2 px-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">Reason / Fix</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${items.map(f => {
+                                        let itemStatusClass = getStatusClasses(f.status);
+                                        return `
+                                            <tr class="border-b border-gray-100 dark:border-gray-700/50 last:border-b-0">
+                                                <td class="py-2 px-4 text-sm text-indigo-600 dark:text-indigo-300">${f.type}</td>
+                                                <td class="py-2 px-4 text-sm font-mono text-pink-600 dark:text-pink-400">${f.name}</td>
+                                                <td class="py-2 px-4 whitespace-nowrap">
+                                                    <span class="px-2 py-0.5 text-xs font-medium rounded-full ${itemStatusClass}">${f.status}</span>
+                                                </td>
+                                                <td class="py-2 px-4 text-sm text-gray-700 dark:text-gray-300">${f.reason}</td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </td>
+            `;
+            resultsBody.appendChild(detailsRow);
+        });
+
+        scoreBadge.style.display = 'inline-block';
+        if (counts.CRITICAL > 0) {
+            scoreBadge.textContent = "FAIL";
+            scoreBadge.classList.add(...getStatusClasses('CRITICAL').split(' '));
+        } else if (counts.WEAK > 0) {
+            scoreBadge.textContent = "WEAK";
+            scoreBadge.classList.add(...getStatusClasses('WEAK').split(' '));
+        } else if (counts.LEGACY > 0) {
+            scoreBadge.textContent = "LEGACY";
+            scoreBadge.classList.add(...getStatusClasses('LEGACY').split(' '));
+        } else {
+            scoreBadge.textContent = "SECURE";
+            scoreBadge.classList.add(...getStatusClasses('SECURE').split(' '));
+        }
+    }
+
+    function copyConciseResults() {
+        const groupedResults = getProblematicGroups();
+
+        if (Object.keys(groupedResults).length === 0) {
+            showCopyMessage("No vulnerable algorithms to copy.");
+            return;
+        }
+
+        let textToCopy = "SSH Vulnerable Algorithms Report (Concise List, Grouped by Host)\n\n";
+        
+        Object.keys(groupedResults).forEach(host => {
+            const data = groupedResults[host];
+            const algosString = data.findings.map(f => f.name).join(', ');
+            
+            // Format: [IP/HOST] - [WORST STATUS] - [ALGO NAME 1, ALGO NAME 2, ...]
+            textToCopy += `${host} - ${data.worstStatus} - ${algosString}\n`;
+        });
+        
+        copyToClipboard(textToCopy);
+    }
+    
+    function copyDetailedResults() {
+        const groupedResults = getProblematicGroups();
+
+        if (Object.keys(groupedResults).length === 0) {
+            showCopyMessage("No vulnerable algorithms to copy.");
+            return;
+        }
+
+        let textToCopy = "SSH Security Analyzer Report (Detailed List, Grouped by Host)\n\n";
+
+        Object.keys(groupedResults).forEach(host => {
+            const data = groupedResults[host];
+            
+            // Host Header: [IP/HOST] - [WORST STATUS]
+            textToCopy += `--- ${host} - ${data.worstStatus} ---\n`;
+
+            // List individual findings with details
+            data.findings.forEach(f => {
+                // Indented line: - [TYPE] [ALGO NAME] (INDIVIDUAL STATUS) - [DESCRIPTION]
+                textToCopy += `  - [${f.type}] ${f.name} (${f.status}) - ${f.reason}\n`;
+            });
+            textToCopy += '\n'; 
+        });
+
+        copyToClipboard(textToCopy);
+    }
+
+    // --- Parsing functions (unchanged) ---
+    function parseNmap(text) {
+        const lines = text.split('\n');
+        let findings = [];
+        let currentContext = null; 
+        let currentHost = 'Unknown';
+
+        lines.forEach(line => {
+            const trimmed = line.trim();
+
+            const hostMatch = line.match(/Nmap scan report for\s+(.+)/i);
+            if (hostMatch) {
+                currentHost = hostMatch[1];
+                currentContext = null; 
+                return;
+            }
+
+            if (/encryption_algorithms/i.test(trimmed) || trimmed.includes('ciphers:')) { currentContext = 'ciphers'; return; }
+            else if (/mac_algorithms/i.test(trimmed) || trimmed.includes('macs:')) { currentContext = 'macs'; return; }
+            else if (/kex_algorithms/i.test(trimmed) || trimmed.includes('kex_algorithms:')) { currentContext = 'kex'; return; }
+            else if (/server_host_key_algorithms/i.test(trimmed) || trimmed.includes('key_exchange_algorithms:')) { currentContext = 'keys'; return; }
+
+            if (currentContext) {
+                const match = line.match(/[\|\s]([a-zA-Z0-9@._-]+)\s*$/);
+                if (match && !match[1].includes(':')) {
+                     let f = lookupAlgo(match[1].trim(), currentContext);
+                     f.host = currentHost; 
+                     findings.push(f);
+                }
+            }
+        });
+        return findings;
+    }
+
+    function parseConfig(text) {
+        let findings = [];
+        const lines = text.split('\n');
+        let foundStructured = false;
+
+        lines.forEach(line => {
+            line = line.split('#')[0].trim();
+            if (!line) return;
+
+            const match = line.match(/^(Ciphers|MACs|KexAlgorithms|HostKeyAlgorithms)\s+(.+)$/i);
+            if (match) {
+                foundStructured = true;
+                let context = 'ciphers';
+                if (match[1].toLowerCase().includes('mac')) context = 'macs';
+                else if (match[1].toLowerCase().includes('kex')) context = 'kex';
+                else if (match[1].toLowerCase().includes('hostkey')) context = 'keys';
+
+                match[2].split(',').forEach(v => {
+                    let f = lookupAlgo(v.trim(), context);
+                    f.host = "Local Config";
+                    findings.push(f);
+                });
+            }
+        });
+
+        if (!foundStructured && text.includes(',')) {
+            text.split(',').forEach(item => {
+                item = item.trim();
+                let context = 'unknown';
+                if (DATABASE.ciphers[item]) context = 'ciphers';
+                else if (DATABASE.macs[item]) context = 'macs';
+                else if (DATABASE.kex[item]) context = 'kex';
+                else if (DATABASE.keys[item]) context = 'keys';
+                
+                if (context !== 'unknown' || item.length > 3) {
+                    let f = lookupAlgo(item, context);
+                    f.host = "Manual Input";
+                    findings.push(f);
+                }
+            });
+        }
+        return findings;
+    }
+
+    function lookupAlgo(name, context) {
+        if (context === 'unknown') context = 'ciphers';
+        let info = (DATABASE[context] && DATABASE[context][name]) || 
+                   DATABASE.ciphers[name] || 
+                   DATABASE.macs[name] || 
+                   DATABASE.kex[name] || 
+                   DATABASE.keys[name];
+        
+        let typeLabel = 'Unknown';
+        if (DATABASE.ciphers[name]) typeLabel = 'Cipher';
+        else if (DATABASE.macs[name]) typeLabel = 'MAC';
+        else if (DATABASE.kex[name]) typeLabel = 'Kex';
+        else if (DATABASE.keys[name]) typeLabel = 'Key';
+        else if (context) {
+             if(context === 'ciphers') typeLabel = 'Cipher';
+             if(context === 'macs') typeLabel = 'MAC';
+             if(context === 'kex') typeLabel = 'Kex';
+             if(context === 'keys') typeLabel = 'Key';
+        }
+
+        if (!info) {
+            if (name.match(/md5|sha1|arcfour|des/i)) {
+                info = { status: 'WEAK', reason: 'Heuristic: Weak primitive detected.' };
+            } else if (name.includes('@')) {
+                info = { status: 'UNKNOWN', reason: 'Custom algorithm.' };
+            } else {
+                info = { status: 'UNKNOWN', reason: 'Not in database.' };
+            }
+        }
+
+        return { type: typeLabel, name: name, status: info.status, reason: info.reason };
+    }
+
+    // --- Sorting function (status sorting logic remains) ---
+    function sortTable(n) {
+        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+        table = document.getElementById("resultsTable");
+        switching = true;
+        dir = "asc"; 
+        while (switching) {
+            switching = false;
+            rows = table.rows;
+            for (i = 1; i < (rows.length - 1); i += 2) { // Skip details rows (i+1 is the detail row)
+                shouldSwitch = false;
+                x = rows[i].getElementsByTagName("TD")[n];
+                y = rows[i + 2].getElementsByTagName("TD")[n]; // Compare main row i with main row i+2
+                
+                let xText = x.innerText.toLowerCase();
+                let yText = y.innerText.toLowerCase();
+
+                if (n === 1) { // Status column logic (sort by severity)
+                    const order = { 'critical': 3, 'weak': 2, 'legacy': 1, 'secure': 0 };
+                    let xVal = order[xText] || -1;
+                    let yVal = order[yText] || -1;
+                    
+                    if (dir == "asc") {
+                        if (xVal < yVal) { shouldSwitch = true; break; }
+                    } else if (dir == "desc") {
+                        if (xVal > yVal) { shouldSwitch = true; break; }
+                    }
+                } else { // Default text/host sorting
+                    if (dir == "asc") {
+                        if (xText > yText) { shouldSwitch = true; break; }
+                    } else if (dir == "desc") {
+                        if (xText < yText) { shouldSwitch = true; break; }
+                    }
+                }
+            }
+            if (shouldSwitch) {
+                // Move both the main row and its corresponding details row
+                rows[i].parentNode.insertBefore(rows[i + 2], rows[i]); // Move main row below
+                rows[i].parentNode.insertBefore(rows[i + 3], rows[i + 1]); // Move detail row below
+                switching = true;
+                switchcount ++; 
+            } else {
+                if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
+                }
+            }
+        }
+    }
+
+
+    // Initial load calls
+    window.onload = function() {
+        initializeDarkMode();
+        setActiveTab('report'); // Set initial tab
+    }
+</script>
+
+</body>
+</html>
