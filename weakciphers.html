@@ -1,389 +1,317 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weak SSL/TLS Cipher Scanner</title>
+    <title>Security Assessment Tool</title>
     <link href="profile.jpg" type="image/gif" rel="shortcut icon" />
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
-        :root {
-            --bg-light: #f4f4f4;
-            --fg-light: #333;
-            --highlight-light: #fff;
-            --btn-light: #007BFF;
-            --export-light: #28a745;
-            --copy-btn-light: #6c757d;
-            --weak-light: #ff4d4f;
-            --secure-light: #52c41a;
-            --accent: #ffcc00;
-
-            --bg-dark: #121212;
-            --fg-dark: #f0f0f0;
-            --highlight-dark: #1e1e1e;
-            --btn-dark: #1890ff;
-            --export-dark: #73d13d;
-            --copy-btn-dark: #555;
-            --weak-dark: #ff4d4f;
-            --secure-dark: #52c41a;
+        /* Custom styles for Dark Mode Toggle SVG icon transitions */
+        .sun-icon, .moon-icon {
+            transition: opacity 0.3s;
+        }
+        /* Logic: If HTML has 'dark' class, hide sun, show moon. If not, vice versa. */
+        html.dark .sun-icon { opacity: 0; }
+        html:not(.dark) .moon-icon { opacity: 0; }
+        
+        /* Transition for the detail arrow icon */
+        .toggle-button svg {
+            transition: transform 0.2s ease-in-out;
+        }
+        .toggle-button svg.rotate-90 {
+            transform: rotate(90deg);
         }
 
-        body {
-            background: var(--bg-light);
-            color: var(--fg-light);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            padding: 40px 20px;
-            transition: background 0.4s ease, color 0.4s ease;
+        /* Custom Scrollbar for Table */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
         }
 
-        body.dark-mode {
-            background: var(--bg-dark);
-            color: var(--fg-dark);
+        /* Icon Animation */
+        .shield-icon {
+            transition: transform 0.3s ease;
         }
-
-        h2 {
-            font-size: 2.2rem;
-            margin-bottom: 15px;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        header:hover .shield-icon {
+            transform: scale(1.1) rotate(10deg);
         }
-
-        h2 i {
-            margin-right: 10px;
-        }
-
-        textarea {
-            width: 100%;
-            max-width: 900px;
-            height: 220px;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #ccc;
-            background: var(--highlight-light);
-            color: var(--fg-light);
-            font-family: monospace;
-            resize: vertical;
-            font-size: 0.95rem;
-        }
-
-        body.dark-mode textarea {
-            background: var(--highlight-dark);
-            color: var(--fg-dark);
-            border: 1px solid #444;
-        }
-
-        button {
-            margin-top: 12px;
-            padding: 12px 18px;
-            cursor: pointer;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 0.95rem;
-            transition: background 0.3s ease;
-            display: flex;
-            align-items: center;
-        }
-
-        body.dark-mode button {
-            background: var(--btn-dark);
-        }
-
-        #results {
-            margin-top: 25px;
-            padding: 25px;
-            border: 1px solid #ccc;
-            background: var(--highlight-light);
-            width: 100%;
-            max-width: 900px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        body.dark-mode #results {
-            background: var(--highlight-dark);
-            border: 1px solid #444;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            font-size: 0.95rem;
-            table-layout: fixed;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border: 1px solid #888;
-            word-wrap: break-word;
-            white-space: normal;
-            vertical-align: top;
-        }
-
-        th {
-            background-color: #333;
-            color: white;
-            text-align: left;
-        }
-
-        body.dark-mode th {
-            background-color: #444;
-        }
-
-        .status {
-            font-size: 13px;
-            padding: 6px 10px;
-            color: white;
-            border-radius: 5px;
-        }
-
-        .weak-status { background: var(--weak-light); }
-        .secure-status { background: var(--secure-light); }
-
-        body.dark-mode .weak-status { background: var(--weak-dark); }
-        body.dark-mode .secure-status { background: var(--secure-dark); }
-
-        .copy-btn, .export-btn, .toggle-btn {
-            background: var(--copy-btn-light);
-            color: white;
-            border: none;
-            margin-right: 8px;
-            display: flex;
-            align-items: center;
-        }
-
-        body.dark-mode .copy-btn, body.dark-mode .export-btn, body.dark-mode .toggle-btn {
-            background: var(--copy-btn-dark);
-        }
-
-        .export-btn { background: var(--export-light); }
-
-        body.dark-mode .export-btn {
-            background: var(--export-dark);
-        }
-
-        .loading { font-style: italic; color: var(--accent); margin-top: 10px; }
-
-        .toggle-btn {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: #000;
-            color: #fff;
-            padding: 10px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        button i, .copy-btn i, .export-btn i {
-            margin-right: 8px;
-        }
-
-        /* Add flexbox for horizontally aligning Copy and Export buttons */
-        .button-group {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            margin-top: 12px;
-        }
-
-        td ul {
-            list-style-type: disc;
-            margin-left: 1em;
-            padding-left: 0;
-            line-height: 1.6;
-            word-wrap: break-word;
-            white-space: normal;
-        }
-
-        td {
-            vertical-align: top;
-        }
-
-        #pagination {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 15px;
-        }
-
-        #pagination button {
-            margin: 0 5px;
-            padding: 6px 10px;
-            border-radius: 5px;
-            border: none;
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        #pagination button:hover {
-            background-color: #0056b3;
-        }
-
-        body.dark-mode #pagination button {
-            background-color: #1890ff;
-        }
-
-        body.dark-mode #pagination button:hover {
-            background-color: #0f66c2;
-        }
-
-        #pagination button.active-page {
-            background-color: #ffc107;
-            color: #000;
-            font-weight: bold;
-            border: 2px solid #ff9800;
-        }
-
-        body.dark-mode #pagination button.active-page {
-            background-color: #ffa000;
-            color: #fff;
-            border: 2px solid #ffca28;
-        }        
     </style>
+    <script>
+        // Custom Tailwind Configuration for font and dark mode
+        tailwind.config = {
+            darkMode: 'class', 
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-indigo': '#4f46e5',
+                        'primary-dark': '#1e293b',
+                        'success-green': '#10b981',
+                        'danger-red': '#ef4444',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body>
-    <button class="toggle-btn" onclick="toggleDarkMode()">🌓</button>
-    <h2><i class="fas fa-shield-alt"></i> Weak SSL/TLS Cipher Scanner</h2>
-    <p>Paste your Nmap scan results below:</p>
-    <textarea id="nmapResults" placeholder="Paste Nmap results here..."></textarea><br>
-    <button onclick="analyzeResults()"><i class="fas fa-search"></i> Scan for Weak Ciphers & Protocols</button>
-    <div id="results">
-        <h3>Scan Results:</h3>
-        <p><strong>Weak Ciphers & Protocols Found:</strong> <span id="cipherCount">0</span></p>
-        <p id="status" class="loading"></p>
-        <table>
-          <thead>
-            <tr>
-              <th>IP / Host</th>
-              <th>Issue</th>
-              <th>Status</th>
-              <th>Explanation</th>
-              <th>Fix Suggestion</th>
-            </tr>
-          </thead>
-          <tbody id="resultsTable"></tbody>
-        </table>
-        <div id="pagination" style="text-align:center; margin-top:15px;"></div>
-        <div class="button-group">
-            <button class="copy-btn" onclick="copyResults(true)"><i class="fas fa-copy"></i> Copy Results</button>
-            <button class="copy-btn" onclick="copyResults(false)"><i class="fas fa-clipboard-list"></i> Copy Issue + Status Only</button>
-            <button class="export-btn" onclick="exportCSV()"><i class="fas fa-file-export"></i> Export as CSV</button>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300 p-6 md:p-10 min-h-screen flex flex-col items-center">
+
+    <header class="w-full max-w-5xl relative mb-8 group">
+        <div class="text-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 dark:text-white mb-3 tracking-tight">
+                <i class="fas fa-shield-alt mr-3 text-indigo-600 dark:text-indigo-500 shield-icon drop-shadow-md"></i>
+                Weak SSL <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-500 dark:from-indigo-400 dark:to-violet-400">Cipher</span>
+                Scanner
+            </h1>
+            <p class="text-gray-500 dark:text-gray-400 text-lg">Analyze Weak SSL Cipher/Protocols from Nmap scan result.</p>
+        </div>
+
+        <button id="darkModeToggle" class="absolute top-0 right-0 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition focus:outline-none" onclick="toggleDarkMode()">
+            <div class="relative w-6 h-6">
+                <svg class="sun-icon w-6 h-6 text-yellow-500 absolute inset-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.5-4.5l-1.591 1.591M3 12h2.25m.386-6.364l1.591 1.591M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z" />
+                </svg>
+                <svg class="moon-icon w-6 h-6 text-indigo-400 absolute inset-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a1.5 1.5 0 01-1.5 1.5h-15a1.5 1.5 0 01-1.5-1.5V6.75m19.5 0A.75.75 0 0021 6H3a.75.75 0 00-.75.75m19.5 0v.243a2.75 2.75 0 01-5.698 0l-.821 5.378a2.75 2.75 0 01-5.32 0l-.82-5.378A2.75 2.75 0 013.75 6.993V6.75M10.375 13.5l1.625-2.25 1.625 2.25M12 10.5a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75z" />
+                </svg>
+            </div>
+        </button>
+    </header>
+
+    <div class="w-full max-w-5xl bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 sm:p-8 mb-8 ring-1 ring-gray-100 dark:ring-gray-700 transition-colors duration-300">
+        <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-4 border-b pb-2 border-gray-100 dark:border-gray-700">Input Data</h3>
+        <textarea id="configInput" 
+                  class="w-full h-40 p-4 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-indigo focus:border-primary-indigo dark:bg-gray-700 dark:text-gray-100 font-mono text-sm resize-y transition-colors duration-300 outline-none"
+                  placeholder="Paste Nmap output (e.g. ssl-enum-ciphers) here..."></textarea>
+        <div class="flex justify-end mt-4">
+            <button class="px-6 py-2 font-semibold text-white bg-primary-indigo rounded-lg shadow-lg hover:bg-indigo-700 transition duration-200 ease-in-out transform hover:scale-[1.02]"
+                    onclick="analyzeInput()">
+                <i class="fas fa-search mr-2"></i> Analyze Data
+            </button>
+        </div>
+    </div>
+
+    <div class="w-full max-w-5xl bg-white dark:bg-gray-800 shadow-lg rounded-xl mb-8 overflow-hidden ring-1 ring-gray-100 dark:ring-gray-700">
+        <button onclick="toggleDatabase()" class="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition text-left">
+            <span class="font-bold text-primary-indigo dark:text-indigo-400"><i class="fas fa-database mr-2"></i> Algorithm Database</span>
+            <i id="db-icon" class="fas fa-chevron-down text-gray-400 transition-transform duration-300" style="transform: rotate(180deg);"></i>
+        </button>
+        <div id="database-content" class="p-6 border-t border-gray-100 dark:border-gray-700">
+            <input type="text" id="dbSearch" onkeyup="filterDatabase()" placeholder="Search database..." class="w-full p-2 mb-4 border border-gray-300 dark:border-gray-600 rounded bg-transparent dark:text-white focus:ring-1 focus:ring-primary-indigo">
+            <div class="overflow-y-auto max-h-64 custom-scrollbar">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 sticky top-0">
+                        <tr>
+                            <th class="px-4 py-2">Algorithm</th>
+                            <th class="px-4 py-2">Type</th>
+                            <th class="px-4 py-2">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody id="databaseTable" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="resultsArea" class="w-full max-w-5xl hidden">
+        
+        <div class="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 sm:p-8 ring-1 ring-gray-100 dark:ring-gray-700 transition-colors duration-300">
+            <div class="flex justify-between items-end mb-4 border-b pb-2 border-gray-100 dark:border-gray-700">
+                <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-200">Scan Results</h3>
+                <div class="text-right">
+                    <span class="text-sm text-gray-500 dark:text-gray-400">Issues Found:</span>
+                    <span id="issueCount" class="text-lg font-bold text-danger-red ml-1">0</span>
+                </div>
+            </div>
+            <p id="statusMessage" class="mb-4 text-sm italic"></p>
+
+            <div class="flex flex-wrap gap-3 mb-6">
+                <button onclick="copyResults(false)" class="px-4 py-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 hover:bg-indigo-200 dark:hover:bg-indigo-900 text-indigo-800 dark:text-indigo-200 transition shadow-sm text-sm font-medium">
+                    <i class="fas fa-list-ul mr-2"></i>Copy Grouped Summary
+                </button>
+                <button onclick="copyResults(true)" class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 transition shadow-sm text-sm font-medium">
+                    <i class="fas fa-file-csv mr-2"></i>Copy Full Result
+                </button>
+                <button onclick="copyIPsOnly()" class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 transition shadow-sm text-sm font-medium">
+                    <i class="fas fa-server mr-2"></i>Copy IPs Only
+                </button>
+                <button onclick="exportCSV()" class="px-4 py-2 rounded-lg bg-success-green hover:bg-emerald-600 text-white transition shadow-md text-sm font-medium ml-auto">
+                    <i class="fas fa-download mr-2"></i>Export CSV
+                </button>
+            </div>
+
+            <div class="overflow-x-auto custom-scrollbar rounded-lg border border-gray-200 dark:border-gray-700">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-indigo-50 dark:bg-gray-900">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-indigo-800 dark:text-indigo-300 uppercase tracking-wider w-1/12">IP/Host</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-indigo-800 dark:text-indigo-300 uppercase tracking-wider w-3/12">Issue</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-indigo-800 dark:text-indigo-300 uppercase tracking-wider w-1/12">Status</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-indigo-800 dark:text-indigo-300 uppercase tracking-wider w-4/12">Details</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-indigo-800 dark:text-indigo-300 uppercase tracking-wider w-3/12">Fix</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTable" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700 text-sm"></tbody>
+                </table>
+            </div>
+
+            <div id="pagination" class="flex justify-center gap-2 mt-6"></div>
+
         </div>
     </div>
 
     <script>
-        const cipherDescriptions = {
-            "NULL": ["Null cipher provides no encryption, data is sent in plaintext.", "Avoid using cipher suites that include NULL."],
-            "EXP": ["Export-grade cipher suites use weak encryption intended for outdated U.S. export laws.", "Ensure all export ciphers are disabled."],
-            "DES": ["Obsolete and insecure block cipher with short key size.", "Replace with modern algorithms such as AES."],
-            "3DES": ["Known weaknesses and susceptible to SWEET32 attack due to block size.", "Use AES-128 or AES-256 with GCM mode."],
-            "RC4": ["Stream cipher with biases and vulnerabilities, deprecated by IETF.", "Remove RC4 from all cipher suites."],
-            "MD5": ["Cryptographic hash function vulnerable to collisions and pre-image attacks.", "Use SHA-256 or SHA-3 instead."],
-            "SHA1": ["SHA-1 is vulnerable to collision attacks and considered insecure.", "Replace SHA-1 with SHA-256 or better in all uses."],
-            "CBC": ["Block mode prone to padding oracle attacks like Lucky13.", "Use AEAD modes like GCM or CCM instead of CBC."],
-            "SSLv2": ["Obsolete and insecure protocol that is susceptible to multiple attacks including DROWN.", "Disable SSLv2 in your server configuration."],
-            "SSLv3": ["Vulnerable to POODLE attack and deprecated by all modern browsers.", "Disable SSLv3 support in your web server or load balancer."],
-            "TLSv1.0": ["TLS 1.0 is deprecated and considered insecure due to known vulnerabilities.", "Update your server to support TLS 1.2 or TLS 1.3 only."],
-            "TLSv1.1": ["Obsolete version of TLS no longer supported by modern browsers.", "Disable TLS 1.1 and use TLS 1.2 or 1.3."],
-            "TLSv1.2": ["TLS 1.2 is still in use but can have weaknesses with older ciphers.", "Update your server to only use modern ciphers like AES-GCM."],
-            "ChaCha20": ["Although secure, ChaCha20 is considered less efficient in some implementations.", "Consider using AES-GCM where possible."],
-            "FREAK": ["Cipher suites vulnerable to FREAK attack, which allows attackers to downgrade the connection.", "Disable FREAK cipher suites and use stronger alternatives."],
-            "RC2": ["Old cipher with known vulnerabilities and weak encryption.", "Disable RC2 and use AES or other modern ciphers."],
-            "ARIA": ["ARIA is rarely used and lacks sufficient cryptanalysis.", "Prefer AES-GCM or ChaCha20-Poly1305."],
-            "SRP": ["SRP cipher suites are not widely supported and can weaken TLS security.", "Avoid using TLS-SRP ciphers."],
-            "GOST": ["GOST cipher suites are used in Russia and are not widely accepted.", "Use more widely adopted ciphers like AES or ChaCha20-Poly1305."],
-            "ECC": ["Elliptic Curve cryptography (ECC) can be misconfigured, especially with weak curves.", "Use widely accepted and secure ECC curves like P-256, P-384, or P-521."],
-            "PSK": ["Pre-Shared Key cipher suites are less secure and not suitable for public services.", "Use public key infrastructure (PKI) instead."],
-            "ANON": ["Anonymous cipher suites offer no authentication.", "Avoid use of anonymous cipher suites like ADH."],
-            "RSA_EXPORT": ["RSA_EXPORT cipher suites use weak keys and are deprecated.", "Disable export cipher suites in your server config."],
-            "KRB5": ["Kerberos-based cipher suites are rare and often misconfigured.", "Use standard TLS cipher suites instead."]
-        };
+        // --- 1. DARK MODE LOGIC ---
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        // Check preference on load
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+
+        // --- 2. DATABASE & VARIABLES ---
+        const vulnerabilityDatabase = [
+            { name: "EXP", type: "Weak Cipher/Key", explanation: "Export-grade cipher suites use weak encryption intended for outdated U.S. export laws.", fix: "Disable export ciphers." },
+            { name: "DES", type: "Weak Cipher/Key", explanation: "Obsolete/insecure block cipher.", fix: "Replace with AES." },
+            { name: "3DES", type: "Weak Cipher/Key", explanation: "Deprecated/vulnerable to SWEET32 (64-bit block).", fix: "Use AES-128/256 GCM." },
+            { name: "RC4", type: "Weak Cipher/Key", explanation: "Stream cipher with biases, deprecated.", fix: "Remove RC4." },
+            { name: "MD5", type: "Weak Hash", explanation: "Vulnerable to collisions.", fix: "Use SHA-256." },
+            { name: "SHA1", type: "Weak Hash", explanation: "Vulnerable to collision attacks.", fix: "Replace with SHA-256." },
+            { name: "CBC", type: "Weak Block Mode", explanation: "Prone to padding oracle (Lucky13).", fix: "Use GCM or CCM." },
+            { name: "SSLv2", type: "Weak Protocol", explanation: "Obsolete/Insecure (DROWN).", fix: "Disable SSLv2." },
+            { name: "SSLv3", type: "Weak Protocol", explanation: "Vulnerable to POODLE.", fix: "Disable SSLv3." },
+            { name: "TLSv1.0", type: "Weak Protocol", explanation: "Deprecated/Insecure.", fix: "Use TLS 1.2 or 1.3." },
+            { name: "TLSv1.1", type: "Weak Protocol", explanation: "Obsolete.", fix: "Use TLS 1.2 or 1.3." },
+            { name: "FREAK", type: "Weak Cipher/Key", explanation: "Vulnerable to downgrade attacks.", fix: "Disable FREAK suites." },
+            { name: "RC2", type: "Weak Cipher/Key", explanation: "Old cipher with known vulnerabilities.", fix: "Disable RC2." },
+            { name: "ARIA", type: "Weak Cipher/Key", explanation: "Rarely used, insufficient analysis.", fix: "Prefer AES-GCM." },
+            { name: "SRP", type: "Authentication", explanation: "Rarely supported, can weaken security.", fix: "Avoid TLS-SRP." },
+            { name: "GOST", type: "Weak Cipher/Key", explanation: "Regional cipher, not widely accepted.", fix: "Use AES or ChaCha20." },
+            { name: "PSK", type: "Authentication", explanation: "Pre-Shared Key is less secure for public services.", fix: "Use PKI." },
+            { name: "ANON", type: "Authentication", explanation: "No authentication.", fix: "Avoid ADH/Anonymous suites." },
+            { name: "RSA_EXPORT", type: "Weak Cipher/Key", explanation: "Weak keys, deprecated.", fix: "Disable export suites." },
+            { name: "KRB5", type: "Authentication", explanation: "Rare/misconfigured.", fix: "Use standard TLS." }
+        ];
 
         const ipIssuesMap = new Map();
         const itemsPerPage = 5;
         let currentPage = 1;
 
-        function analyzeResults() {
-            const input = document.getElementById("nmapResults").value.trim();
-            const statusText = document.getElementById("status");
-            const cipherCount = document.getElementById("cipherCount");
-            const lines = input.split("\n");
-
+        // --- 3. ANALYSIS LOGIC ---
+        function analyzeInput() {
+            const input = document.getElementById("configInput").value.trim();
+            const resultsArea = document.getElementById("resultsArea");
+            const statusMessage = document.getElementById("statusMessage");
+            const issueCountSpan = document.getElementById("issueCount");
+            
+            // Reset
             ipIssuesMap.clear();
             currentPage = 1;
-            cipherCount.textContent = "0";
+            issueCountSpan.textContent = "0";
             document.getElementById("resultsTable").innerHTML = "";
-            statusText.textContent = "";
-
+            
             if (!input) {
-                statusText.textContent = "Please paste your Nmap scan results.";
-                statusText.style.color = "red";
+                alert("Please Nmap SSL scan output to analyze.");
                 return;
             }
 
+            resultsArea.classList.remove("hidden");
+
             let currentIP = "";
             const rsaPattern = /RSA\s*\((\d+)\s*bit\)/;
+            const exclusionString = "64-bit block cipher 3DES vulnerable to SWEET32 attack".toLowerCase();
+            let totalIssues = 0;
 
+            const lines = input.split("\n");
+            
             lines.forEach(line => {
                 const ipMatch = line.match(/Nmap scan report for ([^\s]+)/i);
                 if (ipMatch) currentIP = ipMatch[1];
+                if (!currentIP) return;
+                
+                // Skip SWEET32 warning line
+                if (line.toLowerCase().includes(exclusionString)) return;
 
                 if (!ipIssuesMap.has(currentIP)) ipIssuesMap.set(currentIP, []);
 
-                for (const cipher of Object.keys(cipherDescriptions)) {
-                    if (line.includes(cipher)) {
-                        const [desc, fix] = cipherDescriptions[cipher];
-                        const category = (cipher.includes("TLS") || cipher.includes("SSL")) ? "Weak Protocol" : "Weak Cipher";
+                // Check Database
+                for (const item of vulnerabilityDatabase) {
+                    if (line.includes(item.name)) {
                         const issueObj = {
-                            category,
-                            output: line.trim(),
+                            category: item.type,
+                            vulnerableAlgo: item.name,
+                            output: line.trim().replace(/^\|\s*/, ''),
                             status: "WEAK",
-                            explanation: desc,
-                            fix
+                            explanation: item.explanation,
+                            fix: item.fix
                         };
-                        const key = JSON.stringify(issueObj);
-                        if (!ipIssuesMap.get(currentIP).some(item => JSON.stringify(item) === key)) {
+                        
+                        const key = issueObj.output;
+                        if (!ipIssuesMap.get(currentIP).some(i => i.output === key)) {
                             ipIssuesMap.get(currentIP).push(issueObj);
+                            totalIssues++;
                         }
                     }
                 }
 
+                // Check RSA Key Size
                 const rsaMatch = line.match(rsaPattern);
                 if (rsaMatch && parseInt(rsaMatch[1]) < 2048) {
                     const issueObj = {
                         category: "Insecure RSA Key",
+                        vulnerableAlgo: `RSA Key ${rsaMatch[1]} bit`,
                         output: `RSA Key: ${rsaMatch[1]} bits`,
                         status: "WEAK",
-                        explanation: "RSA keys below 2048 bits are vulnerable to factorization attacks.",
-                        fix: "Use a 2048-bit or longer RSA key."
+                        explanation: "Key < 2048 bits.",
+                        fix: "Use >= 2048-bit key."
                     };
-                    ipIssuesMap.get(currentIP).push(issueObj);
+                    if (!ipIssuesMap.get(currentIP).some(i => i.category === issueObj.category)) {
+                        ipIssuesMap.get(currentIP).push(issueObj);
+                        totalIssues++;
+                    }
                 }
             });
 
-            const total = Array.from(ipIssuesMap.values()).reduce((sum, list) => sum + list.length, 0);
-            cipherCount.textContent = total;
-            statusText.textContent = total > 0 ? "Weak ciphers or keys found!" : "No issues detected.";
-            renderTable();
-            renderPagination();
-            renderTable();
-            const resultsSection = document.getElementById("results");
-            if (resultsSection) {
-                resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+            issueCountSpan.textContent = totalIssues;
+            
+            if (totalIssues > 0) {
+                statusMessage.textContent = "Vulnerabilities detected. Review the table below.";
+                statusMessage.className = "mb-4 text-sm font-medium text-danger-red";
+            } else {
+                statusMessage.textContent = "No obvious weak ciphers/protocols found in provided text.";
+                statusMessage.className = "mb-4 text-sm font-medium text-success-green";
             }
+
+            renderTable();
+            resultsArea.scrollIntoView({ behavior: "smooth" });
         }
 
+        // --- 4. RENDERING ---
         function renderTable() {
             const table = document.getElementById("resultsTable");
             table.innerHTML = "";
@@ -391,118 +319,172 @@
             const allIPs = [...ipIssuesMap.keys()].filter(ip => ipIssuesMap.get(ip).length > 0);
             const pagedIPs = allIPs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-            for (const ip of pagedIPs) {
+            pagedIPs.forEach(ip => {
                 const issues = ipIssuesMap.get(ip);
-                const issueCount = issues.length;
-                if (issueCount === 0) continue;
+                const count = issues.length;
+                if (count === 0) return;
 
                 issues.forEach((issue, index) => {
                     const row = table.insertRow();
+                    row.className = "hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors";
 
-                    // First column only for the first issue of the group (use rowspan)
                     if (index === 0) {
-                        const ipCell = row.insertCell(0);
-                        ipCell.innerHTML = `<strong>${ip}</strong>`;
-                        ipCell.rowSpan = issueCount;
-                        ipCell.style.verticalAlign = "top";
+                        const cellIP = row.insertCell(0);
+                        cellIP.rowSpan = count;
+                        cellIP.className = "px-4 py-3 whitespace-nowrap text-sm font-bold text-primary-indigo dark:text-indigo-400 align-top bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700";
+                        cellIP.textContent = ip;
                     }
 
-                    // Issue details
-                    row.insertCell(-1).innerHTML = `<div style="white-space: normal;">${issue.output.replace(/^\|\s*/, '')}</div>`;
-                    row.insertCell(-1).innerHTML = `<div><span class="status weak-status">${issue.status}</span></div>`;
-                    row.insertCell(-1).innerHTML = `<div style="white-space: normal;">${issue.explanation}</div>`;
-                    row.insertCell(-1).innerHTML = `<div style="white-space: normal;">${issue.fix}</div>`;
-                });
-            }
+                    const cellIssue = row.insertCell(-1);
+                    cellIssue.className = "px-4 py-3 text-sm font-mono text-gray-700 dark:text-gray-300 align-top";
+                    cellIssue.textContent = issue.output;
 
-            renderPagination();
+                    const cellStatus = row.insertCell(-1);
+                    cellStatus.className = "px-4 py-3 text-sm align-top";
+                    cellStatus.innerHTML = `<span class="px-2 py-1 text-xs font-bold rounded bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">${issue.status}</span>`;
+
+                    const cellDesc = row.insertCell(-1);
+                    cellDesc.className = "px-4 py-3 text-sm text-gray-600 dark:text-gray-400 align-top";
+                    cellDesc.textContent = issue.explanation;
+
+                    const cellFix = row.insertCell(-1);
+                    cellFix.className = "px-4 py-3 text-sm italic text-gray-500 dark:text-gray-500 align-top";
+                    cellFix.textContent = issue.fix;
+                });
+            });
+
+            renderPagination(allIPs.length);
         }
 
-        function renderPagination() {
+        function renderPagination(totalIPs) {
             const pagination = document.getElementById("pagination");
             pagination.innerHTML = "";
+            const totalPages = Math.ceil(totalIPs / itemsPerPage);
 
-            const allIPs = [...ipIssuesMap.keys()].filter(ip => ipIssuesMap.get(ip).length > 0);
-            const totalPages = Math.ceil(allIPs.length / itemsPerPage);
-
-            if (totalPages <= 1) {
-                pagination.style.display = "none";
-                return;
-            }
-
-            pagination.style.display = "flex";
-            pagination.style.flexDirection = "column";
-            pagination.style.alignItems = "center";
-
-            const btnContainer = document.createElement("div");
-            btnContainer.style.display = "flex";
-            btnContainer.style.gap = "6px";
-            btnContainer.style.flexWrap = "wrap";
-            btnContainer.style.justifyContent = "center";
+            if (totalPages <= 1) return;
 
             for (let i = 1; i <= totalPages; i++) {
                 const btn = document.createElement("button");
                 btn.textContent = i;
-                btn.onclick = () => {
-                    currentPage = i;
-                    renderTable();
-
-                    const resultsSection = document.getElementById("results");
-                    if (resultsSection) {
-                        resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
-                    }
-                };
-                if (i === currentPage) btn.classList.add("active-page");
-                btnContainer.appendChild(btn);
+                btn.onclick = () => { currentPage = i; renderTable(); };
+                
+                let classes = "px-3 py-1 rounded text-sm font-semibold transition ";
+                if (i === currentPage) {
+                    classes += "bg-primary-indigo text-white shadow-md";
+                } else {
+                    classes += "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600";
+                }
+                btn.className = classes;
+                pagination.appendChild(btn);
             }
-
-            const pageInfo = document.createElement("div");
-            pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
-            pageInfo.style.marginTop = "10px";
-            pageInfo.style.fontSize = "0.9rem";
-
-            pagination.appendChild(btnContainer);
-            pagination.appendChild(pageInfo);
         }
 
-        function copyResults(includeAll = true) {
-            let text = includeAll ? "IP,Issue,Description,Fix\n" : "IP,Issue,Status\n";
-            ipIssuesMap.forEach((issues, ip) => {
-                issues.forEach(item => {
-                    const issue = item.output.replace(/,/g, " ");
-                    const explanation = item.explanation.replace(/,/g, " ");
-                    const fix = item.fix.replace(/,/g, " ");
-                    if (includeAll) {
-                        text += `${ip},${issue},${explanation},${fix}\n`;
-                    } else {
-                        text += `${ip},${issue},${item.status}\n`;
-                    }
-                });
+        // --- 5. DATABASE UI ---
+        function toggleDatabase() {
+            const content = document.getElementById("database-content");
+            const icon = document.getElementById("db-icon");
+            content.classList.toggle("hidden");
+            icon.style.transform = content.classList.contains("hidden") ? "rotate(0deg)" : "rotate(180deg)";
+        }
+
+        function renderDatabaseRows(data) {
+            const tbody = document.getElementById("databaseTable");
+            tbody.innerHTML = "";
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-2 text-center italic text-gray-500">No matching algorithms.</td></tr>`;
+                return;
+            }
+            data.forEach(item => {
+                const row = `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td class="px-4 py-2 font-medium text-gray-800 dark:text-gray-200">${item.name}</td>
+                        <td class="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 uppercase">${item.type}</td>
+                        <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${item.explanation}</td>
+                    </tr>`;
+                tbody.insertAdjacentHTML('beforeend', row);
             });
-            navigator.clipboard.writeText(text).then(() => alert("Results copied to clipboard!"));
+        }
+
+        function filterDatabase() {
+            const term = document.getElementById("dbSearch").value.toLowerCase();
+            const filtered = vulnerabilityDatabase.filter(i => 
+                i.name.toLowerCase().includes(term) || 
+                i.type.toLowerCase().includes(term) || 
+                i.explanation.toLowerCase().includes(term)
+            );
+            renderDatabaseRows(filtered);
+        }
+        
+        // Initialize Database Table on Load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDatabaseRows(vulnerabilityDatabase);
+        });
+
+        // --- 6. COPY & EXPORT ---
+        function copyResults(isFullCSV) {
+            let text = "";
+            if (isFullCSV) {
+                text = "IP,Issue,Description,Fix\n";
+                const unique = new Set();
+                ipIssuesMap.forEach((issues, ip) => {
+                    issues.forEach(i => {
+                        const key = `${ip}|${i.output}`;
+                        if (!unique.has(key)) {
+                            unique.add(key);
+                            text += `${ip},"${i.output.replace(/"/g, '""')}","${i.explanation}","${i.fix}"\n`;
+                        }
+                    });
+                });
+            } else {
+                // *** GROUPED FORMAT ***
+                // IP/HOST - STATUS - ISSUE (Weak Ciphers & Protocols Found)
+                text = "IP/HOST - STATUS - ISSUES (Weak Ciphers & Protocols)\n";
+                ipIssuesMap.forEach((issues, ip) => {
+                    if (issues.length === 0) return;
+                    const list = issues.map(i => i.output).join(", ");
+                    text += `${ip} - WEAK - ${list}\n`;
+                });
+            }
+
+            if (text.split("\n").length > 1) {
+                navigator.clipboard.writeText(text).then(() => alert("Copied to clipboard!"));
+            } else {
+                alert("No findings to copy.");
+            }
+        }
+
+        function copyIPsOnly() {
+            const ips = [...ipIssuesMap.keys()].filter(ip => ipIssuesMap.get(ip).length > 0);
+            if (ips.length > 0) {
+                navigator.clipboard.writeText(ips.join("\n")).then(() => alert("IPs copied!"));
+            } else {
+                alert("No IPs with findings.");
+            }
         }
 
         function exportCSV() {
             let csv = "IP,Issue,Description,Fix\n";
+            const unique = new Set();
             ipIssuesMap.forEach((issues, ip) => {
-                issues.forEach(item => {
-                    const issue = item.output.replace(/,/g, " ");
-                    const explanation = item.explanation.replace(/,/g, " ");
-                    const fix = item.fix.replace(/,/g, " ");
-                    csv += `${ip},${issue},${explanation},${fix}\n`;
+                issues.forEach(i => {
+                    const key = `${ip}|${i.output}`;
+                    if (!unique.has(key)) {
+                        unique.add(key);
+                        csv += `${ip},"${i.output.replace(/"/g, '""')}","${i.explanation}","${i.fix}"\n`;
+                    }
                 });
             });
-            const uri = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-            const link = document.createElement("a");
-            link.href = uri;
-            link.download = "ssl_tls_results.csv";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
 
-        function toggleDarkMode() {
-            document.body.classList.toggle("dark-mode");
+            if (unique.size > 0) {
+                const link = document.createElement("a");
+                link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+                link.download = "scan_report.csv";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                alert("Nothing to export.");
+            }
         }
     </script>
 </body>
