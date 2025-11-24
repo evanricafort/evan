@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SSL Certificate Weak Hashing Algorithm Checker</title>
+    <title>SSL Certificate Analyzer</title>
     <link href="profile.jpg" type="image/jpg" rel="shortcut icon" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -61,7 +61,10 @@
                 <div class="bg-blue-600 p-2 rounded-lg shadow-md">
                     <i data-lucide="shield-check" class="w-6 h-6 text-white"></i>
                 </div>
-                <h1 class="text-xl font-bold text-slate-800 dark:text-white">SSL Certificate Weak Hashing Algorithm Checker</h1>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-800 dark:text-white">SSL Certificate Analyzer</h1>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">Weak Hashing Algorithm • Expired SSL Certificate • Wildcard SSL Certificate</p>
+                </div>
             </div>
             
             <div class="flex items-center gap-4">
@@ -86,7 +89,7 @@
                 <div>
                     <h3 class="font-semibold text-blue-900 dark:text-blue-100">How to use</h3>
                     <p class="text-blue-800 dark:text-blue-200 text-sm mt-1">
-                        Paste your Nmap scan results below to identify certificates using obsolete hashing algorithms (like MD5 or SHA1).
+                        Paste your Nmap scan results below. This tool detects <strong>weak hashing algorithms</strong>, <strong>expired certificates</strong>, and <strong>wildcard usage</strong> (checking both CN and SANs).
                         Supports both <strong>Terminal Output</strong> and <strong>XML (-oX)</strong>.
                     </p>
                 </div>
@@ -100,7 +103,7 @@
             
             <!-- Left Column: Input -->
             <div class="lg:col-span-1 flex flex-col gap-4">
-                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col h-[600px]">
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col h-[650px]">
                     <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 rounded-t-xl">
                         <label class="font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
                             <i data-lucide="code" class="w-4 h-4 text-slate-400"></i>
@@ -127,62 +130,93 @@
             <div class="lg:col-span-2 flex flex-col gap-4">
                 
                 <!-- Stats Bar -->
-                <div class="grid grid-cols-3 gap-4">
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                     <!-- Total -->
-                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
-                        <div>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Analyzed</p>
-                            <p id="statTotal" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24">
+                        <div class="flex justify-between items-start">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Analyzed</p>
+                            <div class="p-1.5 bg-slate-100 dark:bg-slate-700 rounded-md text-slate-500 dark:text-slate-300">
+                                <i data-lucide="file-text" class="w-4 h-4"></i>
+                            </div>
                         </div>
-                        <div class="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-500 dark:text-slate-300">
-                            <i data-lucide="file-text" class="w-5 h-5"></i>
-                        </div>
+                        <p id="statTotal" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
                     </div>
-                    <!-- Weak -->
-                    <div id="cardWeak" class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between transition-colors">
-                        <div>
-                            <p id="labelWeak" class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Weak Hashes</p>
-                            <p id="statWeak" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
+
+                    <!-- Weak Hash -->
+                    <div id="cardWeak" class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24 transition-colors">
+                        <div class="flex justify-between items-start">
+                            <p id="labelWeak" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Weak Hash</p>
+                            <div id="iconBgWeak" class="p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">
+                                <i data-lucide="unlock" class="w-4 h-4"></i>
+                            </div>
                         </div>
-                        <div id="iconBgWeak" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">
-                            <i data-lucide="shield-alert" class="w-5 h-5"></i>
-                        </div>
+                        <p id="statWeak" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
                     </div>
+
+                    <!-- Expired -->
+                    <div id="cardExpired" class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24 transition-colors">
+                        <div class="flex justify-between items-start">
+                            <p id="labelExpired" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Expired</p>
+                            <div id="iconBgExpired" class="p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">
+                                <i data-lucide="clock" class="w-4 h-4"></i>
+                            </div>
+                        </div>
+                        <p id="statExpired" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
+                    </div>
+
+                    <!-- Wildcard -->
+                    <div id="cardWildcard" class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24 transition-colors">
+                        <div class="flex justify-between items-start">
+                            <p id="labelWildcard" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Wildcard</p>
+                            <div id="iconBgWildcard" class="p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">
+                                <i data-lucide="asterisk" class="w-4 h-4"></i>
+                            </div>
+                        </div>
+                        <p id="statWildcard" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
+                    </div>
+
                     <!-- Secure -->
-                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
-                        <div>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Secure</p>
-                            <p id="statSecure" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24">
+                        <div class="flex justify-between items-start">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Secure</p>
+                            <div class="p-1.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-md text-emerald-600 dark:text-emerald-400">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                            </div>
                         </div>
-                        <div class="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600 dark:text-emerald-400">
-                            <i data-lucide="check-circle" class="w-5 h-5"></i>
-                        </div>
+                        <p id="statSecure" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
                     </div>
                 </div>
 
                 <!-- Results Table Area -->
-                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex-1 flex flex-col h-[465px] relative overflow-hidden">
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex-1 flex flex-col h-[510px] relative overflow-hidden">
                     <!-- Toolbar -->
                     <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-800 z-10 relative">
                         <h2 class="font-semibold text-slate-800 dark:text-slate-200">Analysis Details</h2>
-                        <div class="flex p-1 bg-slate-100 dark:bg-slate-700/50 rounded-lg self-start sm:self-auto" id="filterGroup">
+                        <div class="flex flex-wrap p-1 bg-slate-100 dark:bg-slate-700/50 rounded-lg self-start sm:self-auto" id="filterGroup">
                             <button data-filter="all" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm">
-                                All Results
+                                All
                             </button>
                             <button data-filter="weak" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
-                                Vulnerable Only
+                                Weak Hash
+                            </button>
+                            <button data-filter="expired" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+                                Expired
+                            </button>
+                            <button data-filter="wildcard" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+                                Wildcard
                             </button>
                             <button data-filter="secure" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
-                                Secure Only
+                                Secure
                             </button>
                         </div>
                     </div>
 
                     <!-- Table Header -->
                     <div class="grid grid-cols-12 px-6 py-3 bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider z-10 relative">
-                        <div class="col-span-4">Host / IP</div>
+                        <div class="col-span-3">Host / IP</div>
                         <div class="col-span-2">Port</div>
-                        <div class="col-span-4">Signature Algorithm</div>
+                        <div class="col-span-3">Algorithm</div>
+                        <div class="col-span-2">Expiry</div>
                         <div class="col-span-2 text-right">Status</div>
                     </div>
 
@@ -244,12 +278,24 @@ PORT    STATE SERVICE
 | Not valid before: 2020-01-01T00:00:00
 |_Not valid after:  2025-01-01T00:00:00
 
-Nmap scan report for legacy.example.com (192.168.1.12)
+Nmap scan report for wildcard.example.com (192.168.1.13)
 Host is up (0.030s latency).
 PORT    STATE SERVICE
 443/tcp open  https
-| ssl-cert: Signature Algorithm: md5WithRSAEncryption
-|_Subject: commonName=legacy.example.com
+| ssl-cert: Subject: commonName=*.example.com
+| Subject Alternative Name: DNS:example.com, DNS:*.example.com
+| Signature Algorithm: sha256WithRSAEncryption
+| Not valid before: 2022-01-01T00:00:00
+|_Not valid after:  2026-01-01T00:00:00
+
+Nmap scan report for san-wildcard.example.com (192.168.1.14)
+Host is up (0.030s latency).
+PORT    STATE SERVICE
+443/tcp open  https
+| ssl-cert: Subject: commonName=example.com
+| Subject Alternative Name: DNS:example.com, DNS:*.sub.example.com
+| Signature Algorithm: sha256WithRSAEncryption
+|_Not valid after:  2026-01-01T00:00:00
 
 Nmap scan report for secure.example.com (192.168.1.11)
 Host is up (0.020s latency).
@@ -258,7 +304,7 @@ PORT    STATE SERVICE
 | ssl-cert: Subject: commonName=secure.example.com
 | Issuer: commonName=Lets Encrypt
 | Signature Algorithm: sha256WithRSAEncryption
-|_Not valid after:  2024-01-01T00:00:00`;
+|_Not valid after:  2030-01-01T00:00:00`;
 
         // --- DOM Elements ---
         const inputData = document.getElementById('inputData');
@@ -273,17 +319,50 @@ PORT    STATE SERVICE
         // Stats Elements
         const statTotal = document.getElementById('statTotal');
         const statWeak = document.getElementById('statWeak');
+        const statExpired = document.getElementById('statExpired');
+        const statWildcard = document.getElementById('statWildcard');
         const statSecure = document.getElementById('statSecure');
+        
         const cardWeak = document.getElementById('cardWeak');
         const labelWeak = document.getElementById('labelWeak');
         const iconBgWeak = document.getElementById('iconBgWeak');
 
+        const cardExpired = document.getElementById('cardExpired');
+        const labelExpired = document.getElementById('labelExpired');
+        const iconBgExpired = document.getElementById('iconBgExpired');
+
+        const cardWildcard = document.getElementById('cardWildcard');
+        const labelWildcard = document.getElementById('labelWildcard');
+        const iconBgWildcard = document.getElementById('iconBgWildcard');
+
         // --- Logic & Parsers ---
+
+        function checkExpiration(dateStr) {
+            if (!dateStr) return { isExpired: false, dateDisplay: 'Unknown' };
+            const expiryDate = new Date(dateStr);
+            const now = new Date();
+            const isExpired = expiryDate < now;
+            return {
+                isExpired: isExpired,
+                dateDisplay: expiryDate.toLocaleDateString(),
+                rawDate: expiryDate
+            };
+        }
+
+        function checkWildcard(subjectStr, sanStr) {
+            // Check Common Name
+            if (subjectStr && subjectStr.includes('*')) return true;
+            
+            // Check Subject Alternative Names
+            // SAN string typically looks like: "DNS:example.com, DNS:*.example.com"
+            if (sanStr && sanStr.includes('*')) return true;
+            
+            return false;
+        }
 
         function getAlgorithmDetails(algo) {
             if (!algo) return { isWeak: false, desc: 'Unknown algorithm' };
             
-            // 1. Check exact match in DB
             if (ALGO_DB[algo]) {
                 return {
                     isWeak: ALGO_DB[algo].status === 'WEAK',
@@ -291,7 +370,6 @@ PORT    STATE SERVICE
                 };
             }
 
-            // 2. Heuristic checks for unknown strings
             const lower = algo.toLowerCase();
             if (lower.includes('md5') || lower.includes('md2') || lower.includes('md4')) {
                 return { isWeak: true, desc: 'Legacy MD hash detected (Generic match).' };
@@ -303,7 +381,6 @@ PORT    STATE SERVICE
                 return { isWeak: false, desc: 'SHA-2 family detected (Generic match).' };
             }
 
-            // 3. Fallback
             return { isWeak: false, desc: 'Algorithm not in database. Assumed standard.' };
         }
 
@@ -337,10 +414,22 @@ PORT    STATE SERVICE
                             const script = scripts[k];
                             if (script.getAttribute("id") === "ssl-cert") {
                                 const output = script.getAttribute("output") || "";
-                                const match = output.match(/Signature Algorithm:\s*([a-zA-Z0-9-]+)/i);
-                                if (match && match[1]) {
-                                    const algoName = match[1];
+                                
+                                // Extract Algo
+                                const algoMatch = output.match(/Signature Algorithm:\s*([a-zA-Z0-9-]+)/i);
+                                // Extract Expiry
+                                const expiryMatch = output.match(/(?:Not valid after|Not after):\s*([\d\-\:T]+)/i);
+                                // Extract Subject Alternative Name
+                                const sanMatch = output.match(/Subject Alternative Name:\s*([^\n<]*)/i);
+
+                                if (algoMatch || expiryMatch || cnMatch || sanMatch) {
+                                    const algoName = algoMatch ? algoMatch[1] : 'Unknown';
                                     const details = getAlgorithmDetails(algoName);
+                                    const expiryInfo = checkExpiration(expiryMatch ? expiryMatch[1] : null);
+                                    const cn = cnMatch ? cnMatch[1] : '';
+                                    const sanRaw = sanMatch ? sanMatch[1] : '';
+                                    const isWildcard = checkWildcard(cn, sanRaw);
+
                                     results.push({
                                         ip,
                                         hostname,
@@ -348,7 +437,11 @@ PORT    STATE SERVICE
                                         protocol,
                                         algorithm: algoName,
                                         isWeak: details.isWeak,
-                                        description: details.desc
+                                        description: details.desc,
+                                        isExpired: expiryInfo.isExpired,
+                                        dateDisplay: expiryInfo.dateDisplay,
+                                        commonName: cn,
+                                        isWildcard: isWildcard
                                     });
                                 }
                             }
@@ -381,32 +474,63 @@ PORT    STATE SERVICE
                 }
 
                 const lines = block.split('\n');
+                
                 let currentPort = null;
                 let currentProtocol = null;
+                let pendingSSLData = null;
+
+                const finalizePending = () => {
+                    if (pendingSSLData && (pendingSSLData.algo || pendingSSLData.expiryRaw || pendingSSLData.cn || pendingSSLData.sanRaw)) {
+                         const algoName = pendingSSLData.algo || 'Unknown';
+                         const details = getAlgorithmDetails(algoName);
+                         const expiryInfo = checkExpiration(pendingSSLData.expiryRaw);
+                         const cn = pendingSSLData.cn || '';
+                         const sanRaw = pendingSSLData.sanRaw || '';
+                         const isWildcard = checkWildcard(cn, sanRaw);
+
+                         results.push({
+                             ip,
+                             hostname,
+                             port: pendingSSLData.port,
+                             protocol: pendingSSLData.protocol,
+                             algorithm: algoName,
+                             isWeak: details.isWeak,
+                             description: details.desc,
+                             isExpired: expiryInfo.isExpired,
+                             dateDisplay: expiryInfo.dateDisplay,
+                             commonName: cn,
+                             isWildcard: isWildcard
+                         });
+                    }
+                    pendingSSLData = null;
+                };
 
                 lines.forEach(line => {
                     const portMatch = line.match(/^(\d+)\/(tcp|udp)\s+open/);
                     if (portMatch) {
+                        finalizePending();
                         currentPort = portMatch[1];
                         currentProtocol = portMatch[2];
+                        pendingSSLData = { port: currentPort, protocol: currentProtocol, algo: null, expiryRaw: null, cn: null, sanRaw: null };
                     }
 
-                    const algoMatch = line.match(/Signature Algorithm:\s*([a-zA-Z0-9-]+)/i);
-                    
-                    if (algoMatch && currentPort) {
-                        const algoName = algoMatch[1];
-                        const details = getAlgorithmDetails(algoName);
-                        results.push({
-                            ip,
-                            hostname,
-                            port: currentPort,
-                            protocol: currentProtocol,
-                            algorithm: algoName,
-                            isWeak: details.isWeak,
-                            description: details.desc
-                        });
+                    if (currentPort && pendingSSLData) {
+                        const algoMatch = line.match(/Signature Algorithm:\s*([a-zA-Z0-9-]+)/i);
+                        if (algoMatch) pendingSSLData.algo = algoMatch[1];
+
+                        const expiryMatch = line.match(/(?:Not valid after|Not after):\s*([\d\-\:T]+)/i);
+                        if (expiryMatch) pendingSSLData.expiryRaw = expiryMatch[1];
+                        
+                        // Extract Common Name from Subject line
+                        const cnMatch = line.match(/commonName=([^/\s,]+)/i);
+                        if (cnMatch) pendingSSLData.cn = cnMatch[1];
+
+                        // Extract Subject Alternative Name (Simple line match)
+                        const sanMatch = line.match(/Subject Alternative Name:\s*(.*)/i);
+                        if (sanMatch) pendingSSLData.sanRaw = sanMatch[1];
                     }
                 });
+                finalizePending();
             });
             return results;
         }
@@ -416,40 +540,58 @@ PORT    STATE SERVICE
         function updateStats() {
             const total = allResults.length;
             const weak = allResults.filter(r => r.isWeak).length;
-            const secure = total - weak;
+            const expired = allResults.filter(r => r.isExpired).length;
+            const wildcard = allResults.filter(r => r.isWildcard).length;
+            const secure = allResults.filter(r => !r.isWeak && !r.isExpired).length;
 
             statTotal.textContent = total;
             statWeak.textContent = weak;
+            statExpired.textContent = expired;
+            statWildcard.textContent = wildcard;
             statSecure.textContent = secure;
 
-            // Visual feedback for weak stats
+            // Weak Styling
             if (weak > 0) {
                 cardWeak.classList.remove('border-slate-200', 'dark:border-slate-700');
-                cardWeak.classList.add('border-red-200', 'bg-red-50', 'dark:bg-red-900/20', 'dark:border-red-800');
-                
-                labelWeak.classList.remove('text-slate-500', 'dark:text-slate-400');
-                labelWeak.classList.add('text-red-600', 'dark:text-red-400');
-                
-                statWeak.classList.remove('text-slate-900', 'dark:text-white');
-                statWeak.classList.add('text-red-700', 'dark:text-red-300');
-                
-                iconBgWeak.classList.remove('bg-slate-100', 'dark:bg-slate-700', 'text-slate-500', 'dark:text-slate-300');
-                iconBgWeak.classList.add('bg-red-200', 'dark:bg-red-900/40', 'text-red-700', 'dark:text-red-400');
+                cardWeak.classList.add('border-orange-200', 'bg-orange-50', 'dark:bg-orange-900/20', 'dark:border-orange-800');
+                labelWeak.classList.add('text-orange-600', 'dark:text-orange-400');
+                statWeak.classList.add('text-orange-700', 'dark:text-orange-300');
+                iconBgWeak.classList.add('bg-orange-200', 'dark:bg-orange-900/40', 'text-orange-700', 'dark:text-orange-400');
             } else {
-                cardWeak.classList.add('border-slate-200', 'dark:border-slate-700');
-                cardWeak.classList.remove('border-red-200', 'bg-red-50', 'dark:bg-red-900/20', 'dark:border-red-800');
-                
-                labelWeak.classList.add('text-slate-500', 'dark:text-slate-400');
-                labelWeak.classList.remove('text-red-600', 'dark:text-red-400');
-                
-                statWeak.classList.add('text-slate-900', 'dark:text-white');
-                statWeak.classList.remove('text-red-700', 'dark:text-red-300');
-                
-                iconBgWeak.classList.add('bg-slate-100', 'dark:bg-slate-700', 'text-slate-500', 'dark:text-slate-300');
-                iconBgWeak.classList.remove('bg-red-200', 'dark:bg-red-900/40', 'text-red-700', 'dark:text-red-400');
+                cardWeak.className = "bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24 transition-colors";
+                labelWeak.className = "text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500";
+                statWeak.className = "text-2xl font-bold text-slate-900 dark:text-white";
+                iconBgWeak.className = "p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300";
             }
 
-            // Toggle Clear Button
+            // Expired Styling
+            if (expired > 0) {
+                cardExpired.classList.remove('border-slate-200', 'dark:border-slate-700');
+                cardExpired.classList.add('border-red-200', 'bg-red-50', 'dark:bg-red-900/20', 'dark:border-red-800');
+                labelExpired.classList.add('text-red-600', 'dark:text-red-400');
+                statExpired.classList.add('text-red-700', 'dark:text-red-300');
+                iconBgExpired.classList.add('bg-red-200', 'dark:bg-red-900/40', 'text-red-700', 'dark:text-red-400');
+            } else {
+                cardExpired.className = "bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24 transition-colors";
+                labelExpired.className = "text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500";
+                statExpired.className = "text-2xl font-bold text-slate-900 dark:text-white";
+                iconBgExpired.className = "p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300";
+            }
+
+            // Wildcard Styling (Indigo/Purple)
+            if (wildcard > 0) {
+                cardWildcard.classList.remove('border-slate-200', 'dark:border-slate-700');
+                cardWildcard.classList.add('border-indigo-200', 'bg-indigo-50', 'dark:bg-indigo-900/20', 'dark:border-indigo-800');
+                labelWildcard.classList.add('text-indigo-600', 'dark:text-indigo-400');
+                statWildcard.classList.add('text-indigo-700', 'dark:text-indigo-300');
+                iconBgWildcard.classList.add('bg-indigo-200', 'dark:bg-indigo-900/40', 'text-indigo-700', 'dark:text-indigo-400');
+            } else {
+                cardWildcard.className = "bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24 transition-colors";
+                labelWildcard.className = "text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500";
+                statWildcard.className = "text-2xl font-bold text-slate-900 dark:text-white";
+                iconBgWildcard.className = "p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300";
+            }
+
             if (inputData.value.trim().length > 0) {
                 btnClear.classList.remove('hidden');
             } else {
@@ -473,7 +615,9 @@ PORT    STATE SERVICE
 
             const filtered = allResults.filter(r => {
                 if (currentFilter === 'weak') return r.isWeak;
-                if (currentFilter === 'secure') return !r.isWeak;
+                if (currentFilter === 'expired') return r.isExpired;
+                if (currentFilter === 'wildcard') return r.isWildcard;
+                if (currentFilter === 'secure') return !r.isWeak && !r.isExpired;
                 return true;
             });
 
@@ -488,22 +632,48 @@ PORT    STATE SERVICE
 
             filtered.forEach(result => {
                 const row = document.createElement('div');
-                row.className = `grid grid-cols-12 px-6 py-4 border-b border-slate-100 dark:border-slate-700 items-start sm:items-center hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${result.isWeak ? 'bg-red-50/30 dark:bg-red-900/10' : ''}`;
+                const isCritical = result.isWeak || result.isExpired;
+                const isWarning = result.isWildcard && !isCritical;
+                
+                let rowBgClass = '';
+                if (isCritical) rowBgClass = 'bg-red-50/10 dark:bg-red-900/5';
+                else if (isWarning) rowBgClass = 'bg-indigo-50/30 dark:bg-indigo-900/5';
+
+                row.className = `grid grid-cols-12 px-6 py-4 border-b border-slate-100 dark:border-slate-700 items-start sm:items-center hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${rowBgClass}`;
                 
                 const hostDisplay = (result.hostname !== 'Unknown' && result.hostname) ? result.hostname : result.ip;
                 const subDisplay = (result.hostname !== 'Unknown' && result.hostname) ? `<div class="text-xs text-slate-500 dark:text-slate-400">${result.ip}</div>` : '';
 
-                const badgeClass = result.isWeak 
-                    ? 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/40 dark:text-red-300 dark:border-red-800' 
-                    : 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800/50';
+                // Algo Badge Logic
+                const algoBadgeClass = result.isWeak 
+                    ? 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/40 dark:text-orange-300 dark:border-orange-800' 
+                    : 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600';
 
-                const statusHtml = result.isWeak
-                    ? `<div class="inline-flex items-center gap-1.5 text-red-600 dark:text-red-400 text-xs font-bold"><i data-lucide="alert-triangle" class="w-4 h-4"></i> WEAK</div>`
-                    : `<div class="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-xs font-medium"><i data-lucide="shield-check" class="w-4 h-4"></i> OK</div>`;
+                // Expiry Badge Logic
+                const expiryBadgeClass = result.isExpired
+                     ? 'text-red-600 dark:text-red-400 font-bold'
+                     : 'text-slate-500 dark:text-slate-400';
+
+                // Status Column Logic
+                let statusHtml = '';
+                if (result.isExpired) {
+                    statusHtml += `<div class="inline-flex items-center gap-1.5 text-red-600 dark:text-red-400 text-xs font-bold mb-1"><i data-lucide="clock" class="w-3 h-3"></i> EXPIRED SSL CERTIFICATE</div><br>`;
+                }
+                if (result.isWeak) {
+                    statusHtml += `<div class="inline-flex items-center gap-1.5 text-orange-600 dark:text-orange-400 text-xs font-bold mb-1"><i data-lucide="unlock" class="w-3 h-3"></i> WEAK SSL CERTIFICATE HASHING ALORITHM</div><br>`;
+                }
+                if (result.isWildcard) {
+                    statusHtml += `<div class="inline-flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 text-xs font-bold mb-1"><i data-lucide="asterisk" class="w-3 h-3"></i> WILDCARD SSL CERTIFICATE</div><br>`;
+                }
+                if (!result.isExpired && !result.isWeak && !result.isWildcard) {
+                    statusHtml = `<div class="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-xs font-medium"><i data-lucide="shield-check" class="w-4 h-4"></i> SECURE</div>`;
+                }
+                // Cleanup trailing breaks if multiple badges
+                if (statusHtml.endsWith('<br>')) statusHtml = statusHtml.slice(0, -4);
 
                 row.innerHTML = `
-                    <div class="col-span-12 sm:col-span-4 pr-4 mb-2 sm:mb-0">
-                        <div class="font-medium text-slate-900 dark:text-slate-100 break-words">${hostDisplay}</div>
+                    <div class="col-span-12 sm:col-span-3 pr-2 mb-2 sm:mb-0">
+                        <div class="font-medium text-slate-900 dark:text-slate-100 break-words text-sm">${hostDisplay}</div>
                         ${subDisplay}
                     </div>
                     <div class="col-span-4 sm:col-span-2 mb-2 sm:mb-0">
@@ -511,17 +681,21 @@ PORT    STATE SERVICE
                             ${result.port}/${result.protocol}
                         </span>
                     </div>
-                    <div class="col-span-8 sm:col-span-4 mb-2 sm:mb-0">
+                    <div class="col-span-8 sm:col-span-3 mb-2 sm:mb-0">
                         <div class="flex flex-col items-start gap-1">
-                            <code class="text-xs px-2 py-1 rounded border ${badgeClass}">
+                            <code class="text-xs px-2 py-1 rounded border ${algoBadgeClass}">
                                 ${result.algorithm}
                             </code>
-                            <span class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 italic">
+                            <span class="text-[10px] text-slate-400 dark:text-slate-500 italic leading-tight">
                                 ${result.description}
                             </span>
+                            ${result.commonName ? `<span class="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1 rounded border border-slate-200 dark:border-slate-700">CN: ${result.commonName}</span>` : ''}
                         </div>
                     </div>
-                    <div class="col-span-12 sm:col-span-2 text-left sm:text-right">
+                    <div class="col-span-6 sm:col-span-2 mb-2 sm:mb-0 text-sm ${expiryBadgeClass}">
+                        ${result.dateDisplay}
+                    </div>
+                    <div class="col-span-6 sm:col-span-2 text-right">
                         ${statusHtml}
                     </div>
                 `;
@@ -552,7 +726,6 @@ PORT    STATE SERVICE
             }
         }
 
-        // Init Theme
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             htmlElement.classList.add('dark');
@@ -588,7 +761,7 @@ PORT    STATE SERVICE
             btn.addEventListener('click', (e) => {
                 // Update active state visuals
                 filterBtns.forEach(b => {
-                    b.classList.remove('bg-white', 'dark:bg-slate-600', 'text-slate-900', 'dark:text-white', 'shadow-sm', 'text-red-600', 'dark:text-red-400', 'text-emerald-600', 'dark:text-emerald-400');
+                    b.classList.remove('bg-white', 'dark:bg-slate-600', 'text-slate-900', 'dark:text-white', 'shadow-sm', 'text-red-600', 'dark:text-red-400', 'text-emerald-600', 'dark:text-emerald-400', 'text-orange-600', 'dark:text-orange-400', 'text-indigo-600', 'dark:text-indigo-400');
                     b.classList.add('text-slate-500', 'dark:text-slate-400', 'hover:text-slate-700', 'dark:hover:text-slate-200');
                 });
 
@@ -599,7 +772,9 @@ PORT    STATE SERVICE
                 clicked.classList.remove('text-slate-500', 'dark:text-slate-400', 'hover:text-slate-700', 'dark:hover:text-slate-200');
                 clicked.classList.add('bg-white', 'dark:bg-slate-600', 'shadow-sm');
                 
-                if (filterType === 'weak') clicked.classList.add('text-red-600', 'dark:text-red-400');
+                if (filterType === 'weak') clicked.classList.add('text-orange-600', 'dark:text-orange-400');
+                else if (filterType === 'expired') clicked.classList.add('text-red-600', 'dark:text-red-400');
+                else if (filterType === 'wildcard') clicked.classList.add('text-indigo-600', 'dark:text-indigo-400');
                 else if (filterType === 'secure') clicked.classList.add('text-emerald-600', 'dark:text-emerald-400');
                 else clicked.classList.add('text-slate-900', 'dark:text-white');
 
