@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSL Certificate Weak Hashing Algorithm Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#1e293b', 
+                            900: '#0f172a',
+                            950: '#020617',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom scrollbar for the table container */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1; /* slate-300 */
+            border-radius: 4px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #475569; /* slate-600 */
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: #94a3b8; /* slate-400 */
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: #64748b; /* slate-500 */
+        }
+        
+        /* Transitions */
+        body, div, p, span, h1, h2, h3, button, textarea, input, header {
+            transition-property: color, background-color, border-color;
+            transition-duration: 200ms;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans min-h-screen flex flex-col transition-colors duration-200">
+
+    <!-- Header -->
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 p-2 rounded-lg shadow-md">
+                    <i data-lucide="shield-check" class="w-6 h-6 text-white"></i>
+                </div>
+                <h1 class="text-xl font-bold text-slate-800 dark:text-white">SSL Certificate Weak Hashing Algorithm Checker</h1>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="text-sm text-slate-500 dark:text-slate-400 hidden lg:block">
+                    Parses output from <code class="bg-slate-100 dark:bg-slate-900 px-1 py-0.5 rounded text-blue-600 dark:text-blue-400 border border-slate-200 dark:border-slate-700">nmap --script ssl-cert</code>
+                </div>
+                <!-- Dark Mode Toggle -->
+                <button id="btnThemeToggle" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700 transition-colors" title="Toggle Dark Mode">
+                    <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+                    <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 flex-grow w-full">
+        
+        <!-- Intro Card -->
+        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl p-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div class="flex gap-3">
+                <i data-lucide="info" class="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-1"></i>
+                <div>
+                    <h3 class="font-semibold text-blue-900 dark:text-blue-100">How to use</h3>
+                    <p class="text-blue-800 dark:text-blue-200 text-sm mt-1">
+                        Paste your Nmap scan results below to identify certificates using obsolete hashing algorithms (like MD5 or SHA1).
+                        Supports both <strong>Terminal Output</strong> and <strong>XML (-oX)</strong>.
+                    </p>
+                </div>
+            </div>
+            <button id="btnLoadExample" class="text-sm bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-lg border border-blue-200 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-slate-700 font-medium transition-colors whitespace-nowrap shadow-sm">
+                Load Example Data
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Left Column: Input -->
+            <div class="lg:col-span-1 flex flex-col gap-4">
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col h-[600px]">
+                    <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 rounded-t-xl">
+                        <label class="font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                            <i data-lucide="code" class="w-4 h-4 text-slate-400"></i>
+                            Input Data
+                        </label>
+                        <button id="btnClear" class="text-xs text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400 transition-colors hidden">
+                            Clear
+                        </button>
+                    </div>
+                    <textarea id="inputData"
+                        class="flex-1 w-full p-4 font-mono text-xs sm:text-sm resize-none focus:outline-none focus:bg-slate-50 dark:focus:bg-slate-900 transition-colors text-slate-600 dark:text-slate-300 bg-transparent placeholder-slate-400 dark:placeholder-slate-600"
+                        placeholder="Paste nmap output here...&#10;&#10;Example command:&#10;nmap -p 443 --script ssl-cert <target>"
+                        spellcheck="false"></textarea>
+                    <div class="p-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 rounded-b-xl">
+                        <button id="btnAnalyze" class="w-full bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-500 text-white font-medium py-2.5 rounded-lg transition-all active:scale-[0.98] shadow-sm flex justify-center items-center gap-2">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                            Analyze Results
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Results -->
+            <div class="lg:col-span-2 flex flex-col gap-4">
+                
+                <!-- Stats Bar -->
+                <div class="grid grid-cols-3 gap-4">
+                    <!-- Total -->
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Analyzed</p>
+                            <p id="statTotal" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
+                        </div>
+                        <div class="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-500 dark:text-slate-300">
+                            <i data-lucide="file-text" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <!-- Weak -->
+                    <div id="cardWeak" class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between transition-colors">
+                        <div>
+                            <p id="labelWeak" class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Weak Hashes</p>
+                            <p id="statWeak" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
+                        </div>
+                        <div id="iconBgWeak" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">
+                            <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <!-- Secure -->
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Secure</p>
+                            <p id="statSecure" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
+                        </div>
+                        <div class="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600 dark:text-emerald-400">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Table Area -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex-1 flex flex-col h-[465px] relative overflow-hidden">
+                    <!-- Toolbar -->
+                    <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-800 z-10 relative">
+                        <h2 class="font-semibold text-slate-800 dark:text-slate-200">Analysis Details</h2>
+                        <div class="flex p-1 bg-slate-100 dark:bg-slate-700/50 rounded-lg self-start sm:self-auto" id="filterGroup">
+                            <button data-filter="all" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm">
+                                All Results
+                            </button>
+                            <button data-filter="weak" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+                                Vulnerable Only
+                            </button>
+                            <button data-filter="secure" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+                                Secure Only
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Table Header -->
+                    <div class="grid grid-cols-12 px-6 py-3 bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider z-10 relative">
+                        <div class="col-span-4">Host / IP</div>
+                        <div class="col-span-2">Port</div>
+                        <div class="col-span-4">Signature Algorithm</div>
+                        <div class="col-span-2 text-right">Status</div>
+                    </div>
+
+                    <!-- Table Body -->
+                    <div id="resultsContainer" class="overflow-y-auto custom-scrollbar flex-grow bg-white dark:bg-slate-800">
+                        <!-- Empty State -->
+                        <div class="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-500">
+                            <i data-lucide="search" class="w-12 h-12 mb-3 opacity-20"></i>
+                            <p>No results found yet.</p>
+                            <p class="text-sm">Enter Nmap output and click Analyze.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- Algorithm Database ---
+        const ALGO_DB = {
+            'md2': { status: 'WEAK', desc: 'Broken. Vulnerable to collision attacks.' },
+            'md2WithRSAEncryption': { status: 'WEAK', desc: 'Broken. Vulnerable to collision attacks.' },
+            'md4': { status: 'WEAK', desc: 'Broken. Vulnerable to collision attacks.' },
+            'md4WithRSAEncryption': { status: 'WEAK', desc: 'Broken. Vulnerable to collision attacks.' },
+            'md5': { status: 'WEAK', desc: 'Broken. Vulnerable to collision attacks.' },
+            'md5WithRSAEncryption': { status: 'WEAK', desc: 'Broken. Vulnerable to collision attacks.' },
+            'sha1': { status: 'WEAK', desc: 'Deprecated. Vulnerable to chosen-prefix attacks.' },
+            'sha1WithRSAEncryption': { status: 'WEAK', desc: 'Deprecated. Vulnerable to chosen-prefix attacks.' },
+            'sha1WithRSA': { status: 'WEAK', desc: 'Deprecated. Vulnerable to chosen-prefix attacks.' },
+            'dsa-with-sha1': { status: 'WEAK', desc: 'Deprecated SHA-1 usage.' },
+            'iso-sha1': { status: 'WEAK', desc: 'Deprecated.' },
+            'sha224': { status: 'SECURE', desc: 'Part of SHA-2 family. Generally secure.' },
+            'sha224WithRSAEncryption': { status: 'SECURE', desc: 'Part of SHA-2 family. Generally secure.' },
+            'sha256': { status: 'SECURE', desc: 'Standard SHA-2. Industry standard.' },
+            'sha256WithRSAEncryption': { status: 'SECURE', desc: 'Standard SHA-2. Industry standard.' },
+            'sha384': { status: 'SECURE', desc: 'Strong SHA-2. High security.' },
+            'sha384WithRSAEncryption': { status: 'SECURE', desc: 'Strong SHA-2. High security.' },
+            'sha512': { status: 'SECURE', desc: 'Very strong SHA-2. High security.' },
+            'sha512WithRSAEncryption': { status: 'SECURE', desc: 'Very strong SHA-2. High security.' },
+            'id-ecPublicKey': { status: 'SECURE', desc: 'Elliptic Curve Cryptography.' },
+            'ecdsa-with-SHA256': { status: 'SECURE', desc: 'Elliptic Curve with SHA-256.' },
+            'ecdsa-with-SHA384': { status: 'SECURE', desc: 'Elliptic Curve with SHA-384.' }
+        };
+
+        // --- State Management ---
+        let allResults = [];
+        let currentFilter = 'all';
+
+        // --- Constants ---
+        const EXAMPLE_DATA = `Nmap scan report for vulnerable.example.com (192.168.1.10)
+Host is up (0.045s latency).
+PORT    STATE SERVICE
+443/tcp open  https
+| ssl-cert: Subject: commonName=vulnerable.example.com
+| Issuer: commonName=Old CA
+| Public Key type: rsa
+| Public Key bits: 1024
+| Signature Algorithm: sha1WithRSAEncryption
+| Not valid before: 2020-01-01T00:00:00
+|_Not valid after:  2025-01-01T00:00:00
+
+Nmap scan report for legacy.example.com (192.168.1.12)
+Host is up (0.030s latency).
+PORT    STATE SERVICE
+443/tcp open  https
+| ssl-cert: Signature Algorithm: md5WithRSAEncryption
+|_Subject: commonName=legacy.example.com
+
+Nmap scan report for secure.example.com (192.168.1.11)
+Host is up (0.020s latency).
+PORT    STATE SERVICE
+8443/tcp open  https-alt
+| ssl-cert: Subject: commonName=secure.example.com
+| Issuer: commonName=Lets Encrypt
+| Signature Algorithm: sha256WithRSAEncryption
+|_Not valid after:  2024-01-01T00:00:00`;
+
+        // --- DOM Elements ---
+        const inputData = document.getElementById('inputData');
+        const btnAnalyze = document.getElementById('btnAnalyze');
+        const btnClear = document.getElementById('btnClear');
+        const btnLoadExample = document.getElementById('btnLoadExample');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const btnThemeToggle = document.getElementById('btnThemeToggle');
+        const htmlElement = document.documentElement;
+
+        // Stats Elements
+        const statTotal = document.getElementById('statTotal');
+        const statWeak = document.getElementById('statWeak');
+        const statSecure = document.getElementById('statSecure');
+        const cardWeak = document.getElementById('cardWeak');
+        const labelWeak = document.getElementById('labelWeak');
+        const iconBgWeak = document.getElementById('iconBgWeak');
+
+        // --- Logic & Parsers ---
+
+        function getAlgorithmDetails(algo) {
+            if (!algo) return { isWeak: false, desc: 'Unknown algorithm' };
+            
+            // 1. Check exact match in DB
+            if (ALGO_DB[algo]) {
+                return {
+                    isWeak: ALGO_DB[algo].status === 'WEAK',
+                    desc: ALGO_DB[algo].desc
+                };
+            }
+
+            // 2. Heuristic checks for unknown strings
+            const lower = algo.toLowerCase();
+            if (lower.includes('md5') || lower.includes('md2') || lower.includes('md4')) {
+                return { isWeak: true, desc: 'Legacy MD hash detected (Generic match).' };
+            }
+            if (lower.includes('sha1')) {
+                return { isWeak: true, desc: 'SHA-1 detected (Generic match).' };
+            }
+            if (lower.includes('sha256') || lower.includes('sha384') || lower.includes('sha512')) {
+                return { isWeak: false, desc: 'SHA-2 family detected (Generic match).' };
+            }
+
+            // 3. Fallback
+            return { isWeak: false, desc: 'Algorithm not in database. Assumed standard.' };
+        }
+
+        function parseXML(xmlContent) {
+            const results = [];
+            try {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlContent, "text/xml");
+                const hosts = xmlDoc.getElementsByTagName("host");
+
+                for (let i = 0; i < hosts.length; i++) {
+                    const host = hosts[i];
+                    const addressElem = host.getElementsByTagName("address")[0];
+                    const ip = addressElem ? addressElem.getAttribute("addr") : "Unknown IP";
+                    
+                    const hostnamesElem = host.getElementsByTagName("hostnames")[0];
+                    let hostname = "";
+                    if (hostnamesElem) {
+                        const nameElem = hostnamesElem.getElementsByTagName("hostname")[0];
+                        if (nameElem) hostname = nameElem.getAttribute("name");
+                    }
+
+                    const ports = host.getElementsByTagName("port");
+                    for (let j = 0; j < ports.length; j++) {
+                        const portElem = ports[j];
+                        const portId = portElem.getAttribute("portid");
+                        const protocol = portElem.getAttribute("protocol");
+                        
+                        const scripts = portElem.getElementsByTagName("script");
+                        for (let k = 0; k < scripts.length; k++) {
+                            const script = scripts[k];
+                            if (script.getAttribute("id") === "ssl-cert") {
+                                const output = script.getAttribute("output") || "";
+                                const match = output.match(/Signature Algorithm:\s*([a-zA-Z0-9-]+)/i);
+                                if (match && match[1]) {
+                                    const algoName = match[1];
+                                    const details = getAlgorithmDetails(algoName);
+                                    results.push({
+                                        ip,
+                                        hostname,
+                                        port: portId,
+                                        protocol,
+                                        algorithm: algoName,
+                                        isWeak: details.isWeak,
+                                        description: details.desc
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("XML Parsing error", e);
+            }
+            return results;
+        }
+
+        function parseText(textContent) {
+            const results = [];
+            const hostBlocks = textContent.split(/Nmap scan report for /g);
+
+            hostBlocks.forEach(block => {
+                if (!block.trim()) return;
+
+                const firstLine = block.trim().split('\n')[0];
+                let ip = "Unknown";
+                let hostname = "Unknown";
+                
+                const ipMatch = firstLine.match(/\(([\d\.]+)\)/);
+                if (ipMatch) {
+                    ip = ipMatch[1];
+                    hostname = firstLine.split('(')[0].trim();
+                } else {
+                    ip = firstLine.trim();
+                }
+
+                const lines = block.split('\n');
+                let currentPort = null;
+                let currentProtocol = null;
+
+                lines.forEach(line => {
+                    const portMatch = line.match(/^(\d+)\/(tcp|udp)\s+open/);
+                    if (portMatch) {
+                        currentPort = portMatch[1];
+                        currentProtocol = portMatch[2];
+                    }
+
+                    const algoMatch = line.match(/Signature Algorithm:\s*([a-zA-Z0-9-]+)/i);
+                    
+                    if (algoMatch && currentPort) {
+                        const algoName = algoMatch[1];
+                        const details = getAlgorithmDetails(algoName);
+                        results.push({
+                            ip,
+                            hostname,
+                            port: currentPort,
+                            protocol: currentProtocol,
+                            algorithm: algoName,
+                            isWeak: details.isWeak,
+                            description: details.desc
+                        });
+                    }
+                });
+            });
+            return results;
+        }
+
+        // --- UI Updaters ---
+
+        function updateStats() {
+            const total = allResults.length;
+            const weak = allResults.filter(r => r.isWeak).length;
+            const secure = total - weak;
+
+            statTotal.textContent = total;
+            statWeak.textContent = weak;
+            statSecure.textContent = secure;
+
+            // Visual feedback for weak stats
+            if (weak > 0) {
+                cardWeak.classList.remove('border-slate-200', 'dark:border-slate-700');
+                cardWeak.classList.add('border-red-200', 'bg-red-50', 'dark:bg-red-900/20', 'dark:border-red-800');
+                
+                labelWeak.classList.remove('text-slate-500', 'dark:text-slate-400');
+                labelWeak.classList.add('text-red-600', 'dark:text-red-400');
+                
+                statWeak.classList.remove('text-slate-900', 'dark:text-white');
+                statWeak.classList.add('text-red-700', 'dark:text-red-300');
+                
+                iconBgWeak.classList.remove('bg-slate-100', 'dark:bg-slate-700', 'text-slate-500', 'dark:text-slate-300');
+                iconBgWeak.classList.add('bg-red-200', 'dark:bg-red-900/40', 'text-red-700', 'dark:text-red-400');
+            } else {
+                cardWeak.classList.add('border-slate-200', 'dark:border-slate-700');
+                cardWeak.classList.remove('border-red-200', 'bg-red-50', 'dark:bg-red-900/20', 'dark:border-red-800');
+                
+                labelWeak.classList.add('text-slate-500', 'dark:text-slate-400');
+                labelWeak.classList.remove('text-red-600', 'dark:text-red-400');
+                
+                statWeak.classList.add('text-slate-900', 'dark:text-white');
+                statWeak.classList.remove('text-red-700', 'dark:text-red-300');
+                
+                iconBgWeak.classList.add('bg-slate-100', 'dark:bg-slate-700', 'text-slate-500', 'dark:text-slate-300');
+                iconBgWeak.classList.remove('bg-red-200', 'dark:bg-red-900/40', 'text-red-700', 'dark:text-red-400');
+            }
+
+            // Toggle Clear Button
+            if (inputData.value.trim().length > 0) {
+                btnClear.classList.remove('hidden');
+            } else {
+                btnClear.classList.add('hidden');
+            }
+        }
+
+        function renderTable() {
+            resultsContainer.innerHTML = '';
+            
+            if (allResults.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-500">
+                        <i data-lucide="search" class="w-12 h-12 mb-3 opacity-20"></i>
+                        <p>No results found yet.</p>
+                        <p class="text-sm">Enter Nmap output and click Analyze.</p>
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            const filtered = allResults.filter(r => {
+                if (currentFilter === 'weak') return r.isWeak;
+                if (currentFilter === 'secure') return !r.isWeak;
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-500">
+                        <p>No results match the current filter.</p>
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            filtered.forEach(result => {
+                const row = document.createElement('div');
+                row.className = `grid grid-cols-12 px-6 py-4 border-b border-slate-100 dark:border-slate-700 items-start sm:items-center hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${result.isWeak ? 'bg-red-50/30 dark:bg-red-900/10' : ''}`;
+                
+                const hostDisplay = (result.hostname !== 'Unknown' && result.hostname) ? result.hostname : result.ip;
+                const subDisplay = (result.hostname !== 'Unknown' && result.hostname) ? `<div class="text-xs text-slate-500 dark:text-slate-400">${result.ip}</div>` : '';
+
+                const badgeClass = result.isWeak 
+                    ? 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/40 dark:text-red-300 dark:border-red-800' 
+                    : 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800/50';
+
+                const statusHtml = result.isWeak
+                    ? `<div class="inline-flex items-center gap-1.5 text-red-600 dark:text-red-400 text-xs font-bold"><i data-lucide="alert-triangle" class="w-4 h-4"></i> WEAK</div>`
+                    : `<div class="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-xs font-medium"><i data-lucide="shield-check" class="w-4 h-4"></i> OK</div>`;
+
+                row.innerHTML = `
+                    <div class="col-span-12 sm:col-span-4 pr-4 mb-2 sm:mb-0">
+                        <div class="font-medium text-slate-900 dark:text-slate-100 break-words">${hostDisplay}</div>
+                        ${subDisplay}
+                    </div>
+                    <div class="col-span-4 sm:col-span-2 mb-2 sm:mb-0">
+                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                            ${result.port}/${result.protocol}
+                        </span>
+                    </div>
+                    <div class="col-span-8 sm:col-span-4 mb-2 sm:mb-0">
+                        <div class="flex flex-col items-start gap-1">
+                            <code class="text-xs px-2 py-1 rounded border ${badgeClass}">
+                                ${result.algorithm}
+                            </code>
+                            <span class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 italic">
+                                ${result.description}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-2 text-left sm:text-right">
+                        ${statusHtml}
+                    </div>
+                `;
+                resultsContainer.appendChild(row);
+            });
+            lucide.createIcons();
+        }
+
+        function handleAnalyze() {
+            const val = inputData.value;
+            if (val.trim().startsWith('<')) {
+                allResults = parseXML(val);
+            } else {
+                allResults = parseText(val);
+            }
+            updateStats();
+            renderTable();
+        }
+
+        // --- Theme Logic ---
+        function toggleTheme() {
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                htmlElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Init Theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            htmlElement.classList.add('dark');
+        } else {
+            htmlElement.classList.remove('dark');
+        }
+
+        // --- Event Listeners ---
+        btnThemeToggle.addEventListener('click', toggleTheme);
+        btnAnalyze.addEventListener('click', handleAnalyze);
+
+        btnClear.addEventListener('click', () => {
+            inputData.value = '';
+            allResults = [];
+            updateStats();
+            renderTable();
+        });
+
+        btnLoadExample.addEventListener('click', () => {
+            inputData.value = EXAMPLE_DATA;
+            handleAnalyze();
+        });
+
+        inputData.addEventListener('input', () => {
+             if (inputData.value.trim().length > 0) {
+                btnClear.classList.remove('hidden');
+            } else {
+                btnClear.classList.add('hidden');
+            }
+        });
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // Update active state visuals
+                filterBtns.forEach(b => {
+                    b.classList.remove('bg-white', 'dark:bg-slate-600', 'text-slate-900', 'dark:text-white', 'shadow-sm', 'text-red-600', 'dark:text-red-400', 'text-emerald-600', 'dark:text-emerald-400');
+                    b.classList.add('text-slate-500', 'dark:text-slate-400', 'hover:text-slate-700', 'dark:hover:text-slate-200');
+                });
+
+                const clicked = e.target;
+                const filterType = clicked.dataset.filter;
+                currentFilter = filterType;
+
+                clicked.classList.remove('text-slate-500', 'dark:text-slate-400', 'hover:text-slate-700', 'dark:hover:text-slate-200');
+                clicked.classList.add('bg-white', 'dark:bg-slate-600', 'shadow-sm');
+                
+                if (filterType === 'weak') clicked.classList.add('text-red-600', 'dark:text-red-400');
+                else if (filterType === 'secure') clicked.classList.add('text-emerald-600', 'dark:text-emerald-400');
+                else clicked.classList.add('text-slate-900', 'dark:text-white');
+
+                renderTable();
+            });
+        });
+
+        // Initialize Icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>
