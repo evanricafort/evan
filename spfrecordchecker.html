@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPF Record Checker</title>
+    <link href="profile.jpg" type="image/jpg" rel="shortcut icon" />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        gray: {
+                            850: '#1f2937',
+                            900: '#111827',
+                            950: '#0b0f19',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for code blocks */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        /* Smooth theme transition */
+        body, div, nav, button, input, table, th, td {
+            transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 300ms;
+        }
+        .rule-item {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200 min-h-screen flex flex-col items-center py-8 md:py-12 px-4 antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300">
+
+    <!-- Theme Toggle (Top Right) -->
+    <div class="absolute top-4 right-4 md:top-8 md:right-8">
+        <button onclick="toggleTheme()" class="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-600 dark:text-yellow-400 shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <i id="themeIcon" class="fas fa-sun text-xl"></i>
+        </button>
+    </div>
+
+    <!-- Main Container -->
+    <main class="w-full max-w-3xl space-y-8 mt-8">
+        
+        <!-- Header -->
+        <div class="text-center space-y-3">
+            <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center justify-center gap-3">
+                <i class="fas fa-shield-halved text-indigo-600 dark:text-indigo-500"></i>
+                <span><span class="text-indigo-600 dark:text-indigo-500">SPF</span> Record Checker</span>
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 text-sm md:text-lg max-w-xl mx-auto">
+                Retrieves and check if a domain has a valid SPF record.
+            </p>
+        </div>
+
+        <!-- Input Card -->
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50">
+            <form id="spfForm" class="space-y-5" onsubmit="handleLookup(event)">
+                <div class="space-y-2">
+                    <label for="domainInput" class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Target Domain</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                        </div>
+                        <input 
+                            type="text" 
+                            id="domainInput" 
+                            placeholder="e.g., google.com" 
+                            class="block w-full pl-11 pr-4 py-4 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-white placeholder-gray-400 font-mono transition-all text-lg shadow-sm"
+                            required
+                        >
+                    </div>
+                </div>
+                <button 
+                    type="submit" 
+                    id="submitBtn"
+                    class="w-full flex justify-center items-center gap-2 py-4 px-6 border border-transparent rounded-xl shadow-lg shadow-indigo-500/20 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 focus:ring-indigo-500 transition-all uppercase tracking-wide transform active:scale-[0.98]"
+                >
+                    <span>Analyze Records</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading" class="hidden flex flex-col items-center justify-center space-y-4 py-8">
+            <div class="relative">
+                <div class="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 dark:border-gray-800 border-t-indigo-600 dark:border-t-indigo-500"></div>
+            </div>
+            <p class="text-gray-500 dark:text-gray-400 font-mono text-sm animate-pulse">Querying DNS via Google Public DNS...</p>
+        </div>
+
+        <!-- Results Container -->
+        <div id="results" class="hidden space-y-6">
+            
+            <!-- Status Banner -->
+            <div id="statusBanner" class="rounded-xl p-5 border-l-4 flex items-start gap-4 shadow-md bg-white dark:bg-gray-800/50">
+                <div id="statusIcon" class="mt-1 flex-shrink-0"></div>
+                <div>
+                    <h3 id="statusTitle" class="font-bold text-lg text-gray-900 dark:text-white"></h3>
+                    <p id="statusDesc" class="text-sm text-gray-600 dark:text-gray-300 mt-1"></p>
+                </div>
+            </div>
+
+            <!-- Record Display -->
+            <div id="recordContainer" class="hidden">
+                <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm">
+                    <div class="bg-gray-50 dark:bg-gray-850 px-5 py-3 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+                        <span class="text-xs font-bold font-mono text-gray-500 dark:text-gray-400 uppercase tracking-wider">TXT Record</span>
+                        <button onclick="copyToClipboard()" class="text-gray-500 hover:text-indigo-600 dark:hover:text-white transition-colors text-xs uppercase font-bold tracking-wider flex items-center gap-2">
+                            <i class="far fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <div class="p-5 overflow-x-auto bg-white dark:bg-[#0d1117]">
+                        <code id="spfRaw" class="font-mono text-indigo-600 dark:text-indigo-300 text-sm whitespace-pre-wrap break-all leading-relaxed"></code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Breakdown Table -->
+            <div id="breakdownContainer" class="hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 shadow-sm">
+                <h3 class="text-gray-900 dark:text-white font-bold mb-5 flex items-center gap-2 text-lg">
+                    <i class="fas fa-list-ul text-indigo-500"></i> Record Breakdown
+                </h3>
+                <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-50 dark:bg-gray-850 text-gray-500 dark:text-gray-400 font-mono uppercase text-xs tracking-wider">
+                            <tr>
+                                <th class="px-5 py-4 font-semibold">Status</th>
+                                <th class="px-5 py-4 font-semibold">Mechanism</th>
+                                <th class="px-5 py-4 font-semibold">Value</th>
+                                <th class="px-5 py-4 font-semibold">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody id="breakdownBody" class="divide-y divide-gray-200 dark:divide-gray-800 font-mono bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300">
+                            <!-- Rows injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Raw DNS Response (Collapsible) -->
+            <details class="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm">
+                <summary class="flex justify-between items-center p-4 cursor-pointer bg-gray-50 dark:bg-gray-850 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <span class="text-sm font-mono text-gray-500 dark:text-gray-400 uppercase font-bold flex items-center gap-2">
+                        <i class="fas fa-code"></i> Raw DNS Response
+                    </span>
+                    <i class="fas fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <div class="p-4 bg-gray-50 dark:bg-black/30 border-t border-gray-200 dark:border-gray-800">
+                    <pre id="rawDnsJson" class="text-xs font-mono text-gray-600 dark:text-gray-500 overflow-x-auto whitespace-pre-wrap"></pre>
+                </div>
+            </details>
+
+        </div>
+
+    </main>
+
+    <footer class="mt-auto py-8 text-center text-gray-500 dark:text-gray-600 text-xs font-medium">
+        <p>&copy; <span id="year"></span> SPF Detector Tool. Powered by Google DNS API.</p>
+    </footer>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // --- SPF Mechanism Rules Database (Retained for core function) ---
+        const SPF_RULES = {
+            'ip4': { desc: 'Authorizes a specific IPv4 address or CIDR range.', dns_lookup: false, validation: (v) => v && /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:\/(?:3[0-2]|[1-2]?[0-9]))?$/.test(v) },
+            'ip6': { desc: 'Authorizes a specific IPv6 address or CIDR range.', dns_lookup: false, validation: (v) => v && v.includes(':') }, // Simple check
+            'a': { desc: 'Authorizes IP addresses from the domain\'s A records. Requires a DNS lookup.', dns_lookup: true, validation: () => true },
+            'mx': { desc: 'Authorizes IP addresses from the domain\'s MX records. Requires a DNS lookup.', dns_lookup: true, validation: () => true },
+            'include': { desc: 'Authorizes IP addresses defined in another domain\'s SPF record. Requires a DNS lookup.', dns_lookup: true, validation: (v) => v && v.includes('.') },
+            'redirect': { desc: 'Redirects SPF processing to another domain entirely.', dns_lookup: true, validation: (v) => v && v.includes('.') },
+            'ptr': { desc: 'Uses reverse DNS lookup.', dns_lookup: true, isDeprecated: true, validation: () => false },
+            'exists': { desc: 'Checks if a domain name resolves to any address. Requires a DNS lookup.', dns_lookup: true, validation: (v) => v && v.includes('.') },
+            'all': { desc: 'Matches all other IPs (must be the final mechanism).', dns_lookup: false, validation: () => true }
+        };
+
+        const QUALIFIERS = {
+            '+': { name: 'Pass', color: 'text-emerald-500', note: 'Explicitly allow the sender.' },
+            '-': { name: 'Fail', color: 'text-rose-500', note: 'Explicitly reject the sender (Hard Fail).' },
+            '~': { name: 'SoftFail', color: 'text-amber-500', note: 'Mark the sender as suspect (Soft Fail).' },
+            '?': { name: 'Neutral', color: 'text-gray-500', note: 'Treat the result as neither pass nor fail.' }
+        };
+
+        // --- Theme Management ---
+        const htmlEl = document.documentElement;
+        const themeIcon = document.getElementById('themeIcon');
+        
+        // Initialize theme
+        if (localStorage.getItem('theme') === 'light') {
+            htmlEl.classList.remove('dark');
+            themeIcon.className = 'fas fa-moon';
+        } else {
+            htmlEl.classList.add('dark');
+            themeIcon.className = 'fas fa-sun';
+        }
+
+        function toggleTheme() {
+            if (htmlEl.classList.contains('dark')) {
+                htmlEl.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                themeIcon.className = 'fas fa-moon';
+            } else {
+                htmlEl.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.className = 'fas fa-sun';
+            }
+        }
+
+        // --- Core Logic ---
+
+        async function handleLookup(e) {
+            e.preventDefault();
+            const domainInput = document.getElementById('domainInput');
+            let domain = domainInput.value.trim();
+
+            domain = domain.replace(/^https?:\/\//, '').replace(/\/$/, '');
+            
+            if (!domain) return;
+
+            // UI Reset
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const submitBtn = document.getElementById('submitBtn');
+            const recordContainer = document.getElementById('recordContainer');
+            const breakdownContainer = document.getElementById('breakdownContainer');
+            
+            loading.classList.remove('hidden');
+            results.classList.add('hidden');
+            recordContainer.classList.add('hidden');
+            breakdownContainer.classList.add('hidden');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+
+            try {
+                // Exponential backoff retry logic is omitted here for brevity but should be used in production.
+                const response = await fetch(`https://dns.google/resolve?name=${domain}&type=TXT`);
+                const data = await response.json();
+                renderResults(data, domain);
+            } catch (error) {
+                showError("Network Error", "Failed to contact DNS API. Please check your internet connection.");
+                console.error(error);
+            } finally {
+                loading.classList.add('hidden');
+                results.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
+        }
+
+        function renderResults(data, domain) {
+            const spfRaw = document.getElementById('spfRaw');
+            const rawDnsJson = document.getElementById('rawDnsJson');
+            const recordContainer = document.getElementById('recordContainer');
+            const breakdownContainer = document.getElementById('breakdownContainer');
+
+            rawDnsJson.textContent = JSON.stringify(data, null, 2);
+
+            if (data.Status !== 0) {
+                showError("DNS Lookup Failed", `Could not resolve domain: ${domain} (Status Code: ${data.Status})`);
+                return;
+            }
+
+            const spfRecords = [];
+            if (data.Answer) {
+                data.Answer.forEach(record => {
+                    const txtData = record.data.replace(/^"|"$/g, '').replace(/" "/g, '');
+                    if (txtData.toLowerCase().startsWith('v=spf1')) {
+                        spfRecords.push(txtData);
+                    }
+                });
+            }
+
+            if (spfRecords.length === 0) {
+                setBanner('error', 'No Valid SPF Record Found', `The domain ${domain} does not have a TXT record starting with "v=spf1". Emails sent from this domain may be marked as spam.`);
+            } else if (spfRecords.length > 1) {
+                setBanner('error', 'Multiple SPF Records Found', 'A domain MUST NOT have multiple records starting with v=spf1. This renders the SPF invalid.');
+                spfRaw.textContent = spfRecords.join('\n');
+                recordContainer.classList.remove('hidden');
+            } else {
+                const record = spfRecords[0];
+                spfRaw.textContent = record;
+                recordContainer.classList.remove('hidden');
+                
+                const mechanisms = parseSPF(record);
+                renderBreakdown(mechanisms);
+                breakdownContainer.classList.remove('hidden');
+
+                if (record.includes('-all')) {
+                    setBanner('success', 'Valid SPF Record (Hard Fail)', 'The record is present and uses "-all" (Hard Fail) to strictly reject unauthorized senders.');
+                } else if (record.includes('~all')) {
+                    setBanner('warning', 'Valid SPF Record (Soft Fail)', 'The record is present but uses "~all" (Soft Fail). Unauthorized emails may still be delivered but marked as suspicious.');
+                } else if (record.includes('+all') || record.endsWith(' all')) {
+                    setBanner('danger', 'Insecure SPF Record', 'The record uses "+all", which allows ANY IP address to send email on your behalf. This is dangerous.');
+                } else {
+                    setBanner('warning', 'Valid SPF Record (Neutral/None)', 'The record is syntactically valid but may not enforce strict policies (uses ?all or no terminator).');
+                }
+            }
+        }
+
+        function setBanner(type, title, description) {
+            const banner = document.getElementById('statusBanner');
+            const icon = document.getElementById('statusIcon');
+            const titleEl = document.getElementById('statusTitle');
+            const descEl = document.getElementById('statusDesc');
+
+            // Base Classes
+            banner.className = "rounded-xl p-5 border-l-4 flex items-start gap-4 shadow-md transition-all duration-300";
+            icon.innerHTML = "";
+
+            titleEl.textContent = title;
+            descEl.textContent = description;
+
+            // Type Styles (Light Mode / Dark Mode)
+            if (type === 'success') {
+                banner.classList.add('bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-500');
+                titleEl.classList.add('text-emerald-800', 'dark:text-emerald-400');
+                descEl.classList.add('text-emerald-700', 'dark:text-emerald-300');
+                icon.innerHTML = '<i class="fas fa-check-circle text-2xl text-emerald-500"></i>';
+            } else if (type === 'warning') {
+                banner.classList.add('bg-amber-50', 'dark:bg-amber-900/20', 'border-amber-500');
+                titleEl.classList.add('text-amber-800', 'dark:text-amber-400');
+                descEl.classList.add('text-amber-700', 'dark:text-amber-300');
+                icon.innerHTML = '<i class="fas fa-exclamation-triangle text-2xl text-amber-500"></i>';
+            } else if (type === 'error' || type === 'danger') {
+                banner.classList.add('bg-rose-50', 'dark:bg-rose-900/20', 'border-rose-500');
+                titleEl.classList.add('text-rose-800', 'dark:text-rose-400');
+                descEl.classList.add('text-rose-700', 'dark:text-rose-300');
+                icon.innerHTML = '<i class="fas fa-times-circle text-2xl text-rose-500"></i>';
+            }
+        }
+
+        function showError(title, message) {
+            setBanner('error', title, message);
+        }
+
+        function parseSPF(record) {
+            const parts = record.substring(7).trim().split(/\s+/);
+
+            return parts.map(part => {
+                let qualifier = '+';
+                let cleanPart = part;
+                
+                if (/^[-~?+]/.test(part)) {
+                    qualifier = part.charAt(0);
+                    cleanPart = part.substring(1);
+                }
+
+                let mechanism = cleanPart;
+                let value = '';
+                
+                if (cleanPart.includes(':')) {
+                    [mechanism, value] = cleanPart.split(':');
+                } else if (cleanPart.includes('=')) {
+                     [mechanism, value] = cleanPart.split('=');
+                }
+                
+                // Fetch rule from the database object
+                const rule = SPF_RULES[mechanism] || { desc: 'Unknown mechanism', dns_lookup: false, validation: () => false, error: 'Unknown mechanism found.' };
+                
+                let isValid = rule.validation(value);
+                let statusMsg = "Valid syntax";
+
+                if (!isValid) {
+                    statusMsg = rule.error || `Invalid syntax or missing value for ${mechanism}.`;
+                }
+
+                let qualText = "";
+                if (mechanism === 'all') {
+                    qualText = ` (${QUALIFIERS[qualifier].name} - ${QUALIFIERS[qualifier].note})`;
+                }
+
+                return {
+                    full: part,
+                    mech: mechanism,
+                    val: value || mechanism,
+                    desc: rule.desc + qualText,
+                    isValid: isValid,
+                    statusMsg: statusMsg,
+                    isWarning: rule.isDeprecated || (mechanism === 'all' && qualifier === '+')
+                };
+            });
+        }
+
+        function renderBreakdown(items) {
+            const tbody = document.getElementById('breakdownBody');
+            tbody.innerHTML = '';
+
+            items.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors";
+                
+                let iconHtml = '';
+                if (item.isWarning) {
+                    iconHtml = '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-500 border border-amber-200 dark:border-amber-700/50"><i class="fas fa-exclamation-triangle mr-1"></i> Warning</span>';
+                } else if (item.isValid) {
+                    iconHtml = '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-500 border border-emerald-200 dark:border-emerald-700/50"><i class="fas fa-check mr-1"></i> Valid</span>';
+                } else {
+                    iconHtml = '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-rose-100 dark:bg-rose-900/50 text-rose-800 dark:text-rose-500 border border-rose-200 dark:border-rose-700/50"><i class="fas fa-times mr-1"></i> Invalid</span>';
+                }
+
+                tr.innerHTML = `
+                    <td class="px-5 py-4 border-b border-gray-100 dark:border-gray-800 whitespace-nowrap">${iconHtml}</td>
+                    <td class="px-5 py-4 font-bold text-indigo-700 dark:text-indigo-300 border-b border-gray-100 dark:border-gray-800">${item.mech}</td>
+                    <td class="px-5 py-4 text-gray-800 dark:text-gray-300 border-b border-gray-100 dark:border-gray-800 break-all font-mono text-xs md:text-sm">${item.full}</td>
+                    <td class="px-5 py-4 text-gray-600 dark:text-gray-400 border-b border-gray-100 dark:border-gray-800">
+                        ${item.desc}
+                        ${!item.isValid ? `<div class="text-rose-600 dark:text-rose-400 text-xs mt-1 font-bold">Error: ${item.statusMsg}</div>` : ''}
+                        ${item.isWarning ? `<div class="text-amber-600 dark:text-amber-400 text-xs mt-1 font-bold">Note: ${item.statusMsg}</div>` : ''}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('spfRaw').textContent;
+            navigator.clipboard.writeText(text);
+            const btn = document.querySelector('button[onclick="copyToClipboard()"]');
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            btn.classList.add('text-green-600', 'dark:text-green-500');
+            setTimeout(() => {
+                btn.innerHTML = original;
+                btn.classList.remove('text-green-600', 'dark:text-green-500');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
