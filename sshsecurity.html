@@ -7,14 +7,12 @@
     <link href="profile.jpg" type="image/gif" rel="shortcut icon" />
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom styles for Dark Mode Toggle SVG icon transitions */
         .sun-icon, .moon-icon {
             transition: opacity 0.3s;
         }
         [data-theme="light"] .moon-icon { opacity: 0; }
         [data-theme="dark"] .sun-icon { opacity: 0; }
         
-        /* Transition for the detail arrow icon */
         .toggle-button svg {
             transition: transform 0.2s ease-in-out;
         }
@@ -23,9 +21,8 @@
         }
     </style>
     <script>
-        // Custom Tailwind Configuration for font and dark mode
         tailwind.config = {
-            darkMode: 'class', // Enable dark mode based on the 'dark' class on the html element
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
@@ -51,13 +48,10 @@
             Analyze SSH configurations or Nmap SSH scan result for cryptographic risks.
         </p>
 
-        <!-- Dark Mode Toggle Button -->
         <button id="darkModeToggle" class="absolute top-0 right-0 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition" onclick="toggleDarkMode()">
-            <!-- Sun Icon (Light Mode) -->
             <svg class="sun-icon w-6 h-6 text-yellow-500" data-theme="light" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.5-4.5l-1.591 1.591M3 12h2.25m.386-6.364l1.591 1.591M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z" />
             </svg>
-            <!-- Moon Icon (Dark Mode) -->
             <svg class="moon-icon w-6 h-6 text-indigo-400 absolute top-2 right-2" data-theme="dark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a1.5 1.5 0 01-1.5 1.5h-15a1.5 1.5 0 01-1.5-1.5V6.75m19.5 0A.75.75 0 0021 6H3a.75.75 0 00-.75.75m19.5 0v.243a2.75 2.75 0 01-5.698 0l-.821 5.378a2.75 2.75 0 01-5.32 0l-.82-5.378A2.75 2.75 0 013.75 6.993V6.75M10.375 13.5l1.625-2.25 1.625 2.25M12 10.5a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75z" />
             </svg>
@@ -77,7 +71,6 @@
         </div>
     </div>
 
-    <!-- Tab Navigation -->
     <div class="flex border-b border-gray-200 dark:border-gray-700 mb-6">
         <button id="tab-report-btn" onclick="setActiveTab('report')" class="tab-btn px-4 py-3 text-lg font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-primary-indigo hover:border-primary-indigo dark:hover:text-indigo-400 dark:hover:border-indigo-400 transition-colors duration-200">
             Analysis Report
@@ -87,9 +80,6 @@
         </button>
     </div>
 
-    <!-- Tab Content -->
-    
-    <!-- 1. Analysis Report Tab Content -->
     <div id="tab-report" class="tab-content">
         <div id="resultsPanel" class="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 sm:p-8 mb-8 ring-1 ring-gray-100 dark:ring-gray-700 transition-colors duration-300" style="display:none;">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 border-gray-100 dark:border-gray-700">
@@ -98,7 +88,6 @@
                     <span id="securityScore" class="px-4 py-1.5 text-sm font-extrabold rounded-full shadow-lg transition duration-200">Checking...</span>
                 </div>
                 
-                <!-- Copy Results button Group -->
                 <div class="flex flex-wrap gap-3">
                     <button id="copyHostsButton" 
                             class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg shadow-md hover:bg-green-700 transition duration-150 ease-in-out" 
@@ -134,23 +123,21 @@
                         </tr>
                     </thead>
                     <tbody id="resultsBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        <!-- Rows injected here -->
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- 2. Algorithm Database Tab Content -->
     <div id="tab-database" class="tab-content" style="display:none;">
         <div class="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 sm:p-8 mb-8 ring-1 ring-gray-100 dark:ring-gray-700 transition-colors duration-300">
             <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 border-b pb-2 border-gray-100 dark:border-gray-700">Known Algorithm Definitions</h2>
             <div class="mb-4">
                 <input type="text" id="databaseSearch" onkeyup="filterDatabase()" placeholder="Search by name, status, or description..."
-                       class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-indigo focus:border-primary-indigo dark:bg-gray-700 dark:text-gray-100 transition-colors duration-300">
+                        class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-indigo focus:border-primary-indigo dark:bg-gray-700 dark:text-gray-100 transition-colors duration-300">
             </div>
             <div class="overflow-x-auto rounded-lg shadow-md ring-1 ring-gray-200 dark:ring-gray-700">
-                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700" id="databaseTable">
+                   <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700" id="databaseTable">
                     <thead class="bg-gray-100 dark:bg-gray-700">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">Type</th>
@@ -160,9 +147,8 @@
                         </tr>
                     </thead>
                     <tbody id="databaseBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        <!-- Database rows generated via JavaScript -->
                     </tbody>
-                 </table>
+                   </table>
             </div>
         </div>
     </div>
@@ -172,14 +158,10 @@
 <div id="copyMessage" class="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-xl opacity-0 transition-opacity duration-300 z-50">Copied to clipboard!</div>
 
 <script>
-    // Note: The __app_id, __firebase_config, and __initial_auth_token variables
-    // required for real-world Firestore integration are NOT used in this version,
-    // as it is a pure client-side utility tool. The apiKey remains empty.
     const apiKey = ""; 
     let currentFindings = []; 
     let activeTab = 'report';
 
-    // --- Algorithm Database (CRITICAL, WEAK, LEGACY, SECURE) ---
     const DATABASE = {
         ciphers: {
             'arcfour': { status: 'CRITICAL', reason: 'RC4 is broken.' },
@@ -235,10 +217,7 @@
         }
     };
 
-    /** Utility Functions **/
-
     function getStatusClasses(status) {
-        // Updated to use more distinct Tailwind classes
         switch (status) {
             case 'CRITICAL': return 'bg-red-600 text-white shadow-red-900/50';
             case 'WEAK': return 'bg-amber-400 text-amber-900 shadow-amber-900/50';
@@ -264,20 +243,17 @@
         tempTextArea.value = text;
         document.body.appendChild(tempTextArea);
         tempTextArea.select();
-        // Use document.execCommand('copy') for compatibility in environments like iframe/Canvas
         document.execCommand('copy'); 
         document.body.removeChild(tempTextArea);
         showCopyMessage("Results copied to clipboard!");
     }
     
-    /** NEW: Copy only unique Hosts/IPs **/
     function copyHostsOnly() {
         if (currentFindings.length === 0) {
             showCopyMessage("No hosts or IPs detected to copy.");
             return;
         }
 
-        // Extract unique host names from all valid findings
         const uniqueHosts = [...new Set(currentFindings.map(f => f.host))];
         
         let textToCopy = "Detected SSH Hosts/IPs:\n\n" + uniqueHosts.join('\n');
@@ -285,8 +261,6 @@
         copyToClipboard(textToCopy);
     }
 
-
-    /** Dark Mode Logic **/
 
     function toggleDarkMode() {
         const html = document.documentElement;
@@ -317,37 +291,29 @@
             document.documentElement.classList.add('dark');
         }
         updateDarkModeIcon(themeToSet);
-        renderDatabase(); // Render DB table on load
+        renderDatabase();
     }
-
-    /** Tab Logic **/
 
     function setActiveTab(tabId) {
         activeTab = tabId;
-        // Hide all tab content
         document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
         
-        // Reset all button styles
         document.querySelectorAll('.tab-btn').forEach(el => {
             el.classList.remove('border-primary-indigo', 'text-primary-indigo', 'dark:border-indigo-400', 'dark:text-indigo-400', 'border-opacity-100');
             el.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
         });
 
-        // Show active content and style active button
         document.getElementById(`tab-${tabId}`).style.display = 'block';
         const activeBtn = document.getElementById(`tab-${tabId}-btn`);
         activeBtn.classList.add('border-primary-indigo', 'text-primary-indigo', 'dark:border-indigo-400', 'dark:text-indigo-400', 'border-opacity-100');
         activeBtn.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400');
     }
 
-    /** Database Tab Logic **/
-
     function renderDatabase() {
         const databaseBody = document.getElementById('databaseBody');
         databaseBody.innerHTML = '';
         let allAlgos = [];
 
-        // Flatten the DATABASE structure for rendering
         Object.keys(DATABASE).forEach(typeKey => {
             Object.keys(DATABASE[typeKey]).forEach(name => {
                 const typeLabel = typeKey.charAt(0).toUpperCase() + typeKey.slice(1);
@@ -396,8 +362,6 @@
     }
 
 
-    /** Analysis and Copy Logic (Retained Core Functions) **/
-    
     function toggleDetails(button) {
         const row = button.closest('tr');
         const nextRow = row.nextElementSibling;
@@ -412,7 +376,6 @@
 
 
     function getProblematicGroups() {
-        // Filter out secure and unknown algorithms
         const problematicFindings = currentFindings.filter(f => 
             f.status === 'CRITICAL' || f.status === 'WEAK' || f.status === 'LEGACY'
         );
@@ -428,7 +391,6 @@
                     findings: []
                 };
             } else {
-                // Determine the worst status for the host (CRITICAL > WEAK > LEGACY)
                 const currentWorst = groupedResults[host].worstStatus;
                 if (status === 'CRITICAL') {
                     groupedResults[host].worstStatus = 'CRITICAL';
@@ -441,17 +403,11 @@
         return groupedResults;
     }
 
-    /**
-     * Deduplicates findings based on the combination of host, type, and name.
-     * @param {Array} findings - The list of raw findings.
-     * @returns {Array} - The list of unique findings.
-     */
     function deduplicateFindings(findings) {
         const seen = new Set();
         const uniqueFindings = [];
         
         findings.forEach(f => {
-            // Create a unique identifier: Host|Type|Name
             const key = `${f.host}|${f.type}|${f.name}`;
             if (!seen.has(key)) {
                 seen.add(key);
@@ -471,7 +427,7 @@
         setActiveTab('report');
         resultsPanel.style.display = 'block';
         resultsBody.innerHTML = '';
-        scoreBadge.className = 'px-4 py-1.5 text-sm font-extrabold rounded-full shadow-lg transition duration-200'; // Reset classes
+        scoreBadge.className = 'px-4 py-1.5 text-sm font-extrabold rounded-full shadow-lg transition duration-200'; 
 
         if (!input.trim()) {
             resultsBody.innerHTML = '<tr><td colspan="3" class="p-6 text-center text-gray-500 dark:text-gray-400">Please enter data to analyze.</td></tr>';
@@ -489,7 +445,6 @@
             findings = parseConfig(input);
         }
 
-        // Apply deduplication here
         findings = deduplicateFindings(findings);
 
         currentFindings = findings.filter(f => f.status !== 'UNKNOWN');
@@ -506,7 +461,6 @@
         }
 
         const groupedFindings = {};
-        // Only group problematic findings for the expandable table
         problematicFindings.forEach(f => {
             if (!groupedFindings[f.host]) {
                 groupedFindings[f.host] = [];
@@ -526,7 +480,6 @@
 
             let hostStatusClass = getStatusClasses(hostStatus);
 
-            // --- 1. Generate the Main Row (Host, Status, Toggle Button) ---
             const mainRow = document.createElement('tr');
             mainRow.className = 'hover:bg-indigo-50/50 dark:hover:bg-gray-700/50 transition-colors duration-150 cursor-pointer'; 
             mainRow.onclick = (e) => { 
@@ -543,7 +496,6 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                     <button class="toggle-button text-gray-400 hover:text-primary-indigo dark:hover:text-indigo-400 transition transform duration-200" title="Toggle details" onclick="event.stopPropagation(); toggleDetails(this);">
-                        <!-- Down/Right Arrow Icon -->
                         <svg class="w-5 h-5 transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                         </svg>
@@ -552,7 +504,6 @@
             `;
             resultsBody.appendChild(mainRow);
             
-            // --- 2. Generate the Details Row (Hidden Nested Table) ---
             const detailsRow = document.createElement('tr');
             detailsRow.className = 'details-row hidden bg-gray-50 dark:bg-gray-800/80';
             detailsRow.innerHTML = `
@@ -591,239 +542,246 @@
             `;
             resultsBody.appendChild(detailsRow);
         });
-
+        
+        const overallStatus = counts.CRITICAL > 0 ? 'CRITICAL' : (counts.WEAK > 0 ? 'WEAK' : (counts.LEGACY > 0 ? 'LEGACY' : 'SECURE'));
+        const scoreClass = getStatusClasses(overallStatus);
+        
+        scoreBadge.textContent = overallStatus;
+        scoreBadge.className = `px-4 py-1.5 text-sm font-extrabold rounded-full shadow-lg transition duration-200 ${scoreClass}`;
         scoreBadge.style.display = 'inline-block';
-        if (counts.CRITICAL > 0) {
-            scoreBadge.textContent = "FAIL";
-            scoreBadge.classList.add(...getStatusClasses('CRITICAL').split(' '));
-        } else if (counts.WEAK > 0) {
-            scoreBadge.textContent = "WEAK";
-            scoreBadge.classList.add(...getStatusClasses('WEAK').split(' '));
-        } else if (counts.LEGACY > 0) {
-            scoreBadge.textContent = "LEGACY";
-            scoreBadge.classList.add(...getStatusClasses('LEGACY').split(' '));
+    }
+
+
+    /**
+     * Parses Nmap output for SSH algorithm enumeration.
+     * @param {string} input - The Nmap output text.
+     * @returns {Array<Object>} An array of findings.
+     */
+    function parseNmap(input) {
+        const findings = [];
+        const lines = input.split('\n');
+        
+        let currentHost = 'Nmap Scan Result';
+
+        // Regex to find the host/IP line
+        const hostMatch = input.match(/Nmap scan report for ([\w.-]+) \(([\d.]+)\)/i);
+        if (hostMatch) {
+            currentHost = hostMatch[1] || hostMatch[2];
         } else {
-            scoreBadge.textContent = "SECURE";
-            scoreBadge.classList.add(...getStatusClasses('SECURE').split(' '));
-        }
-    }
-
-    // --- Copy Logic (Retained & Updated) ---
-    function copyConciseResults() {
-        const groupedResults = getProblematicGroups();
-
-        if (Object.keys(groupedResults).length === 0) {
-            showCopyMessage("No vulnerable algorithms to copy.");
-            return;
+            const alternateHostMatch = input.match(/Host: ([\w.-]+)/i);
+            if (alternateHostMatch) {
+                currentHost = alternateHostMatch[1];
+            }
         }
 
-        let textToCopy = "SSH Vulnerable Algorithms Report (Concise List, Grouped by Host)\n\n";
-        
-        Object.keys(groupedResults).forEach(host => {
-            const data = groupedResults[host];
-            const algosString = data.findings.map(f => f.name).join(', ');
-            
-            // Format: [IP/HOST] - [WORST STATUS] - [ALGO NAME 1, ALGO NAME 2, ...]
-            textToCopy += `${host} - ${data.worstStatus} - ${algosString}\n`;
-        });
-        
-        copyToClipboard(textToCopy);
-    }
-    
-    function copyDetailedResults() {
-        const groupedResults = getProblematicGroups();
+        const typeMap = {
+            'kex_': 'KEX',
+            'encryption_': 'Cipher',
+            'mac_': 'MAC',
+            'server_host_key_': 'Key'
+        };
 
-        if (Object.keys(groupedResults).length === 0) {
-            showCopyMessage("No vulnerable algorithms to copy.");
-            return;
-        }
+        const regex = /\|\s+(kex_|encryption_|mac_|server_host_key_)(\w+)\s*:\s*(.*?)$/gmi;
+        let match;
 
-        let textToCopy = "SSH Security Analyzer Report (Detailed List, Grouped by Host)\n\n";
+        while ((match = regex.exec(input)) !== null) {
+            const prefix = match[1].toLowerCase();
+            const typeKey = prefix.slice(0, -1); 
+            const algos = match[3].split(',').map(a => a.trim()).filter(a => a.length > 0);
 
-        Object.keys(groupedResults).forEach(host => {
-            const data = groupedResults[host];
-            
-            // Host Header: [IP/HOST] - [WORST STATUS]
-            textToCopy += `--- ${host} - ${data.worstStatus} ---\n`;
-
-            // List individual findings with details
-            data.findings.forEach(f => {
-                // Indented line: - [TYPE] [ALGO NAME] (INDIVIDUAL STATUS) - [DESCRIPTION]
-                textToCopy += `  - [${f.type}] ${f.name} (${f.status}) - ${f.reason}\n`;
+            algos.forEach(algo => {
+                const dbEntry = DATABASE[typeKey][algo.toLowerCase()];
+                const status = dbEntry ? dbEntry.status : 'UNKNOWN';
+                const reason = dbEntry ? dbEntry.reason : 'Algorithm not found in database or is non-standard.';
+                
+                findings.push({
+                    host: currentHost,
+                    type: typeMap[prefix],
+                    name: algo,
+                    status: status,
+                    reason: reason
+                });
             });
-            textToCopy += '\n'; 
-        });
-
-        copyToClipboard(textToCopy);
-    }
-
-    // --- Parsing functions (Retained) ---
-    function parseNmap(text) {
-        const lines = text.split('\n');
-        let findings = [];
-        let currentContext = null; 
-        let currentHost = 'Unknown';
-
-        lines.forEach(line => {
-            const trimmed = line.trim();
-
-            const hostMatch = line.match(/Nmap scan report for\s+(.+)/i);
-            if (hostMatch) {
-                currentHost = hostMatch[1];
-                currentContext = null; 
-                return;
-            }
-
-            if (/encryption_algorithms/i.test(trimmed) || trimmed.includes('ciphers:')) { currentContext = 'ciphers'; return; }
-            else if (/mac_algorithms/i.test(trimmed) || trimmed.includes('macs:')) { currentContext = 'macs'; return; }
-            else if (/kex_algorithms/i.test(trimmed) || trimmed.includes('kex_algorithms:')) { currentContext = 'kex'; return; }
-            else if (/server_host_key_algorithms/i.test(trimmed) || trimmed.includes('key_exchange_algorithms:')) { currentContext = 'keys'; return; }
-
-            if (currentContext) {
-                const match = line.match(/[\|\s]([a-zA-Z0-9@._-]+)\s*$/);
-                if (match && !match[1].includes(':')) {
-                     let f = lookupAlgo(match[1].trim(), currentContext);
-                     f.host = currentHost; 
-                     findings.push(f);
-                }
-            }
-        });
+        }
+        
         return findings;
     }
 
-    function parseConfig(text) {
-        let findings = [];
-        const lines = text.split('\n');
-        let foundStructured = false;
+    /**
+     * Parses sshd_config style input.
+     * @param {string} input - The sshd_config style text.
+     * @returns {Array<Object>} An array of findings (only one host).
+     */
+    function parseConfig(input) {
+        const findings = [];
+        const lines = input.split('\n');
+        const host = 'sshd_config'; 
+
+        const configMap = {
+            'Ciphers': 'ciphers',
+            'MACs': 'macs',
+            'KexAlgorithms': 'kex',
+            'HostKeyAlgorithms': 'keys'
+        };
 
         lines.forEach(line => {
-            line = line.split('#')[0].trim();
-            if (!line) return;
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith('#')) return; 
 
-            const match = line.match(/^(Ciphers|MACs|KexAlgorithms|HostKeyAlgorithms)\s+(.+)$/i);
-            if (match) {
-                foundStructured = true;
-                let context = 'ciphers';
-                if (match[1].toLowerCase().includes('mac')) context = 'macs';
-                else if (match[1].toLowerCase().includes('kex')) context = 'kex';
-                else if (match[1].toLowerCase().includes('hostkey')) context = 'keys';
+            const parts = trimmedLine.match(/^(\w+)\s+(.*)/);
+            if (!parts) return;
 
-                match[2].split(',').forEach(v => {
-                    let f = lookupAlgo(v.trim(), context);
-                    f.host = "Local Config";
-                    findings.push(f);
+            const directive = parts[1];
+            const value = parts[2];
+            const dbKey = configMap[directive];
+
+            if (dbKey) {
+                const algos = value.split(',').map(a => a.trim()).filter(a => a.length > 0);
+                const typeLabel = directive.replace('Algorithms', '');
+                
+                algos.forEach(algo => {
+                    const dbEntry = DATABASE[dbKey][algo.toLowerCase()];
+                    const status = dbEntry ? dbEntry.status : 'UNKNOWN';
+                    const reason = dbEntry ? dbEntry.reason : 'Algorithm not found in database or is non-standard.';
+                    
+                    findings.push({
+                        host: host,
+                        type: typeLabel,
+                        name: algo,
+                        status: status,
+                        reason: reason
+                    });
                 });
             }
         });
 
-        if (!foundStructured && text.includes(',')) {
-            text.split(',').forEach(item => {
-                item = item.trim();
-                let context = 'unknown';
-                if (DATABASE.ciphers[item]) context = 'ciphers';
-                else if (DATABASE.macs[item]) context = 'macs';
-                else if (DATABASE.kex[item]) context = 'kex';
-                else if (DATABASE.keys[item]) context = 'keys';
-                
-                if (context !== 'unknown' || item.length > 3) {
-                    let f = lookupAlgo(item, context);
-                    f.host = "Manual Input";
-                    findings.push(f);
-                }
-            });
-        }
         return findings;
     }
 
-    function lookupAlgo(name, context) {
-        if (context === 'unknown') context = 'ciphers';
-        let info = (DATABASE[context] && DATABASE[context][name]) || 
-                   DATABASE.ciphers[name] || 
-                   DATABASE.macs[name] || 
-                   DATABASE.kex[name] || 
-                   DATABASE.keys[name];
-        
-        let typeLabel = 'Unknown';
-        if (DATABASE.ciphers[name]) typeLabel = 'Cipher';
-        else if (DATABASE.macs[name]) typeLabel = 'MAC';
-        else if (DATABASE.kex[name]) typeLabel = 'Kex';
-        else if (DATABASE.keys[name]) typeLabel = 'Key';
-        else if (context) {
-             if(context === 'ciphers') typeLabel = 'Cipher';
-             if(context === 'macs') typeLabel = 'MAC';
-             if(context === 'kex') typeLabel = 'Kex';
-             if(context === 'keys') typeLabel = 'Key';
+
+    /**
+     * Copy functions (Concise and Detailed)
+     */
+    function copyConciseResults() {
+        if (currentFindings.length === 0) {
+            showCopyMessage("No findings to copy.");
+            return;
         }
 
-        if (!info) {
-            if (name.match(/md5|sha1|arcfour|des/i)) {
-                info = { status: 'WEAK', reason: 'Heuristic: Weak primitive detected.' };
-            } else if (name.includes('@')) {
-                info = { status: 'UNKNOWN', reason: 'Custom algorithm.' };
-            } else {
-                info = { status: 'UNKNOWN', reason: 'Not in database.' };
-            }
-        }
+        const problematicGroups = getProblematicGroups();
+        let textToCopy = "SSH Security Analyzer - Concise Report\n\n";
 
-        return { type: typeLabel, name: name, status: info.status, reason: info.reason };
+        if (Object.keys(problematicGroups).length === 0) {
+            textToCopy += "All detected algorithms are marked as SECURE.\n";
+        } else {
+            Object.keys(problematicGroups).forEach(host => {
+                const hostData = problematicGroups[host];
+                textToCopy += `Host: ${host} (Status: ${hostData.worstStatus})\n`;
+                hostData.findings.forEach(f => {
+                    textToCopy += `- [${f.status}] ${f.type}: ${f.name} (${f.reason})\n`;
+                });
+                textToCopy += '\n';
+            });
+        }
+        copyToClipboard(textToCopy);
     }
 
-    // --- Sorting function (Retained) ---
+    function copyDetailedResults() {
+        if (currentFindings.length === 0) {
+            showCopyMessage("No findings to copy.");
+            return;
+        }
+
+        const problematicGroups = getProblematicGroups();
+        let textToCopy = "SSH Security Analyzer - Detailed Report\n\n";
+
+        if (Object.keys(problematicGroups).length === 0) {
+            textToCopy += "All detected algorithms are marked as SECURE.\n";
+        } else {
+            Object.keys(problematicGroups).forEach(host => {
+                const hostData = problematicGroups[host];
+                textToCopy += `======================================================\n`;
+                textToCopy += `HOST: ${host} (Overall: ${hostData.worstStatus})\n`;
+                textToCopy += `======================================================\n`;
+                textToCopy += `Status | Type | Algorithm | Reason\n`;
+                textToCopy += `------------------------------------------------------\n`;
+                hostData.findings.forEach(f => {
+                    textToCopy += `${f.status.padEnd(6)} | ${f.type.padEnd(4)} | ${f.name.padEnd(25)} | ${f.reason}\n`;
+                });
+                textToCopy += '\n';
+            });
+        }
+        copyToClipboard(textToCopy);
+    }
+    
+    /**
+     * Table Sorting Logic
+     */
+    let sortDirection = {}; 
+    
     function sortTable(n) {
-        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-        table = document.getElementById("resultsTable");
-        switching = true;
-        dir = "asc"; 
-        while (switching) {
-            switching = false;
-            rows = table.rows;
-            for (i = 1; i < (rows.length - 1); i += 2) { 
-                shouldSwitch = false;
-                x = rows[i].getElementsByTagName("TD")[n];
-                y = rows[i + 2].getElementsByTagName("TD")[n]; 
-                
-                let xText = x.innerText.toLowerCase();
-                let yText = y.innerText.toLowerCase();
+        const table = document.getElementById("resultsTable");
+        const tbody = document.getElementById("resultsBody");
+        const rows = Array.from(tbody.rows);
+        const columnKeys = ['host', 'worstStatus', 'details']; 
+        const key = columnKeys[n];
 
-                if (n === 1) { // Status column logic (sort by severity)
-                    const order = { 'critical': 3, 'weak': 2, 'legacy': 1, 'secure': 0 };
-                    let xVal = order[xText] || -1;
-                    let yVal = order[yText] || -1;
-                    
-                    if (dir == "asc") {
-                        if (xVal < yVal) { shouldSwitch = true; break; }
-                    } else if (dir == "desc") {
-                        if (xVal > yVal) { shouldSwitch = true; break; }
-                    }
-                } else { // Default text/host sorting
-                    if (dir == "asc") {
-                        if (xText > yText) { shouldSwitch = true; break; }
-                    } else if (dir == "desc") {
-                        if (xText < yText) { shouldSwitch = true; break; }
-                    }
-                }
+        // Toggle sort direction
+        const currentDirection = sortDirection[key] === 'asc' ? 'desc' : 'asc';
+        sortDirection[key] = currentDirection;
+
+        // Comparator logic
+        rows.sort((rowA, rowB) => {
+            let a = rowA.cells[n].textContent.trim();
+            let b = rowB.cells[n].textContent.trim();
+
+            if (key === 'worstStatus') {
+                const statusOrder = { 'CRITICAL': 4, 'WEAK': 3, 'LEGACY': 2, 'SECURE': 1, 'UNKNOWN': 0 };
+                a = statusOrder[a] || 0;
+                b = statusOrder[b] || 0;
+            } else if (key === 'host') {
+                // Natural sort for strings/IPs
+                return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
             }
-            if (shouldSwitch) {
-                rows[i].parentNode.insertBefore(rows[i + 2], rows[i]); 
-                rows[i].parentNode.insertBefore(rows[i + 3], rows[i + 1]); 
-                switching = true;
-                switchcount ++; 
-            } else {
-                if (switchcount == 0 && dir == "asc") {
-                    dir = "desc";
-                    switching = true;
-                }
+
+            let comparison = 0;
+            if (a > b) {
+                comparison = 1;
+            } else if (a < b) {
+                comparison = -1;
             }
-        }
+            
+            return currentDirection === 'asc' ? comparison : comparison * -1;
+        });
+        
+        // Rebuild tbody, ensuring details rows stay attached
+        const newTbody = document.createElement('tbody');
+        newTbody.id = "resultsBody";
+        newTbody.className = "bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700";
+
+        rows.forEach(row => {
+            newTbody.appendChild(row);
+            const nextRow = row.nextElementSibling;
+            if (nextRow && nextRow.classList.contains('details-row')) {
+                newTbody.appendChild(nextRow);
+            }
+        });
+
+        tbody.parentNode.replaceChild(newTbody, tbody);
     }
 
 
-    // Initial load calls
-    window.onload = function() {
-        initializeDarkMode();
-        setActiveTab('report'); // Set initial tab
-    }
+    window.onload = initializeDarkMode;
+    window.toggleDarkMode = toggleDarkMode;
+    window.analyzeInput = analyzeInput;
+    window.setActiveTab = setActiveTab;
+    window.filterDatabase = filterDatabase;
+    window.toggleDetails = toggleDetails;
+    window.copyHostsOnly = copyHostsOnly;
+    window.copyConciseResults = copyConciseResults;
+    window.copyDetailedResults = copyDetailedResults;
+    window.sortTable = sortTable;
+
 </script>
-
 </body>
 </html>
