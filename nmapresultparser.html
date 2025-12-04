@@ -11,25 +11,23 @@
             theme: {
                 extend: {
                     colors: {
-                        // Original custom dark gray shades
                         gray: {
-                            50: '#f9fafb', // New: Added for general light background
-                            100: '#f3f4f6', // New: Added for button light background
-                            300: '#d1d5db', // New: Added for light borders
-                            400: '#9ca3af', // New: Added for subtle text in light mode
-                            600: '#6b7280', // New: Added for empty state/subtle text in light mode
-                            700: '#4b5563', // New: Added for hover/active elements in light mode
-                            800: '#1f2937', // New: Added for dark text in light mode
+                            50: '#f9fafb',
+                            100: '#f3f4f6',
+                            300: '#d1d5db',
+                            400: '#9ca3af',
+                            600: '#6b7280',
+                            700: '#4b5563',
+                            800: '#1f2937',
                             850: '#1f2937',
                             900: '#111827',
                             950: '#030712',
                         },
                         emerald: {
-                            600: '#059669', // New: Added for button in light mode
+                            600: '#059669',
                             700: '#047857',
                             800: '#065f46',
                         },
-                        // Additional colors for light mode text/buttons
                         red: {
                             400: '#b91c1c',
                         },
@@ -45,19 +43,16 @@
         }
     </script>
     <style>
-        /* Custom scrollbar for the textarea and table - Adjusted to use variables for both modes */
         :root {
-            /* Dark Mode Defaults */
             --scrollbar-track: #1f2937;
             --scrollbar-thumb: #4b5563;
             --scrollbar-thumb-hover: #6b7280;
         }
 
         .light-mode {
-            /* Light Mode Overrides */
-            --scrollbar-track: #f3f4f6; /* gray-100 */
-            --scrollbar-thumb: #9ca3af; /* gray-400 */
-            --scrollbar-thumb-hover: #6b7280; /* gray-500 */
+            --scrollbar-track: #f3f4f6;
+            --scrollbar-thumb: #9ca3af;
+            --scrollbar-thumb-hover: #6b7280;
         }
 
         ::-webkit-scrollbar {
@@ -76,49 +71,34 @@
         }
 
 
-        /* ---------------------------------------------------------------------- */
-        /* LIGHT MODE FULL PAGE OVERRIDES */
-        /* ---------------------------------------------------------------------- */
-
         .light-mode {
-            /* Full Body/Page Background and Text Color */
-            background-color: #f9fafb !important; /* gray-50 */
-            color: #1f2937 !important; /* gray-800 */
+            background-color: #f9fafb !important;
+            color: #1f2937 !important;
         }
         
-        /* Containers (Navbar, Input/Output area background) - from bg-gray-900 to white */
         .light-mode .bg-gray-900 { background-color: #ffffff !important; }
-        /* Footer Border (from border-gray-800) */
         .light-mode .border-gray-800 { border-color: #e5e7eb !important; }
-        /* Textarea/Output Container Border (from border-gray-700) */
         .light-mode .border-gray-700 { border-color: #d1d5db !important; }
-        /* Textarea Text (from text-green-400 to dark text) */
-        .light-mode .text-green-400 { color: #047857 !important; } /* emerald-700 */
+        .light-mode .text-green-400 { color: #047857 !important; }
 
-        /* Text Colors */
-        .light-mode .text-gray-200 { color: #1f2937 !important; } /* Body text */
-        .light-mode .text-white { color: #1f2937 !important; } /* Title text */
-        .light-mode .text-gray-400 { color: #6b7280 !important; } /* Subtle text */
-        .light-mode .text-gray-600 { color: #9ca3af !important; } /* Empty state text */
-        .light-mode .text-emerald-400 { color: #059669 !important; } /* IP text */
-        .light-mode .text-blue-300 { color: #2563eb !important; } /* Port text */
-        .light-mode .text-red-400 { color: #b91c1c !important; } /* Error text */
-        .light-mode .placeholder-gray-700::placeholder { color: #a1a1aa !important; } /* Placeholder in textarea */
+        .light-mode .text-gray-200 { color: #1f2937 !important; }
+        .light-mode .text-white { color: #1f2937 !important; }
+        .light-mode .text-gray-400 { color: #6b7280 !important; }
+        .light-mode .text-gray-600 { color: #9ca3af !important; }
+        .light-mode .text-emerald-400 { color: #059669 !important; }
+        .light-mode .text-blue-300 { color: #2563eb !important; }
+        .light-mode .text-red-400 { color: #b91c1c !important; }
+        .light-mode .placeholder-gray-700::placeholder { color: #a1a1aa !important; }
         
-        /* Table/Code area colors */
-        .light-mode .bg-gray-950 { background-color: #f9fafb !important; } /* Main background on table (for scroll) */
-        .light-mode .bg-gray-800 { background-color: #f3f4f6 !important; } /* Table Header / Alternate row */
-        .light-mode .bg-gray-900.alt-row { background-color: #ffffff !important; } /* Table alternate row override */
-        .light-mode .hover\:bg-gray-700:hover { background-color: #e5e7eb !important; } /* Table row hover */
-        .light-mode .text-gray-300 { color: #374151 !important; } /* Table cell text */
+        .light-mode .bg-gray-950 { background-color: #f9fafb !important; }
+        .light-mode .bg-gray-800 { background-color: #f3f4f6 !important; }
+        .light-mode .bg-gray-900.alt-row { background-color: #ffffff !important; }
+        .light-mode .hover\:bg-gray-700:hover { background-color: #e5e7eb !important; }
+        .light-mode .text-gray-300 { color: #374151 !important; }
 
-        /* Button colors (Copy buttons and others using gray-700/600) */
         .light-mode .bg-gray-700 { background-color: #e5e7eb !important; color: #1f2937 !important; border-color: #d1d5db !important; }
         .light-mode .hover\:bg-gray-600:hover { background-color: #d1d5db !important; }
-        /* Submit button doesn't need override as it uses emerald-600/500 */
-        /* Focus ring (focus:ring-emerald-600) doesn't need override */
 
-        /* Icon Toggle Management */
         #moon-icon { display: block; }
         #sun-icon { display: none; }
         .light-mode #moon-icon { display: none; }
@@ -134,7 +114,6 @@
         function copyToClipboard(text, btnId) {
             const btn = document.getElementById(btnId);
             
-            // 1. Copy text
             const el = document.createElement('textarea');
             el.value = text;
             document.body.appendChild(el);
@@ -142,35 +121,30 @@
             document.execCommand('copy');
             document.body.removeChild(el);
 
-            // 2. Provide feedback
             const originalText = btn.innerText;
             
             btn.innerText = "Copied!";
             btn.classList.replace('bg-gray-700', 'bg-emerald-700');
             btn.classList.replace('hover:bg-gray-600', 'hover:bg-emerald-600'); 
-            btn.classList.add('pointer-events-none'); // Prevent multiple clicks
+            btn.classList.add('pointer-events-none');
 
             setTimeout(() => {
                 btn.innerText = originalText;
-                // Revert color, the light-mode CSS rules will take effect if needed
                 btn.classList.replace('bg-emerald-700', 'bg-gray-700');
                 btn.classList.replace('hover:bg-emerald-600', 'hover:bg-gray-600');
                 btn.classList.remove('pointer-events-none');
             }, 2000);
         }
 
-        // Theme Toggle Functions
         function toggleTheme() {
             const body = document.body;
-            // The class toggle now controls the full-page theme via the global CSS overrides
             const isLightMode = body.classList.toggle('light-mode');
             
-            // Save preference to localStorage
             localStorage.setItem('theme', isLightMode ? 'light' : 'dark');
         }
 
         function loadTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'dark'; // Default to dark
+            const savedTheme = localStorage.getItem('theme') || 'dark';
             const body = document.body;
             
             if (savedTheme === 'light') {
@@ -180,10 +154,8 @@
             }
         }
 
-        // Initial theme load
         window.onload = function() {
             loadTheme();
-            // Attach parseNmap to the button only after load
             document.querySelector('.w-full.py-3').onclick = parseNmap;
         };
 
@@ -216,32 +188,26 @@
             let hasReasonColumn = false;
             let results = [];
 
-            // Regex for finding IP address in Nmap header
             const ipRegex = /Nmap scan report for (?:[\w.-]+ \()?([\d.]+)\)?/;
             
-            // Regex 1: Standard Output (PORT STATE SERVICE VERSION)
             const standardRegex = /^(\d+\/(?:tcp|udp|sctp))\s+(\w+)\s+(\S+)\s*(.*)?$/;
 
-            // Regex 2: Output with Reason (PORT STATE SERVICE REASON VERSION)
             const reasonRegex = /^(\d+\/(?:tcp|udp|sctp))\s+(\w+)\s+(\S+)\s+\S+\s*(.*)?$/;
 
             lines.forEach(line => {
                 const trimmedLine = line.trim();
 
-                // Detect Header Line to check for REASON column
                 if (trimmedLine.startsWith('PORT') && (trimmedLine.includes('STATE') || trimmedLine.includes('SERVICE'))) {
                     hasReasonColumn = trimmedLine.includes('REASON');
                     return;
                 }
 
-                // Check for IP header
                 const ipMatch = trimmedLine.match(ipRegex);
                 if (ipMatch) {
-                    currentIp = ipMatch[1]; // The captured IP
+                    currentIp = ipMatch[1];
                     return;
                 }
 
-                // If we have an active IP, check for ports
                 if (currentIp) {
                     const activeRegex = hasReasonColumn ? reasonRegex : standardRegex;
                     const portMatch = trimmedLine.match(activeRegex);
@@ -251,10 +217,8 @@
                         const service = portMatch[3];
                         const version = portMatch[4] || "";
 
-                        // Clean up version string
                         let cleanVersion = version.replace(/ttl\s*\d+/gi, '').trim();
 
-                        // Skip if no actual version information was found
                         if (cleanVersion === "") {
                             return; 
                         }
@@ -273,9 +237,7 @@
                 }
             });
 
-            // SORTING LOGIC
             results.sort((a, b) => {
-                // IP Compare (numeric comparison for IP segments)
                 const ipA = a.ip.split('.').map(Number);
                 const ipB = b.ip.split('.').map(Number);
                 
@@ -284,14 +246,11 @@
                     if (ipA[i] > ipB[i]) return 1;
                 }
 
-                // Port Compare
                 return a.portNum - b.portNum;
             });
             
-            // Store results globally for copy functions
             parsedResults = results;
 
-            // RENDER RESULTS
             container.innerHTML = '';
             
             if (results.length === 0) {
@@ -307,7 +266,6 @@
 
             let html = '';
             results.forEach((r, index) => {
-                // Use a dedicated class for one of the alternating rows that needs an override
                 const bgClass = index % 2 === 0 ? 'bg-gray-900 alt-row' : 'bg-gray-800'; 
                 html += `
                     <div class="grid grid-cols-12 ${bgClass} hover:bg-gray-700 text-sm border-b border-gray-800 transition-colors">
@@ -323,7 +281,6 @@
             copyButtons.forEach(id => document.getElementById(id).classList.remove('hidden'));
         }
 
-        // 1. Copies the full IP, PORT, and VERSION table (tab-separated)
         function copyAll() {
             if (parsedResults.length === 0) return;
 
@@ -336,27 +293,22 @@
             copyToClipboard(clipboardText, 'copyAllBtn');
         }
         
-        // 2. Copies only unique versions (newline-separated with bullet point)
         function copyUniqueVersions() {
             if (parsedResults.length === 0) return;
 
-            // Use a Set to automatically handle deduplication
             const uniqueVersions = new Set(parsedResults.map(r => r.displayVersion));
             
-            // Format each version string with a bullet point and join with newlines
             const clipboardText = Array.from(uniqueVersions)
-                                   .map(version => `• ${version}`)
-                                   .join('\n'); // Prepend with bullet and non-breaking space
+                                       .map(version => `• ${version}`)
+                                       .join('\n');
 
             copyToClipboard(clipboardText, 'copyVersionsBtn');
         }
 
-        // 3. Copies IP and Ports, grouped by IP (IP:port1,port2...)
         function copyGroupedIpPorts() {
             if (parsedResults.length === 0) return;
 
             const groupedMap = parsedResults.reduce((acc, current) => {
-                // Ensure we only use the port number for the list (e.g., '22' instead of '22/tcp')
                 const portNumber = current.portStr.split('/')[0];
                 if (!acc[current.ip]) {
                     acc[current.ip] = new Set();
@@ -367,9 +319,7 @@
 
             let clipboardText = '';
             
-            // Format: IP:port1,port2,port3
             for (const ip in groupedMap) {
-                // Convert Set of ports to a comma-separated string
                 const ports = Array.from(groupedMap[ip]).join(',');
                 clipboardText += `${ip}:${ports}\n`;
             }
@@ -435,7 +385,7 @@
 Nmap scan report for 192.168.1.10
 Host is up (0.0020s latency).
 Not shown: 998 closed ports
-PORT    STATE SERVICE VERSION
+PORT  STATE SERVICE VERSION
 22/tcp open  ssh     OpenSSH 7.6p1 Ubuntu 4ubuntu0.3
 80/tcp open  http    Apache httpd 2.4.29 ((Ubuntu))
 443/tcp open ssl/http nginx 1.10.3 (Ubuntu)
