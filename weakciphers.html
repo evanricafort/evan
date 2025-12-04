@@ -8,15 +8,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
-        /* Custom styles for Dark Mode Toggle SVG icon transitions */
         .sun-icon, .moon-icon {
             transition: opacity 0.3s;
         }
-        /* Logic: If HTML has 'dark' class, hide sun, show moon. If not, vice versa. */
         html.dark .sun-icon { opacity: 0; }
         html:not(.dark) .moon-icon { opacity: 0; }
         
-        /* Transition for the detail arrow icon */
         .toggle-button svg {
             transition: transform 0.2s ease-in-out;
         }
@@ -24,7 +21,6 @@
             transform: rotate(90deg);
         }
 
-        /* Custom Scrollbar for Table */
         .custom-scrollbar::-webkit-scrollbar {
             height: 8px;
             width: 8px;
@@ -43,7 +39,6 @@
             background: #475569;
         }
 
-        /* Icon Animation */
         .shield-icon {
             transition: transform 0.3s ease;
         }
@@ -52,7 +47,6 @@
         }
     </style>
     <script>
-        // Custom Tailwind Configuration for font and dark mode
         tailwind.config = {
             darkMode: 'class', 
             theme: {
@@ -178,7 +172,6 @@
     </div>
 
     <script>
-        // --- 1. DARK MODE LOGIC ---
         function toggleDarkMode() {
             const html = document.documentElement;
             if (html.classList.contains('dark')) {
@@ -189,12 +182,10 @@
                 localStorage.setItem('theme', 'dark');
             }
         }
-        // Check preference on load
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         }
 
-        // --- 2. DATABASE & VARIABLES ---
         const vulnerabilityDatabase = [
             { name: "EXP", type: "Weak Cipher/Key", explanation: "Export-grade cipher suites use weak encryption intended for outdated U.S. export laws.", fix: "Disable export ciphers." },
             { name: "DES", type: "Weak Cipher/Key", explanation: "Obsolete/insecure block cipher.", fix: "Replace with AES." },
@@ -222,14 +213,12 @@
         const itemsPerPage = 5;
         let currentPage = 1;
 
-        // --- 3. ANALYSIS LOGIC ---
         function analyzeInput() {
             const input = document.getElementById("configInput").value.trim();
             const resultsArea = document.getElementById("resultsArea");
             const statusMessage = document.getElementById("statusMessage");
             const issueCountSpan = document.getElementById("issueCount");
             
-            // Reset
             ipIssuesMap.clear();
             currentPage = 1;
             issueCountSpan.textContent = "0";
@@ -254,12 +243,10 @@
                 if (ipMatch) currentIP = ipMatch[1];
                 if (!currentIP) return;
                 
-                // Skip SWEET32 warning line
                 if (line.toLowerCase().includes(exclusionString)) return;
 
                 if (!ipIssuesMap.has(currentIP)) ipIssuesMap.set(currentIP, []);
 
-                // Check Database
                 for (const item of vulnerabilityDatabase) {
                     if (line.includes(item.name)) {
                         const issueObj = {
@@ -279,7 +266,6 @@
                     }
                 }
 
-                // Check RSA Key Size
                 const rsaMatch = line.match(rsaPattern);
                 if (rsaMatch && parseInt(rsaMatch[1]) < 2048) {
                     const issueObj = {
@@ -311,7 +297,6 @@
             resultsArea.scrollIntoView({ behavior: "smooth" });
         }
 
-        // --- 4. RENDERING ---
         function renderTable() {
             const table = document.getElementById("resultsTable");
             table.innerHTML = "";
@@ -379,7 +364,6 @@
             }
         }
 
-        // --- 5. DATABASE UI ---
         function toggleDatabase() {
             const content = document.getElementById("database-content");
             const icon = document.getElementById("db-icon");
@@ -415,12 +399,10 @@
             renderDatabaseRows(filtered);
         }
         
-        // Initialize Database Table on Load
         document.addEventListener('DOMContentLoaded', () => {
             renderDatabaseRows(vulnerabilityDatabase);
         });
 
-        // --- 6. COPY & EXPORT ---
         function copyResults(isFullCSV) {
             let text = "";
             if (isFullCSV) {
@@ -436,8 +418,6 @@
                     });
                 });
             } else {
-                // *** GROUPED FORMAT ***
-                // IP/HOST - STATUS - ISSUE (Weak Ciphers & Protocols Found)
                 text = "IP/HOST - STATUS - ISSUES (Weak Ciphers & Protocols)\n";
                 ipIssuesMap.forEach((issues, ip) => {
                     if (issues.length === 0) return;
