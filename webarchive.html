@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Archive URL Fetcher</title>
+    <link href="profile.jpg" type="image/jpg" rel="shortcut icon" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#1e293b', 
+                            900: '#0f172a',
+                            950: '#020617',
+                        },
+                        indigo: {
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                        },
+                        red: {
+                            400: '#f87171',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .input-accent {
+            border-left: 4px solid #f87171; 
+        }
+
+        #resultsOutput {
+            height: auto; 
+            max-height: 200px; 
+            word-break: break-all;
+            white-space: pre-wrap;
+            scrollbar-color: #9ca3af #e5e7eb; 
+            scrollbar-width: thin;
+            transition: background-color 0.3s, color 0.3s; 
+        }
+
+        #resultsOutput::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        #resultsOutput::-webkit-scrollbar-track {
+            background: #e5e7eb; 
+            border-radius: 4px;
+        }
+        #resultsOutput::-webkit-scrollbar-thumb {
+            background: #9ca3af; 
+            border-radius: 4px;
+        }
+        #resultsOutput::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; 
+        }
+
+        .dark #resultsOutput::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        .dark #resultsOutput::-webkit-scrollbar-thumb {
+            background: #475569; 
+        }
+        .dark #resultsOutput::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-slate-900 min-h-screen flex flex-col items-center justify-center p-4 font-sans text-gray-700 dark:text-slate-300 transition-colors duration-300">
+
+    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl dark:shadow-slate-950/50 w-full max-w-lg overflow-hidden transition-colors duration-300 border border-gray-200 dark:border-slate-700">
+        
+        <div class="bg-indigo-600 dark:bg-indigo-700 p-5 flex items-center shadow-lg relative">
+            
+            <div class="w-14 h-7"></div>
+
+            <h1 class="flex-grow text-xl font-extrabold text-white tracking-wide text-center">
+                <i class="fas fa-archive mr-3 text-indigo-200"></i>Web Archive URL Fetcher
+            </h1>
+            
+            <label for="themeToggle" class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="themeToggle" class="sr-only peer">
+                
+                <div class="w-14 h-7 bg-indigo-500 rounded-full peer peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-slate-800 dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-slate-900">
+                    <i class="fas fa-sun text-yellow-300 absolute left-1 top-1.5 transition-opacity duration-300 peer-checked:opacity-0"></i>
+                    <i class="fas fa-moon text-indigo-200 absolute right-1 top-1.5 opacity-0 transition-opacity duration-300 peer-checked:opacity-100"></i>
+                </div>
+            </label>
+        </div>
+
+        <div class="p-6 sm:p-8">
+            
+            <p class="mb-6 text-base text-gray-500 dark:text-slate-400 text-center">
+                Enter a URL to fetch archived records (Status 200) directly.
+            </p>
+
+            <div class="mb-4 relative">
+                <label for="urlInput" class="block text-xs font-semibold uppercase text-gray-500 dark:text-slate-400 mb-2">Target URL</label>
+                <div class="flex shadow-md rounded-lg overflow-hidden">
+                    <span class="inline-flex items-center px-4 bg-gray-50 dark:bg-slate-700 text-gray-500 dark:text-slate-400 text-sm">
+                        <i class="fas fa-link"></i>
+                    </span>
+                    <input 
+                        type="text" 
+                        id="urlInput" 
+                        placeholder="e.g., example.com or https://example.com/page" 
+                        class="input-accent flex-1 block w-full rounded-none sm:text-sm border-none p-3 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-100 transition-colors duration-200 focus:ring-2 focus:ring-red-400 outline-none"
+                    >
+                </div>
+            </div>
+
+            <div class="mb-6 flex justify-between items-center">
+                <div class="flex items-center">
+                    <input 
+                        id="subdomainToggle" 
+                        type="checkbox" 
+                        class="h-5 w-5 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded focus:ring-indigo-500 cursor-pointer"
+                        checked
+                    >
+                    <label for="subdomainToggle" class="ml-3 block text-sm font-medium text-gray-700 dark:text-slate-300 cursor-pointer">
+                        Include Subdomains (*.example.com)
+                    </label>
+                </div>
+            </div>
+
+            <div class="mb-6 p-4 border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 shadow-sm">
+                <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-slate-400 mb-3">
+                    <i class="fas fa-filter mr-1"></i> Filter by File Extension (MIME Type)
+                </label>
+                <div class="grid grid-cols-3 gap-y-2 gap-x-4 text-sm">
+                    
+                    <div class="flex items-center">
+                        <input id="ext-pdf" type="checkbox" data-ext="pdf" class="ext-checkbox h-4 w-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded focus:ring-indigo-500 cursor-pointer">
+                        <label for="ext-pdf" class="ml-2 text-gray-700 dark:text-slate-300 cursor-pointer">.pdf</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input id="ext-xml" type="checkbox" data-ext="xml" class="ext-checkbox h-4 w-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded focus:ring-indigo-500 cursor-pointer">
+                        <label for="ext-xml" class="ml-2 text-gray-700 dark:text-slate-300 cursor-pointer">.xml</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input id="ext-html" type="checkbox" data-ext="html" class="ext-checkbox h-4 w-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded focus:ring-indigo-500 cursor-pointer">
+                        <label for="ext-html" class="ml-2 text-gray-700 dark:text-slate-300 cursor-pointer">.html</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input id="ext-php" type="checkbox" data-ext="php" class="ext-checkbox h-4 w-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded focus:ring-indigo-500 cursor-pointer">
+                        <label for="ext-php" class="ml-2 text-gray-700 dark:text-slate-300 cursor-pointer">.php</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input id="ext-txt" type="checkbox" data-ext="txt" class="ext-checkbox h-4 w-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded focus:ring-indigo-500 cursor-pointer">
+                        <label for="ext-txt" class="ml-2 text-gray-700 dark:text-slate-300 cursor-pointer">.txt</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input id="ext-any" type="checkbox" class="ext-checkbox h-4 w-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded focus:ring-indigo-500 cursor-pointer" checked>
+                        <label for="ext-any" class="ml-2 text-gray-700 dark:text-slate-300 cursor-pointer font-bold">Any / Clear Filter</label>
+                    </div>
+                </div>
+            </div>
+
+
+            <button 
+                id="insertButton" 
+                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-xl text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99]"
+            >
+                <span><i class="fas fa-search mr-2"></i> FETCH & DISPLAY RESULTS</span>
+            </button>
+
+            <div id="statusMessage" class="mt-6 text-center text-sm font-medium hidden"></div>
+
+            <div id="resultsContainer" class="mt-8 hidden">
+                <div class="flex justify-between items-end mb-2">
+                    <label class="block text-xs font-semibold uppercase text-indigo-600 dark:text-indigo-400">
+                        CDX API Results
+                    </label>
+                    <button id="copyButton" class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold focus:outline-none transition-colors duration-200 p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-700">
+                        <i class="far fa-copy mr-1"></i> Copy Content
+                    </button>
+                </div>
+                <div class="relative group">
+                    <pre id="resultsOutput" class="w-full bg-slate-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-4 text-xs font-mono text-gray-700 dark:text-slate-300 overflow-auto shadow-inner"></pre>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="bg-gray-100 dark:bg-slate-950 px-6 py-4 border-t border-gray-200 dark:border-slate-700 flex justify-center items-center transition-colors duration-300">
+            <span class="text-xs text-gray-400 dark:text-slate-600">Web Archive (archive.org)</span>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const htmlElement = document.documentElement; 
+            const urlInput = document.getElementById("urlInput");
+            const insertButton = document.getElementById("insertButton");
+            const btnText = insertButton.querySelector("span");
+            const statusMessage = document.getElementById("statusMessage");
+            const resultsContainer = document.getElementById("resultsContainer");
+            const resultsOutput = document.getElementById("resultsOutput");
+            const copyButton = document.getElementById("copyButton");
+            const subdomainToggle = document.getElementById("subdomainToggle");
+            const extCheckboxes = document.querySelectorAll('.ext-checkbox');
+            const extAny = document.getElementById('ext-any');
+            
+            const themeToggleInput = document.getElementById('themeToggle'); 
+
+            const PROXY_URL = 'https://corsproxy.io/?'; 
+            const MAX_RETRIES = 3;
+            
+            const mimeMap = {
+                'pdf': 'application/pdf',
+                'xml': 'text/xml',
+                'html': 'text/html', 
+                'php': 'text/html', 
+                'txt': 'text/plain'
+            };
+
+
+            const getExtensionFilter = () => {
+                if (extAny.checked) {
+                    return ''; 
+                }
+
+                const selectedMimeTypes = [];
+                extCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked && checkbox.dataset.ext) {
+                        const mime = mimeMap[checkbox.dataset.ext];
+                        if (mime) {
+                            selectedMimeTypes.push(`filter=mimetype:${encodeURIComponent(mime)}`);
+                        }
+                    }
+                });
+
+                return selectedMimeTypes.join('&');
+            };
+
+            extCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', (event) => {
+                    if (event.target === extAny) {
+                        if (extAny.checked) {
+                            extCheckboxes.forEach(otherCheckbox => {
+                                if (otherCheckbox !== extAny) {
+                                    otherCheckbox.checked = false;
+                                }
+                            });
+                        }
+                    } else {
+                        if (event.target.checked) {
+                            extAny.checked = false;
+                        } else {
+                            const anyChecked = Array.from(extCheckboxes).some(cb => cb.checked && cb !== extAny);
+                            if (!anyChecked) {
+                                extAny.checked = true;
+                            }
+                        }
+                    }
+                });
+            });
+
+
+            const isValidInput = (str) => str && str.trim().length > 0;
+
+            const setLoading = (isLoading, retryAttempt = 0) => {
+                if (isLoading) {
+                    insertButton.disabled = true;
+                    insertButton.classList.add('opacity-75', 'cursor-not-allowed');
+                    let message = 'FETCHING DATA...';
+                    if (retryAttempt > 0) {
+                        message = `RETRYING (${retryAttempt}/${MAX_RETRIES})...`;
+                    }
+                    btnText.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> ${message}`;
+                } else {
+                    insertButton.disabled = false;
+                    insertButton.classList.remove('opacity-75', 'cursor-not-allowed');
+                    btnText.innerHTML = '<i class="fas fa-search mr-2"></i> FETCH & DISPLAY RESULTS';
+                }
+            };
+
+            const showSuccess = (msg) => {
+                statusMessage.innerHTML = msg;
+                statusMessage.className = "mt-6 text-center text-sm font-semibold text-green-700 dark:text-green-300 block p-2 rounded-md bg-green-100 dark:bg-green-900/40";
+                statusMessage.classList.remove('hidden');
+            };
+            
+            const showError = (msg, cdxQueryUrl = null) => {
+                let html = `<span><i class="fas fa-exclamation-triangle mr-2"></i> ${msg}</span>`;
+                if (cdxQueryUrl) {
+                    html += `<br><a href="${cdxQueryUrl}" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:underline mt-2 inline-block">Click here to open the raw data link (Bypasses Proxy).</a>`;
+                }
+                statusMessage.innerHTML = html;
+                statusMessage.className = "mt-6 text-center text-sm font-semibold text-red-700 dark:text-red-300 block p-2 rounded-md bg-red-100 dark:bg-red-900/40";
+                statusMessage.classList.remove('hidden');
+            };
+
+            const clearStatus = () => {
+                statusMessage.classList.add('hidden');
+                statusMessage.innerHTML = "";
+            };
+
+            async function fetchWithRetry(url, maxAttempts) {
+                for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                    setLoading(true, attempt); 
+                    const delay = Math.pow(2, attempt) * 100;
+                    
+                    try {
+                        const response = await fetch(url);
+
+                        if (response.ok) {
+                            return response;
+                        }
+
+                        if (response.status === 408) { 
+                            console.warn(`Attempt ${attempt} failed with status ${response.status} (Timeout). Retrying in ${delay}ms...`);
+                        } else {
+                            const errorText = await response.text();
+                            throw new Error(`Proxy returned error status: ${response.status}. Raw response: ${errorText.substring(0, 100)}...`);
+                        }
+
+                    } catch (error) {
+                        console.error(`Attempt ${attempt} failed:`, error.message);
+                    }
+
+                    if (attempt < maxAttempts) {
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                }
+                throw new Error(`Failed to fetch after ${maxAttempts} attempts.`);
+            }
+
+            insertButton.addEventListener("click", async function () {
+                const rawInput = urlInput.value.trim();
+                
+                if (!isValidInput(rawInput)) {
+                    showError("Please enter a valid URL.");
+                    urlInput.classList.add('ring-2', 'ring-red-500');
+                    return;
+                }
+
+                const matchType = subdomainToggle.checked ? 'domain' : 'host';
+                const extensionFilterParams = getExtensionFilter();
+                
+                let cdxQueryUrl = `https://web.archive.org/cdx/search/cdx?url=${encodeURIComponent(rawInput)}&matchType=${matchType}&fl=original&collapse=urlkey&output=text&filter=statuscode:200`;
+
+                if (extensionFilterParams) {
+                    cdxQueryUrl += `&${extensionFilterParams}`;
+                }
+
+                clearStatus();
+                urlInput.classList.remove('ring-2', 'ring-red-500');
+                resultsContainer.classList.add('hidden');
+                resultsOutput.textContent = "";
+                
+                
+                const finalFetchUrl = `${PROXY_URL}${encodeURIComponent(cdxQueryUrl)}`;
+
+                try {
+                    const response = await fetchWithRetry(finalFetchUrl, MAX_RETRIES);
+                    const textData = await response.text();
+                    
+                    if (!textData.trim()) {
+                        showError("No archive records found (Status 200) matching your filters.", cdxQueryUrl);
+                        resultsOutput.textContent = `No results found for the query:\n${cdxQueryUrl}`;
+                    } else {
+                        resultsOutput.textContent = textData;
+                        const lineCount = textData.trim().split('\n').filter(line => line.trim().length > 0).length;
+                        showSuccess(`Successfully fetched ${lineCount} archive URLs.`);
+                    }
+                    resultsContainer.classList.remove('hidden');
+
+                } catch (error) {
+                    console.error("Final Fetch Error:", error);
+                    showError(`Data retrieval failed after ${MAX_RETRIES} attempts. Error: ${error.message.substring(0, 80)}...`, cdxQueryUrl);
+                    resultsOutput.textContent = `The CORS proxy failed to retrieve data after multiple attempts. Use the fallback link above to view the raw CDX output directly. Raw query URL:\n${cdxQueryUrl}`;
+                    resultsContainer.classList.remove('hidden');
+
+                } finally {
+                    setLoading(false);
+                }
+            });
+
+            copyButton.addEventListener("click", function() {
+                const text = resultsOutput.textContent;
+                if (!text) return;
+
+                const originalText = copyButton.innerHTML;
+                copyButton.innerHTML = '<i class="fas fa-check mr-1"></i> Copied!';
+                copyButton.classList.add('text-green-600', 'dark:text-green-400');
+                copyButton.classList.remove('text-indigo-600', 'dark:text-indigo-400');
+                
+                const tempTextarea = document.createElement('textarea');
+                tempTextarea.value = text;
+                document.body.appendChild(tempTextarea);
+                tempTextarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempTextarea);
+                
+                setTimeout(() => {
+                    copyButton.innerHTML = originalText;
+                    copyButton.classList.remove('text-green-600', 'dark:text-green-400');
+                    copyButton.classList.add('text-indigo-600', 'dark:text-indigo-400');
+                }, 2000);
+            });
+
+            urlInput.addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    insertButton.click();
+                }
+            });
+
+            function applyTheme(isDark) {
+                if (isDark) {
+                    htmlElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                    themeToggleInput.checked = true; 
+                } else {
+                    htmlElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                    themeToggleInput.checked = false; 
+                }
+            }
+
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                applyTheme(true);
+            } else {
+                applyTheme(false);
+            }
+            
+            themeToggleInput.addEventListener('change', (e) => {
+                applyTheme(e.target.checked);
+            });
+        });
+    </script>
+</body>
+</html>
