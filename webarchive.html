@@ -411,27 +411,58 @@
                 }
             });
 
-            copyButton.addEventListener("click", function() {
+            // UPDATED COPY LOGIC
+            copyButton.addEventListener("click", async function() {
                 const text = resultsOutput.textContent;
                 if (!text) return;
 
-                const originalText = copyButton.innerHTML;
-                copyButton.innerHTML = '<i class="fas fa-check mr-1"></i> Copied!';
-                copyButton.classList.add('text-green-600', 'dark:text-green-400');
-                copyButton.classList.remove('text-indigo-600', 'dark:text-indigo-400');
+                const originalText = "<i class=\"far fa-copy mr-1\"></i> Copy Content";
                 
-                const tempTextarea = document.createElement('textarea');
-                tempTextarea.value = text;
-                document.body.appendChild(tempTextarea);
-                tempTextarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(tempTextarea);
-                
-                setTimeout(() => {
-                    copyButton.innerHTML = originalText;
-                    copyButton.classList.remove('text-green-600', 'dark:text-green-400');
-                    copyButton.classList.add('text-indigo-600', 'dark:text-indigo-400');
-                }, 2000);
+                const showSuccessFeedback = () => {
+                    copyButton.innerHTML = '<i class="fas fa-check mr-1"></i> Copied!';
+                    copyButton.classList.add('text-green-600', 'dark:text-green-400');
+                    copyButton.classList.remove('text-indigo-600', 'dark:text-indigo-400');
+                    
+                    setTimeout(() => {
+                        copyButton.innerHTML = originalText;
+                        copyButton.classList.remove('text-green-600', 'dark:text-green-400');
+                        copyButton.classList.add('text-indigo-600', 'dark:text-indigo-400');
+                    }, 2000);
+                };
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    try {
+                        await navigator.clipboard.writeText(text);
+                        showSuccessFeedback();
+                        return; 
+                    } catch (err) {
+                        console.warn("Clipboard API failed, attempting fallback...", err);
+                    }
+                }
+
+                try {
+                    const tempTextarea = document.createElement('textarea');
+                    tempTextarea.value = text;
+                    tempTextarea.style.position = 'fixed'; 
+                    tempTextarea.style.left = '-9999px';
+                    tempTextarea.style.top = '0';
+                    document.body.appendChild(tempTextarea);
+                    
+                    tempTextarea.focus();
+                    tempTextarea.select();
+                    
+                    const successful = document.execCommand('copy');
+                    document.body.removeChild(tempTextarea);
+                    
+                    if (successful) {
+                        showSuccessFeedback();
+                    } else {
+                        alert("Unable to copy. The result set might be too large for this browser version.");
+                    }
+                } catch (err) {
+                    console.error("Copy failed", err);
+                    alert("Failed to copy results.");
+                }
             });
 
             urlInput.addEventListener("keypress", function(event) {
