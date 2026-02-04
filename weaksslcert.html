@@ -2,7 +2,6 @@
 <html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SSL Certificate Analyzer</title>
     <link href="profile.jpg" type="image/jpg" rel="shortcut icon" />
     <script src="https://cdn.tailwindcss.com"></script>
@@ -60,7 +59,7 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-slate-800 dark:text-white">SSL Analyzer</h1>
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">Weak Hash • Expiry • Wildcards • Self-Signed</p>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">Weak Hash • Expiry • Wildcards • Issuers</p>
                 </div>
             </div>
             
@@ -84,7 +83,7 @@
                 <div>
                     <h3 class="font-semibold text-blue-900 dark:text-blue-100">How to use</h3>
                     <p class="text-blue-800 dark:text-blue-200 text-sm mt-1">
-                        Paste your Nmap scan results below. This tool detects <strong>weak hashing algorithms</strong>, <strong>expired certificates</strong>, <strong>wildcard usage</strong>, and <strong>self-signed certificates</strong>.
+                        Paste your Nmap scan results below. This tool detects <strong>weak hashing algorithms</strong>, <strong>expired certificates</strong>, <strong>wildcard usage</strong>, and <strong>private/self-signed certificates</strong>.
                         Supports both <strong>Terminal Output</strong> and <strong>XML (-oX)</strong>.
                     </p>
                 </div>
@@ -153,14 +152,14 @@
                         <p id="statExpired" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
                     </div>
 
-                    <div id="cardSelfSigned" class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24 transition-colors">
+                    <div id="cardPrivate" class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24 transition-colors">
                         <div class="flex justify-between items-start">
-                            <p id="labelSelfSigned" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Self-Signed</p>
-                            <div id="iconBgSelfSigned" class="p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">
+                            <p id="labelPrivate" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Issuer (Self-Signed / Private or Internal)</p>
+                            <div id="iconBgPrivate" class="p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">
                                 <i data-lucide="user-check" class="w-4 h-4"></i>
                             </div>
                         </div>
-                        <p id="statSelfSigned" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
+                        <p id="statPrivate" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
                     </div>
 
                     <div id="cardWildcard" class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24 transition-colors">
@@ -197,8 +196,8 @@
                             <button data-filter="expired" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
                                 Expired
                             </button>
-                            <button data-filter="selfsigned" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
-                                Self-Signed
+                            <button data-filter="private" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+                                Private Issuer
                             </button>
                             <button data-filter="wildcard" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
                                 Wildcard
@@ -272,14 +271,23 @@ PORT    STATE SERVICE
 | Not valid before: 2020-01-01T00:00:00
 |_Not valid after:  2025-01-01T00:00:00
 
-Nmap scan report for selfsigned.local (192.168.1.50)
+Nmap scan report for self-signed-dev.local (192.168.1.50)
 Host is up (0.010s latency).
 PORT    STATE SERVICE
 443/tcp open  https
-| ssl-cert: Subject: commonName=selfsigned.local
-| Issuer: commonName=selfsigned.local
+| ssl-cert: Subject: commonName=self-signed-dev.local/organizationName=DevOps Team
+| Issuer: commonName=self-signed-dev.local/organizationName=DevOps Team
 | Signature Algorithm: sha256WithRSAEncryption
 |_Not valid after:  2030-01-01T00:00:00
+
+Nmap scan report for internal-intranet.corp (10.0.0.5)
+Host is up (0.015s latency).
+PORT    STATE SERVICE
+443/tcp open  https
+| ssl-cert: Subject: commonName=hr-portal.corp/organizationName=MegaCorp Industries
+| Issuer: commonName=MegaCorp Internal CA/organizationName=MegaCorp Industries
+| Signature Algorithm: sha256WithRSAEncryption
+|_Not valid after:  2028-12-31T00:00:00
 
 Nmap scan report for wildcard.example.com (192.168.1.13)
 Host is up (0.030s latency).
@@ -313,7 +321,7 @@ PORT    STATE SERVICE
         const statTotal = document.getElementById('statTotal');
         const statWeak = document.getElementById('statWeak');
         const statExpired = document.getElementById('statExpired');
-        const statSelfSigned = document.getElementById('statSelfSigned');
+        const statPrivate = document.getElementById('statPrivate');
         const statWildcard = document.getElementById('statWildcard');
         const statSecure = document.getElementById('statSecure');
         
@@ -325,9 +333,9 @@ PORT    STATE SERVICE
         const labelExpired = document.getElementById('labelExpired');
         const iconBgExpired = document.getElementById('iconBgExpired');
 
-        const cardSelfSigned = document.getElementById('cardSelfSigned');
-        const labelSelfSigned = document.getElementById('labelSelfSigned');
-        const iconBgSelfSigned = document.getElementById('iconBgSelfSigned');
+        const cardPrivate = document.getElementById('cardPrivate');
+        const labelPrivate = document.getElementById('labelPrivate');
+        const iconBgPrivate = document.getElementById('iconBgPrivate');
 
         const cardWildcard = document.getElementById('cardWildcard');
         const labelWildcard = document.getElementById('labelWildcard');
@@ -351,11 +359,72 @@ PORT    STATE SERVICE
             return false;
         }
 
-        function checkSelfSigned(subject, issuer) {
-            if (!subject || !issuer) return false;
-            const s = subject.trim().toLowerCase();
-            const i = issuer.trim().toLowerCase();
-            return s === i;
+        // Updated function to detect type: 'self-signed' | 'internal' | null
+        function analyzeIssuer(subject, issuer) {
+            if (!subject || !issuer) return null;
+
+            const sClean = subject.trim().toLowerCase();
+            const iClean = issuer.trim().toLowerCase();
+            
+            // 1. Exact Match -> Self-Signed
+            if (sClean === iClean) return 'self-signed';
+
+            // 2. DN Component Parsing
+            const parseDN = (dnStr) => {
+                const map = {};
+                // Handles slash or comma delimiters, flexible whitespace
+                const regex = /(?:^|[\/, \s])(commonName|CN|organizationName|O|organizationalUnitName|OU)\s*=\s*([^/,\n]+)/gi;
+                
+                let match;
+                while ((match = regex.exec(dnStr)) !== null) {
+                    let key = match[1].toLowerCase();
+                    if (key === 'commonname') key = 'cn';
+                    if (key === 'organizationname') key = 'o';
+                    if (key === 'organizationalunitname') key = 'ou';
+                    
+                    const value = match[2].trim().toLowerCase();
+                    map[key] = value;
+                }
+                return map;
+            };
+
+            const sMap = parseDN(subject);
+            const iMap = parseDN(issuer);
+
+            // 3. Direct Component Match 
+            // If Common Name matches -> Self-Signed
+            if (sMap.cn && iMap.cn && sMap.cn === iMap.cn) return 'self-signed';
+            
+            // If Organization matches but CN differs -> Likely Internal CA
+            if (sMap.o && iMap.o && sMap.o === iMap.o) return 'internal';
+
+            // 4. Keyword Overlap (Fuzzy Match) -> Internal/Private CA
+            const getKeywords = (str) => {
+                if (!str) return [];
+                return str.split(/[^a-z0-9]/i)
+                    .filter(w => w.length > 3) // Min length to avoid noise
+                    // Filter out common cert terms and generic domains
+                    .filter(w => !['com', 'org', 'net', 'edu', 'gov', 'mil', 'int', 'www', 'inc', 'corp', 'ltd', 'llc', 'gmbh', 'plc', 'ca', 'root', 'certificate', 'authority', 'secure', 'trust', 'encryption', 'server', 'class', 'sha256', 'rsa', 'organization', 'group', 'unit', 'state', 'province', 'country', 'locality'].includes(w));
+            };
+
+            const sKeywords = new Set([
+                ...getKeywords(sMap.cn),
+                ...getKeywords(sMap.o)
+            ]);
+
+            const iKeywords = new Set([
+                ...getKeywords(iMap.cn),
+                ...getKeywords(iMap.o)
+            ]);
+
+            for (let word of sKeywords) {
+                if (iKeywords.has(word)) return 'internal';
+            }
+
+            // Fallback: Check if Issuer string contains the Subject's Organization Name
+            if (sMap.o && iClean.includes(sMap.o)) return 'internal';
+
+            return null;
         }
 
         function getAlgorithmDetails(algo) {
@@ -429,7 +498,9 @@ PORT    STATE SERVICE
                                     
                                     const subjectFull = subjectMatch ? subjectMatch[1] : '';
                                     const issuerFull = issuerMatch ? issuerMatch[1] : '';
-                                    const isSelfSigned = checkSelfSigned(subjectFull, issuerFull);
+                                    
+                                    // Use new analyzer
+                                    const issuerType = analyzeIssuer(subjectFull, issuerFull);
 
                                     const cn = cnMatch ? cnMatch[1] : '';
                                     const sanRaw = sanMatch ? sanMatch[1] : '';
@@ -447,7 +518,7 @@ PORT    STATE SERVICE
                                         dateDisplay: expiryInfo.dateDisplay,
                                         commonName: cn,
                                         isWildcard: isWildcard,
-                                        isSelfSigned: isSelfSigned,
+                                        issuerType: issuerType, // 'self-signed', 'internal', or null
                                         rawOutput: output
                                     });
                                 }
@@ -496,7 +567,8 @@ PORT    STATE SERVICE
                          const sanRaw = pendingSSLData.sanRaw || '';
                          const isWildcard = checkWildcard(cn, sanRaw);
                          
-                         const isSelfSigned = checkSelfSigned(pendingSSLData.subject, pendingSSLData.issuer);
+                         // Use new analyzer
+                         const issuerType = analyzeIssuer(pendingSSLData.subject, pendingSSLData.issuer);
 
                          results.push({
                              ip,
@@ -510,7 +582,7 @@ PORT    STATE SERVICE
                              dateDisplay: expiryInfo.dateDisplay,
                              commonName: cn,
                              isWildcard: isWildcard,
-                             isSelfSigned: isSelfSigned,
+                             issuerType: issuerType,
                              rawOutput: block.trim()
                          });
                     }
@@ -555,14 +627,14 @@ PORT    STATE SERVICE
             const total = allResults.length;
             const weak = allResults.filter(r => r.isWeak).length;
             const expired = allResults.filter(r => r.isExpired).length;
-            const selfSigned = allResults.filter(r => r.isSelfSigned).length;
+            const privateIssuer = allResults.filter(r => r.issuerType !== null).length; // Count both types
             const wildcard = allResults.filter(r => r.isWildcard).length;
-            const secure = allResults.filter(r => !r.isWeak && !r.isExpired && !r.isSelfSigned).length;
+            const secure = allResults.filter(r => !r.isWeak && !r.isExpired && r.issuerType === null).length;
 
             statTotal.textContent = total;
             statWeak.textContent = weak;
             statExpired.textContent = expired;
-            statSelfSigned.textContent = selfSigned;
+            statPrivate.textContent = privateIssuer;
             statWildcard.textContent = wildcard;
             statSecure.textContent = secure;
 
@@ -598,7 +670,7 @@ PORT    STATE SERVICE
                 iconBg: 'bg-red-200 dark:bg-red-900/40 text-red-700 dark:text-red-400'
             });
 
-            toggleStyle(selfSigned, cardSelfSigned, labelSelfSigned, statSelfSigned, iconBgSelfSigned, {
+            toggleStyle(privateIssuer, cardPrivate, labelPrivate, statPrivate, iconBgPrivate, {
                 bg: 'bg-yellow-50 dark:bg-yellow-900/20',
                 border: 'border-yellow-200 dark:border-yellow-800',
                 text: 'text-yellow-600 dark:text-yellow-400',
@@ -638,9 +710,9 @@ PORT    STATE SERVICE
             const filtered = allResults.filter(r => {
                 if (currentFilter === 'weak') return r.isWeak;
                 if (currentFilter === 'expired') return r.isExpired;
-                if (currentFilter === 'selfsigned') return r.isSelfSigned;
+                if (currentFilter === 'private') return r.issuerType !== null; // Show both self-signed and internal
                 if (currentFilter === 'wildcard') return r.isWildcard;
-                if (currentFilter === 'secure') return !r.isWeak && !r.isExpired && !r.isSelfSigned;
+                if (currentFilter === 'secure') return !r.isWeak && !r.isExpired && r.issuerType === null;
                 return true;
             });
 
@@ -656,16 +728,15 @@ PORT    STATE SERVICE
             filtered.forEach(result => {
                 const row = document.createElement('div');
                 const isCritical = result.isWeak || result.isExpired;
-                const isWarning = result.isSelfSigned || (result.isWildcard && !isCritical);
+                const isWarning = (result.issuerType !== null) || (result.isWildcard && !isCritical);
                 
                 let rowBgClass = '';
                 if (isCritical) rowBgClass = 'bg-red-50/10 dark:bg-red-900/5';
-                else if (result.isSelfSigned) rowBgClass = 'bg-yellow-50/30 dark:bg-yellow-900/5';
+                else if (result.issuerType !== null) rowBgClass = 'bg-yellow-50/30 dark:bg-yellow-900/5';
                 else if (result.isWildcard) rowBgClass = 'bg-indigo-50/30 dark:bg-indigo-900/5';
 
                 row.className = `grid grid-cols-12 px-6 py-4 border-b border-slate-100 dark:border-slate-700 items-start sm:items-center hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${rowBgClass} cursor-help`;
                 
-                // Add event listeners for tooltip
                 row.addEventListener('mouseenter', (e) => {
                     rawTooltip.innerText = result.rawOutput || 'No raw data available.';
                     rawTooltip.classList.remove('hidden');
@@ -696,15 +767,20 @@ PORT    STATE SERVICE
                     statusHtml += `<div class="inline-flex items-center gap-1.5 text-red-600 dark:text-red-400 text-xs font-bold mb-1"><i data-lucide="clock" class="w-3 h-3"></i> EXPIRED</div><br>`;
                 }
                 if (result.isWeak) {
-                    statusHtml += `<div class="inline-flex items-center gap-1.5 text-orange-600 dark:text-orange-400 text-xs font-bold mb-1"><i data-lucide="unlock" class="w-3 h-3"></i> WEAK HASH</div><br>`;
+                    statusHtml += `<div class="inline-flex items-center gap-1.5 text-orange-600 dark:text-orange-400 text-xs font-bold mb-1"><i data-lucide="unlock" class="w-3 h-3"></i> WEAK CIPHER</div><br>`;
                 }
-                if (result.isSelfSigned) {
+                
+                // Specific Issuer Badges
+                if (result.issuerType === 'self-signed') {
                     statusHtml += `<div class="inline-flex items-center gap-1.5 text-yellow-600 dark:text-yellow-400 text-xs font-bold mb-1"><i data-lucide="user-check" class="w-3 h-3"></i> SELF-SIGNED</div><br>`;
+                } else if (result.issuerType === 'internal') {
+                    statusHtml += `<div class="inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400 text-xs font-bold mb-1"><i data-lucide="building" class="w-3 h-3"></i> INTERNAL CA</div><br>`;
                 }
+
                 if (result.isWildcard) {
                     statusHtml += `<div class="inline-flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 text-xs font-bold mb-1"><i data-lucide="asterisk" class="w-3 h-3"></i> WILDCARD</div><br>`;
                 }
-                if (!result.isExpired && !result.isWeak && !result.isSelfSigned && !result.isWildcard) {
+                if (!result.isExpired && !result.isWeak && result.issuerType === null && !result.isWildcard) {
                     statusHtml = `<div class="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-xs font-medium"><i data-lucide="shield-check" class="w-4 h-4"></i> SECURE</div>`;
                 }
                 if (statusHtml.endsWith('<br>')) statusHtml = statusHtml.slice(0, -4);
@@ -746,7 +822,6 @@ PORT    STATE SERVICE
             const x = e.clientX + 15;
             const y = e.clientY + 15;
             
-            // Boundary checks
             const rect = rawTooltip.getBoundingClientRect();
             const winWidth = window.innerWidth;
             const winHeight = window.innerHeight;
@@ -832,7 +907,7 @@ PORT    STATE SERVICE
                 
                 if (filterType === 'weak') clicked.classList.add('text-orange-600', 'dark:text-orange-400');
                 else if (filterType === 'expired') clicked.classList.add('text-red-600', 'dark:text-red-400');
-                else if (filterType === 'selfsigned') clicked.classList.add('text-yellow-600', 'dark:text-yellow-400');
+                else if (filterType === 'private') clicked.classList.add('text-yellow-600', 'dark:text-yellow-400');
                 else if (filterType === 'wildcard') clicked.classList.add('text-indigo-600', 'dark:text-indigo-400');
                 else if (filterType === 'secure') clicked.classList.add('text-emerald-600', 'dark:text-emerald-400');
                 else clicked.classList.add('text-slate-900', 'dark:text-white');
