@@ -696,7 +696,7 @@ PORT    STATE SERVICE
                     statusHtml += `<div class="inline-flex items-center gap-1.5 text-red-600 dark:text-red-400 text-xs font-bold mb-1"><i data-lucide="clock" class="w-3 h-3"></i> EXPIRED</div><br>`;
                 }
                 if (result.isWeak) {
-                    statusHtml += `<div class="inline-flex items-center gap-1.5 text-orange-600 dark:text-orange-400 text-xs font-bold mb-1"><i data-lucide="unlock" class="w-3 h-3"></i> WEAK CIPHER</div><br>`;
+                    statusHtml += `<div class="inline-flex items-center gap-1.5 text-orange-600 dark:text-orange-400 text-xs font-bold mb-1"><i data-lucide="unlock" class="w-3 h-3"></i> WEAK HASH</div><br>`;
                 }
                 if (result.isSelfSigned) {
                     statusHtml += `<div class="inline-flex items-center gap-1.5 text-yellow-600 dark:text-yellow-400 text-xs font-bold mb-1"><i data-lucide="user-check" class="w-3 h-3"></i> SELF-SIGNED</div><br>`;
