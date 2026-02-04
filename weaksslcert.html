@@ -155,7 +155,9 @@
 
                     <div id="cardPrivate" class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24 transition-colors">
                         <div class="flex justify-between items-start">
-                            <p id="labelPrivate" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Issuer (Self-Signed / Private or Internal)</p>
+                            <p id="labelPrivate" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Issuer (Self-Signed / Private or Internal)
+
+</p>
                             <div id="iconBgPrivate" class="p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">
                                 <i data-lucide="user-check" class="w-4 h-4"></i>
                             </div>
@@ -272,15 +274,6 @@ PORT    STATE SERVICE
 | Not valid before: 2020-01-01T00:00:00
 |_Not valid after:  2025-01-01T00:00:00
 
-Nmap scan report for self-signed-dev.local (192.168.1.50)
-Host is up (0.010s latency).
-PORT    STATE SERVICE
-443/tcp open  https
-| ssl-cert: Subject: commonName=self-signed-dev.local/organizationName=DevOps Team
-| Issuer: commonName=self-signed-dev.local/organizationName=DevOps Team
-| Signature Algorithm: sha256WithRSAEncryption
-|_Not valid after:  2030-01-01T00:00:00
-
 Nmap scan report for internal-intranet.corp (10.0.0.5)
 Host is up (0.015s latency).
 PORT    STATE SERVICE
@@ -289,6 +282,15 @@ PORT    STATE SERVICE
 | Issuer: commonName=MegaCorp Internal CA/organizationName=MegaCorp Industries
 | Signature Algorithm: sha256WithRSAEncryption
 |_Not valid after:  2028-12-31T00:00:00
+
+Nmap scan report for self-signed-dev.local (192.168.1.50)
+Host is up (0.010s latency).
+PORT    STATE SERVICE
+443/tcp open  https
+| ssl-cert: Subject: commonName=self-signed-dev.local/organizationName=DevOps Team
+| Issuer: commonName=self-signed-dev.local/organizationName=DevOps Team
+| Signature Algorithm: sha256WithRSAEncryption
+|_Not valid after:  2030-01-01T00:00:00
 
 Nmap scan report for wildcard.example.com (192.168.1.13)
 Host is up (0.030s latency).
@@ -367,57 +369,49 @@ PORT    STATE SERVICE
         function analyzeIssuer(subject, issuer) {
             if (!subject || !issuer) return null;
 
-            const sClean = subject.trim().toLowerCase();
-            const iClean = issuer.trim().toLowerCase();
+            const sClean = subject.toLowerCase();
+            const iClean = issuer.toLowerCase();
             
             if (sClean === iClean) return 'self-signed';
 
-            const parseDN = (dnStr) => {
-                const map = {};
-                const regex = /(?:^|[\/, \s])(commonName|CN|organizationName|O|organizationalUnitName|OU)\s*=\s*([^/,\n]+)/gi;
-                
-                let match;
-                while ((match = regex.exec(dnStr)) !== null) {
-                    let key = match[1].toLowerCase();
-                    if (key === 'commonname') key = 'cn';
-                    if (key === 'organizationname') key = 'o';
-                    if (key === 'organizationalunitname') key = 'ou';
-                    
-                    const value = match[2].trim().toLowerCase();
-                    map[key] = value;
-                }
-                return map;
+            // Helper to extract values
+            const getValue = (str, keys) => {
+                const keyPattern = keys.join('|');
+                const regex = new RegExp(`(?:^|[\\/, \\s])(?:${keyPattern})\\s*=\\s*([^\\/,\\n]+)`, 'i');
+                const match = str.match(regex);
+                return match ? match[1].trim() : null;
             };
 
-            const sMap = parseDN(subject);
-            const iMap = parseDN(issuer);
+            const sCN = getValue(subject, ['commonName', 'CN']);
+            const sO = getValue(subject, ['organizationName', 'O']);
+            const iCN = getValue(issuer, ['commonName', 'CN']);
+            const iO = getValue(issuer, ['organizationName', 'O']);
 
-            if (sMap.cn && iMap.cn && sMap.cn === iMap.cn) return 'self-signed';
+            if (sCN && iCN && sCN === iCN) return 'self-signed';
+            if (sO && iO && sO.toLowerCase() === iO.toLowerCase()) return 'internal';
+
+            // Fuzzy matching for Internal CA detection
+            let sourceString = sO || sCN || '';
             
-            if (sMap.o && iMap.o && sMap.o === iMap.o) return 'internal';
+            // Common stop words to ignore in organization names
+            const stopWords = [
+                'inc', 'incorporated', 'corp', 'corporation', 'ltd', 'limited', 'llc', 
+                'gmbh', 'plc', 'company', 'co', 'and', 'the', 'of', 'systems', 'services', 
+                'global', 'group', 'int', 'international', 'solutions', 'technologies',
+                'network', 'networks', 'communications', 'enterprises', 'holdings',
+                'com', 'org', 'net', 'www'
+            ];
 
-            const getKeywords = (str) => {
-                if (!str) return [];
-                return str.split(/[^a-z0-9]/i)
-                    .filter(w => w.length > 3)
-                    .filter(w => !['com', 'org', 'net', 'edu', 'gov', 'mil', 'int', 'www', 'inc', 'corp', 'ltd', 'llc', 'gmbh', 'plc', 'ca', 'root', 'certificate', 'authority', 'secure', 'trust', 'encryption', 'server', 'class', 'sha256', 'rsa', 'organization', 'group', 'unit', 'state', 'province', 'country', 'locality'].includes(w));
-            };
+            const keywords = sourceString.split(/[^a-z0-9]/i)
+                .filter(w => w.length > 3) // Filter short words
+                .filter(w => !stopWords.includes(w.toLowerCase()));
 
-            const sKeywords = new Set([
-                ...getKeywords(sMap.cn),
-                ...getKeywords(sMap.o)
-            ]);
-
-            const iKeywords = new Set([
-                ...getKeywords(iMap.cn),
-                ...getKeywords(iMap.o)
-            ]);
-
-            for (let word of sKeywords) {
-                if (iKeywords.has(word)) return 'internal';
+            // Check if ANY significant keyword from Subject exists in the Issuer string
+            for (const word of keywords) {
+                if (iClean.includes(word.toLowerCase())) {
+                    return 'internal';
+                }
             }
-
-            if (sMap.o && iClean.includes(sMap.o)) return 'internal';
 
             return null;
         }
