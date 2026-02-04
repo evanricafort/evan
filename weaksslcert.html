@@ -172,10 +172,10 @@
                         <p id="statWildcard" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
                     </div>
 
-                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24">
+                    <div id="cardSecure" class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24 transition-colors">
                         <div class="flex justify-between items-start">
-                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Secure</p>
-                            <div class="p-1.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-md text-emerald-600 dark:text-emerald-400">
+                            <p id="labelSecure" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Secure</p>
+                            <div id="iconBgSecure" class="p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">
                                 <i data-lucide="check-circle" class="w-4 h-4"></i>
                             </div>
                         </div>
@@ -341,6 +341,10 @@ PORT    STATE SERVICE
         const labelWildcard = document.getElementById('labelWildcard');
         const iconBgWildcard = document.getElementById('iconBgWildcard');
 
+        const cardSecure = document.getElementById('cardSecure');
+        const labelSecure = document.getElementById('labelSecure');
+        const iconBgSecure = document.getElementById('iconBgSecure');
+
         function checkExpiration(dateStr) {
             if (!dateStr) return { isExpired: false, dateDisplay: 'Unknown' };
             const expiryDate = new Date(dateStr);
@@ -359,20 +363,16 @@ PORT    STATE SERVICE
             return false;
         }
 
-        // Updated function to detect type: 'self-signed' | 'internal' | null
         function analyzeIssuer(subject, issuer) {
             if (!subject || !issuer) return null;
 
             const sClean = subject.trim().toLowerCase();
             const iClean = issuer.trim().toLowerCase();
             
-            // 1. Exact Match -> Self-Signed
             if (sClean === iClean) return 'self-signed';
 
-            // 2. DN Component Parsing
             const parseDN = (dnStr) => {
                 const map = {};
-                // Handles slash or comma delimiters, flexible whitespace
                 const regex = /(?:^|[\/, \s])(commonName|CN|organizationName|O|organizationalUnitName|OU)\s*=\s*([^/,\n]+)/gi;
                 
                 let match;
@@ -391,19 +391,14 @@ PORT    STATE SERVICE
             const sMap = parseDN(subject);
             const iMap = parseDN(issuer);
 
-            // 3. Direct Component Match 
-            // If Common Name matches -> Self-Signed
             if (sMap.cn && iMap.cn && sMap.cn === iMap.cn) return 'self-signed';
             
-            // If Organization matches but CN differs -> Likely Internal CA
             if (sMap.o && iMap.o && sMap.o === iMap.o) return 'internal';
 
-            // 4. Keyword Overlap (Fuzzy Match) -> Internal/Private CA
             const getKeywords = (str) => {
                 if (!str) return [];
                 return str.split(/[^a-z0-9]/i)
-                    .filter(w => w.length > 3) // Min length to avoid noise
-                    // Filter out common cert terms and generic domains
+                    .filter(w => w.length > 3)
                     .filter(w => !['com', 'org', 'net', 'edu', 'gov', 'mil', 'int', 'www', 'inc', 'corp', 'ltd', 'llc', 'gmbh', 'plc', 'ca', 'root', 'certificate', 'authority', 'secure', 'trust', 'encryption', 'server', 'class', 'sha256', 'rsa', 'organization', 'group', 'unit', 'state', 'province', 'country', 'locality'].includes(w));
             };
 
@@ -421,7 +416,6 @@ PORT    STATE SERVICE
                 if (iKeywords.has(word)) return 'internal';
             }
 
-            // Fallback: Check if Issuer string contains the Subject's Organization Name
             if (sMap.o && iClean.includes(sMap.o)) return 'internal';
 
             return null;
@@ -499,7 +493,6 @@ PORT    STATE SERVICE
                                     const subjectFull = subjectMatch ? subjectMatch[1] : '';
                                     const issuerFull = issuerMatch ? issuerMatch[1] : '';
                                     
-                                    // Use new analyzer
                                     const issuerType = analyzeIssuer(subjectFull, issuerFull);
 
                                     const cn = cnMatch ? cnMatch[1] : '';
@@ -518,7 +511,7 @@ PORT    STATE SERVICE
                                         dateDisplay: expiryInfo.dateDisplay,
                                         commonName: cn,
                                         isWildcard: isWildcard,
-                                        issuerType: issuerType, // 'self-signed', 'internal', or null
+                                        issuerType: issuerType,
                                         rawOutput: output
                                     });
                                 }
@@ -567,7 +560,6 @@ PORT    STATE SERVICE
                          const sanRaw = pendingSSLData.sanRaw || '';
                          const isWildcard = checkWildcard(cn, sanRaw);
                          
-                         // Use new analyzer
                          const issuerType = analyzeIssuer(pendingSSLData.subject, pendingSSLData.issuer);
 
                          results.push({
@@ -627,7 +619,7 @@ PORT    STATE SERVICE
             const total = allResults.length;
             const weak = allResults.filter(r => r.isWeak).length;
             const expired = allResults.filter(r => r.isExpired).length;
-            const privateIssuer = allResults.filter(r => r.issuerType !== null).length; // Count both types
+            const privateIssuer = allResults.filter(r => r.issuerType !== null).length;
             const wildcard = allResults.filter(r => r.isWildcard).length;
             const secure = allResults.filter(r => !r.isWeak && !r.isExpired && r.issuerType === null).length;
 
@@ -686,6 +678,14 @@ PORT    STATE SERVICE
                 iconBg: 'bg-indigo-200 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400'
             });
 
+            toggleStyle(secure, cardSecure, labelSecure, statSecure, iconBgSecure, {
+                bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+                border: 'border-emerald-200 dark:border-emerald-800',
+                text: 'text-emerald-600 dark:text-emerald-400',
+                textBold: 'text-emerald-700 dark:text-emerald-300',
+                iconBg: 'bg-emerald-200 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400'
+            });
+
             if (inputData.value.trim().length > 0) {
                 btnClear.classList.remove('hidden');
             } else {
@@ -710,7 +710,7 @@ PORT    STATE SERVICE
             const filtered = allResults.filter(r => {
                 if (currentFilter === 'weak') return r.isWeak;
                 if (currentFilter === 'expired') return r.isExpired;
-                if (currentFilter === 'private') return r.issuerType !== null; // Show both self-signed and internal
+                if (currentFilter === 'private') return r.issuerType !== null;
                 if (currentFilter === 'wildcard') return r.isWildcard;
                 if (currentFilter === 'secure') return !r.isWeak && !r.isExpired && r.issuerType === null;
                 return true;
@@ -728,7 +728,6 @@ PORT    STATE SERVICE
             filtered.forEach(result => {
                 const row = document.createElement('div');
                 const isCritical = result.isWeak || result.isExpired;
-                const isWarning = (result.issuerType !== null) || (result.isWildcard && !isCritical);
                 
                 let rowBgClass = '';
                 if (isCritical) rowBgClass = 'bg-red-50/10 dark:bg-red-900/5';
@@ -767,10 +766,9 @@ PORT    STATE SERVICE
                     statusHtml += `<div class="inline-flex items-center gap-1.5 text-red-600 dark:text-red-400 text-xs font-bold mb-1"><i data-lucide="clock" class="w-3 h-3"></i> EXPIRED</div><br>`;
                 }
                 if (result.isWeak) {
-                    statusHtml += `<div class="inline-flex items-center gap-1.5 text-orange-600 dark:text-orange-400 text-xs font-bold mb-1"><i data-lucide="unlock" class="w-3 h-3"></i> WEAK CIPHER</div><br>`;
+                    statusHtml += `<div class="inline-flex items-center gap-1.5 text-orange-600 dark:text-orange-400 text-xs font-bold mb-1"><i data-lucide="unlock" class="w-3 h-3"></i> WEAK HASH</div><br>`;
                 }
                 
-                // Specific Issuer Badges
                 if (result.issuerType === 'self-signed') {
                     statusHtml += `<div class="inline-flex items-center gap-1.5 text-yellow-600 dark:text-yellow-400 text-xs font-bold mb-1"><i data-lucide="user-check" class="w-3 h-3"></i> SELF-SIGNED</div><br>`;
                 } else if (result.issuerType === 'internal') {
