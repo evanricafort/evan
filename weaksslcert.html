@@ -2,6 +2,7 @@
 <html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SSL Certificate Analyzer</title>
     <link href="profile.jpg" type="image/jpg" rel="shortcut icon" />
     <script src="https://cdn.tailwindcss.com"></script>
@@ -59,7 +60,7 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-slate-800 dark:text-white">SSL Analyzer</h1>
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">Weak Hash • Expiry • Wildcards • Issuers</p>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">Weak Hash • Expiry • Wildcards • Issuer</p>
                 </div>
             </div>
             
@@ -737,7 +738,22 @@ PORT    STATE SERVICE
                 row.className = `grid grid-cols-12 px-6 py-4 border-b border-slate-100 dark:border-slate-700 items-start sm:items-center hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${rowBgClass} cursor-help`;
                 
                 row.addEventListener('mouseenter', (e) => {
-                    rawTooltip.innerText = result.rawOutput || 'No raw data available.';
+                    // Build Issue Report
+                    let issueText = "";
+                    if (result.isWeak) issueText += `[WEAK HASH] ${result.algorithm}: ${result.description}\n`;
+                    if (result.isExpired) issueText += `[EXPIRED] Certificate expired on ${result.dateDisplay}.\n`;
+                    if (result.issuerType === 'self-signed') issueText += `[SELF-SIGNED] The certificate is self-signed (untrusted).\n`;
+                    if (result.issuerType === 'internal') issueText += `[INTERNAL CA] Issued by a private/internal authority.\n`;
+                    if (result.isWildcard) issueText += `[WILDCARD] Uses a wildcard (*.domain) certificate.\n`;
+
+                    let tooltipContent = "";
+                    if (issueText) {
+                        tooltipContent += "⚠️ ISSUES IDENTIFIED:\n" + issueText + "\n";
+                        tooltipContent += "📝 RAW DATA:\n";
+                    }
+                    tooltipContent += (result.rawOutput || 'No raw data available.');
+
+                    rawTooltip.innerText = tooltipContent;
                     rawTooltip.classList.remove('hidden');
                     updateTooltipPosition(e);
                 });
