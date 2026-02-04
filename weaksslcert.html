@@ -229,6 +229,8 @@
         </div>
     </main>
 
+    <div id="rawTooltip" class="fixed z-50 hidden max-w-lg p-3 bg-slate-900 text-slate-200 text-[10px] font-mono rounded-lg shadow-xl border border-slate-700 pointer-events-none whitespace-pre-wrap leading-tight break-words opacity-95"></div>
+
     <script>
         const ALGO_DB = {
             'md2': { status: 'WEAK', desc: 'Broken. Vulnerable to collision attacks.' },
@@ -306,6 +308,7 @@ PORT    STATE SERVICE
         const filterBtns = document.querySelectorAll('.filter-btn');
         const btnThemeToggle = document.getElementById('btnThemeToggle');
         const htmlElement = document.documentElement;
+        const rawTooltip = document.getElementById('rawTooltip');
 
         const statTotal = document.getElementById('statTotal');
         const statWeak = document.getElementById('statWeak');
@@ -444,7 +447,8 @@ PORT    STATE SERVICE
                                         dateDisplay: expiryInfo.dateDisplay,
                                         commonName: cn,
                                         isWildcard: isWildcard,
-                                        isSelfSigned: isSelfSigned
+                                        isSelfSigned: isSelfSigned,
+                                        rawOutput: output
                                     });
                                 }
                             }
@@ -506,7 +510,8 @@ PORT    STATE SERVICE
                              dateDisplay: expiryInfo.dateDisplay,
                              commonName: cn,
                              isWildcard: isWildcard,
-                             isSelfSigned: isSelfSigned
+                             isSelfSigned: isSelfSigned,
+                             rawOutput: block.trim()
                          });
                     }
                     pendingSSLData = null;
@@ -658,8 +663,23 @@ PORT    STATE SERVICE
                 else if (result.isSelfSigned) rowBgClass = 'bg-yellow-50/30 dark:bg-yellow-900/5';
                 else if (result.isWildcard) rowBgClass = 'bg-indigo-50/30 dark:bg-indigo-900/5';
 
-                row.className = `grid grid-cols-12 px-6 py-4 border-b border-slate-100 dark:border-slate-700 items-start sm:items-center hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${rowBgClass}`;
+                row.className = `grid grid-cols-12 px-6 py-4 border-b border-slate-100 dark:border-slate-700 items-start sm:items-center hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${rowBgClass} cursor-help`;
                 
+                // Add event listeners for tooltip
+                row.addEventListener('mouseenter', (e) => {
+                    rawTooltip.innerText = result.rawOutput || 'No raw data available.';
+                    rawTooltip.classList.remove('hidden');
+                    updateTooltipPosition(e);
+                });
+
+                row.addEventListener('mousemove', (e) => {
+                    updateTooltipPosition(e);
+                });
+
+                row.addEventListener('mouseleave', () => {
+                    rawTooltip.classList.add('hidden');
+                });
+
                 const hostDisplay = (result.hostname !== 'Unknown' && result.hostname) ? result.hostname : result.ip;
                 const subDisplay = (result.hostname !== 'Unknown' && result.hostname) ? `<div class="text-xs text-slate-500 dark:text-slate-400">${result.ip}</div>` : '';
 
@@ -690,16 +710,16 @@ PORT    STATE SERVICE
                 if (statusHtml.endsWith('<br>')) statusHtml = statusHtml.slice(0, -4);
 
                 row.innerHTML = `
-                    <div class="col-span-12 sm:col-span-3 pr-2 mb-2 sm:mb-0">
+                    <div class="col-span-12 sm:col-span-3 pr-2 mb-2 sm:mb-0 pointer-events-none">
                         <div class="font-medium text-slate-900 dark:text-slate-100 break-words text-sm">${hostDisplay}</div>
                         ${subDisplay}
                     </div>
-                    <div class="col-span-4 sm:col-span-2 mb-2 sm:mb-0">
+                    <div class="col-span-4 sm:col-span-2 mb-2 sm:mb-0 pointer-events-none">
                         <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
                             ${result.port}/${result.protocol}
                         </span>
                     </div>
-                    <div class="col-span-8 sm:col-span-3 mb-2 sm:mb-0">
+                    <div class="col-span-8 sm:col-span-3 mb-2 sm:mb-0 pointer-events-none">
                         <div class="flex flex-col items-start gap-1">
                             <code class="text-xs px-2 py-1 rounded border ${algoBadgeClass}">
                                 ${result.algorithm}
@@ -710,16 +730,39 @@ PORT    STATE SERVICE
                             ${result.commonName ? `<span class="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1 rounded border border-slate-200 dark:border-slate-700">CN: ${result.commonName}</span>` : ''}
                         </div>
                     </div>
-                    <div class="col-span-6 sm:col-span-2 mb-2 sm:mb-0 text-sm ${expiryBadgeClass}">
+                    <div class="col-span-6 sm:col-span-2 mb-2 sm:mb-0 text-sm ${expiryBadgeClass} pointer-events-none">
                         ${result.dateDisplay}
                     </div>
-                    <div class="col-span-6 sm:col-span-2 text-right">
+                    <div class="col-span-6 sm:col-span-2 text-right pointer-events-none">
                         ${statusHtml}
                     </div>
                 `;
                 resultsContainer.appendChild(row);
             });
             lucide.createIcons();
+        }
+
+        function updateTooltipPosition(e) {
+            const x = e.clientX + 15;
+            const y = e.clientY + 15;
+            
+            // Boundary checks
+            const rect = rawTooltip.getBoundingClientRect();
+            const winWidth = window.innerWidth;
+            const winHeight = window.innerHeight;
+
+            let finalX = x;
+            let finalY = y;
+
+            if (x + rect.width > winWidth) {
+                finalX = winWidth - rect.width - 10;
+            }
+            if (y + rect.height > winHeight) {
+                finalY = winHeight - rect.height - 10;
+            }
+            
+            rawTooltip.style.left = `${finalX}px`;
+            rawTooltip.style.top = `${finalY}px`;
         }
 
         function handleAnalyze() {
