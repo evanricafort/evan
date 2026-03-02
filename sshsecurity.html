@@ -3,20 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SSH Security Analyzer V2</title>
-    <!-- Tailwind CDN: Required for single-file, browser-based compilation. -->
+    <title>SSH Security Analyzer</title>
+    <link href="profile.jpg" type="image/jpg" rel="shortcut icon" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome CDN: Required for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Custom styles for Dark Mode Toggle SVG icon transitions */
         .sun-icon, .moon-icon {
             transition: opacity 0.3s;
         }
         [data-theme="light"] .moon-icon { opacity: 0; }
         [data-theme="dark"] .sun-icon { opacity: 0; }
         
-        /* Transition for the detail arrow icon */
         .toggle-button svg {
             transition: transform 0.2s ease-in-out;
         }
@@ -25,9 +22,8 @@
         }
     </style>
     <script>
-        // Custom Tailwind Configuration for font and dark mode
         tailwind.config = {
-            darkMode: 'class', // Enable dark mode based on the 'dark' class on the html element
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
@@ -47,7 +43,6 @@
 <div class="max-w-7xl mx-auto">
     <header class="text-center mb-10 relative">
         <h1 class="text-4xl font-extrabold text-gray-900 dark:text-gray-50 mb-2 flex items-center justify-center flex-wrap">
-            <!-- Added Hover Moving Effect here -->
             <i class="fa-solid fa-square-terminal mr-3 text-indigo-600 dark:text-indigo-500 drop-shadow-md transition-transform duration-300 hover:scale-110 hover:-rotate-6 cursor-pointer"></i>
             <span class="text-primary-indigo dark:text-indigo-400">SSH</span>
             <span class="ml-3">Security Analyzer</span>
@@ -56,13 +51,10 @@
             Analyze SSH configurations or Nmap scans for cryptographic risks.
         </p>
 
-        <!-- Dark Mode Toggle Button -->
         <button id="darkModeToggle" class="absolute top-0 right-0 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition" onclick="toggleDarkMode()">
-            <!-- Sun Icon (Light Mode) -->
             <svg class="sun-icon w-6 h-6 text-yellow-500" data-theme="light" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.5-4.5l-1.591 1.591M3 12h2.25m.386-6.364l1.591 1.591M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z" />
             </svg>
-            <!-- Moon Icon (Dark Mode) -->
             <svg class="moon-icon w-6 h-6 text-indigo-400 absolute top-2 right-2" data-theme="dark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a1.5 1.5 0 01-1.5 1.5h-15a1.5 1.5 0 01-1.5-1.5V6.75m19.5 0A.75.75 0 0021 6H3a.75.75 0 00-.75.75m19.5 0v.243a2.75 2.75 0 01-5.698 0l-.821 5.378a2.75 2.75 0 01-5.32 0l-.82-5.378A2.75 2.75 0 013.75 6.993V6.75M10.375 13.5l1.625-2.25 1.625 2.25M12 10.5a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5a.75.75 0 01.75-.75z" />
             </svg>
@@ -82,7 +74,6 @@
         </div>
     </div>
 
-    <!-- Tab Navigation -->
     <div class="flex border-b border-gray-200 dark:border-gray-700 mb-6">
         <button id="tab-report-btn" onclick="setActiveTab('report')" class="tab-btn px-4 py-3 text-lg font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-primary-indigo hover:border-primary-indigo dark:hover:text-indigo-400 dark:hover:border-indigo-400 transition-colors duration-200">
             Analysis Report
@@ -92,9 +83,6 @@
         </button>
     </div>
 
-    <!-- Tab Content -->
-    
-    <!-- 1. Analysis Report Tab Content -->
     <div id="tab-report" class="tab-content">
         <div id="resultsPanel" class="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 sm:p-8 mb-8 ring-1 ring-gray-100 dark:ring-gray-700 transition-colors duration-300" style="display:none;">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 border-gray-100 dark:border-gray-700">
@@ -103,7 +91,7 @@
                     <span id="securityScore" class="px-4 py-1.5 text-sm font-extrabold rounded-full shadow-lg transition duration-200">Checking...</span>
                 </div>
                 
-                <!-- Copy Results button Group -->
+        
                 <div class="flex flex-wrap gap-3">
                     <button id="copyHostsButton" 
                             class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg shadow-md hover:bg-green-700 transition duration-150 ease-in-out" 
@@ -139,14 +127,14 @@
                         </tr>
                     </thead>
                     <tbody id="resultsBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        <!-- Rows injected here -->
+
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- 2. Algorithm Database Tab Content -->
+
     <div id="tab-database" class="tab-content" style="display:none;">
         <div class="bg-white dark:bg-gray-800 shadow-xl rounded-xl p-6 sm:p-8 mb-8 ring-1 ring-gray-100 dark:ring-gray-700 transition-colors duration-300">
             <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 border-b pb-2 border-gray-100 dark:border-gray-700">Known Algorithm Definitions</h2>
@@ -165,7 +153,7 @@
                         </tr>
                     </thead>
                     <tbody id="databaseBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        <!-- Database rows generated via JavaScript -->
+
                     </tbody>
                  </table>
             </div>
@@ -177,14 +165,11 @@
 <div id="copyMessage" class="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-xl opacity-0 transition-opacity duration-300 z-50">Copied to clipboard!</div>
 
 <script>
-    // Note: The __app_id, __firebase_config, and __initial_auth_token variables
-    // required for real-world Firestore integration are NOT used in this version,
-    // as it is a pure client-side utility tool. The apiKey remains empty.
+
     const apiKey = ""; 
     let currentFindings = []; 
     let activeTab = 'report';
 
-    // --- Algorithm Database (CRITICAL, WEAK, LEGACY, SECURE) ---
     const DATABASE = {
         ciphers: {
             'arcfour': { status: 'CRITICAL', reason: 'RC4 is broken.' },
@@ -240,10 +225,9 @@
         }
     };
 
-    /** Utility Functions **/
 
     function getStatusClasses(status) {
-        // Updated to use more distinct Tailwind classes
+    
         switch (status) {
             case 'CRITICAL': return 'bg-red-600 text-white shadow-red-900/50';
             case 'WEAK': return 'bg-amber-400 text-amber-900 shadow-amber-900/50';
@@ -269,20 +253,18 @@
         tempTextArea.value = text;
         document.body.appendChild(tempTextArea);
         tempTextArea.select();
-        // Use document.execCommand('copy') for compatibility in environments like iframe/Canvas
+
         document.execCommand('copy'); 
         document.body.removeChild(tempTextArea);
         showCopyMessage("Results copied to clipboard!");
     }
     
-    /** NEW: Copy only unique Hosts/IPs **/
     function copyHostsOnly() {
         if (currentFindings.length === 0) {
             showCopyMessage("No hosts or IPs detected to copy.");
             return;
         }
 
-        // Extract unique host names from all valid findings
         const uniqueHosts = [...new Set(currentFindings.map(f => f.host))];
         
         let textToCopy = "Detected SSH Hosts/IPs:\n\n" + uniqueHosts.join('\n');
@@ -291,7 +273,6 @@
     }
 
 
-    /** Dark Mode Logic **/
 
     function toggleDarkMode() {
         const html = document.documentElement;
@@ -322,37 +303,31 @@
             document.documentElement.classList.add('dark');
         }
         updateDarkModeIcon(themeToSet);
-        renderDatabase(); // Render DB table on load
+        renderDatabase(); 
     }
 
-    /** Tab Logic **/
 
     function setActiveTab(tabId) {
         activeTab = tabId;
-        // Hide all tab content
         document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
         
-        // Reset all button styles
         document.querySelectorAll('.tab-btn').forEach(el => {
             el.classList.remove('border-primary-indigo', 'text-primary-indigo', 'dark:border-indigo-400', 'dark:text-indigo-400', 'border-opacity-100');
             el.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
         });
 
-        // Show active content and style active button
         document.getElementById(`tab-${tabId}`).style.display = 'block';
         const activeBtn = document.getElementById(`tab-${tabId}-btn`);
         activeBtn.classList.add('border-primary-indigo', 'text-primary-indigo', 'dark:border-indigo-400', 'dark:text-indigo-400', 'border-opacity-100');
         activeBtn.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400');
     }
 
-    /** Database Tab Logic **/
 
     function renderDatabase() {
         const databaseBody = document.getElementById('databaseBody');
         databaseBody.innerHTML = '';
         let allAlgos = [];
 
-        // Flatten the DATABASE structure for rendering
         Object.keys(DATABASE).forEach(typeKey => {
             Object.keys(DATABASE[typeKey]).forEach(name => {
                 const typeLabel = typeKey.charAt(0).toUpperCase() + typeKey.slice(1);
@@ -401,17 +376,14 @@
     }
 
 
-    /** Analysis and Copy Logic (Retained & Enhanced) **/
     
     function toggleDetails(button) {
         const row = button.closest('tr');
         const nextRow = row.nextElementSibling;
         
-        // Ensure the next element is the details row and it's hidden
         if (nextRow && nextRow.classList.contains('details-row')) {
             nextRow.classList.toggle('hidden');
             
-            // Toggle the arrow icon direction
             const icon = button.querySelector('svg');
             icon.classList.toggle('rotate-90');
         }
@@ -419,7 +391,7 @@
 
 
     function getProblematicGroups() {
-        // Filter out secure and unknown algorithms
+
         const problematicFindings = currentFindings.filter(f => 
             f.status === 'CRITICAL' || f.status === 'WEAK' || f.status === 'LEGACY'
         );
@@ -435,7 +407,7 @@
                     findings: []
                 };
             } else {
-                // Determine the worst status for the host (CRITICAL > WEAK > LEGACY)
+
                 const currentWorst = groupedResults[host].worstStatus;
                 if (status === 'CRITICAL') {
                     groupedResults[host].worstStatus = 'CRITICAL';
@@ -448,17 +420,13 @@
         return groupedResults;
     }
 
-    /**
-     * Deduplicates findings based on the combination of host, type, and name.
-     * @param {Array} findings - The list of raw findings.
-     * @returns {Array} - The list of unique findings.
-     */
+
     function deduplicateFindings(findings) {
         const seen = new Set();
         const uniqueFindings = [];
         
         findings.forEach(f => {
-            // Create a unique identifier: Host|Type|Name
+
             const key = `${f.host}|${f.type}|${f.name}`;
             if (!seen.has(key)) {
                 seen.add(key);
@@ -478,7 +446,7 @@
         setActiveTab('report');
         resultsPanel.style.display = 'block';
         resultsBody.innerHTML = '';
-        scoreBadge.className = 'px-4 py-1.5 text-sm font-extrabold rounded-full shadow-lg transition duration-200'; // Reset classes
+        scoreBadge.className = 'px-4 py-1.5 text-sm font-extrabold rounded-full shadow-lg transition duration-200';
 
         if (!input.trim()) {
             resultsBody.innerHTML = '<tr><td colspan="3" class="p-6 text-center text-gray-500 dark:text-gray-400">Please enter data to analyze.</td></tr>';
@@ -496,7 +464,6 @@
             findings = parseConfig(input);
         }
 
-        // Apply deduplication here
         findings = deduplicateFindings(findings);
 
         currentFindings = findings.filter(f => f.status !== 'UNKNOWN');
@@ -513,7 +480,7 @@
         }
 
         const groupedFindings = {};
-        // Only group problematic findings for the expandable table
+
         problematicFindings.forEach(f => {
             if (!groupedFindings[f.host]) {
                 groupedFindings[f.host] = [];
@@ -533,7 +500,6 @@
 
             let hostStatusClass = getStatusClasses(hostStatus);
 
-            // --- 1. Generate the Main Row (Host, Status, Toggle Button) ---
             const mainRow = document.createElement('tr');
             mainRow.className = 'hover:bg-indigo-50/50 dark:hover:bg-gray-700/50 transition-colors duration-150 cursor-pointer'; 
             mainRow.onclick = (e) => { 
@@ -559,7 +525,6 @@
             `;
             resultsBody.appendChild(mainRow);
             
-            // --- 2. Generate the Details Row (Hidden Nested Table) ---
             const detailsRow = document.createElement('tr');
             detailsRow.className = 'details-row hidden bg-gray-50 dark:bg-gray-800/80';
             detailsRow.innerHTML = `
@@ -615,7 +580,6 @@
         }
     }
 
-    // --- Copy Logic (Retained & Updated) ---
     function copyConciseResults() {
         const groupedResults = getProblematicGroups();
 
@@ -630,7 +594,6 @@
             const data = groupedResults[host];
             const algosString = data.findings.map(f => f.name).join(', ');
             
-            // Format: [IP/HOST] - [WORST STATUS] - [ALGO NAME 1, ALGO NAME 2, ...]
             textToCopy += `${host} - ${data.worstStatus} - ${algosString}\n`;
         });
         
@@ -650,12 +613,10 @@
         Object.keys(groupedResults).forEach(host => {
             const data = groupedResults[host];
             
-            // Host Header: [IP/HOST] - [WORST STATUS]
             textToCopy += `--- ${host} - ${data.worstStatus} ---\n`;
 
-            // List individual findings with details
             data.findings.forEach(f => {
-                // Indented line: - [TYPE] [ALGO NAME] (INDIVIDUAL STATUS) - [DESCRIPTION]
+
                 textToCopy += `  - [${f.type}] ${f.name} (${f.status}) - ${f.reason}\n`;
             });
             textToCopy += '\n'; 
@@ -664,7 +625,6 @@
         copyToClipboard(textToCopy);
     }
 
-    // --- Parsing functions (Retained) ---
     function parseNmap(text) {
         const lines = text.split('\n');
         let findings = [];
@@ -775,7 +735,6 @@
         return { type: typeLabel, name: name, status: info.status, reason: info.reason };
     }
 
-    // --- Sorting function (status sorting logic remains) ---
     function sortTable(n) {
         var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
         table = document.getElementById("resultsTable");
@@ -784,15 +743,15 @@
         while (switching) {
             switching = false;
             rows = table.rows;
-            for (i = 1; i < (rows.length - 1); i += 2) { // Skip details rows (i+1 is the detail row)
+            for (i = 1; i < (rows.length - 1); i += 2) { 
                 shouldSwitch = false;
                 x = rows[i].getElementsByTagName("TD")[n];
-                y = rows[i + 2].getElementsByTagName("TD")[n]; // Compare main row i with main row i+2
+                y = rows[i + 2].getElementsByTagName("TD")[n];
                 
                 let xText = x.innerText.toLowerCase();
                 let yText = y.innerText.toLowerCase();
 
-                if (n === 1) { // Status column logic (sort by severity)
+                if (n === 1) { 
                     const order = { 'critical': 3, 'weak': 2, 'legacy': 1, 'secure': 0 };
                     let xVal = order[xText] || -1;
                     let yVal = order[yText] || -1;
@@ -802,7 +761,7 @@
                     } else if (dir == "desc") {
                         if (xVal > yVal) { shouldSwitch = true; break; }
                     }
-                } else { // Default text/host sorting
+                } else { 
                     if (dir == "asc") {
                         if (xText > yText) { shouldSwitch = true; break; }
                     } else if (dir == "desc") {
@@ -811,9 +770,8 @@
                 }
             }
             if (shouldSwitch) {
-                // Move both the main row and its corresponding details row
-                rows[i].parentNode.insertBefore(rows[i + 2], rows[i]); // Move main row below
-                rows[i].parentNode.insertBefore(rows[i + 3], rows[i + 1]); // Move detail row below
+                rows[i].parentNode.insertBefore(rows[i + 2], rows[i]); 
+                rows[i].parentNode.insertBefore(rows[i + 3], rows[i + 1]); 
                 switching = true;
                 switchcount ++; 
             } else {
@@ -826,10 +784,9 @@
     }
 
 
-    // Initial load calls
     window.onload = function() {
         initializeDarkMode();
-        setActiveTab('report'); // Set initial tab
+        setActiveTab('report'); 
     }
 </script>
 
