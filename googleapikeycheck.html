@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Google / Gemini API Key Checker</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --surface: #ffffff;
+    --surface2: #f0f2f6;
+    --border: #dde1ea;
+    --text: #1a1d2e;
+    --text2: #5a6072;
+    --accent: #2563eb;
+    --accent-glow: rgba(37,99,235,0.15);
+    --green: #16a34a;
+    --green-bg: #dcfce7;
+    --red: #dc2626;
+    --red-bg: #fee2e2;
+    --yellow: #d97706;
+    --yellow-bg: #fef3c7;
+    --blue: #2563eb;
+    --blue-bg: #dbeafe;
+    --gray: #6b7280;
+    --gray-bg: #f3f4f6;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+    --radius: 12px;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Sora', sans-serif;
+  }
+  [data-theme="dark"] {
+    --bg: #0d0f1a;
+    --surface: #151825;
+    --surface2: #1e2133;
+    --border: #2a2f47;
+    --text: #e8eaf2;
+    --text2: #8b91aa;
+    --accent: #3b82f6;
+    --accent-glow: rgba(59,130,246,0.2);
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.12);
+    --red: #ef4444;
+    --red-bg: rgba(239,68,68,0.12);
+    --yellow: #f59e0b;
+    --yellow-bg: rgba(245,158,11,0.12);
+    --blue: #60a5fa;
+    --blue-bg: rgba(96,165,250,0.12);
+    --gray: #6b7280;
+    --gray-bg: rgba(107,114,128,0.12);
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .brand-icon {
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .dark-toggle {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 6px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: var(--sans);
+    font-weight: 500;
+    color: var(--text2);
+    display: flex; align-items: center; gap: 7px;
+    transition: all 0.2s;
+  }
+  .dark-toggle:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ─── MAIN ─── */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  .page-hero {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--blue-bg);
+    color: var(--blue);
+    border: 1px solid rgba(96,165,250,0.3);
+    border-radius: 50px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--mono);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: clamp(22px, 4vw, 30px);
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+  }
+  .hero-sub {
+    font-size: 14px;
+    color: var(--text2);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+    transition: background 0.3s, border-color 0.3s;
+    margin-bottom: 20px;
+  }
+  .card-header {
+    padding: 18px 22px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text);
+  }
+  .card-header-icon {
+    width: 28px; height: 28px;
+    background: var(--accent-glow);
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+  }
+  .card-body { padding: 18px 22px 22px; }
+
+  /* ─── INPUT ─── */
+  .input-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .input-wrap {
+    flex: 1;
+    min-width: 200px;
+    position: relative;
+  }
+  .input-wrap input {
+    width: 100%;
+    padding: 11px 44px 11px 14px;
+    font-family: var(--mono);
+    font-size: 13px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .input-wrap input::placeholder { color: var(--text2); }
+  .input-wrap input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  .eye-btn {
+    position: absolute;
+    right: 12px; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none;
+    cursor: pointer; color: var(--text2);
+    font-size: 15px; padding: 2px;
+    transition: color 0.2s;
+  }
+  .eye-btn:hover { color: var(--accent); }
+  .btn {
+    padding: 11px 22px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 7px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); opacity: 1; }
+
+  .privacy-note {
+    margin-top: 10px;
+    font-size: 11.5px;
+    color: var(--text2);
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  /* ─── PROGRESS ─── */
+  .progress-area { display: none; }
+  .progress-area.active { display: block; }
+  .progress-label {
+    font-size: 12px;
+    color: var(--text2);
+    font-family: var(--mono);
+    margin-bottom: 6px;
+    display: flex; justify-content: space-between;
+  }
+  .progress-track {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 99px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #2563eb, #7c3aed);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* ─── STATS GRID ─── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  @media(max-width:600px){ .stats-grid { grid-template-columns: repeat(2,1fr); } }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    text-align: center;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .stat-value {
+    font-size: 26px;
+    font-weight: 700;
+    font-family: var(--mono);
+    line-height: 1;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--text2);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .stat-card.s-total .stat-value { color: var(--blue); }
+  .stat-card.s-enabled .stat-value { color: var(--green); }
+  .stat-card.s-restricted .stat-value { color: var(--yellow); }
+  .stat-card.s-disabled .stat-value { color: var(--red); }
+
+  /* ─── TABLE ─── */
+  .section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .section-title h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .count-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 2px 9px;
+    font-size: 11px;
+    font-family: var(--mono);
+    font-weight: 600;
+    color: var(--text2);
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead tr {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text2);
+    white-space: nowrap;
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    color: var(--text);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+
+  .empty-row td {
+    text-align: center;
+    color: var(--text2);
+    padding: 32px;
+    font-size: 13px;
+  }
+
+  /* ─── STATUS BADGES ─── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 50px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--mono);
+    white-space: nowrap;
+  }
+  .badge-enabled { background: var(--green-bg); color: var(--green); }
+  .badge-restricted { background: var(--yellow-bg); color: var(--yellow); }
+  .badge-disabled { background: var(--red-bg); color: var(--red); }
+  .badge-checking { background: var(--blue-bg); color: var(--blue); }
+  .badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .badge-dot.pulse { animation: pulse 1.2s infinite; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .service-name { font-weight: 500; font-family: var(--mono); font-size: 12px; }
+  .category-tag {
+    display: inline-flex;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: 10.5px;
+    font-family: var(--mono);
+    color: var(--text2);
+  }
+  .note-text { font-size: 11.5px; color: var(--text2); font-family: var(--mono); }
+
+  /* ─── COPY BTN ─── */
+  .copy-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 14px;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+    color: var(--text2);
+    border-top: 1px solid var(--border);
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in { animation: fadeIn 0.3s ease both; }
+
+  .spinner {
+    width: 12px; height: 12px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* model table td smaller */
+  .model-id { font-size: 11.5px; font-family: var(--mono); color: var(--text); }
+  .model-name { font-size: 12px; color: var(--text2); }
+  .token-val { font-family: var(--mono); font-size: 12px; }
+  .methods-cell { font-size: 11px; font-family: var(--mono); color: var(--text2); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <a class="brand" href="#">
+      <div class="brand-icon">🔑</div>
+      API Key Checker
+    </a>
+    <button class="dark-toggle" id="themeToggle" onclick="toggleTheme()">
+      <span id="themeIcon">🌙</span>
+      <span id="themeLabel">Dark Mode</span>
+    </button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main>
+
+  <!-- HERO -->
+  <div class="page-hero fade-in">
+    <div class="hero-badge">🔍 Security Tool</div>
+    <h1>Google / Gemini API Key Checker</h1>
+    <p class="hero-sub">Test a leaked API key against Gemini and Google services to determine its scope and enabled permissions.</p>
+  </div>
+
+  <!-- INPUT CARD -->
+  <div class="card fade-in">
+    <div class="card-header">
+      <div class="card-header-icon">🔑</div>
+      API Key Input
+    </div>
+    <div class="card-body">
+      <div class="input-row">
+        <div class="input-wrap">
+          <input type="password" id="apiKeyInput" placeholder="Paste your Google / Gemini API key here…" autocomplete="off" />
+          <button class="eye-btn" onclick="toggleVisibility()" title="Toggle visibility" id="eyeBtn">👁️</button>
+        </div>
+        <button class="btn" id="checkBtn" onclick="startCheck()">
+          <span id="btnIcon">▶</span>
+          <span id="btnText">Check Key</span>
+        </button>
+        <button class="btn btn-secondary" onclick="clearAll()">✕ Clear</button>
+      </div>
+      <div class="privacy-note">
+        🔒 All requests are made directly from your browser to Google's APIs. Your key is never sent to any third-party server.
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESS CARD -->
+  <div class="card fade-in" id="progressCard" style="display:none">
+    <div class="card-body">
+      <div class="progress-label">
+        <span id="progressMsg">Checking services…</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid fade-in">
+    <div class="stat-card s-total">
+      <div class="stat-value" id="statTotal">—</div>
+      <div class="stat-label">Services Tested</div>
+    </div>
+    <div class="stat-card s-enabled">
+      <div class="stat-value" id="statEnabled">—</div>
+      <div class="stat-label">Enabled</div>
+    </div>
+    <div class="stat-card s-restricted">
+      <div class="stat-value" id="statRestricted">—</div>
+      <div class="stat-label">Restricted</div>
+    </div>
+    <div class="stat-card s-disabled">
+      <div class="stat-value" id="statDisabled">—</div>
+      <div class="stat-label">Disabled / Error</div>
+    </div>
+  </div>
+
+  <!-- SERVICE RESULTS -->
+  <div class="card fade-in">
+    <div class="card-body">
+      <div class="section-title">
+        <h2>● Service Access Results <span class="count-badge" id="serviceCount">0</span></h2>
+        <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px" onclick="copyReport()">📋 Copy Report</button>
+      </div>
+      <div class="table-wrap">
+        <table id="serviceTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Service</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody id="serviceBody">
+            <tr class="empty-row"><td colspan="5">Enter an API key above and click <strong>Check Key</strong> to begin.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- GEMINI MODELS -->
+  <div class="card fade-in">
+    <div class="card-body">
+      <div class="section-title">
+        <h2>● Accessible Gemini Models <span class="count-badge" id="modelCount">0</span></h2>
+      </div>
+      <div class="table-wrap">
+        <table id="modelsTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Model ID</th>
+              <th>Display Name</th>
+              <th>Input Tokens</th>
+              <th>Output Tokens</th>
+              <th>Methods</th>
+            </tr>
+          </thead>
+          <tbody id="modelsBody">
+            <tr class="empty-row"><td colspan="6">No models found yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  For authorized security testing only &nbsp;·&nbsp; All checks run client-side &nbsp;·&nbsp; No data is stored
+</footer>
+
+<script>
+/* ─── THEME ─── */
+function toggleTheme() {
+  const html = document.documentElement;
+  const dark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', dark ? 'light' : 'dark');
+  document.getElementById('themeIcon').textContent = dark ? '🌙' : '☀️';
+  document.getElementById('themeLabel').textContent = dark ? 'Dark Mode' : 'Light Mode';
+}
+
+/* ─── INPUT TOGGLE ─── */
+function toggleVisibility() {
+  const inp = document.getElementById('apiKeyInput');
+  const btn = document.getElementById('eyeBtn');
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁️'; }
+}
+
+/* ─── CLEAR ─── */
+function clearAll() {
+  document.getElementById('apiKeyInput').value = '';
+  document.getElementById('apiKeyInput').type = 'password';
+  document.getElementById('eyeBtn').textContent = '👁️';
+  document.getElementById('progressCard').style.display = 'none';
+  resetStats();
+  document.getElementById('serviceBody').innerHTML = '<tr class="empty-row"><td colspan="5">Enter an API key above and click <strong>Check Key</strong> to begin.</td></tr>';
+  document.getElementById('modelsBody').innerHTML  = '<tr class="empty-row"><td colspan="6">No models found yet.</td></tr>';
+  document.getElementById('serviceCount').textContent = '0';
+  document.getElementById('modelCount').textContent  = '0';
+  results = [];
+}
+
+/* ─── SERVICES DEFINITION ─── */
+const SERVICES = [
+  {
+    name: 'Gemini — List Models',
+    category: 'Gemini AI',
+    test: async (k) => {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${k}`);
+      const d = await r.json();
+      if (r.ok && d.models) return { status: 'ENABLED', note: `${d.models.length} model(s) accessible`, models: d.models };
+      if (r.status === 403) return { status: 'RESTRICTED', note: d.error?.message || 'Permission denied' };
+      return { status: 'DISABLED', note: d.error?.message || `HTTP ${r.status}` };
+    }
+  },
+  {
+    name: 'Gemini — generateContent (flash)',
+    category: 'Gemini AI',
+    test: async (k) => {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${k}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: 'Say OK' }] }] })
+      });
+      const d = await r.json();
+      if (r.ok && d.candidates) return { status: 'ENABLED', note: 'Content generation works' };
+      if (r.status === 403) return { status: 'RESTRICTED', note: d.error?.message || 'Permission denied' };
+      return { status: 'DISABLED', note: d.error?.message || `HTTP ${r.status}` };
+    }
+  },
+  {
+    name: 'Gemini — embedContent',
+    category: 'Gemini AI',
+    test: async (k) => {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/embedding-001:embedContent?key=${k}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'models/embedding-001', content: { parts: [{ text: 'test' }] } })
+      });
+      const d = await r.json();
+      if (r.ok && d.embedding) return { status: 'ENABLED', note: 'Embedding generation works' };
+      if (r.status === 403) return { status: 'RESTRICTED', note: d.error?.message || 'Permission denied' };
+      return { status: 'DISABLED', note: d.error?.message || `HTTP ${r.status}` };
+    }
+  },
+  {
+    name: 'Maps — Geocoding API',
+    category: 'Google Maps',
+    test: async (k) => {
+      const r = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=New+York&key=${k}`);
+      const d = await r.json();
+      if (d.status === 'OK') return { status: 'ENABLED', note: `Geocoding works (${d.results?.length} result)` };
+      if (d.status === 'REQUEST_DENIED') return { status: 'RESTRICTED', note: d.error_message || 'Request denied' };
+      if (d.status === 'OVER_QUERY_LIMIT') return { status: 'RESTRICTED', note: 'Over query limit' };
+      return { status: 'DISABLED', note: d.error_message || d.status };
+    }
+  },
+  {
+    name: 'Maps — Places Nearby Search',
+    category: 'Google Maps',
+    test: async (k) => {
+      const r = await fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=40.7128,-74.0060&radius=100&key=${k}`);
+      const d = await r.json();
+      if (d.status === 'OK' || d.status === 'ZERO_RESULTS') return { status: 'ENABLED', note: `Places API accessible (${d.results?.length || 0} results)` };
+      if (d.status === 'REQUEST_DENIED') return { status: 'RESTRICTED', note: d.error_message || 'Request denied' };
+      return { status: 'DISABLED', note: d.error_message || d.status };
+    }
+  },
+  {
+    name: 'Maps — Directions API',
+    category: 'Google Maps',
+    test: async (k) => {
+      const r = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=New+York&destination=Boston&key=${k}`);
+      const d = await r.json();
+      if (d.status === 'OK') return { status: 'ENABLED', note: `${d.routes?.length} route(s) returned` };
+      if (d.status === 'REQUEST_DENIED') return { status: 'RESTRICTED', note: d.error_message || 'Request denied' };
+      return { status: 'DISABLED', note: d.error_message || d.status };
+    }
+  },
+  {
+    name: 'Maps — Distance Matrix',
+    category: 'Google Maps',
+    test: async (k) => {
+      const r = await fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?origins=New+York&destinations=Boston&key=${k}`);
+      const d = await r.json();
+      if (d.status === 'OK') return { status: 'ENABLED', note: 'Distance Matrix accessible' };
+      if (d.status === 'REQUEST_DENIED') return { status: 'RESTRICTED', note: d.error_message || 'Request denied' };
+      return { status: 'DISABLED', note: d.error_message || d.status };
+    }
+  },
+  {
+    name: 'Maps — Elevation API',
+    category: 'Google Maps',
+    test: async (k) => {
+      const r = await fetch(`https://maps.googleapis.com/maps/api/elevation/json?locations=27.988,86.925&key=${k}`);
+      const d = await r.json();
+      if (d.status === 'OK') return { status: 'ENABLED', note: `Elevation: ${Math.round(d.results?.[0]?.elevation || 0)}m` };
+      if (d.status === 'REQUEST_DENIED') return { status: 'RESTRICTED', note: d.error_message || 'Request denied' };
+      return { status: 'DISABLED', note: d.error_message || d.status };
+    }
+  },
+  {
+    name: 'Maps — Timezone API',
+    category: 'Google Maps',
+    test: async (k) => {
+      const r = await fetch(`https://maps.googleapis.com/maps/api/timezone/json?location=40.7128,-74.006&timestamp=1331161200&key=${k}`);
+      const d = await r.json();
+      if (d.status === 'OK') return { status: 'ENABLED', note: `TZ: ${d.timeZoneId}` };
+      if (d.status === 'REQUEST_DENIED') return { status: 'RESTRICTED', note: d.errorMessage || 'Request denied' };
+      return { status: 'DISABLED', note: d.errorMessage || d.status };
+    }
+  },
+  {
+    name: 'YouTube — Data API v3',
+    category: 'YouTube',
+    test: async (k) => {
+      const r = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=test&maxResults=1&key=${k}`);
+      const d = await r.json();
+      if (r.ok && d.items) return { status: 'ENABLED', note: `YouTube search works (${d.pageInfo?.totalResults || '?'} results)` };
+      if (r.status === 403) return { status: 'RESTRICTED', note: d.error?.message || 'Permission denied' };
+      return { status: 'DISABLED', note: d.error?.message || `HTTP ${r.status}` };
+    }
+  },
+  {
+    name: 'Custom Search API',
+    category: 'Search',
+    test: async (k) => {
+      const r = await fetch(`https://www.googleapis.com/customsearch/v1?cx=017576662512468239146:omuauf_lfve&q=test&key=${k}`);
+      const d = await r.json();
+      if (r.ok && d.items) return { status: 'ENABLED', note: 'Custom Search accessible' };
+      if (r.status === 403) return { status: 'RESTRICTED', note: d.error?.message || 'Permission denied' };
+      if (r.status === 400 && d.error?.message?.includes('cx')) return { status: 'ENABLED', note: 'Key valid — cx missing (expected)' };
+      return { status: 'DISABLED', note: d.error?.message || `HTTP ${r.status}` };
+    }
+  },
+  {
+    name: 'Cloud Translation API',
+    category: 'Cloud AI',
+    test: async (k) => {
+      const r = await fetch(`https://translation.googleapis.com/language/translate/v2?q=hello+world&target=es&key=${k}`);
+      const d = await r.json();
+      if (r.ok && d.data?.translations) return { status: 'ENABLED', note: `Translated: "${d.data.translations[0]?.translatedText}"` };
+      if (r.status === 403) return { status: 'RESTRICTED', note: d.error?.message || 'Permission denied' };
+      return { status: 'DISABLED', note: d.error?.message || `HTTP ${r.status}` };
+    }
+  },
+  {
+    name: 'Cloud Vision API',
+    category: 'Cloud AI',
+    test: async (k) => {
+      const r = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${k}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requests: [{ image: { source: { imageUri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/240px-PNG_transparency_demonstration_1.png' } }, features: [{ type: 'LABEL_DETECTION', maxResults: 1 }] }] })
+      });
+      const d = await r.json();
+      if (r.ok && d.responses) return { status: 'ENABLED', note: 'Vision API works' };
+      if (r.status === 403) return { status: 'RESTRICTED', note: d.error?.message || 'Permission denied' };
+      return { status: 'DISABLED', note: d.error?.message || `HTTP ${r.status}` };
+    }
+  },
+  {
+    name: 'Cloud Natural Language',
+    category: 'Cloud AI',
+    test: async (k) => {
+      const r = await fetch(`https://language.googleapis.com/v1/documents:analyzeEntities?key=${k}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ document: { type: 'PLAIN_TEXT', content: 'Google Cloud is awesome.' }, encodingType: 'UTF8' })
+      });
+      const d = await r.json();
+      if (r.ok && d.entities) return { status: 'ENABLED', note: `${d.entities.length} entities detected` };
+      if (r.status === 403) return { status: 'RESTRICTED', note: d.error?.message || 'Permission denied' };
+      return { status: 'DISABLED', note: d.error?.message || `HTTP ${r.status}` };
+    }
+  },
+  {
+    name: 'Cloud Text-to-Speech',
+    category: 'Cloud AI',
+    test: async (k) => {
+      const r = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${k}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input: { text: 'Test' }, voice: { languageCode: 'en-US', name: 'en-US-Wavenet-D' }, audioConfig: { audioEncoding: 'MP3' } })
+      });
+      const d = await r.json();
+      if (r.ok && d.audioContent) return { status: 'ENABLED', note: 'TTS synthesis works' };
+      if (r.status === 403) return { status: 'RESTRICTED', note: d.error?.message || 'Permission denied' };
+      return { status: 'DISABLED', note: d.error?.message || `HTTP ${r.status}` };
+    }
+  }
+];
+
+/* ─── STATE ─── */
+let results = [];
+
+function resetStats() {
+  ['statTotal','statEnabled','statRestricted','statDisabled'].forEach(id => {
+    document.getElementById(id).textContent = '—';
+  });
+}
+function updateStats() {
+  const total = results.length;
+  const enabled = results.filter(r => r.status === 'ENABLED').length;
+  const restricted = results.filter(r => r.status === 'RESTRICTED').length;
+  const disabled = results.filter(r => r.status === 'DISABLED').length;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statEnabled').textContent = enabled;
+  document.getElementById('statRestricted').textContent = restricted;
+  document.getElementById('statDisabled').textContent = disabled;
+}
+
+function setProgress(pct, msg) {
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressMsg').textContent = msg;
+}
+
+function statusBadge(status) {
+  const map = {
+    ENABLED:    ['badge-enabled',    '✔', 'Enabled'],
+    RESTRICTED: ['badge-restricted', '⚠', 'Restricted'],
+    DISABLED:   ['badge-disabled',   '✕', 'Disabled'],
+    CHECKING:   ['badge-checking',   '', 'Checking…'],
+  };
+  const [cls, dot, label] = map[status] || map.DISABLED;
+  const dotHtml = status === 'CHECKING'
+    ? `<div class="badge-dot pulse"></div>`
+    : `<span>${dot}</span>`;
+  return `<span class="badge ${cls}">${dotHtml} ${label}</span>`;
+}
+
+function renderServiceRow(i, svc, result) {
+  return `<tr class="fade-in">
+    <td style="color:var(--text2);font-family:var(--mono);font-size:12px">${i}</td>
+    <td><span class="service-name">${svc.name}</span></td>
+    <td><span class="category-tag">${svc.category}</span></td>
+    <td>${statusBadge(result.status)}</td>
+    <td><span class="note-text">${result.note || ''}</span></td>
+  </tr>`;
+}
+
+async function startCheck() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) {
+    document.getElementById('apiKeyInput').focus();
+    document.getElementById('apiKeyInput').style.borderColor = 'var(--red)';
+    setTimeout(() => document.getElementById('apiKeyInput').style.borderColor = '', 1500);
+    return;
+  }
+
+  const btn = document.getElementById('checkBtn');
+  btn.disabled = true;
+  document.getElementById('btnIcon').innerHTML = '<span class="spinner"></span>';
+  document.getElementById('btnText').textContent = 'Checking…';
+
+  results = [];
+  document.getElementById('serviceBody').innerHTML = '';
+  document.getElementById('modelsBody').innerHTML  = '<tr class="empty-row"><td colspan="6">Fetching models…</td></tr>';
+  document.getElementById('serviceCount').textContent = '0';
+  document.getElementById('modelCount').textContent   = '0';
+  resetStats();
+
+  document.getElementById('progressCard').style.display = 'block';
+  setProgress(0, 'Starting checks…');
+
+  let foundModels = [];
+
+  for (let i = 0; i < SERVICES.length; i++) {
+    const svc = SERVICES[i];
+    const pct = Math.round(((i) / SERVICES.length) * 100);
+    setProgress(pct, `Checking: ${svc.name}…`);
+
+    // Show checking placeholder row
+    const tbody = document.getElementById('serviceBody');
+    const placeholderId = `row-placeholder-${i}`;
+    const ph = document.createElement('tr');
+    ph.id = placeholderId;
+    ph.innerHTML = `
+      <td style="color:var(--text2);font-family:var(--mono);font-size:12px">${i+1}</td>
+      <td><span class="service-name">${svc.name}</span></td>
+      <td><span class="category-tag">${svc.category}</span></td>
+      <td>${statusBadge('CHECKING')}</td>
+      <td><span class="note-text">—</span></td>`;
+    tbody.appendChild(ph);
+
+    let result;
+    try {
+      result = await svc.test(key);
+    } catch(e) {
+      result = { status: 'DISABLED', note: e.message || 'Network error' };
+    }
+
+    // Collect models from Gemini List Models
+    if (svc.name.includes('List Models') && result.models) {
+      foundModels = result.models;
+      delete result.models;
+    }
+
+    results.push({ svc, result });
+
+    // Replace placeholder with real row
+    const existing = document.getElementById(placeholderId);
+    const div = document.createElement('tbody');
+    div.innerHTML = renderServiceRow(i+1, svc, result);
+    const newRow = div.firstElementChild;
+    tbody.replaceChild(newRow, existing);
+
+    document.getElementById('serviceCount').textContent = results.length;
+    updateStats();
+  }
+
+  setProgress(100, `Done — ${SERVICES.length} services checked`);
+
+  // Render models table
+  if (foundModels.length > 0) {
+    document.getElementById('modelsBody').innerHTML = foundModels.map((m, idx) => {
+      const id = m.name?.replace('models/', '') || '?';
+      const name = m.displayName || '—';
+      const inTok = m.inputTokenLimit ? m.inputTokenLimit.toLocaleString() : '—';
+      const outTok = m.outputTokenLimit ? m.outputTokenLimit.toLocaleString() : '—';
+      const methods = (m.supportedGenerationMethods || []).join(', ') || '—';
+      return `<tr class="fade-in">
+        <td style="color:var(--text2);font-family:var(--mono);font-size:12px">${idx+1}</td>
+        <td class="model-id">${id}</td>
+        <td class="model-name">${name}</td>
+        <td class="token-val">${inTok}</td>
+        <td class="token-val">${outTok}</td>
+        <td class="methods-cell">${methods}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('modelCount').textContent = foundModels.length;
+  } else {
+    document.getElementById('modelsBody').innerHTML = '<tr class="empty-row"><td colspan="6">No accessible models found — Gemini API may be disabled or key is invalid.</td></tr>';
+  }
+
+  btn.disabled = false;
+  document.getElementById('btnIcon').textContent = '▶';
+  document.getElementById('btnText').textContent = 'Check Key';
+}
+
+/* ─── COPY REPORT ─── */
+function copyReport() {
+  if (!results.length) return;
+  const lines = [
+    '=== Google / Gemini API Key Check Report ===',
+    `Date: ${new Date().toUTCString()}`,
+    '',
+    'SERVICE ACCESS RESULTS',
+    '-'.repeat(80),
+    ...results.map((r, i) =>
+      `${String(i+1).padStart(2,'0')}. [${r.result.status.padEnd(10)}] ${r.svc.name.padEnd(40)} ${r.result.note || ''}`
+    ),
+    '',
+    `Total: ${results.length} | Enabled: ${results.filter(r=>r.result.status==='ENABLED').length} | Restricted: ${results.filter(r=>r.result.status==='RESTRICTED').length} | Disabled: ${results.filter(r=>r.result.status==='DISABLED').length}`
+  ];
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    const btn = event.target.closest('button');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = orig, 2000);
+  });
+}
+</script>
+</body>
+</html>
