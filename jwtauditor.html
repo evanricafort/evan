@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JWT Analyzer</title>
+<link href="profile.jpg" type="image/jpg" rel="shortcut icon" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #080b10;
+    --bg2:      #0d1117;
+    --bg3:      #111820;
+    --bg4:      #161e2a;
+    --border:   #1e2d3d;
+    --border2:  #243040;
+    --cyan:     #00e5ff;
+    --cyan-dim: #0097aa;
+    --green:    #00ff88;
+    --green-dim:#00804a;
+    --red:      #ff3b5c;
+    --red-dim:  #8b1a2e;
+    --orange:   #ff9100;
+    --orange-dim:#7a4500;
+    --yellow:   #ffe033;
+    --yellow-dim:#6b5c00;
+    --text:     #c9d8ea;
+    --text2:    #6b8199;
+    --text3:    #3d5068;
+    --white:    #e8f0f8;
+    --mono:     'JetBrains Mono', monospace;
+    --display:  'Syne', sans-serif;
+    --radius:   6px;
+    --shadow:   0 4px 24px rgba(0,0,0,0.6);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.6;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 80% 40% at 50% -10%, rgba(0,229,255,0.06) 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,229,255,0.015) 40px, rgba(0,229,255,0.015) 41px);
+  }
+
+  /* ── Header ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(8,11,16,0.92);
+    backdrop-filter: blur(12px);
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--cyan), var(--green));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(0,229,255,0.25);
+  }
+  .logo-text {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.5px;
+  }
+  .logo-sub {
+    font-size: 10px;
+    color: var(--text2);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+  .header-badge {
+    margin-left: auto;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    border: 1px solid var(--cyan-dim);
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(0,229,255,0.06);
+  }
+
+  /* ── Layout ── */
+  .container { max-width: 1200px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  /* ── Section title ── */
+  .section-title {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--white);
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+  }
+  .section-sub {
+    color: var(--text2);
+    font-size: 12px;
+    margin-bottom: 20px;
+  }
+
+  /* ── Main Tabs ── */
+  .main-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+    overflow-x: auto;
+  }
+  .main-tab {
+    padding: 10px 20px;
+    border: none;
+    background: none;
+    color: var(--text2);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+  }
+  .main-tab:hover { color: var(--text); }
+  .main-tab.active {
+    color: var(--cyan);
+    border-bottom-color: var(--cyan);
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Input Area ── */
+  .input-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .input-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg3);
+    gap: 8px;
+  }
+  .input-card-header span {
+    font-size: 11px;
+    color: var(--text2);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .btn-group { display: flex; gap: 6px; }
+  textarea {
+    width: 100%;
+    background: var(--bg2);
+    border: none;
+    color: var(--cyan);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 14px 16px;
+    resize: vertical;
+    min-height: 80px;
+    outline: none;
+    line-height: 1.7;
+  }
+  textarea::placeholder { color: var(--text3); }
+
+  /* ── Buttons ── */
+  .btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--radius);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--cyan-dim), #006080);
+    color: var(--white);
+    border: 1px solid var(--cyan-dim);
+  }
+  .btn-primary:hover {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-dim));
+    box-shadow: 0 0 16px rgba(0,229,255,0.25);
+    transform: translateY(-1px);
+  }
+  .btn-success {
+    background: linear-gradient(135deg, var(--green-dim), #004a28);
+    color: var(--white);
+    border: 1px solid var(--green-dim);
+  }
+  .btn-success:hover {
+    background: linear-gradient(135deg, var(--green), var(--green-dim));
+    box-shadow: 0 0 16px rgba(0,255,136,0.2);
+  }
+  .btn-danger {
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border2);
+  }
+  .btn-danger:hover { color: var(--red); border-color: var(--red-dim); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--border2); }
+  .btn-orange {
+    background: linear-gradient(135deg, var(--orange-dim), #5c3200);
+    color: var(--white);
+    border: 1px solid var(--orange-dim);
+  }
+  .btn-orange:hover {
+    background: linear-gradient(135deg, var(--orange), var(--orange-dim));
+    box-shadow: 0 0 16px rgba(255,145,0,0.2);
+  }
+
+  /* ── Stat Cards ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: var(--border2); }
+  .stat-num {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-size: 10px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .stat-critical .stat-num { color: var(--red); }
+  .stat-high .stat-num { color: var(--orange); }
+  .stat-medium .stat-num { color: var(--yellow); }
+  .stat-low .stat-num { color: var(--cyan); }
+  .stat-safe .stat-num { color: var(--green); }
+  .stat-info .stat-num { color: var(--text2); }
+
+  /* ── JWT Token Display ── */
+  .jwt-visual {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    font-size: 12px;
+    line-height: 1.8;
+    word-break: break-all;
+    margin-bottom: 20px;
+  }
+  .jwt-part-header { color: var(--red); }
+  .jwt-part-payload { color: var(--cyan); }
+  .jwt-part-sig { color: var(--green); }
+  .jwt-dot { color: var(--text3); }
+  .jwt-label {
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  /* ── Decoded Panels ── */
+  .decoded-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 680px) { .decoded-grid { grid-template-columns: 1fr; } }
+  .decoded-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .decoded-card-header {
+    padding: 8px 14px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text2);
+  }
+  .tag-header { color: var(--red); }
+  .tag-payload { color: var(--cyan); }
+  .tag-sig { color: var(--green); }
+  pre.json-view {
+    padding: 14px 16px;
+    font-size: 12px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.7;
+  }
+  .json-key { color: #7eb8d4; }
+  .json-str { color: #a8d8a8; }
+  .json-num { color: #f7c27f; }
+  .json-bool { color: #d4a6f7; }
+  .json-null { color: var(--text3); }
+
+  /* ── Security Findings ── */
+  .findings-filter {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .filter-btn {
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: transparent;
+    color: var(--text2);
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .filter-btn:hover { border-color: var(--border2); color: var(--text); }
+  .filter-btn.active { border-color: var(--cyan); color: var(--cyan); background: rgba(0,229,255,0.06); }
+  .filter-btn[data-sev="critical"].active { border-color: var(--red); color: var(--red); background: rgba(255,59,92,0.06); }
+  .filter-btn[data-sev="high"].active { border-color: var(--orange); color: var(--orange); background: rgba(255,145,0,0.06); }
+  .filter-btn[data-sev="medium"].active { border-color: var(--yellow); color: var(--yellow); background: rgba(255,224,51,0.06); }
+  .filter-btn[data-sev="low"].active { border-color: var(--cyan); color: var(--cyan); background: rgba(0,229,255,0.06); }
+  .filter-btn[data-sev="info"].active { border-color: var(--text2); color: var(--text2); background: rgba(107,129,153,0.06); }
+
+  .finding-item {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .finding-item:hover { border-color: var(--border2); }
+  .finding-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    cursor: pointer;
+  }
+  .sev-badge {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .sev-critical { background: rgba(255,59,92,0.15); color: var(--red); border: 1px solid var(--red-dim); }
+  .sev-high { background: rgba(255,145,0,0.12); color: var(--orange); border: 1px solid var(--orange-dim); }
+  .sev-medium { background: rgba(255,224,51,0.1); color: var(--yellow); border: 1px solid var(--yellow-dim); }
+  .sev-low { background: rgba(0,229,255,0.08); color: var(--cyan); border: 1px solid var(--cyan-dim); }
+  .sev-info { background: rgba(107,129,153,0.1); color: var(--text2); border: 1px solid var(--text3); }
+
+  .finding-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--white);
+    flex: 1;
+  }
+  .finding-chevron { color: var(--text3); font-size: 10px; transition: transform 0.2s; }
+  .finding-body {
+    padding: 0 14px 14px;
+    border-top: 1px solid var(--border);
+    display: none;
+  }
+  .finding-body.open { display: block; }
+  .finding-row { margin-top: 10px; }
+  .finding-row-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
+  .finding-row-val { font-size: 12px; color: var(--text); line-height: 1.6; }
+  .finding-row-val.code {
+    background: var(--bg3);
+    padding: 8px 12px;
+    border-radius: 4px;
+    border-left: 3px solid var(--border2);
+    color: var(--cyan);
+    font-size: 11px;
+  }
+
+  /* ── Secret Bruteforcer ── */
+  .brute-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+  }
+  @media (max-width: 800px) { .brute-layout { grid-template-columns: 1fr; } }
+  .brute-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .brute-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+  }
+  .brute-card-header span {
+    font-size: 11px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .progress-bar-wrap {
+    background: var(--bg3);
+    border-radius: 3px;
+    height: 6px;
+    margin: 12px 0;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan-dim), var(--cyan));
+    border-radius: 3px;
+    transition: width 0.1s;
+    width: 0%;
+    box-shadow: 0 0 8px rgba(0,229,255,0.4);
+  }
+  .brute-status {
+    font-size: 11px;
+    color: var(--text2);
+    margin-bottom: 8px;
+  }
+  .brute-log {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    height: 220px;
+    overflow-y: auto;
+    padding: 10px 12px;
+    font-size: 11px;
+    line-height: 1.9;
+  }
+  .brute-log .log-line { color: var(--text3); }
+  .brute-log .log-line.found { color: var(--green); font-weight: 600; }
+  .brute-log .log-line.testing { color: var(--text2); }
+  .brute-found-banner {
+    background: rgba(0,255,136,0.08);
+    border: 1px solid var(--green-dim);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-top: 12px;
+    display: none;
+  }
+  .brute-found-banner.show { display: block; }
+  .brute-found-title { color: var(--green); font-weight: 700; font-size: 12px; margin-bottom: 6px; }
+  .brute-found-secret {
+    color: var(--white);
+    background: var(--bg3);
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 13px;
+    word-break: break-all;
+  }
+  .wordlist-area {
+    padding: 14px;
+  }
+  .wordlist-label {
+    font-size: 10px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .wordlist-area textarea {
+    height: 200px;
+    font-size: 11px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 10px;
+    background: var(--bg3);
+    min-height: 200px;
+  }
+  .algo-select-wrap {
+    padding: 10px 14px 0;
+  }
+  .algo-select-wrap label { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 5px; }
+  select {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 7px 10px;
+    border-radius: var(--radius);
+    width: 100%;
+    outline: none;
+  }
+  select:focus { border-color: var(--cyan-dim); }
+
+  /* ── JWT Editor ── */
+  .editor-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 680px) { .editor-grid { grid-template-columns: 1fr; } }
+  .editor-pane {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .editor-pane-header {
+    padding: 8px 14px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .editor-pane textarea {
+    height: 200px;
+    font-size: 12px;
+    color: var(--text);
+    min-height: 160px;
+  }
+  .editor-output {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .editor-output-header {
+    padding: 8px 14px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .editor-output pre {
+    padding: 14px 16px;
+    font-size: 11px;
+    word-break: break-all;
+    white-space: pre-wrap;
+    color: var(--text2);
+    min-height: 60px;
+  }
+  .sign-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .sign-field { flex: 1; min-width: 160px; }
+  .sign-field label { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 5px; }
+  .sign-field input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .sign-field input:focus { border-color: var(--cyan-dim); }
+
+  /* ── Security Checklist ── */
+  .checklist-section {
+    margin-bottom: 24px;
+  }
+  .checklist-section-title {
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white);
+    padding: 10px 14px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+    border-bottom: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .checklist-section-title .sev-badge { font-family: var(--mono); }
+  .checklist-table {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 0 0 var(--radius) var(--radius);
+    overflow: hidden;
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .checklist-table tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .checklist-table tr:last-child { border-bottom: none; }
+  .checklist-table tr:hover { background: var(--bg3); }
+  .checklist-table td {
+    padding: 10px 14px;
+    vertical-align: top;
+    line-height: 1.6;
+  }
+  .check-icon { font-size: 14px; width: 24px; text-align: center; flex-shrink: 0; }
+  .check-name { font-size: 12px; font-weight: 600; color: var(--white); }
+  .check-desc { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .check-risk { font-size: 10px; padding: 2px 8px; border-radius: 3px; font-weight: 600; }
+
+  /* ── Empty state ── */
+  .empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text3);
+  }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+  .empty-text { font-size: 13px; color: var(--text3); }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  /* ── Copy toast ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--bg3);
+    border: 1px solid var(--green-dim);
+    color: var(--green);
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: none; }
+
+  /* ── Divider ── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  /* ── Claim pills ── */
+  .claim-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .claim-pill {
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+    font-size: 10px;
+    background: var(--bg3);
+    color: var(--text2);
+  }
+  .claim-pill.has { border-color: var(--green-dim); color: var(--green); background: rgba(0,255,136,0.05); }
+  .claim-pill.miss { border-color: var(--red-dim); color: var(--red); background: rgba(255,59,92,0.05); }
+
+  /* ── Info box ── */
+  .info-box {
+    background: rgba(0,229,255,0.04);
+    border: 1px solid var(--cyan-dim);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 11px;
+    color: var(--text2);
+    margin-bottom: 16px;
+    line-height: 1.7;
+  }
+  .info-box strong { color: var(--cyan); }
+
+  /* load example btn */
+  .load-example-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 10px 14px;
+    background: var(--bg3);
+    border-top: 1px solid var(--border);
+  }
+  .ex-btn {
+    padding: 4px 10px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text2);
+    font-family: var(--mono);
+    font-size: 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .ex-btn:hover { color: var(--cyan); border-color: var(--cyan-dim); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">🔐</div>
+  <div>
+    <div class="logo-text">JWT Analyzer</div>
+    <div class="logo-sub">JWT Security Testing Tool</div>
+  </div>
+  <div class="header-badge">100% Client-Side</div>
+</header>
+
+<div class="container">
+
+  <div class="main-tabs">
+    <button class="main-tab active" onclick="switchTab('decoder')">🔍 Decoder &amp; Analyzer</button>
+    <button class="main-tab" onclick="switchTab('bruteforce')">⚡ Secret Bruteforcer</button>
+    <button class="main-tab" onclick="switchTab('editor')">✏️ JWT Editor</button>
+    <button class="main-tab" onclick="switchTab('checklist')">📋 Security Checklist</button>
+  </div>
+
+  <!-- ════════════════════════════════════
+       TAB 1 — Decoder & Analyzer
+       ════════════════════════════════════ -->
+  <div class="tab-panel active" id="tab-decoder">
+    <p class="section-sub">Paste a JWT token to decode its header &amp; payload and run a comprehensive security audit.</p>
+
+    <div class="input-card">
+      <div class="input-card-header">
+        <span>JWT Token Input</span>
+        <div class="btn-group">
+          <button class="btn btn-danger" onclick="clearDecoder()">Clear</button>
+          <button class="btn btn-primary" onclick="analyzeJWT()">Analyze →</button>
+        </div>
+      </div>
+      <textarea id="jwtInput" placeholder="Paste your JWT token here...  e.g. eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NSIsIm5hbWUiOiJKb2huIERvZSJ9.abc123" rows="3" spellcheck="false"></textarea>
+      <div class="load-example-row">
+        <span style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;align-self:center">Load Example:</span>
+        <button class="ex-btn" onclick="loadExample('none')">ALG:NONE</button>
+        <button class="ex-btn" onclick="loadExample('hs256')">HS256 Weak</button>
+        <button class="ex-btn" onclick="loadExample('noexp')">No Expiry</button>
+        <button class="ex-btn" onclick="loadExample('rs256')">RS256</button>
+        <button class="ex-btn" onclick="loadExample('kid')">KID Injection</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card stat-critical"><div class="stat-num" id="cnt-critical">0</div><div class="stat-label">Critical</div></div>
+      <div class="stat-card stat-high"><div class="stat-num" id="cnt-high">0</div><div class="stat-label">High</div></div>
+      <div class="stat-card stat-medium"><div class="stat-num" id="cnt-medium">0</div><div class="stat-label">Medium</div></div>
+      <div class="stat-card stat-low"><div class="stat-num" id="cnt-low">0</div><div class="stat-label">Low</div></div>
+      <div class="stat-card stat-info"><div class="stat-num" id="cnt-info">0</div><div class="stat-label">Info</div></div>
+      <div class="stat-card stat-safe"><div class="stat-num" id="cnt-pass">0</div><div class="stat-label">Passed</div></div>
+    </div>
+
+    <!-- JWT Visual -->
+    <div id="jwtVisualWrap" style="display:none">
+      <div class="jwt-label">Token Visualization</div>
+      <div class="jwt-visual" id="jwtVisual"></div>
+    </div>
+
+    <!-- Decoded Header + Payload -->
+    <div class="decoded-grid" id="decodedGrid" style="display:none">
+      <div class="decoded-card">
+        <div class="decoded-card-header"><span class="tag-header">■</span> Header</div>
+        <pre class="json-view" id="headerView"></pre>
+      </div>
+      <div class="decoded-card">
+        <div class="decoded-card-header"><span class="tag-payload">■</span> Payload</div>
+        <pre class="json-view" id="payloadView"></pre>
+      </div>
+    </div>
+
+    <!-- Claims quick view -->
+    <div id="claimsQuickWrap" style="display:none;margin-bottom:20px">
+      <div class="jwt-label">Standard Claims</div>
+      <div class="claim-pills" id="claimPills"></div>
+    </div>
+
+    <!-- Findings -->
+    <div id="findingsSection" style="display:none">
+      <div class="jwt-label" style="margin-bottom:10px">Security Findings</div>
+      <div class="findings-filter">
+        <button class="filter-btn active" data-sev="all" onclick="filterFindings('all',this)">All</button>
+        <button class="filter-btn" data-sev="critical" onclick="filterFindings('critical',this)">Critical</button>
+        <button class="filter-btn" data-sev="high" onclick="filterFindings('high',this)">High</button>
+        <button class="filter-btn" data-sev="medium" onclick="filterFindings('medium',this)">Medium</button>
+        <button class="filter-btn" data-sev="low" onclick="filterFindings('low',this)">Low</button>
+        <button class="filter-btn" data-sev="info" onclick="filterFindings('info',this)">Info</button>
+      </div>
+      <div id="findingsList"></div>
+    </div>
+
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">🔐</div>
+      <div class="empty-text">Paste a JWT token above and click <strong>Analyze</strong> to start the security audit.</div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════
+       TAB 2 — Secret Bruteforcer
+       ════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-bruteforce">
+    <p class="section-sub">Test HMAC-signed JWTs against a wordlist of common/weak secrets. Runs entirely in your browser.</p>
+
+    <div class="info-box">
+      ⚠️ <strong>Note:</strong> This tool only works on <strong>HS256, HS384, HS512</strong> tokens. RS256/ES256 asymmetric algorithms cannot be bruteforced this way.
+      The default wordlist contains 80+ commonly used weak secrets.
+    </div>
+
+    <div class="input-card" style="margin-bottom:16px">
+      <div class="input-card-header"><span>JWT Token (HMAC-signed)</span></div>
+      <textarea id="bruteJwtInput" placeholder="Paste JWT token to bruteforce..." rows="3" spellcheck="false"></textarea>
+    </div>
+
+    <div class="brute-layout">
+      <div>
+        <div class="brute-card">
+          <div class="brute-card-header">
+            <span>Bruteforce Status</span>
+            <div class="btn-group">
+              <button class="btn btn-danger" id="stopBtn" onclick="stopBrute()" style="display:none">⏹ Stop</button>
+              <button class="btn btn-orange" id="startBtn" onclick="startBrute()">⚡ Start Attack</button>
+            </div>
+          </div>
+          <div style="padding:14px 16px">
+            <div class="brute-status" id="bruteStatus">Ready. Load a token and click Start Attack.</div>
+            <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+            <div class="brute-log" id="bruteLog">
+              <div class="log-line">// Waiting to start...</div>
+            </div>
+            <div class="brute-found-banner" id="foundBanner">
+              <div class="brute-found-title">🎉 SECRET FOUND!</div>
+              <div class="brute-found-secret" id="foundSecret"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="brute-card">
+          <div class="brute-card-header"><span>Algorithm</span></div>
+          <div class="algo-select-wrap">
+            <label>Select Algorithm</label>
+            <select id="bruteAlgo">
+              <option value="auto">Auto-detect</option>
+              <option value="HS256">HS256</option>
+              <option value="HS384">HS384</option>
+              <option value="HS512">HS512</option>
+            </select>
+          </div>
+          <div class="wordlist-area">
+            <div class="wordlist-label">Wordlist (one per line)</div>
+            <textarea id="wordlistInput" spellcheck="false" placeholder="secret&#10;password&#10;123456&#10;..."></textarea>
+          </div>
+          <div style="padding:0 14px 14px;display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-ghost" onclick="loadDefaultWordlist()">Load Default List</button>
+            <button class="btn btn-ghost" onclick="clearWordlist()">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════
+       TAB 3 — JWT Editor
+       ════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-editor">
+    <p class="section-sub">Decode a JWT, modify the header/payload, and regenerate the token (with optional signing).</p>
+
+    <div class="input-card" style="margin-bottom:16px">
+      <div class="input-card-header">
+        <span>Source JWT Token</span>
+        <button class="btn btn-primary" onclick="loadToEditor()">Load &amp; Edit →</button>
+      </div>
+      <textarea id="editorSourceInput" placeholder="Paste JWT to edit..." rows="3" spellcheck="false"></textarea>
+    </div>
+
+    <div class="editor-grid">
+      <div class="editor-pane">
+        <div class="editor-pane-header"><span class="tag-header">■</span> Header JSON</div>
+        <textarea id="editorHeader" placeholder='{"alg":"HS256","typ":"JWT"}' spellcheck="false"></textarea>
+      </div>
+      <div class="editor-pane">
+        <div class="editor-pane-header"><span class="tag-payload">■</span> Payload JSON</div>
+        <textarea id="editorPayload" placeholder='{"sub":"1234567890","name":"John Doe","iat":1516239022}' spellcheck="false"></textarea>
+      </div>
+    </div>
+
+    <div class="sign-row">
+      <div class="sign-field">
+        <label>Signing Secret (HMAC only)</label>
+        <input type="text" id="editorSecret" placeholder="Leave blank for unsigned (alg: none)">
+      </div>
+      <button class="btn btn-success" onclick="generateJWT()" style="padding:8px 20px;flex-shrink:0">Generate JWT</button>
+      <button class="btn btn-ghost" onclick="setAlgNone()" style="flex-shrink:0">Set alg:none</button>
+    </div>
+
+    <div class="editor-output">
+      <div class="editor-output-header">
+        <span>Generated Token</span>
+        <button class="btn btn-ghost" onclick="copyGenerated()" style="font-size:10px;padding:4px 10px">Copy</button>
+      </div>
+      <pre id="generatedToken">// Token will appear here after clicking Generate JWT</pre>
+    </div>
+
+    <div class="editor-output">
+      <div class="editor-output-header"><span>Token Visualization</span></div>
+      <div id="editorVisual" style="padding:14px 16px;font-size:12px;word-break:break-all;line-height:1.8;min-height:50px;color:var(--text3)">// Visualization will appear here</div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════
+       TAB 4 — Security Checklist
+       ════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-checklist">
+    <p class="section-sub">50+ point JWT security audit checklist based on OWASP, RFC 7519, and real-world pen-testing experience.</p>
+
+    <!-- P1: Critical -->
+    <div class="checklist-section">
+      <div class="checklist-section-title">
+        <span class="sev-badge sev-critical">Critical</span>
+        Algorithm &amp; Signature Vulnerabilities
+      </div>
+      <table class="checklist-table">
+        <tr><td class="check-icon">🔴</td><td><div class="check-name">alg:none Bypass</div><div class="check-desc">Verify the server rejects tokens with algorithm set to "none". An attacker can forge tokens without a secret.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr><td class="check-icon">🔴</td><td><div class="check-name">Algorithm Confusion (RS256 → HS256)</div><div class="check-desc">If the server uses RS256, try sending an HS256-signed token using the public key as the HMAC secret.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr><td class="check-icon">🔴</td><td><div class="check-name">Signature Not Verified</div><div class="check-desc">Check whether the server verifies the signature at all. Some implementations only decode without verifying.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr><td class="check-icon">🔴</td><td><div class="check-name">Empty Signature Accepted</div><div class="check-desc">Test if the server accepts tokens with an empty/truncated signature field.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr><td class="check-icon">🔴</td><td><div class="check-name">Weak HMAC Secret</div><div class="check-desc">Test for short, dictionary-based, or default secrets. Use the Secret Bruteforcer tab to audit.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr><td class="check-icon">🟠</td><td><div class="check-name">Weak Algorithm (HS256)</div><div class="check-desc">HS256 may be vulnerable to brute-force if secret entropy is low. Prefer HS512, RS256, or ES256.</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+      </table>
+    </div>
+
+    <!-- P2: Claims -->
+    <div class="checklist-section">
+      <div class="checklist-section-title">
+        <span class="sev-badge sev-high">High</span>
+        Claims Validation
+      </div>
+      <table class="checklist-table">
+        <tr><td class="check-icon">🔴</td><td><div class="check-name">Missing exp Claim</div><div class="check-desc">Token never expires — remains valid indefinitely after issuance, critical risk if stolen.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr><td class="check-icon">🔴</td><td><div class="check-name">Expired Token Accepted</div><div class="check-desc">Verify the server rejects tokens whose exp timestamp has passed. Clock skew should be ≤60s.</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr><td class="check-icon">🟠</td><td><div class="check-name">Missing iss (Issuer) Claim</div><div class="check-desc">Without issuer validation, tokens from other systems may be accepted.</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr><td class="check-icon">🟠</td><td><div class="check-name">Missing aud (Audience) Claim</div><div class="check-desc">Without audience validation, tokens for one service may be used against another (confused deputy).</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr><td class="check-icon">🟡</td><td><div class="check-name">Missing jti (JWT ID) Claim</div><div class="check-desc">Without a unique ID, token revocation/blacklisting is impossible and replay attacks harder to detect.</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+        <tr><td class="check-icon">🟡</td><td><div class="check-name">Missing sub (Subject) Claim</div><div class="check-desc">The sub claim should uniquely identify the token's subject (usually a user ID).</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+        <tr><td class="check-icon">🟠</td><td><div class="check-name">Token Not-Before (nbf) Abuse</div><div class="check-desc">Verify the server enforces the nbf claim — tokens should not be accepted before the not-before time.</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr><td class="check-icon">🟠</td><td><div class="check-name">iat Issued-in-Future</div><div class="check-desc">A future-dated iat may indicate token manipulation or clock synchronization issues.</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr><td class="check-icon">🟡</td><td><div class="check-name">Excessive Token Lifetime (&gt;24h)</div><div class="check-desc">Long-lived tokens increase the impact window if a token is stolen. Prefer short-lived tokens with refresh.</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr><td class="check-icon">🟡</td><td><div class="check-name">Replay Attack Potential</div><div class="check-desc">Token lacks jti and has a long expiration — replay attacks are harder to detect without a unique ID.</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+      </table>
+    </div>
+
+    <!-- P3: Header Injection -->
+    <div class="checklist-section">
+      <div class="checklist-section-title">
+        <span class="sev-badge sev-critical">Critical</span>
+        Header Injection &amp; Hijacking
+      </div>
+      <table class="checklist-table">
+        <tr><td class="check-icon">🔴</td><td><div class="check-name">kid SQL Injection</div><div class="check-desc">The kid header may be passed to a DB query. Test: <code>kid: 1' OR '1'='1</code>. If key lookup is injectable, attacker can control signature verification.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr><td class="check-icon">🔴</td><td><div class="check-name">kid Path Traversal</div><div class="check-desc">If kid is used as a file path, test: <code>kid: ../../dev/null</code>. Allows bypassing signature verification using an empty key.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr><td class="check-icon">🔴</td><td><div class="check-name">kid Command Injection</div><div class="check-desc">If kid is passed to a shell command, special characters may lead to RCE.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr><td class="check-icon">🔴</td><td><div class="check-name">jku Header Injection (JWKS URL)</div><div class="check-desc">Verify the server validates the jku URL against a trusted whitelist. Malicious jku can redirect key verification to attacker-controlled server.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr><td class="check-icon">🔴</td><td><div class="check-name">x5u Header Injection</div><div class="check-desc">Similar to jku — the x5u header specifies a URL for X.509 certificate chain. Must validate against trusted domains only.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr><td class="check-icon">🟠</td><td><div class="check-name">Embedded JWK in Header</div><div class="check-desc">Some libraries accept a jwk claim in the header to embed a key. Server should never use an embedded key for verification.</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr><td class="check-icon">🟠</td><td><div class="check-name">x5c Certificate Chain Injection</div><div class="check-desc">x5c embeds an X.509 certificate in the header. Validate the certificate chain against trusted roots.</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+      </table>
+    </div>
+
+    <!-- P4: Sensitive Data -->
+    <div class="checklist-section">
+      <div class="checklist-section-title">
+        <span class="sev-badge sev-medium">Medium</span>
+        Sensitive Data &amp; Information Disclosure
+      </div>
+      <table class="checklist-table">
+        <tr><td class="check-icon">🟠</td><td><div class="check-name">Sensitive Data in Payload</div><div class="check-desc">JWT payload is base64-encoded, NOT encrypted. Never include passwords, SSNs, credit cards, or PII directly.</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr><td class="check-icon">🟡</td><td><div class="check-name">Excessive Claims / Over-Privilege</div><div class="check-desc">Review role/permission claims for over-privilege. Never trust client-supplied privilege escalation.</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr><td class="check-icon">🟡</td><td><div class="check-name">Internal System Info in Claims</div><div class="check-desc">Avoid leaking internal hostnames, DB names, or architecture details in JWT claims.</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+        <tr><td class="check-icon">🟡</td><td><div class="check-name">Email / Username Exposed</div><div class="check-desc">PII like email or username in JWT can be read by any party that intercepts or stores the token.</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+      </table>
+    </div>
+
+    <!-- P5: Impl Best Practices -->
+    <div class="checklist-section">
+      <div class="checklist-section-title">
+        <span class="sev-badge sev-low">Low</span>
+        Implementation Best Practices
+      </div>
+      <table class="checklist-table">
+        <tr><td class="check-icon">🟡</td><td><div class="check-name">Algorithm Whitelist Enforced</div><div class="check-desc">Server should maintain an explicit whitelist of allowed algorithms (e.g., only RS256). Never allow "any".</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr><td class="check-icon">🟡</td><td><div class="check-name">Secret Entropy ≥ 256-bit</div><div class="check-desc">HMAC secrets must be at least 32 random bytes (256 bits), generated by a CSPRNG.</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr><td class="check-icon">🟡</td><td><div class="check-name">HTTPS Only Token Transmission</div><div class="check-desc">Tokens should only be transmitted over HTTPS. Never expose in URLs (query params, paths).</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr><td class="check-icon">🟡</td><td><div class="check-name">Secure Cookie Storage</div><div class="check-desc">If using cookies: HttpOnly, Secure, SameSite=Strict flags should all be set to prevent XSS theft.</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr><td class="check-icon">🟡</td><td><div class="check-name">Token Revocation / Blacklist</div><div class="check-desc">Implement a jti-based token revocation list for logout and compromised credential scenarios.</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr><td class="check-icon">🟡</td><td><div class="check-name">Key Rotation Policy</div><div class="check-desc">Define and implement a key rotation schedule. Old keys should be retired after rotation.</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+        <tr><td class="check-icon">🟡</td><td><div class="check-name">Rate Limiting on Token Endpoints</div><div class="check-desc">Apply rate limiting to token issuance and verification endpoints to prevent brute-force attacks.</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr><td class="check-icon">🟡</td><td><div class="check-name">Unique jti per Token</div><div class="check-desc">jti (JWT ID) should use UUID v4 or CSPRNG — not sequential IDs or timestamps alone.</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+        <tr><td class="check-icon">🟡</td><td><div class="check-name">Clock Skew Tolerance ≤ 60s</div><div class="check-desc">Allow at most 60 seconds of clock skew for exp/nbf validation to prevent manipulation.</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+        <tr><td class="check-icon">🟡</td><td><div class="check-name">Payload Encryption (JWE) for PII</div><div class="check-desc">For sensitive payloads, use JSON Web Encryption (JWE / RFC 7516) instead of plain JWT.</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+      </table>
+    </div>
+
+  </div><!-- /tab-checklist -->
+
+</div><!-- /container -->
+
+<div class="toast" id="toast">Copied to clipboard!</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   Utility helpers
+═══════════════════════════════════════════════════════ */
+function b64UrlDecode(str) {
+  str = str.replace(/-/g,'+').replace(/_/g,'/');
+  while(str.length % 4) str += '=';
+  try { return atob(str); } catch(e) { return null; }
+}
+
+function b64UrlEncode(str) {
+  return btoa(str).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+
+function jsonParse(str) {
+  try { return JSON.parse(str); } catch(e) { return null; }
+}
+
+function syntaxHighlight(obj) {
+  const json = JSON.stringify(obj, null, 2);
+  return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(match) {
+    let cls = 'json-num';
+    if (/^"/.test(match)) { cls = /:$/.test(match) ? 'json-key' : 'json-str'; }
+    else if (/true|false/.test(match)) { cls = 'json-bool'; }
+    else if (/null/.test(match)) { cls = 'json-null'; }
+    return `<span class="${cls}">${match}</span>`;
+  });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg || 'Copied!';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function switchTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.main-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  const idx = ['decoder','bruteforce','editor','checklist'].indexOf(id);
+  document.querySelectorAll('.main-tab')[idx].classList.add('active');
+}
+
+/* ═══════════════════════════════════════════════════════
+   Example tokens
+═══════════════════════════════════════════════════════ */
+const EXAMPLES = {
+  none: 'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJyb2xlIjoiYWRtaW4ifQ.',
+  hs256: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+  noexp: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5ODc2NTQiLCJuYW1lIjoiQWxpY2UgV29uZGVybGFuZCIsImVtYWlsIjoiYWxpY2VAZXhhbXBsZS5jb20iLCJyb2xlIjoiYWRtaW4ifQ.abc123fake',
+  rs256: 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImtleS0xIn0.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE5MTYyNDI2MjIsImlzcyI6Imh0dHBzOi8vYXV0aC5leGFtcGxlLmNvbSIsImF1ZCI6ImFwaS5leGFtcGxlLmNvbSIsImp0aSI6ImZiNGQ4Zjc0LWE4MWUtNDNmNS1iYzA0LWU5MzAzYmU2MGVlYSJ9.fakesignature',
+  kid: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjEnIE9SICcxJz0nMSJ9.eyJzdWIiOiI5OTkiLCJuYW1lIjoiQXR0YWNrZXIiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE2MDAwMDAwMDB9.fakesignature'
+};
+
+function loadExample(type) {
+  document.getElementById('jwtInput').value = EXAMPLES[type];
+  analyzeJWT();
+}
+
+/* ═══════════════════════════════════════════════════════
+   JWT Decoder & Analyzer
+═══════════════════════════════════════════════════════ */
+let allFindings = [];
+
+function clearDecoder() {
+  document.getElementById('jwtInput').value = '';
+  document.getElementById('jwtVisualWrap').style.display = 'none';
+  document.getElementById('decodedGrid').style.display = 'none';
+  document.getElementById('claimsQuickWrap').style.display = 'none';
+  document.getElementById('findingsSection').style.display = 'none';
+  document.getElementById('emptyState').style.display = 'block';
+  ['critical','high','medium','low','info','pass'].forEach(k => document.getElementById('cnt-'+k).textContent = '0');
+  allFindings = [];
+}
+
+function analyzeJWT() {
+  const raw = document.getElementById('jwtInput').value.trim();
+  if (!raw) { showToast('Paste a JWT token first!'); return; }
+
+  const parts = raw.split('.');
+  if (parts.length < 2 || parts.length > 3) {
+    showToast('Invalid JWT format — expected header.payload.signature');
+    return;
+  }
+
+  const headerRaw = b64UrlDecode(parts[0]);
+  const payloadRaw = b64UrlDecode(parts[1]);
+  const sigRaw = parts[2] || '';
+
+  if (!headerRaw || !payloadRaw) { showToast('Failed to decode JWT parts'); return; }
+
+  const header = jsonParse(headerRaw);
+  const payload = jsonParse(payloadRaw);
+
+  if (!header || !payload) { showToast('Failed to parse JWT JSON'); return; }
+
+  // — Visual —
+  document.getElementById('jwtVisualWrap').style.display = 'block';
+  document.getElementById('jwtVisual').innerHTML =
+    `<span class="jwt-part-header">${parts[0]}</span><span class="jwt-dot">.</span>` +
+    `<span class="jwt-part-payload">${parts[1]}</span><span class="jwt-dot">.</span>` +
+    `<span class="jwt-part-sig">${sigRaw || '<em style="color:var(--text3)">empty</em>'}</span>`;
+
+  // — Decoded panels —
+  document.getElementById('decodedGrid').style.display = 'grid';
+  document.getElementById('headerView').innerHTML = syntaxHighlight(header);
+  document.getElementById('payloadView').innerHTML = syntaxHighlight(payload);
+
+  // — Claims quick view —
+  const stdClaims = ['iss','sub','aud','exp','nbf','iat','jti'];
+  document.getElementById('claimsQuickWrap').style.display = 'block';
+  document.getElementById('claimPills').innerHTML = stdClaims.map(c =>
+    `<span class="claim-pill ${payload[c] !== undefined ? 'has' : 'miss'}">${payload[c] !== undefined ? '✓' : '✗'} ${c}</span>`
+  ).join('');
+
+  // — Run security checks —
+  allFindings = [];
+  const now = Math.floor(Date.now() / 1000);
+  const alg = (header.alg || '').toString().toLowerCase();
+
+  const add = (sev, title, desc, rec) => allFindings.push({sev, title, desc, rec});
+
+  // 1. Algorithm: none
+  if (alg === 'none' || alg === '') {
+    add('critical','⚠ Algorithm set to "none"',
+      `The token uses alg="${header.alg}", which means no signature verification is performed. An attacker can forge arbitrary tokens without knowing any secret.`,
+      'Reject all tokens with alg="none". Implement a server-side algorithm whitelist. Never trust client-supplied algorithm values.');
+  }
+
+  // 2. Weak algorithm
+  if (alg === 'hs256') {
+    add('medium','⚠ Weak Algorithm: HS256',
+      'HS256 is a symmetric algorithm with a 256-bit HMAC. If a weak secret is used, the token can be brute-forced.',
+      'Consider upgrading to HS512, RS256, or ES256. Use the Secret Bruteforcer tab to verify secret strength.');
+  }
+
+  // 3. Symmetric algo — suggest bruteforce
+  if (['hs256','hs384','hs512'].includes(alg)) {
+    add('info','ℹ Symmetric Algorithm Detected',
+      'This token uses a symmetric HMAC algorithm. If the secret has low entropy, it may be vulnerable to offline brute-force attacks.',
+      'Use the ⚡ Secret Bruteforcer tab to test this token against common secrets.');
+  }
+
+  // 4. No expiration
+  if (payload.exp === undefined) {
+    add('critical','⚠ Missing exp (Expiration) Claim',
+      'This token has no expiration time. It will remain valid indefinitely, dramatically increasing the impact of token theft.',
+      'Always include an exp claim. Recommended token lifetime is 15–60 minutes for access tokens. Use refresh tokens for longer sessions.');
+  } else {
+    // 5. Expired
+    if (payload.exp < now) {
+      const ago = now - payload.exp;
+      add('high','⚠ Token is Expired',
+        `This token expired ${formatDuration(ago)} ago (exp: ${new Date(payload.exp*1000).toUTCString()}).`,
+        'Verify the server properly rejects expired tokens. Implement clock skew tolerance of ≤60 seconds.');
+    } else {
+      const ttl = payload.exp - now;
+      if (ttl > 86400) {
+        add('medium','⚠ Excessive Token Lifetime',
+          `This token is valid for ${formatDuration(ttl)} (expires: ${new Date(payload.exp*1000).toUTCString()}). Long-lived tokens increase exposure if stolen.`,
+          'Use short-lived access tokens (15–60 min) combined with refresh tokens. Implement token revocation.');
+      }
+    }
+  }
+
+  // 6. Missing iss
+  if (!payload.iss) add('medium','⚠ Missing iss (Issuer) Claim',
+    'Without the issuer claim, the server cannot verify that the token was issued by a trusted authority.',
+    'Add iss claim and validate it server-side against a whitelist of trusted issuers.');
+
+  // 7. Missing aud
+  if (!payload.aud) add('medium','⚠ Missing aud (Audience) Claim',
+    'Without audience validation, a token issued for one service could be replayed against another (confused deputy attack).',
+    'Add aud claim containing the intended recipient (e.g., "api.example.com") and validate server-side.');
+
+  // 8. Missing jti
+  if (!payload.jti) {
+    add('low','ℹ Missing jti (JWT ID) Claim',
+      'Without a unique JWT ID, token revocation is impossible and replay attacks are harder to detect.',
+      'Add a jti claim (UUID v4) to every token. Maintain a server-side revocation list for logout/security events.');
+  } else {
+    // Check jti quality
+    const jti = payload.jti.toString();
+    if (jti.length < 8 || /^[0-9]+$/.test(jti)) {
+      add('low','⚠ Potentially Weak JWT ID (jti)',
+        `The jti value "${jti}" may have insufficient randomness or uniqueness.`,
+        'Use UUID v4 or a CSPRNG-generated value with at least 128 bits of entropy.');
+    }
+  }
+
+  // 9. Missing sub
+  if (!payload.sub) add('low','ℹ Missing sub (Subject) Claim',
+    'The sub claim should uniquely identify the entity the token represents (e.g., user ID).',
+    'Include a sub claim with a stable, unique identifier for the token subject.');
+
+  // 10. Replay attack
+  if (!payload.jti && payload.exp !== undefined && (payload.exp - (payload.iat || now)) > 3600) {
+    add('medium','⚠ Replay Attack Potential',
+      'Token has a long expiration window and no jti claim, making it difficult to detect or prevent replay attacks.',
+      'Add a jti claim and implement a token blacklist. Use short token lifetimes.');
+  }
+
+  // 11. nbf in future
+  if (payload.nbf !== undefined && payload.nbf > now + 60) {
+    add('medium','⚠ Token Not Yet Valid (nbf in future)',
+      `The nbf claim is set to ${new Date(payload.nbf*1000).toUTCString()}, which is in the future. This token should not be accepted yet.`,
+      'Verify your server enforces the nbf claim. Investigate why a future-dated token was issued.');
+  }
+
+  // 12. iat in future
+  if (payload.iat !== undefined && payload.iat > now + 60) {
+    add('medium','⚠ iat Issued-in-Future',
+      `The iat claim (${new Date(payload.iat*1000).toUTCString()}) is set in the future, which may indicate token manipulation or clock skew issues.`,
+      'Reject tokens with iat more than 60 seconds in the future. Ensure server clocks are synchronized via NTP.');
+  }
+
+  // 13. kid injection checks
+  if (header.kid !== undefined) {
+    const kid = header.kid.toString();
+    if (/['";\-\s]|OR|AND|SELECT|INSERT|DROP/i.test(kid)) {
+      add('critical','⚠ Potential SQL Injection in kid Header',
+        `The kid parameter contains suspicious characters: "${kid}". If this value is interpolated into a database query, it could enable SQL injection to bypass authentication.`,
+        'Never interpolate the kid claim directly into SQL queries. Use parameterized queries or prepared statements. Validate kid against a whitelist.');
+    }
+    if (/\.\.\/|\.\.\\/.test(kid)) {
+      add('critical','⚠ Potential Path Traversal in kid Header',
+        `The kid parameter contains directory traversal sequences: "${kid}". If kid is used as a file path for key lookup, an attacker could read arbitrary files (e.g., /dev/null for empty-key bypass).`,
+        'Validate the kid claim against a whitelist of known key IDs. Never use kid as a raw filesystem path.');
+    }
+    if (/[;&|`$]/.test(kid)) {
+      add('critical','⚠ Potential Command Injection in kid Header',
+        `The kid parameter contains shell metacharacters: "${kid}". If passed to a system command, this could enable remote code execution.`,
+        'Never pass kid to shell commands. Validate kid against an allowlist of expected key identifiers.');
+    }
+  }
+
+  // 14. jku / x5u header
+  if (header.jku) {
+    add('critical','⚠ jku Header Present (JWKS URL Injection Risk)',
+      `The jku (JWK Set URL) header is set to: "${header.jku}". If the server fetches this URL without strict domain validation, an attacker can point it to a malicious JWKS endpoint to forge tokens with their own key.`,
+      'Validate jku against a trusted domain whitelist server-side. Prefer embedding trusted keys server-side rather than fetching from URLs.');
+  }
+  if (header.x5u) {
+    add('critical','⚠ x5u Header Present (Certificate URL Injection Risk)',
+      `The x5u header is set to: "${header.x5u}". Similar to jku, this allows pointing certificate verification to an attacker-controlled URL.`,
+      'Validate x5u against a trusted domain whitelist. Never fetch x5u URLs without strict domain and certificate validation.');
+  }
+  if (header.jwk) {
+    add('high','⚠ Embedded JWK in Header',
+      'The header contains an embedded JWK (JSON Web Key). Some libraries may use the embedded key for signature verification, allowing an attacker to forge tokens signed with their own key.',
+      'Ignore embedded JWK headers. Always use server-configured trusted keys for signature verification.');
+  }
+  if (header.x5c) {
+    add('high','⚠ x5c Certificate Chain in Header',
+      'The x5c header contains an X.509 certificate chain. Verify this is validated against trusted root CAs and not used blindly.',
+      'Validate x5c certificate chains against trusted roots. Do not accept self-signed certificates embedded in x5c.');
+  }
+
+  // 15. Algorithm confusion (RS/ES with potential confusion)
+  if (['rs256','rs384','rs512','es256','es384','es512','ps256'].includes(alg)) {
+    add('high','⚠ Algorithm Confusion Attack Vector',
+      `This token uses an asymmetric algorithm (${header.alg}). Verify the server rejects HS256 tokens where the public key is used as the HMAC secret — this is a classic algorithm confusion attack.`,
+      'Implement a strict algorithm whitelist on the server. Explicitly specify expected algorithms in your JWT library options (never use "auto" algorithm detection).');
+  }
+
+  // 16. Sensitive data in payload
+  const sensitiveKeys = ['password','pass','pwd','secret','token','key','ssn','dob','credit','card','cvv','pin','private','bank','salary'];
+  const payloadKeys = Object.keys(payload).map(k => k.toLowerCase());
+  const foundSensitive = sensitiveKeys.filter(s => payloadKeys.some(pk => pk.includes(s)));
+  if (foundSensitive.length > 0) {
+    add('high','⚠ Potentially Sensitive Data in Payload',
+      `Claims with sensitive-sounding names detected: ${foundSensitive.join(', ')}. JWT payloads are only base64-encoded, NOT encrypted — anyone with the token can read the payload.`,
+      'Remove sensitive data from JWT payloads. Use JWE (JSON Web Encryption) if sensitive data must be included. Use opaque tokens with server-side sessions for highly sensitive data.');
+  }
+
+  // 17. role/admin in token
+  const payloadStr = JSON.stringify(payload).toLowerCase();
+  if (/\b(admin|superuser|root|system)\b/.test(payloadStr)) {
+    add('info','ℹ Privileged Role Claim Detected',
+      'The payload appears to contain high-privilege role claims (admin/superuser/root). Verify these cannot be tampered with client-side.',
+      'Validate role claims server-side after signature verification. Consider keeping roles server-side and not embedding them in the JWT.');
+  }
+
+  // 18. No signature
+  if (!sigRaw) {
+    add('critical','⚠ Empty/Missing Signature',
+      'This token has no signature. If the server accepts it, anyone can forge tokens without a secret.',
+      'Require signatures on all tokens. Verify alg is not "none". Always validate the signature server-side.');
+  }
+
+  // Count findings
+  const sevs = {critical:0, high:0, medium:0, low:0, info:0};
+  allFindings.forEach(f => { if(sevs[f.sev]!==undefined) sevs[f.sev]++; });
+  document.getElementById('cnt-critical').textContent = sevs.critical;
+  document.getElementById('cnt-high').textContent = sevs.high;
+  document.getElementById('cnt-medium').textContent = sevs.medium;
+  document.getElementById('cnt-low').textContent = sevs.low;
+  document.getElementById('cnt-info').textContent = sevs.info;
+
+  // How many "passed"?
+  const totalChecks = 18;
+  const issueCount = Object.values(sevs).reduce((a,b)=>a+b,0);
+  document.getElementById('cnt-pass').textContent = Math.max(0, totalChecks - issueCount);
+
+  // Render findings
+  document.getElementById('findingsSection').style.display = 'block';
+  document.getElementById('emptyState').style.display = 'none';
+  renderFindings('all');
+
+  // Reset filter buttons
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.filter-btn[data-sev="all"]').classList.add('active');
+}
+
+function formatDuration(secs) {
+  if (secs < 60) return `${secs}s`;
+  if (secs < 3600) return `${Math.floor(secs/60)}m ${secs%60}s`;
+  if (secs < 86400) return `${Math.floor(secs/3600)}h ${Math.floor((secs%3600)/60)}m`;
+  return `${Math.floor(secs/86400)}d ${Math.floor((secs%86400)/3600)}h`;
+}
+
+function renderFindings(filter) {
+  const list = document.getElementById('findingsList');
+  const shown = filter === 'all' ? allFindings : allFindings.filter(f => f.sev === filter);
+
+  if (shown.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-text">No findings for this severity level.</div></div>`;
+    return;
+  }
+
+  const sevOrder = {critical:0, high:1, medium:2, low:3, info:4};
+  const sorted = [...shown].sort((a,b) => (sevOrder[a.sev]||4) - (sevOrder[b.sev]||4));
+
+  list.innerHTML = sorted.map((f, i) => `
+    <div class="finding-item" data-sev="${f.sev}">
+      <div class="finding-header" onclick="toggleFinding(this)">
+        <span class="sev-badge sev-${f.sev}">${f.sev.toUpperCase()}</span>
+        <span class="finding-title">${f.title}</span>
+        <span class="finding-chevron">▼</span>
+      </div>
+      <div class="finding-body">
+        <div class="finding-row">
+          <div class="finding-row-label">Description</div>
+          <div class="finding-row-val">${f.desc}</div>
+        </div>
+        <div class="finding-row">
+          <div class="finding-row-label">Recommendation</div>
+          <div class="finding-row-val code">${f.rec}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleFinding(el) {
+  const body = el.nextElementSibling;
+  const chevron = el.querySelector('.finding-chevron');
+  body.classList.toggle('open');
+  chevron.style.transform = body.classList.contains('open') ? 'rotate(180deg)' : '';
+}
+
+function filterFindings(sev, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderFindings(sev);
+}
+
+/* ═══════════════════════════════════════════════════════
+   Secret Bruteforcer
+═══════════════════════════════════════════════════════ */
+const DEFAULT_WORDLIST = `secret
+password
+123456
+your-256-bit-secret
+jwt_secret
+SECRET_KEY
+default
+admin
+test
+company
+changeme
+letmein
+qwerty
+abc123
+password123
+mysecret
+jwttoken
+myapp
+appkey
+supersecret
+mysupersecret
+hs256secret
+hs256
+shhhhh
+123456789
+12345678
+1234567890
+welcome
+monkey
+dragon
+pass
+football
+iloveyou
+master
+login
+hello
+trustno1
+sunshine
+princess
+batman
+access
+shadow
+superman
+michael
+jessica
+charlie
+donald
+qwerty123
+passw0rd
+passw0rd1
+Token1234
+apikey
+api_key
+apiSecret
+api_secret
+jwtSecret
+jwt_secret_key
+application_secret
+app_secret
+web_secret
+authtoken
+auth_secret
+dev_secret
+prod_secret
+signing_key
+token_key
+hmac_secret
+bearer_secret
+session_secret
+cookie_secret
+express_secret
+laravel_secret
+rails_secret
+django_secret
+flask_secret
+spring_secret
+node_secret
+secret123
+password1234
+abcdef
+111111
+000000
+asdfgh
+zxcvbn
+P@ssw0rd
+P@$$w0rd
+Admin123
+Admin@123`;
+
+let bruteRunning = false;
+let bruteStop = false;
+
+function loadDefaultWordlist() {
+  document.getElementById('wordlistInput').value = DEFAULT_WORDLIST;
+}
+function clearWordlist() {
+  document.getElementById('wordlistInput').value = '';
+}
+
+async function hmacSign(secret, data, alg) {
+  const enc = new TextEncoder();
+  const keyData = enc.encode(secret);
+  const msgData = enc.encode(data);
+  const hashAlg = { HS256: 'SHA-256', HS384: 'SHA-384', HS512: 'SHA-512' }[alg] || 'SHA-256';
+  try {
+    const key = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: hashAlg }, false, ['sign']);
+    const sig = await crypto.subtle.sign('HMAC', key, msgData);
+    return btoa(String.fromCharCode(...new Uint8Array(sig))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+  } catch(e) { return null; }
+}
+
+async function startBrute() {
+  const token = document.getElementById('bruteJwtInput').value.trim();
+  if (!token) { showToast('Paste a JWT token first!'); return; }
+
+  const parts = token.split('.');
+  if (parts.length !== 3) { showToast('Invalid JWT — needs 3 parts'); return; }
+
+  const header = jsonParse(b64UrlDecode(parts[0]));
+  if (!header) { showToast('Could not decode JWT header'); return; }
+
+  let alg = document.getElementById('bruteAlgo').value;
+  if (alg === 'auto') alg = header.alg || 'HS256';
+
+  if (!['HS256','HS384','HS512'].includes(alg)) {
+    showToast(`Algorithm ${alg} is not HMAC — cannot bruteforce`);
+    return;
+  }
+
+  const wordlistRaw = document.getElementById('wordlistInput').value;
+  if (!wordlistRaw.trim()) { showToast('Load a wordlist first'); return; }
+  const words = wordlistRaw.split('\n').map(w=>w.trim()).filter(Boolean);
+
+  bruteStop = false;
+  bruteRunning = true;
+  document.getElementById('startBtn').style.display = 'none';
+  document.getElementById('stopBtn').style.display = 'inline-flex';
+  document.getElementById('foundBanner').classList.remove('show');
+  document.getElementById('bruteLog').innerHTML = '';
+
+  const signingInput = parts[0] + '.' + parts[1];
+  const expectedSig = parts[2];
+
+  const log = document.getElementById('bruteLog');
+  const status = document.getElementById('bruteStatus');
+  const bar = document.getElementById('progressBar');
+
+  let tested = 0;
+  let found = false;
+  const batchSize = 20;
+
+  function appendLog(line, cls='') {
+    const div = document.createElement('div');
+    div.className = 'log-line ' + cls;
+    div.textContent = line;
+    log.appendChild(div);
+    if (log.children.length > 200) log.removeChild(log.firstChild);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  for (let i = 0; i < words.length && !bruteStop; i += batchSize) {
+    const batch = words.slice(i, i+batchSize);
+    const results = await Promise.all(batch.map(async w => ({ w, sig: await hmacSign(w, signingInput, alg) })));
+
+    for (const {w, sig} of results) {
+      if (bruteStop) break;
+      tested++;
+      const pct = Math.round(tested / words.length * 100);
+      bar.style.width = pct + '%';
+      status.textContent = `Testing ${tested}/${words.length} — ${pct}%  [${alg}]`;
+
+      if (tested % 10 === 0) appendLog(`[${tested}/${words.length}] Testing: "${w}"`, 'testing');
+
+      if (sig === expectedSig) {
+        appendLog(`✅ SECRET FOUND: "${w}"`, 'found');
+        document.getElementById('foundSecret').textContent = w;
+        document.getElementById('foundBanner').classList.add('show');
+        found = true;
+        bruteStop = true;
+        break;
+      }
+    }
+    // yield control
+    await new Promise(r => setTimeout(r, 0));
+  }
+
+  if (!found && !bruteStop) {
+    appendLog('❌ Secret not found in wordlist.', '');
+    status.textContent = `Completed: ${tested} secrets tested. Not found.`;
+    bar.style.width = '100%';
+  }
+
+  if (bruteStop && !found) {
+    status.textContent = 'Stopped by user.';
+  }
+
+  bruteRunning = false;
+  document.getElementById('startBtn').style.display = 'inline-flex';
+  document.getElementById('stopBtn').style.display = 'none';
+}
+
+function stopBrute() {
+  bruteStop = true;
+}
+
+/* ═══════════════════════════════════════════════════════
+   JWT Editor
+═══════════════════════════════════════════════════════ */
+function loadToEditor() {
+  const raw = document.getElementById('editorSourceInput').value.trim();
+  if (!raw) { showToast('Paste a JWT token first'); return; }
+  const parts = raw.split('.');
+  if (parts.length < 2) { showToast('Invalid JWT'); return; }
+  const h = jsonParse(b64UrlDecode(parts[0]));
+  const p = jsonParse(b64UrlDecode(parts[1]));
+  if (!h || !p) { showToast('Could not decode JWT'); return; }
+  document.getElementById('editorHeader').value = JSON.stringify(h, null, 2);
+  document.getElementById('editorPayload').value = JSON.stringify(p, null, 2);
+  showToast('Loaded! Modify and click Generate JWT.');
+}
+
+function setAlgNone() {
+  try {
+    const h = jsonParse(document.getElementById('editorHeader').value) || {};
+    h.alg = 'none';
+    document.getElementById('editorHeader').value = JSON.stringify(h, null, 2);
+    document.getElementById('editorSecret').value = '';
+  } catch(e) {}
+}
+
+async function generateJWT() {
+  const headerStr = document.getElementById('editorHeader').value.trim();
+  const payloadStr = document.getElementById('editorPayload').value.trim();
+  const secret = document.getElementById('editorSecret').value;
+
+  const header = jsonParse(headerStr);
+  const payload = jsonParse(payloadStr);
+
+  if (!header) { showToast('Invalid header JSON'); return; }
+  if (!payload) { showToast('Invalid payload JSON'); return; }
+
+  const hEnc = b64UrlEncode(JSON.stringify(header));
+  const pEnc = b64UrlEncode(JSON.stringify(payload));
+  const signingInput = hEnc + '.' + pEnc;
+
+  let signature = '';
+  const alg = (header.alg || '').toUpperCase();
+
+  if (secret && ['HS256','HS384','HS512'].includes(alg)) {
+    signature = await hmacSign(secret, signingInput, alg) || '';
+  }
+
+  const token = signingInput + '.' + signature;
+  document.getElementById('generatedToken').textContent = token;
+  document.getElementById('editorVisual').innerHTML =
+    `<span class="jwt-part-header">${hEnc}</span><span class="jwt-dot">.</span>` +
+    `<span class="jwt-part-payload">${pEnc}</span><span class="jwt-dot">.</span>` +
+    `<span class="jwt-part-sig">${signature || '<em style="color:var(--text3)">unsigned</em>'}</span>`;
+
+  showToast('Token generated!');
+}
+
+function copyGenerated() {
+  const t = document.getElementById('generatedToken').textContent;
+  if (t && !t.startsWith('//')) {
+    navigator.clipboard.writeText(t).then(() => showToast('Copied to clipboard!'));
+  } else {
+    showToast('Generate a token first');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   Init
+═══════════════════════════════════════════════════════ */
+loadDefaultWordlist();
+</script>
+</body>
+</html>
