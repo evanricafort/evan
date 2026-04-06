@@ -203,7 +203,11 @@
     border-radius: 9px;
     color: var(--text);
     outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s;
+  }
+  .input-wrap input.error {
+    border-color: var(--red);
+    background-color: var(--red-bg);
   }
   .input-wrap input::placeholder { color: var(--text2); }
   .input-wrap input:focus {
@@ -299,6 +303,7 @@
     line-height: 1;
     margin-bottom: 4px;
     color: var(--text);
+    transition: color 0.3s ease;
   }
   .stat-label {
     font-size: 11px;
@@ -440,6 +445,13 @@
   }
   .fade-in { animation: fadeIn 0.3s ease both; }
 
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+  .shake { animation: shake 0.2s ease-in-out 2; }
+
   .spinner {
     width: 12px; height: 12px;
     border: 2px solid rgba(255,255,255,0.3);
@@ -459,7 +471,6 @@
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
   <div class="header-inner">
     <a class="brand" href="#">
@@ -473,17 +484,14 @@
   </div>
 </header>
 
-<!-- MAIN -->
 <main>
 
-  <!-- HERO -->
   <div class="page-hero fade-in">
     <div class="hero-badge">🔍 Security Tool</div>
     <h1>Google / Gemini API Key Checker</h1>
     <p class="hero-sub">Test a leaked API key against Gemini and Google services to determine its scope and enabled permissions.</p>
   </div>
 
-  <!-- INPUT CARD -->
   <div class="card fade-in">
     <div class="card-header">
       <div class="card-header-icon">🔑</div>
@@ -507,7 +515,6 @@
     </div>
   </div>
 
-  <!-- PROGRESS CARD -->
   <div class="card fade-in" id="progressCard" style="display:none">
     <div class="card-body">
       <div class="progress-label">
@@ -520,7 +527,6 @@
     </div>
   </div>
 
-  <!-- STATS -->
   <div class="stats-grid fade-in">
     <div class="stat-card s-total">
       <div class="stat-value" id="statTotal">—</div>
@@ -540,7 +546,6 @@
     </div>
   </div>
 
-  <!-- SERVICE RESULTS -->
   <div class="card fade-in">
     <div class="card-body">
       <div class="section-title">
@@ -566,7 +571,6 @@
     </div>
   </div>
 
-  <!-- GEMINI MODELS -->
   <div class="card fade-in">
     <div class="card-body">
       <div class="section-title">
@@ -618,8 +622,10 @@ function toggleVisibility() {
 
 /* ─── CLEAR ─── */
 function clearAll() {
-  document.getElementById('apiKeyInput').value = '';
-  document.getElementById('apiKeyInput').type = 'password';
+  const inp = document.getElementById('apiKeyInput');
+  inp.value = '';
+  inp.type = 'password';
+  inp.classList.remove('error');
   document.getElementById('eyeBtn').textContent = '👁️';
   document.getElementById('progressCard').style.display = 'none';
   resetStats();
@@ -746,7 +752,7 @@ const SERVICES = [
     test: async (k) => {
       const r = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=test&maxResults=1&key=${k}`);
       const d = await r.json();
-      if (r.ok && d.items) return { status: 'ENABLED', note: `YouTube search works (${d.pageInfo?.totalResults || '?'} results)` };
+      if (r.ok && d.items) return { status: 'ENABLED', note: `Youtube works (${d.pageInfo?.totalResults || '?'} results)` };
       if (r.status === 403) return { status: 'RESTRICTED', note: d.error?.message || 'Permission denied' };
       return { status: 'DISABLED', note: d.error?.message || `HTTP ${r.status}` };
     }
@@ -829,11 +835,14 @@ function resetStats() {
     document.getElementById(id).textContent = '—';
   });
 }
+
 function updateStats() {
   const total = results.length;
-  const enabled = results.filter(r => r.status === 'ENABLED').length;
-  const restricted = results.filter(r => r.status === 'RESTRICTED').length;
-  const disabled = results.filter(r => r.status === 'DISABLED').length;
+  // BUGFIX: Looking at r.result.status instead of r.status
+  const enabled = results.filter(r => r.result.status === 'ENABLED').length;
+  const restricted = results.filter(r => r.result.status === 'RESTRICTED').length;
+  const disabled = results.filter(r => r.result.status === 'DISABLED').length;
+  
   document.getElementById('statTotal').textContent = total;
   document.getElementById('statEnabled').textContent = enabled;
   document.getElementById('statRestricted').textContent = restricted;
@@ -871,11 +880,14 @@ function renderServiceRow(i, svc, result) {
 }
 
 async function startCheck() {
-  const key = document.getElementById('apiKeyInput').value.trim();
+  const inp = document.getElementById('apiKeyInput');
+  const key = inp.value.trim();
+  
+  // Shake and highlight empty input
   if (!key) {
-    document.getElementById('apiKeyInput').focus();
-    document.getElementById('apiKeyInput').style.borderColor = 'var(--red)';
-    setTimeout(() => document.getElementById('apiKeyInput').style.borderColor = '', 1500);
+    inp.focus();
+    inp.classList.add('error', 'shake');
+    setTimeout(() => inp.classList.remove('error', 'shake'), 600);
     return;
   }
 
@@ -937,7 +949,7 @@ async function startCheck() {
     tbody.replaceChild(newRow, existing);
 
     document.getElementById('serviceCount').textContent = results.length;
-    updateStats();
+    updateStats(); // This now accurately updates counts inline!
   }
 
   setProgress(100, `Done — ${SERVICES.length} services checked`);
