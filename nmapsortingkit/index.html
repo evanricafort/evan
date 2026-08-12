@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nmap Result Sorting Kit</title>
+<link href="profile.jpg" type="image/gif" rel="shortcut icon" />
+<meta name="description" content="Nmap Result Sorting Kit" />
+<meta name="author" content="Evan Ricafort" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script>
+  if (localStorage.getItem("theme") === "dark" ||
+      (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+    document.documentElement.classList.add("dark");
+  }
+</script>
+<style>
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 215 28% 17%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 28% 17%;
+    --primary: 243 75% 59%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 215 28% 17%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 215 28% 17%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 84%;
+    --input: 220 13% 84%;
+    --ring: 243 75% 59%;
+    --radius: 0.75rem;
+  }
+  html.dark {
+    --background: 221 39% 11%;
+    --foreground: 220 13% 91%;
+    --card: 215 28% 17%;
+    --card-foreground: 220 13% 91%;
+    --secondary: 217 19% 27%;
+    --secondary-foreground: 220 13% 91%;
+    --muted-foreground: 218 11% 65%;
+    --accent: 217 19% 27%;
+    --accent-foreground: 220 13% 91%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 220 13% 91%;
+    --border: 217 19% 27%;
+    --input: 215 14% 34%;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    transition: background-color .3s ease, color .3s ease;
+  }
+  .container {
+    max-width: 56rem;
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem 3rem;
+  }
+  header { position: relative; text-align: center; margin-bottom: 2rem; }
+  header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.75rem;
+  }
+  header h1 .shield-icon {
+    display: inline-block;
+    margin-right: 0.5rem;
+    vertical-align: -6px;
+    transition: transform .3s ease;
+  }
+  header:hover .shield-icon { transform: scale(1.1) rotate(8deg); }
+  header h1 .gradient {
+    background: linear-gradient(90deg, hsl(var(--primary)), #8b5cf6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  header p { margin: 0; font-size: 1.05rem; color: hsl(var(--muted-foreground)); }
+  header p a { color: hsl(var(--primary)); text-decoration: underline; text-decoration-color: transparent; transition: text-decoration-color .15s ease; }
+  header p a:hover { text-decoration-color: hsl(var(--primary)); }
+
+  #themeToggle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 2.5rem;
+    width: 2.5rem;
+    padding: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: hsl(var(--muted-foreground));
+    border: none;
+  }
+  #themeToggle:hover { background: hsl(var(--accent)); color: hsl(var(--accent-foreground)); }
+  #themeToggle svg { width: 1.25rem; height: 1.25rem; }
+  #themeToggle .moon-icon { display: none; }
+  html.dark #themeToggle .sun-icon { display: none; }
+  html.dark #themeToggle .moon-icon { display: inline-block; }
+
+  .panel {
+    background: hsl(var(--card));
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.08), 0 4px 6px -2px rgb(0 0 0 / 0.04);
+    border: 1px solid hsl(var(--border) / 0.6);
+    transition: background-color .3s ease, border-color .3s ease;
+  }
+  .panel h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 0 0 1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; }
+  .field { margin-bottom: 1rem; }
+  textarea, input[type="text"] {
+    width: 100%;
+    border: 1px solid hsl(var(--input));
+    border-radius: calc(var(--radius) - 0.25rem);
+    background: hsl(var(--background));
+    padding: 0.6rem 0.75rem;
+    font-size: 0.875rem;
+    font-family: inherit;
+    color: hsl(var(--foreground));
+    transition: background-color .3s ease, border-color .2s ease;
+  }
+  textarea { min-height: 200px; resize: vertical; }
+  textarea:focus, input:focus {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+  .row { display: flex; gap: 0.5rem; }
+  .row input { flex: 1; }
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    white-space: nowrap;
+    border-radius: calc(var(--radius) - 0.25rem);
+    font-size: 0.875rem;
+    font-weight: 500;
+    height: 2.5rem;
+    padding: 0 1.1rem;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    transition: background-color .15s ease, transform .1s ease;
+  }
+  button:hover:not(:disabled) { background: hsl(var(--primary) / 0.9); }
+  button:active:not(:disabled) { transform: scale(0.98); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.outline {
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    border-color: hsl(var(--input));
+  }
+  button.outline:hover:not(:disabled) { background: hsl(var(--accent)); }
+  button.ghost {
+    background: transparent;
+    color: hsl(var(--foreground));
+    border: none;
+    height: 2.5rem;
+    width: 2.5rem;
+    padding: 0;
+  }
+  button.ghost:hover:not(:disabled) { background: hsl(var(--accent)); }
+  .process-btn { margin-top: 0.25rem; }
+  .results-grid { display: grid; gap: 1rem; }
+  h2 { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .result-box { border: 1px solid hsl(var(--border)); border-radius: calc(var(--radius) - 0.25rem); padding: 1rem; }
+  .result-box.matched { background: #f0fdf4; border-color: #bbf7d0; }
+  .result-box.unmatched { background: #fef2f2; border-color: #fecaca; }
+  html.dark .result-box.matched { background: rgb(5 46 22 / 0.4); border-color: rgb(20 83 45 / 0.8); }
+  html.dark .result-box.unmatched { background: rgb(69 10 10 / 0.4); border-color: rgb(127 29 29 / 0.8); }
+  .empty { color: hsl(var(--muted-foreground)); }
+  .service-item {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+  }
+  .service-item:hover { color: hsl(var(--primary)); }
+  .card {
+    margin-top: 1rem;
+    position: relative;
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    background: hsl(var(--card));
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  }
+  .card-close { position: absolute; right: 0.5rem; top: 0.5rem; }
+  .card-header { padding: 1.5rem 1.5rem 0; }
+  .card-title { font-size: 1.4rem; font-weight: 600; margin: 0 0 0.25rem; }
+  .card-desc { font-size: 0.875rem; color: hsl(var(--muted-foreground)); margin: 0; }
+  .card-content {
+    padding: 1.5rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.875rem;
+  }
+  .card-content > div { margin-bottom: 0.5rem; }
+  .card-content .label { font-weight: 600; }
+  .scripts-block { margin-top: 0.5rem; }
+  .scripts-block .title { font-weight: 600; margin-bottom: 0.25rem; }
+  .scripts-block .item { padding-left: 1rem; white-space: pre-wrap; margin-bottom: 0.25rem; }
+  #toast-region {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 1000;
+    max-width: 24rem;
+  }
+  .toast {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    padding: 1rem 2rem 1rem 1rem;
+    position: relative;
+    animation: slide-in 0.15s ease-out;
+  }
+  .toast.destructive {
+    background: hsl(var(--destructive));
+    color: hsl(var(--destructive-foreground));
+    border-color: hsl(var(--destructive));
+  }
+  .toast .toast-title { font-size: 0.875rem; font-weight: 600; margin: 0 0 0.25rem; }
+  .toast .toast-desc { font-size: 0.875rem; opacity: 0.9; margin: 0; }
+  .toast .toast-close {
+    position: absolute;
+    right: 0.5rem;
+    top: 0.5rem;
+    background: none;
+    border: none;
+    height: 1.5rem;
+    width: 1.5rem;
+    padding: 0;
+    color: inherit;
+    opacity: 0.6;
+    cursor: pointer;
+  }
+  .toast .toast-close:hover { opacity: 1; background: none; }
+  @keyframes slide-in {
+    from { transform: translateY(0.5rem); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  svg.icon { width: 1rem; height: 1rem; flex-shrink: 0; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>
+        <svg class="shield-icon icon" style="width:1.75rem;height:1.75rem;color:hsl(var(--primary))" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+        Nmap Result <span class="gradient">Sorting</span> Kit
+      </h1>
+      <p>
+        Sort and search Nmap scan results by evan
+        <a href="https://x.com/evanricafort" target="_blank" rel="noreferrer">(@evanricafort)</a>
+      </p>
+      <button id="themeToggle" aria-label="Toggle dark mode" onclick="toggleTheme()">
+        <svg class="sun-icon icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.5-4.5l-1.591 1.591M3 12h2.25m.386-6.364l1.591 1.591M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z" /></svg>
+        <svg class="moon-icon icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.752 15.002A9.72 9.72 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 008.998-5.998z" /></svg>
+      </button>
+    </header>
+
+    <div class="panel">
+      <h3>Input Data</h3>
+      <div class="field">
+        <label for="nmapInput">Nmap Results</label>
+        <textarea id="nmapInput" placeholder="Paste your nmap results here..."></textarea>
+      </div>
+
+      <div class="field">
+        <label for="searchString">Search String</label>
+        <div class="row">
+          <input id="searchString" type="text" placeholder='Enter search terms (e.g. "smb" "port:445" or "version:" for version detection)' />
+          <button id="extractBtn" class="outline" disabled>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
+            <span id="extractLabel">Extract Versions</span>
+          </button>
+        </div>
+      </div>
+
+      <button id="processBtn" class="process-btn" disabled>Process Results</button>
+    </div>
+
+    <div class="panel">
+      <h3>Results</h3>
+      <div class="results-grid">
+        <div>
+          <h2>Matched Results (<span id="matchedCount">0</span>)</h2>
+          <div id="matchedBox" class="result-box matched">
+            <div class="empty">No matched results</div>
+          </div>
+        </div>
+        <div id="matchedDetails"></div>
+
+        <div>
+          <h2>Unmatched Results (<span id="unmatchedCount">0</span>)</h2>
+          <div id="unmatchedBox" class="result-box unmatched">
+            <div class="empty">No unmatched results</div>
+          </div>
+        </div>
+        <div id="unmatchedDetails"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-region"></div>
+
+<script>
+  function toggleTheme() {
+    var html = document.documentElement;
+    if (html.classList.contains("dark")) {
+      html.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    } else {
+      html.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    }
+  }
+</script>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- Core nmap parsing/matching logic (ported 1:1 from the original app) ----------
+
+  function parseSearchString(searchString) {
+    var matches = searchString.match(/"[^"]+"|[^\s"]+/g) || [];
+    return matches.map(function (term) {
+      return term.replace(/"/g, "").trim();
+    });
+  }
+
+  function hasVersionInfo(service) {
+    if ((service.version && service.version.trim() !== "") ||
+        (service.service && service.service.toLowerCase().indexOf("version") !== -1)) {
+      return true;
+    }
+    return service.scripts.some(function (script) {
+      var s = script.toLowerCase();
+      return s.indexOf("version:") !== -1 ||
+             s.indexOf("version =") !== -1 ||
+             /vers?\.?:?\s*\d+/.test(s);
+    });
+  }
+
+  function matchesSearch(service, searchTerms) {
+    var searchableText = [
+      service.service, service.version, service.state, service.port
+    ].concat(service.scripts.map(function (script) {
+      var parts = script.split(":");
+      return parts.length > 1
+        ? parts[0].trim() + " " + parts.slice(1).join(":").trim()
+        : script;
+    })).join(" ").toLowerCase();
+
+    return searchTerms.every(function (term) {
+      var lower = term.toLowerCase();
+      if (lower.indexOf("port:") === 0) {
+        var portNumber = term.split(":")[1];
+        return service.port === portNumber;
+      }
+      if (lower === "version:") {
+        return hasVersionInfo(service);
+      }
+      return searchableText.indexOf(lower) !== -1;
+    });
+  }
+
+  function processNmapResults(nmapResults, searchString) {
+    if (!nmapResults || !searchString) {
+      throw new Error("Please provide both Nmap results and search string");
+    }
+
+    var searchTerms = parseSearchString(searchString);
+    var matched = [];
+    var unmatched = [];
+    var currentService = {};
+    var currentScripts = [];
+    var inScriptBlock = false;
+
+    function flush() {
+      if (currentService.ip && currentService.port) {
+        var service = Object.assign({}, currentService, { scripts: currentScripts });
+        if (matchesSearch(service, searchTerms)) {
+          matched.push(service);
+        } else {
+          unmatched.push(service);
+        }
+      }
+    }
+
+    var lines = nmapResults.split("\n");
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].trim();
+      if (!line) { inScriptBlock = false; continue; }
+
+      var hostMatch = line.match(/^Nmap scan report for ([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)/);
+      if (hostMatch) {
+        flush();
+        currentService = { ip: hostMatch[1] };
+        currentScripts = [];
+        inScriptBlock = false;
+        continue;
+      }
+
+      var portMatch = line.match(/^(\d+)\/(\w+)\s+(\w+)\s+(.+)/);
+      if (portMatch && currentService.ip) {
+        flush();
+        currentService = Object.assign({}, currentService, {
+          port: portMatch[1],
+          state: portMatch[3],
+          service: portMatch[4] || "",
+          version: ""
+        });
+        if (currentService.service) {
+          var vm = currentService.service.match(/version\s+([^,]+)/i);
+          if (vm) currentService.version = vm[1];
+        }
+        currentScripts = [];
+        inScriptBlock = false;
+        continue;
+      }
+
+      if (line.indexOf("|") === 0) {
+        var scriptLine = line.replace(/^\|[_]?\s*/, "").trim();
+        if (scriptLine) {
+          if (scriptLine.indexOf(":") !== -1) {
+            currentScripts.push(scriptLine);
+            inScriptBlock = true;
+          } else if (inScriptBlock) {
+            currentScripts[currentScripts.length - 1] += " " + scriptLine;
+          }
+        }
+        continue;
+      }
+    }
+
+    flush();
+    return { matched: matched, unmatched: unmatched };
+  }
+
+  function formatVersionResults(services) {
+    var withVersions = services.filter(hasVersionInfo);
+    if (withVersions.length === 0) {
+      return "No services with version information found.";
+    }
+    return withVersions.map(function (service) {
+      var version = service.version;
+      if (!version || version.trim() === "") {
+        var vm = service.service.match(/version ([^,]+)/i);
+        if (vm) {
+          version = vm[1];
+        } else if (service.service.toLowerCase().indexOf("version") !== -1) {
+          version = service.service;
+        } else {
+          var sv = service.scripts.find(function (script) {
+            var s = script.toLowerCase();
+            return s.indexOf("version:") !== -1 || s.indexOf("version =") !== -1 || /vers?\.?:?\s*\d+/.test(s);
+          });
+          if (sv) version = sv;
+        }
+      }
+      return service.ip + ":" + service.port + " - " + service.service + (version ? " (" + version + ")" : "");
+    }).join("\n");
+  }
+
+  function aiExtractVersions() {
+    return new Promise(function (resolve) {
+      setTimeout(function () {
+        resolve('"version:"');
+      }, 1500);
+    });
+  }
+
+  // ---------- UI wiring ----------
+
+  var nmapInputEl = document.getElementById("nmapInput");
+  var searchStringEl = document.getElementById("searchString");
+  var extractBtn = document.getElementById("extractBtn");
+  var extractLabel = document.getElementById("extractLabel");
+  var processBtn = document.getElementById("processBtn");
+  var matchedBox = document.getElementById("matchedBox");
+  var unmatchedBox = document.getElementById("unmatchedBox");
+  var matchedCount = document.getElementById("matchedCount");
+  var unmatchedCount = document.getElementById("unmatchedCount");
+  var matchedDetails = document.getElementById("matchedDetails");
+  var unmatchedDetails = document.getElementById("unmatchedDetails");
+  var toastRegion = document.getElementById("toast-region");
+
+  var state = {
+    matched: [],
+    unmatched: [],
+    selectedMatched: null,
+    selectedUnmatched: null,
+    isAILoading: false
+  };
+
+  function updateButtons() {
+    processBtn.disabled = !nmapInputEl.value || !searchStringEl.value;
+    extractBtn.disabled = state.isAILoading || !nmapInputEl.value;
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function renderList(box, countEl, services, type) {
+    countEl.textContent = services.length;
+    box.innerHTML = "";
+    if (services.length === 0) {
+      var empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "No " + type + " results";
+      box.appendChild(empty);
+      return;
+    }
+    var wrap = document.createElement("div");
+    services.forEach(function (service, index) {
+      var item = document.createElement("div");
+      item.className = "service-item";
+      item.textContent = service.ip + ":" + service.port;
+      item.addEventListener("click", function () {
+        if (type === "matched") {
+          state.selectedMatched = service;
+          state.selectedUnmatched = null;
+        } else {
+          state.selectedUnmatched = service;
+          state.selectedMatched = null;
+        }
+        renderDetails();
+      });
+      wrap.appendChild(item);
+    });
+    box.appendChild(wrap);
+  }
+
+  function renderDetailsCard(container, service, type, onClose) {
+    container.innerHTML = "";
+    if (!service) return;
+
+    var card = document.createElement("div");
+    card.className = "card";
+
+    var closeBtn = document.createElement("button");
+    closeBtn.className = "ghost card-close";
+    closeBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+    closeBtn.addEventListener("click", onClose);
+    card.appendChild(closeBtn);
+
+    var header = document.createElement("div");
+    header.className = "card-header";
+    var title = document.createElement("h3");
+    title.className = "card-title";
+    title.textContent = "Details for " + service.ip + ":" + service.port;
+    var desc = document.createElement("p");
+    desc.className = "card-desc";
+    desc.textContent = (type === "matched" ? "Matched" : "Unmatched") + " result details";
+    header.appendChild(title);
+    header.appendChild(desc);
+    card.appendChild(header);
+
+    var content = document.createElement("div");
+    content.className = "card-content";
+
+    var serviceLine = document.createElement("div");
+    serviceLine.innerHTML = '<span class="label">Service:</span> ' + escapeHtml(service.service);
+    content.appendChild(serviceLine);
+
+    var stateLine = document.createElement("div");
+    stateLine.innerHTML = '<span class="label">State:</span> ' + escapeHtml(service.state);
+    content.appendChild(stateLine);
+
+    var versionLine = document.createElement("div");
+    versionLine.innerHTML = '<span class="label">Version:</span> ' + escapeHtml(service.version || "N/A");
+    content.appendChild(versionLine);
+
+    if (service.scripts.length > 0) {
+      var scriptsBlock = document.createElement("div");
+      scriptsBlock.className = "scripts-block";
+      var scriptsTitle = document.createElement("div");
+      scriptsTitle.className = "title";
+      scriptsTitle.textContent = "Scripts:";
+      scriptsBlock.appendChild(scriptsTitle);
+      service.scripts.forEach(function (script) {
+        var item = document.createElement("div");
+        item.className = "item";
+        item.textContent = script;
+        scriptsBlock.appendChild(item);
+      });
+      content.appendChild(scriptsBlock);
+    }
+
+    card.appendChild(content);
+    container.appendChild(card);
+  }
+
+  function renderDetails() {
+    renderDetailsCard(matchedDetails, state.selectedMatched, "matched", function () {
+      state.selectedMatched = null;
+      renderDetails();
+    });
+    renderDetailsCard(unmatchedDetails, state.selectedUnmatched, "unmatched", function () {
+      state.selectedUnmatched = null;
+      renderDetails();
+    });
+  }
+
+  function renderResults() {
+    renderList(matchedBox, matchedCount, state.matched, "matched");
+    renderList(unmatchedBox, unmatchedCount, state.unmatched, "unmatched");
+    renderDetails();
+  }
+
+  function showToast(title, description, variant) {
+    var toast = document.createElement("div");
+    toast.className = "toast" + (variant === "destructive" ? " destructive" : "");
+
+    var titleEl = document.createElement("p");
+    titleEl.className = "toast-title";
+    titleEl.textContent = title;
+    toast.appendChild(titleEl);
+
+    if (description) {
+      var descEl = document.createElement("p");
+      descEl.className = "toast-desc";
+      descEl.textContent = description;
+      toast.appendChild(descEl);
+    }
+
+    var closeBtn = document.createElement("button");
+    closeBtn.className = "toast-close";
+    closeBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+    closeBtn.addEventListener("click", function () {
+      toastRegion.removeChild(toast);
+    });
+    toast.appendChild(closeBtn);
+
+    toastRegion.appendChild(toast);
+    setTimeout(function () {
+      if (toast.parentNode) toastRegion.removeChild(toast);
+    }, 5000);
+  }
+
+  function handleProcess() {
+    try {
+      var processed = processNmapResults(nmapInputEl.value, searchStringEl.value);
+      state.matched = processed.matched;
+      state.unmatched = processed.unmatched;
+      renderResults();
+      showToast(
+        "Processing complete",
+        "Found " + processed.matched.length + " matched and " + processed.unmatched.length + " unmatched results"
+      );
+    } catch (err) {
+      showToast("Error", err && err.message ? err.message : "An error occurred while processing results", "destructive");
+    }
+  }
+
+  function handleExtractVersions() {
+    state.isAILoading = true;
+    extractLabel.textContent = "Analyzing...";
+    updateButtons();
+
+    aiExtractVersions().then(function (extractedSearch) {
+      searchStringEl.value = extractedSearch;
+      try {
+        var processed = processNmapResults(nmapInputEl.value, extractedSearch);
+        state.matched = processed.matched;
+        state.unmatched = processed.unmatched;
+        renderResults();
+        showToast(
+          "Version extraction complete",
+          "Found " + processed.matched.length + " services with version information"
+        );
+      } catch (err) {
+        showToast("AI extraction error", err && err.message ? err.message : "An error occurred during version extraction", "destructive");
+      }
+    }).catch(function (err) {
+      showToast("AI extraction error", err && err.message ? err.message : "An error occurred during version extraction", "destructive");
+    }).finally(function () {
+      state.isAILoading = false;
+      extractLabel.textContent = "Extract Versions";
+      updateButtons();
+    });
+  }
+
+  nmapInputEl.addEventListener("input", updateButtons);
+  searchStringEl.addEventListener("input", updateButtons);
+  processBtn.addEventListener("click", handleProcess);
+  extractBtn.addEventListener("click", handleExtractVersions);
+
+  updateButtons();
+})();
+</script>
+</body>
+</html>
