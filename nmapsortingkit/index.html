@@ -179,7 +179,25 @@
   button.ghost:hover:not(:disabled) { background: hsl(var(--accent)); }
   .process-btn { margin-top: 0.25rem; }
   .results-grid { display: grid; gap: 1rem; }
-  h2 { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  h2 { font-size: 1.05rem; font-weight: 600; margin: 0; }
+  button.copy-btn {
+    height: 2rem;
+    padding: 0 0.75rem;
+    font-size: 0.8125rem;
+    background: hsl(var(--secondary));
+    color: hsl(var(--secondary-foreground));
+    border-color: transparent;
+    flex-shrink: 0;
+  }
+  button.copy-btn:hover:not(:disabled) { background: hsl(var(--accent)); }
+  button.copy-btn svg { width: 0.875rem; height: 0.875rem; }
   .result-box { border: 1px solid hsl(var(--border)); border-radius: calc(var(--radius) - 0.25rem); padding: 1rem; }
   .result-box.matched { background: #f0fdf4; border-color: #bbf7d0; }
   .result-box.unmatched { background: #fef2f2; border-color: #fecaca; }
@@ -303,7 +321,13 @@
       <h3>Results</h3>
       <div class="results-grid">
         <div>
-          <h2>Matched Results (<span id="matchedCount">0</span>)</h2>
+          <div class="results-header">
+            <h2>Matched Results (<span id="matchedCount">0</span>)</h2>
+            <button id="copyMatchedBtn" class="copy-btn" type="button" disabled title="Copy all matched IP:PORT to clipboard">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+              Copy IP:PORT
+            </button>
+          </div>
           <div id="matchedBox" class="result-box matched">
             <div class="empty">No matched results</div>
           </div>
@@ -311,7 +335,13 @@
         <div id="matchedDetails"></div>
 
         <div>
-          <h2>Unmatched Results (<span id="unmatchedCount">0</span>)</h2>
+          <div class="results-header">
+            <h2>Unmatched Results (<span id="unmatchedCount">0</span>)</h2>
+            <button id="copyUnmatchedBtn" class="copy-btn" type="button" disabled title="Copy all unmatched IP:PORT to clipboard">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+              Copy IP:PORT
+            </button>
+          </div>
           <div id="unmatchedBox" class="result-box unmatched">
             <div class="empty">No unmatched results</div>
           </div>
@@ -504,6 +534,8 @@
   var unmatchedCount = document.getElementById("unmatchedCount");
   var matchedDetails = document.getElementById("matchedDetails");
   var unmatchedDetails = document.getElementById("unmatchedDetails");
+  var copyMatchedBtn = document.getElementById("copyMatchedBtn");
+  var copyUnmatchedBtn = document.getElementById("copyUnmatchedBtn");
   var toastRegion = document.getElementById("toast-region");
 
   var state = {
@@ -632,7 +664,51 @@
   function renderResults() {
     renderList(matchedBox, matchedCount, state.matched, "matched");
     renderList(unmatchedBox, unmatchedCount, state.unmatched, "unmatched");
+    copyMatchedBtn.disabled = state.matched.length === 0;
+    copyUnmatchedBtn.disabled = state.unmatched.length === 0;
     renderDetails();
+  }
+
+  // Copies text to the clipboard, falling back to a temporary textarea when the
+  // async Clipboard API is unavailable (e.g. opened over file://).
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.top = "-1000px";
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      document.body.removeChild(ta);
+      ok ? resolve() : reject(new Error("Clipboard not available"));
+    });
+  }
+
+  function copyResults(type) {
+    var services = type === "matched" ? state.matched : state.unmatched;
+    if (services.length === 0) return;
+
+    var text = services.map(function (s) { return s.ip + ":" + s.port; }).join("\n");
+
+    copyText(text).then(function () {
+      showToast(
+        "Copied to clipboard",
+        "Copied " + services.length + " " + type + " " +
+          (services.length === 1 ? "entry" : "entries")
+      );
+    }).catch(function (err) {
+      showToast(
+        "Copy failed",
+        err && err.message ? err.message : "Could not access the clipboard",
+        "destructive"
+      );
+    });
   }
 
   function showToast(title, description, variant) {
@@ -712,6 +788,8 @@
   searchStringEl.addEventListener("input", updateButtons);
   processBtn.addEventListener("click", handleProcess);
   extractBtn.addEventListener("click", handleExtractVersions);
+  copyMatchedBtn.addEventListener("click", function () { copyResults("matched"); });
+  copyUnmatchedBtn.addEventListener("click", function () { copyResults("unmatched"); });
 
   updateButtons();
 })();
