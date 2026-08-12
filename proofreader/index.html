@@ -1,12 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Proofreader & Analyzer</title>
   <link href="/profile.jpg" type="image/jpeg" rel="shortcut icon" />
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
   
@@ -491,28 +489,14 @@
         grid-template-columns: 1fr;
       }
     }
-  
-  /* ═══ Toolkit alias layer — points local tokens at /css/toolkit.css ═══ */
-  html {
-    --bg: var(--tk-bg) !important;              --border: var(--tk-border) !important;
-    --card-bg: var(--tk-surface) !important;    --editor-bg: var(--tk-surface) !important;
-    --dropzone-bg: var(--tk-surface-2) !important; --metric-bg: var(--tk-surface-2) !important;
-    --tab-bg: var(--tk-surface-2) !important;   --tab-hover: var(--tk-surface-3) !important;
-    --primary: var(--tk-accent) !important;     --primary-hover: var(--tk-accent-2) !important;
-    --text: var(--tk-text) !important;          --text-muted: var(--tk-text-3) !important;
-    --grammar-bg: var(--tk-blue-soft) !important;  --grammar-border: var(--tk-blue) !important;
-    --punct-bg: var(--tk-amber-soft) !important;   --punct-border: var(--tk-amber) !important;
-    --spelling-bg: var(--tk-red-soft) !important;  --spelling-border: var(--tk-red) !important;
-    --style-bg: var(--tk-green-soft) !important;   --style-border: var(--tk-green) !important;
-  }</style>
-    <link rel="stylesheet" href="/css/toolkit.css">
+  </style>
 </head>
 <body>
 
   <div class="container">
     <header>
       <div>
-        <h1><i class="fas fa-spell-check"></i> AI-Powered Proofreader &amp; Analyzer</h1>
+        <h1>AI-Powered Proofreader & Analyzer</h1>
         <p>Analyze text or uploaded documents (.pdf, .docx, .txt) with advanced NLP accuracy.</p>
       </div>
       <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle theme">
@@ -984,33 +968,6 @@
     function escapeAttr(text) {
       return text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
     }
-  
-/* ═══ Toolkit theme module — uniform across all tools ═══════════════════
-   Drives theming from the `dark` class on <html>, matching the reference
-   at /spfrecordchecker. Declared last so it supersedes any earlier
-   toggleTheme() definition on the page. */
-function tkSyncTheme() {
-  var dark = document.documentElement.classList.contains('dark');
-  var i = document.getElementById('themeIcon');
-  if (i) i.className = 'fas fa-' + (dark ? 'sun' : 'moon');
-  var l = document.getElementById('themeLabel');
-  if (l) l.textContent = dark ? 'Light Mode' : 'Dark Mode';
-  var x = document.getElementById('themeText');
-  if (x) x.textContent = dark ? 'Light' : 'Dark';
-}
-function toggleTheme() {
-  var dark = document.documentElement.classList.toggle('dark');
-  try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
-  tkSyncTheme();
-}
-(function () {
-  var s = null;
-  try { s = localStorage.getItem('theme'); } catch (e) {}
-  if (s === 'light') document.documentElement.classList.remove('dark');
-  else document.documentElement.classList.add('dark');
-  tkSyncTheme();
-  var b = document.getElementById('themeToggleBtn');
-  if (b) b.addEventListener('click', function () { tkSyncTheme(); });
-})();</script>
+  </script>
 </body>
 </html>

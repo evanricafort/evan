@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,8 +9,7 @@
 <meta name="author" content="Evan Ricafort" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <script>
   if (localStorage.getItem("theme") === "dark" ||
       (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
@@ -278,29 +277,7 @@
     to { transform: translateY(0); opacity: 1; }
   }
   svg.icon { width: 1rem; height: 1rem; flex-shrink: 0; }
-
-  /* ═══ Toolkit alignment — HSL triples matching /css/toolkit.css ═══
-     This page consumes tokens as hsl(var(--x)), so values stay as triples. */
-  :root {
-    --background: 220 14% 96%;  --foreground: 221 39% 11%;
-    --card: 0 0% 100%;          --card-foreground: 221 39% 11%;
-    --primary: 243 75% 59%;     --primary-foreground: 0 0% 100%;
-    --secondary: 210 20% 98%;   --secondary-foreground: 215 14% 34%;
-    --accent: 243 75% 59%;      --accent-foreground: 0 0% 100%;
-    --muted-foreground: 220 9% 46%;
-    --border: 220 13% 91%;      --input: 216 12% 84%;   --ring: 243 75% 59%;
-    --radius: 1rem;
-  }
-  html.dark {
-    --background: 223 39% 7%;   --foreground: 0 0% 100%;
-    --card: 221 39% 11%;        --card-foreground: 0 0% 100%;
-    --primary: 239 84% 67%;     --primary-foreground: 0 0% 100%;
-    --secondary: 215 28% 17%;   --secondary-foreground: 216 12% 84%;
-    --accent: 239 84% 67%;      --accent-foreground: 0 0% 100%;
-    --muted-foreground: 218 11% 65%;
-    --border: 215 28% 17%;      --input: 217 19% 27%;   --ring: 239 84% 67%;
-  }</style>
-    <link rel="stylesheet" href="/css/toolkit.css">
+</style>
 </head>
 <body>
   <div class="container">

@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JWT Analyzer – JWT Security Tool</title>
 <link href="/profile.jpg" type="image/jpeg" rel="shortcut icon" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   /* ═══════════════════════════════════════════════════════════════
      Design tokens — aligned with /googleapikeychecker
@@ -1861,33 +1860,7 @@
   .atk-module-card, .brute-card, .finding-item {
     text-shadow: none;
   }
-
-  /* ═══ Toolkit alias layer — points local tokens at /css/toolkit.css ═══
-     Custom properties are live, so these follow html.dark automatically. */
-  html {
-    --bg: var(--tk-bg) !important;            --bg2: var(--tk-surface) !important;
-    --bg3: var(--tk-surface-2) !important;    --bg4: var(--tk-surface-2) !important;
-    --border: var(--tk-border) !important;    --border2: var(--tk-border-2) !important;
-    --surface: var(--tk-surface) !important;  --surface2: var(--tk-surface-2) !important;
-    --accent: var(--tk-accent) !important;    --accent-glow: var(--tk-accent-ring) !important;
-    --cyan: var(--tk-accent) !important;      --cyan-dim: var(--tk-accent-2) !important;
-    --green: var(--tk-green) !important;      --green-dim: var(--tk-green) !important;
-    --green-bg: var(--tk-green-soft) !important;
-    --red: var(--tk-red) !important;          --red-dim: var(--tk-red) !important;
-    --red-bg: var(--tk-red-soft) !important;
-    --orange: var(--tk-amber) !important;     --orange-dim: var(--tk-amber) !important;
-    --orange-bg: var(--tk-amber-soft) !important;
-    --yellow: var(--tk-amber) !important;     --yellow-dim: var(--tk-amber) !important;
-    --yellow-bg: var(--tk-amber-soft) !important;
-    --blue: var(--tk-blue) !important;        --blue-bg: var(--tk-blue-soft) !important;
-    --gray: var(--tk-text-3) !important;      --gray-bg: var(--tk-surface-2) !important;
-    --text: var(--tk-text) !important;        --text2: var(--tk-text-2) !important;
-    --text3: var(--tk-text-3) !important;     --white: var(--tk-text) !important;
-    --mono: var(--tk-mono) !important;        --sans: var(--tk-sans) !important;
-    --display: var(--tk-sans) !important;     --radius: var(--tk-radius) !important;
-    --shadow: var(--tk-shadow-lg) !important; --card-shadow: var(--tk-shadow) !important;
-  }</style>
-    <link rel="stylesheet" href="/css/toolkit.css">
+</style>
 </head>
 <body>
 
@@ -4538,33 +4511,6 @@ function setCLFilter(f, btn) {
 loadDefaultWordlist();
 // Init checklist counter
 setTimeout(updateChecklist, 100);
-
-/* ═══ Toolkit theme module — uniform across all tools ═══════════════════
-   Drives theming from the `dark` class on <html>, matching the reference
-   at /spfrecordchecker. Declared last so it supersedes any earlier
-   toggleTheme() definition on the page. */
-function tkSyncTheme() {
-  var dark = document.documentElement.classList.contains('dark');
-  var i = document.getElementById('themeIcon');
-  if (i) i.className = 'fas fa-' + (dark ? 'sun' : 'moon');
-  var l = document.getElementById('themeLabel');
-  if (l) l.textContent = dark ? 'Light Mode' : 'Dark Mode';
-  var x = document.getElementById('themeText');
-  if (x) x.textContent = dark ? 'Light' : 'Dark';
-}
-function toggleTheme() {
-  var dark = document.documentElement.classList.toggle('dark');
-  try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
-  tkSyncTheme();
-}
-(function () {
-  var s = null;
-  try { s = localStorage.getItem('theme'); } catch (e) {}
-  if (s === 'light') document.documentElement.classList.remove('dark');
-  else document.documentElement.classList.add('dark');
-  tkSyncTheme();
-  var b = document.getElementById('themeToggleBtn');
-  if (b) b.addEventListener('click', function () { tkSyncTheme(); });
-})();</script>
+</script>
 </body>
 </html>
