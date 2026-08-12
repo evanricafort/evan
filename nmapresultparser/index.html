@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nmap Parser & Sorter</title>
     <link href="/profile.jpg" type="image/jpeg" rel="shortcut icon" />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
@@ -23,7 +25,7 @@
                             800: '#1f2937',
                             850: '#1f2937',
                             900: '#111827',
-                            950: '#030712',
+                            950: '#0b0f19',
                         },
                         emerald: {
                             600: '#059669',
@@ -51,7 +53,7 @@
             --scrollbar-thumb-hover: #6b7280;
         }
 
-        .light-mode {
+        html:not(.dark) body {
             --scrollbar-track: #f3f4f6;
             --scrollbar-thumb: #9ca3af;
             --scrollbar-thumb-hover: #6b7280;
@@ -73,155 +75,44 @@
         }
 
 
-        .light-mode {
-            background-color: #f9fafb !important;
+        html:not(.dark) body {
+            background-color: #f3f4f6 !important;
             color: #1f2937 !important;
         }
         
-        .light-mode .bg-gray-900 { background-color: #ffffff !important; }
-        .light-mode .border-gray-800 { border-color: #e5e7eb !important; }
-        .light-mode .border-gray-700 { border-color: #d1d5db !important; }
-        .light-mode .text-green-400 { color: #047857 !important; }
+        html:not(.dark) .bg-gray-900 { background-color: #ffffff !important; }
+        html:not(.dark) .border-gray-800 { border-color: #e5e7eb !important; }
+        html:not(.dark) .border-gray-700 { border-color: #d1d5db !important; }
+        html:not(.dark) .text-green-400 { color: #047857 !important; }
 
-        .light-mode .text-gray-200 { color: #1f2937 !important; }
-        .light-mode .text-white { color: #1f2937 !important; }
-        .light-mode .text-gray-400 { color: #6b7280 !important; }
-        .light-mode .text-gray-600 { color: #9ca3af !important; }
-        .light-mode .text-emerald-400 { color: #059669 !important; }
-        .light-mode .text-blue-300 { color: #2563eb !important; }
-        .light-mode .text-red-400 { color: #b91c1c !important; }
-        .light-mode .placeholder-gray-700::placeholder { color: #a1a1aa !important; }
+        html:not(.dark) .text-gray-200 { color: #1f2937 !important; }
+        html:not(.dark) .text-white { color: #1f2937 !important; }
+        html:not(.dark) .text-gray-400 { color: #6b7280 !important; }
+        html:not(.dark) .text-gray-600 { color: #9ca3af !important; }
+        html:not(.dark) .text-indigo-400 { color: #059669 !important; }
+        html:not(.dark) .text-indigo-300 { color: #2563eb !important; }
+        html:not(.dark) .text-red-400 { color: #b91c1c !important; }
+        html:not(.dark) .placeholder-gray-700::placeholder { color: #a1a1aa !important; }
         
-        .light-mode .bg-gray-950 { background-color: #f9fafb !important; }
-        .light-mode .bg-gray-800 { background-color: #f3f4f6 !important; }
-        .light-mode .bg-gray-900.alt-row { background-color: #ffffff !important; }
-        .light-mode .hover\:bg-gray-700:hover { background-color: #e5e7eb !important; }
-        .light-mode .text-gray-300 { color: #374151 !important; }
+        html:not(.dark) .bg-gray-950 { background-color: #f3f4f6 !important; }
+        html:not(.dark) .bg-gray-800 { background-color: #f3f4f6 !important; }
+        html:not(.dark) .bg-gray-900.alt-row { background-color: #ffffff !important; }
+        html:not(.dark) .hover\:bg-gray-700:hover { background-color: #e5e7eb !important; }
+        html:not(.dark) .text-gray-300 { color: #374151 !important; }
 
-        .light-mode .bg-gray-700 { background-color: #e5e7eb !important; color: #1f2937 !important; border-color: #d1d5db !important; }
-        .light-mode .hover\:bg-gray-600:hover { background-color: #d1d5db !important; }
+        html:not(.dark) .bg-gray-700 { background-color: #e5e7eb !important; color: #1f2937 !important; border-color: #d1d5db !important; }
+        html:not(.dark) .hover\:bg-gray-600:hover { background-color: #d1d5db !important; }
 
         #moon-icon { display: block; }
         #sun-icon { display: none; }
-        .light-mode #moon-icon { display: none; }
-        .light-mode #sun-icon { display: block; }
-
-    
-  /* ═══════════════════════════════════════════════════════════════
-     UI ALIGNMENT LAYER — matches /googleapikeychecker
-     This page themes via a .light-mode class on the body element (dark is the base),
-     so both palettes are mapped onto the Tailwind utilities already
-     present in the markup. Presentation only — no markup or JS
-     selectors are changed.
-     ═══════════════════════════════════════════════════════════════ */
-
-  /* ── Typography ── */
-  body, .font-sans, button, input, select, textarea { font-family: 'Inter', sans-serif; }
-  .font-mono, code, pre, th { font-family: 'JetBrains Mono', monospace; }
-  body { line-height: 1.6; }
-
-  /* ── Geometry ── */
-  .rounded, .rounded-md, .rounded-lg, .rounded-xl { border-radius: 12px !important; }
-  .shadow, .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl {
-    box-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.3) !important;
-  }
-  body.light-mode .shadow, body.light-mode .shadow-sm, body.light-mode .shadow-md,
-  body.light-mode .shadow-lg, body.light-mode .shadow-xl {
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04) !important;
-  }
-
-  /* ═══ DARK (base) — reference dark palette ═══ */
-  .bg-gray-950 { background-color: #0d0f1a !important; }
-  .bg-gray-900 { background-color: #151825 !important; }
-  .bg-gray-800 { background-color: #1e2133 !important; }
-  .bg-gray-700 { background-color: #1e2133 !important; }
-  .border-gray-800, .border-gray-700, .border-gray-600 { border-color: #2a2f47 !important; }
-  .text-white, .text-gray-200 { color: #e8eaf2 !important; }
-  .text-gray-300 { color: #c8ccdb !important; }
-  .text-gray-400, .text-gray-500, .text-gray-600,
-  .text-slate-500, .text-slate-600 { color: #8b91aa !important; }
-  .placeholder-gray-700::placeholder { color: #8b91aa !important; }
-  .hover\:bg-gray-700:hover, .hover\:bg-gray-600:hover { background-color: #242840 !important; }
-
-  /* accent + semantics → reference palette */
-  .bg-emerald-600 { background-color: #3b82f6 !important; }
-  .hover\:bg-emerald-500:hover { background-color: #3b82f6 !important; opacity: 0.88; }
-  .text-emerald-400, .text-emerald-500, .text-blue-300 { color: #3b82f6 !important; }
-  .text-green-400  { color: #22c55e !important; }
-  .text-yellow-400 { color: #f59e0b !important; }
-  .text-red-400    { color: #ef4444 !important; }
-  .hover\:text-red-300:hover { color: #ef4444 !important; opacity: 0.85; }
-
-  /* ═══ LIGHT (.light-mode) — reference light palette ═══ */
-  body.light-mode { background-color: #f4f6f9 !important; color: #1a1d2e !important; }
-  body.light-mode .bg-gray-950 { background-color: #f4f6f9 !important; }
-  body.light-mode .bg-gray-900 { background-color: #ffffff !important; }
-  body.light-mode .bg-gray-800 { background-color: #f0f2f6 !important; }
-  body.light-mode .bg-gray-700 {
-    background-color: #f0f2f6 !important; color: #1a1d2e !important; border-color: #dde1ea !important;
-  }
-  body.light-mode .bg-gray-900.alt-row { background-color: #ffffff !important; }
-  body.light-mode .border-gray-800,
-  body.light-mode .border-gray-700,
-  body.light-mode .border-gray-600 { border-color: #dde1ea !important; }
-  body.light-mode .text-white, body.light-mode .text-gray-200 { color: #1a1d2e !important; }
-  body.light-mode .text-gray-300 { color: #3a4056 !important; }
-  body.light-mode .text-gray-400,
-  body.light-mode .text-gray-500,
-  body.light-mode .text-gray-600,
-  body.light-mode .text-slate-500,
-  body.light-mode .text-slate-600 { color: #5a6072 !important; }
-  body.light-mode .placeholder-gray-700::placeholder { color: #5a6072 !important; }
-  body.light-mode .hover\:bg-gray-700:hover,
-  body.light-mode .hover\:bg-gray-600:hover { background-color: #e6e9f0 !important; }
-
-  body.light-mode .bg-emerald-600 { background-color: #2563eb !important; }
-  body.light-mode .hover\:bg-emerald-500:hover { background-color: #2563eb !important; opacity: 0.88; }
-  body.light-mode .text-emerald-400,
-  body.light-mode .text-emerald-500,
-  body.light-mode .text-blue-300 { color: #2563eb !important; }
-  body.light-mode .text-green-400  { color: #16a34a !important; }
-  body.light-mode .text-yellow-400 { color: #d97706 !important; }
-  body.light-mode .text-red-400    { color: #dc2626 !important; }
-
-  /* icons in the toggle button follow the accent, not neon yellow */
-  .text-yellow-400 > svg, button .text-yellow-400 { color: inherit; }
-
-  /* ── Tables ── */
-  th {
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-  }
-  td { font-size: 13px; }
-
-  /* ── Focus rings ── */
-  input:focus, textarea:focus, select:focus {
-    outline: none !important;
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.2) !important;
-  }
-  body.light-mode input:focus,
-  body.light-mode textarea:focus,
-  body.light-mode select:focus {
-    border-color: #2563eb !important;
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.15) !important;
-  }
-
-  /* ── Footer ── */
-  .vc-footer {
-    text-align: center;
-    padding: 24px;
-    font-size: 12px;
-    color: #8b91aa;
-    border-top: 1px solid #2a2f47;
-    margin-top: auto;
-  }
-  body.light-mode .vc-footer { color: #5a6072; border-top-color: #dde1ea; }
+        html:not(.dark) #moon-icon { display: none; }
+        html:not(.dark) #sun-icon { display: block; }
+        .tk-anim-logo { display:inline-block; animation: tk-logo-float 4.5s ease-in-out infinite; transform-origin:center; }
+        @keyframes tk-logo-float { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-5px) rotate(-6deg)} 75%{transform:translateY(-2px) rotate(6deg)} }
+        @media (prefers-reduced-motion: reduce){ .tk-anim-logo{animation:none} }
 </style>
 </head>
-<body class="bg-gray-950 text-gray-200 font-sans min-h-screen flex flex-col">
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200 font-sans min-h-screen flex flex-col items-center py-8 md:py-12 px-4 antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300">
 
     <script>
         let parsedResults = []; 
@@ -240,13 +131,13 @@
             
             btn.innerText = "Copied!";
             btn.classList.replace('bg-gray-700', 'bg-emerald-700');
-            btn.classList.replace('hover:bg-gray-600', 'hover:bg-emerald-600'); 
+            btn.classList.replace('hover:bg-gray-600', 'hover:bg-indigo-600'); 
             btn.classList.add('pointer-events-none');
 
             setTimeout(() => {
                 btn.innerText = originalText;
                 btn.classList.replace('bg-emerald-700', 'bg-gray-700');
-                btn.classList.replace('hover:bg-emerald-600', 'hover:bg-gray-600');
+                btn.classList.replace('hover:bg-indigo-600', 'hover:bg-gray-600');
                 btn.classList.remove('pointer-events-none');
             }, 2000);
         }
@@ -384,8 +275,8 @@
                 const bgClass = index % 2 === 0 ? 'bg-gray-900 alt-row' : 'bg-gray-800'; 
                 html += `
                     <div class="grid grid-cols-12 ${bgClass} hover:bg-gray-700 text-sm border-b border-gray-800 transition-colors">
-                        <div class="col-span-3 p-3 font-mono text-emerald-400 border-r border-gray-800 truncate" title="${r.ip}">${r.ip}</div>
-                        <div class="col-span-2 p-3 font-mono text-blue-300 text-center border-r border-gray-800">${r.portStr}</div>
+                        <div class="col-span-3 p-3 font-mono text-indigo-400 border-r border-gray-800 truncate" title="${r.ip}">${r.ip}</div>
+                        <div class="col-span-2 p-3 font-mono text-indigo-300 text-center border-r border-gray-800">${r.portStr}</div>
                         <div class="col-span-7 p-3 text-gray-300 truncate" title="${r.displayVersion}">${r.displayVersion}</div>
                     </div>
                 `;
@@ -442,46 +333,37 @@
             copyToClipboard(clipboardText.trim(), 'copyGroupedBtn');
         }
 
-    </script>
+    
+/* theme: dark class on <html>, matching /spfrecordchecker */
+function toggleTheme() {
+  var dark = document.documentElement.classList.toggle('dark');
+  try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
+}
+function loadTheme() {
+  var s = null; try { s = localStorage.getItem('theme'); } catch (e) {}
+  if (s === 'light') document.documentElement.classList.remove('dark');
+  else document.documentElement.classList.add('dark');
+}
+loadTheme();</script>
 
-    <nav class="bg-gray-900 border-b border-gray-800 p-4 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <span class="text-xl font-bold text-white tracking-tight font uppercase tracking-wide">Nmap Result Parser</span>
-                <p class="text-[12px] text-slate-600 dark:text-slate-500 font-medium uppercase tracking-wide">Sorting tool for Version Disclosure.</p>
-            </div>
-            
-            <div class="flex items-center space-x-2">
-                <button 
-                    onclick="toggleTheme()" 
-                    aria-label="Toggle theme"
-                    class="p-2 rounded-full text-yellow-400 bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors border border-gray-700">
-                    
-                    <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-                    </svg>
+        <div class="absolute top-4 right-4 md:top-8 md:right-8 z-30">
+        <button onclick="toggleTheme()" aria-label="Toggle theme" class="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-600 dark:text-yellow-400 shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+        </button>
+    </div>
 
-                    <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-                        <circle cx="12" cy="12" r="4"/>
-                        <path d="M12 2v2"/>
-                        <path d="M12 20v2"/>
-                        <path d="m4.93 4.93 1.41 1.41"/>
-                        <path d="m17.66 17.66 1.41 1.41"/>
-                        <path d="M2 12h2"/>
-                        <path d="M20 12h2"/>
-                        <path d="m6.34 17.66-1.41 1.41"/>
-                        <path d="m19.07 4.93-1.41 1.41"/>
-                    </svg>
-                </button>
-                <div class="text-xs text-gray-500 font-mono hidden sm:block">
-                    Extracts: IP • PORT • VERSION
-                </div>
-            </div>
+    <main class="w-full max-w-7xl space-y-8 mt-8">
+
+        <div class="text-center space-y-3">
+            <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center justify-center gap-3">
+                <i class="fas fa-network-wired tk-anim-logo text-indigo-600 dark:text-indigo-500"></i>
+                <span><span class="text-indigo-600 dark:text-indigo-500">Nmap Result</span> Parser</span>
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 text-sm md:text-lg max-w-xl mx-auto">
+                Sorting tool for version disclosure &mdash; extracts IP, port and service version from scan output.
+            </p>
         </div>
-    </nav>
-
-    <main class="flex-grow container mx-auto px-4 py-8 max-w-7xl">
         
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
             
@@ -507,7 +389,7 @@ PORT  STATE SERVICE VERSION
 ..."></textarea>
                 
                 <button onclick="parseNmap()" 
-                    class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg shadow-lg transition-all transform hover:scale-[1.01] active:scale-95 flex justify-center items-center gap-2">
+                    class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg shadow-lg transition-all transform hover:scale-[1.01] active:scale-95 flex justify-center items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
                     Extract & Sort Info
                 </button>
@@ -553,7 +435,7 @@ PORT  STATE SERVICE VERSION
         </div>
     </main>
 
-    <footer class="border-t border-gray-800 py-4 text-center text-xs text-gray-600">
+    <footer class="mt-auto py-8 text-center text-gray-500 dark:text-gray-600 text-xs font-medium">
         Nmap Output Parser v1.0
     </footer>
 
