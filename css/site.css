@@ -1,0 +1,244 @@
+/* --- Design tokens ------------------------------------------------ */
+:root {
+  --bg: #ffffff;
+  --fg: #000000;
+  --rule: #dddddd;
+  --underline: #080fad;
+  --social-hover: #0073e6;
+  --loading-bar: #054b82;
+  --progress-bar: #113959;
+  --to-top: #333333;
+  --trail: rgba(0, 0, 0, 0.2);
+  --map-border: rgba(0, 0, 0, 0.4);
+  --glow: 0, 0, 0;
+  --geo-line: 22, 44, 66;
+  --geo-accent: 0, 118, 168;
+}
+
+body.dark-mode {
+  --bg: #1e1e1e;
+  --fg: #f0f0f0;
+  --to-top: #cccccc;
+  --trail: rgba(255, 255, 255, 0.1);
+  --map-border: rgba(255, 255, 255, 0.9);
+  --glow: 255, 255, 255;
+  --geo-line: 200, 220, 240;
+  --geo-accent: 96, 208, 255;
+}
+
+/* --- Base --------------------------------------------------------- */
+* { margin: 0; padding: 0; border: 0; text-decoration: none; }
+
+body {
+  padding: 10px;
+  font-family: "Bitter", serif;
+  font-size: 80%;
+  font-style: normal;
+  font-weight: 400;
+  font-optical-sizing: auto;
+  background-color: var(--bg);
+  color: var(--fg);
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+a, h1, h2, p, ul li { transition: color 0.5s ease; }
+a { text-decoration: none; }
+p { padding-bottom: 5px; }
+h1 { margin-bottom: 5px; text-align: center; }
+h2 { margin: 10px 0; padding: 0 0 5px; border-bottom: 1px solid var(--rule); }
+header { padding: 5px; }
+section { padding-top: 12px; }
+footer { padding-top: 30px; }
+body.dark-mode a { color: #4ea3ff; }
+body.dark-mode a:hover { color: #7ec8ff; }
+
+/* --- Lists -------------------------------------------------------- */
+ul > li { margin: 0 0 1px 20px; }
+ul ul { margin-left: 0; padding-left: 0; list-style-type: none; }
+ul ul li { position: relative; padding-left: 1.4em; }
+
+ul ul li::before {
+  content: "\02937";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0.8em;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* --- Header and contact blocks ------------------------------------ */
+#i { margin: 0 auto 5px; text-align: center; }
+#bio_left { float: left; }
+#bio_right { float: right; }
+#bio_center { width: 200px; margin: 0 auto; text-align: center; }
+
+#bio_center a {
+  display: inline-block;
+  margin: 0 6px;
+  color: inherit;
+  font-size: 0.8rem;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+#bio_center a:hover { color: var(--social-hover); transform: scale(1.7); }
+#bio_center a[href*="instagram.com"]:hover i { color: #e4405f; }
+#bio_center a[href*="twitter.com"]:hover i { color: #1da1f2; }
+#bio_center a[href*="github.com"]:hover i { color: #333333; }
+#bio_center a[href*="linkedin.com"]:hover i { color: #0077b5; }
+
+/* Profile photo (also the dark-mode trigger). */
+.center {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.center:hover { transform: scale(1.05); }
+
+/* --- Underlined links --------------------------------------------- */
+.container { position: relative; display: inline-block; }
+
+.cool-link::after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 2px;
+  background: var(--underline);
+  transition: width 0.3s ease-in-out;
+}
+
+.cool-link:hover::after { width: 100%; }
+
+/* --- Glowing name -------------------------------------------------- */
+.glow-text { color: inherit; text-align: center; }
+
+.glow-text span {
+  display: inline-block;
+  color: inherit;
+  cursor: default;
+  transition: text-shadow 0.3s ease;
+}
+
+.glow-text .flicker-glow {
+  text-shadow: 0 0 6px rgba(var(--glow), 0.4), 0 0 14px rgba(var(--glow), 0.5), 0 0 18px rgba(var(--glow), 0.6);
+}
+
+body.dark-mode .glow-text .flicker-glow {
+  text-shadow: 0 0 8px rgba(var(--glow), 0.4), 0 0 18px rgba(var(--glow), 0.6), 0 0 24px rgba(var(--glow), 0.8);
+}
+
+.glow-text span:hover {
+  text-shadow: 0 0 10px rgba(var(--glow), 0.5), 0 0 20px rgba(var(--glow), 0.4), 0 0 30px rgba(var(--glow), 0.3);
+}
+
+body.dark-mode .glow-text span:hover {
+  text-shadow: 0 0 12px rgba(var(--glow), 0.9), 0 0 25px rgba(var(--glow), 0.8), 0 0 40px rgba(var(--glow), 0.6);
+}
+
+/* --- Typed tagline with RGB glitch on hover ------------------------ */
+.glitch-wrapper { position: relative; display: inline-block; cursor: pointer; }
+#typing-text { position: relative; z-index: 1; display: inline-block; transition: all 0.3s ease; }
+
+.glitch-wrapper:hover #typing-text::before,
+.glitch-wrapper:hover #typing-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0.6;
+  font-family: inherit;
+  pointer-events: none;
+  animation: rgb-glitch 0.25s infinite;
+}
+
+.glitch-wrapper:hover #typing-text::before { color: #ff00ff; transform: translate(-2px, -1px); }
+.glitch-wrapper:hover #typing-text::after { color: #00ffff; transform: translate(2px, 1px); }
+
+@keyframes rgb-glitch {
+  0%   { clip-path: inset(25% 0 90% 0); }
+  25%  { clip-path: inset(10% 0 80% 0); }
+  50%  { clip-path: inset(20% 0 60% 0); }
+  75%  { clip-path: inset(5% 0 85% 0); }
+  100% { clip-path: inset(40% 0 90% 0); }
+}
+
+/* --- Address hover map --------------------------------------------- */
+#map-circle {
+  position: fixed;
+  width: 250px;
+  height: 250px;
+  overflow: hidden;
+  border: 3px solid var(--map-border);
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.35);
+  transform: scale(0);
+  transition: transform 0.2s ease;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+#map-circle iframe { width: 100%; height: 100%; border: none; }
+
+/* --- Page load and scroll indicators -------------------------------- */
+#loading-bar,
+#scroll-progress { position: fixed; top: 0; left: 0; width: 0; height: 4px; z-index: 9999; }
+#loading-bar { background-color: var(--loading-bar); animation: loading-bar-grow 2s ease-out forwards; }
+#scroll-progress { background-color: var(--progress-bar); transition: width 0.2s ease-out; }
+
+@keyframes loading-bar-grow {
+  0%   { width: 0%; }
+  80%  { width: 90%; }
+  100% { width: 100%; }
+}
+
+/* --- "Read More" disclosure ----------------------------------------- */
+#more {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.8s ease, opacity 0.8s ease;
+  will-change: max-height, opacity;
+}
+
+#more.show { max-height: 10000px; opacity: 1; }
+
+/* --- Scroll-to-top plane -------------------------------------------- */
+#scrollToTopBtn {
+  position: fixed;
+  right: 40px;
+  bottom: 40px;
+  background: none;
+  color: var(--to-top);
+  font-size: 2rem;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+#scrollToTopBtn.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+#airplaneIcon { display: inline-block; transform: rotate(-90deg); transition: transform 0.3s ease; }
+
+.trail-dot {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  background: var(--trail);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  animation: trail-fade 0.6s ease-out forwards;
+}
+
+@keyframes trail-fade {
+  0%   { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.3); }
+}
+
+/* --- Geometric web canvas (sits behind every other layer) ------------ */
+#bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
