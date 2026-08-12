@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Proofreader & Analyzer</title>
   <link href="/profile.jpg" type="image/jpeg" rel="shortcut icon" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
   
@@ -489,7 +490,11 @@
         grid-template-columns: 1fr;
       }
     }
-  </style>
+  
+  /* tk-font-unify — shared type faces */
+  html body, body button, body input, body select, body textarea { font-family: 'Sora', sans-serif; }
+  body code, body pre, body kbd, body samp, body .font-mono { font-family: 'JetBrains Mono', monospace; }
+</style>
 </head>
 <body>
 
