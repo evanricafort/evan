@@ -1,0 +1,63 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Toolkit — Tailwind normalisation layer
+   Loaded by the Tailwind-CDN tools alongside toolkit.css. Retargets the
+   utility classes already present in their markup onto the reference
+   palette (/spfrecordchecker) so no markup has to be rewritten.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Accent hue: emerald / blue / cyan primaries → indigo ─────────────── */
+.bg-emerald-500, .bg-emerald-600, .bg-emerald-700,
+.bg-blue-500, .bg-blue-600, .bg-blue-700,
+.bg-indigo-500, .bg-indigo-600, .bg-indigo-700 {
+  background-color: var(--tk-accent) !important;
+}
+.hover\:bg-emerald-500:hover, .hover\:bg-emerald-600:hover, .hover\:bg-emerald-700:hover,
+.hover\:bg-blue-500:hover, .hover\:bg-blue-600:hover, .hover\:bg-blue-700:hover,
+.hover\:bg-indigo-500:hover, .hover\:bg-indigo-600:hover, .hover\:bg-indigo-700:hover {
+  background-color: var(--tk-accent) !important;
+  filter: brightness(1.12);
+}
+.text-emerald-400, .text-emerald-500, .text-emerald-600,
+.text-blue-300, .text-blue-400, .text-blue-600, .text-blue-800, .text-blue-900,
+.text-indigo-500, .text-indigo-600 {
+  color: var(--tk-accent) !important;
+}
+.dark\:text-indigo-300:is(html.dark *),
+.dark\:text-indigo-500:is(html.dark *) { color: var(--tk-code) !important; }
+.border-emerald-500, .border-blue-500, .border-indigo-500 { border-color: var(--tk-accent) !important; }
+.focus\:ring-emerald-500:focus, .focus\:ring-blue-500:focus, .focus\:ring-indigo-500:focus {
+  --tw-ring-color: var(--tk-accent-ring) !important;
+}
+.bg-gradient-to-r { background-image: linear-gradient(to right, var(--tk-accent-2), var(--tk-accent)) !important; }
+
+/* ── Semantic colours ────────────────────────────────────────────────── */
+.text-green-400, .text-green-500, .text-green-600  { color: var(--tk-green) !important; }
+.text-red-300,  .text-red-400,  .text-red-500, .text-red-600 { color: var(--tk-red) !important; }
+.text-yellow-300, .text-yellow-400, .text-yellow-600,
+.text-orange-500, .text-orange-600 { color: var(--tk-amber) !important; }
+.bg-red-600, .bg-red-700 { background-color: var(--tk-red) !important; }
+
+/* ── Geometry: reference radii + shadows (pills untouched) ───────────── */
+.rounded, .rounded-md, .rounded-lg, .rounded-xl { border-radius: var(--tk-radius) !important; }
+.rounded-2xl, .rounded-3xl { border-radius: var(--tk-radius-lg) !important; }
+.shadow, .shadow-sm, .shadow-md { box-shadow: var(--tk-shadow) !important; }
+.shadow-lg, .shadow-xl, .shadow-2xl { box-shadow: var(--tk-shadow-lg) !important; }
+
+/* ── Typography ──────────────────────────────────────────────────────── */
+.font-sans { font-family: var(--tk-sans) !important; }
+.font-mono, code, pre, kbd, samp { font-family: var(--tk-mono) !important; }
+
+/* ── Focus rings ─────────────────────────────────────────────────────── */
+input:focus, textarea:focus, select:focus {
+  outline: none !important;
+  border-color: var(--tk-accent) !important;
+  box-shadow: 0 0 0 2px var(--tk-accent-ring) !important;
+}
+
+/* ── Table headers match the reference treatment ─────────────────────── */
+th {
+  font-family: var(--tk-mono) !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
