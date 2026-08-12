@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nmap Parser & Sorter</title>
     <link href="/profile.jpg" type="image/jpeg" rel="shortcut icon" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -104,7 +105,120 @@
         .light-mode #moon-icon { display: none; }
         .light-mode #sun-icon { display: block; }
 
-    </style>
+    
+  /* ═══════════════════════════════════════════════════════════════
+     UI ALIGNMENT LAYER — matches /googleapikeychecker
+     This page themes via a .light-mode class on the body element (dark is the base),
+     so both palettes are mapped onto the Tailwind utilities already
+     present in the markup. Presentation only — no markup or JS
+     selectors are changed.
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* ── Typography ── */
+  body, .font-sans, button, input, select, textarea { font-family: 'Sora', sans-serif; }
+  .font-mono, code, pre, th { font-family: 'JetBrains Mono', monospace; }
+  body { line-height: 1.6; }
+
+  /* ── Geometry ── */
+  .rounded, .rounded-md, .rounded-lg, .rounded-xl { border-radius: 12px !important; }
+  .shadow, .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.3) !important;
+  }
+  body.light-mode .shadow, body.light-mode .shadow-sm, body.light-mode .shadow-md,
+  body.light-mode .shadow-lg, body.light-mode .shadow-xl {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04) !important;
+  }
+
+  /* ═══ DARK (base) — reference dark palette ═══ */
+  .bg-gray-950 { background-color: #0d0f1a !important; }
+  .bg-gray-900 { background-color: #151825 !important; }
+  .bg-gray-800 { background-color: #1e2133 !important; }
+  .bg-gray-700 { background-color: #1e2133 !important; }
+  .border-gray-800, .border-gray-700, .border-gray-600 { border-color: #2a2f47 !important; }
+  .text-white, .text-gray-200 { color: #e8eaf2 !important; }
+  .text-gray-300 { color: #c8ccdb !important; }
+  .text-gray-400, .text-gray-500, .text-gray-600,
+  .text-slate-500, .text-slate-600 { color: #8b91aa !important; }
+  .placeholder-gray-700::placeholder { color: #8b91aa !important; }
+  .hover\:bg-gray-700:hover, .hover\:bg-gray-600:hover { background-color: #242840 !important; }
+
+  /* accent + semantics → reference palette */
+  .bg-emerald-600 { background-color: #3b82f6 !important; }
+  .hover\:bg-emerald-500:hover { background-color: #3b82f6 !important; opacity: 0.88; }
+  .text-emerald-400, .text-emerald-500, .text-blue-300 { color: #3b82f6 !important; }
+  .text-green-400  { color: #22c55e !important; }
+  .text-yellow-400 { color: #f59e0b !important; }
+  .text-red-400    { color: #ef4444 !important; }
+  .hover\:text-red-300:hover { color: #ef4444 !important; opacity: 0.85; }
+
+  /* ═══ LIGHT (.light-mode) — reference light palette ═══ */
+  body.light-mode { background-color: #f4f6f9 !important; color: #1a1d2e !important; }
+  body.light-mode .bg-gray-950 { background-color: #f4f6f9 !important; }
+  body.light-mode .bg-gray-900 { background-color: #ffffff !important; }
+  body.light-mode .bg-gray-800 { background-color: #f0f2f6 !important; }
+  body.light-mode .bg-gray-700 {
+    background-color: #f0f2f6 !important; color: #1a1d2e !important; border-color: #dde1ea !important;
+  }
+  body.light-mode .bg-gray-900.alt-row { background-color: #ffffff !important; }
+  body.light-mode .border-gray-800,
+  body.light-mode .border-gray-700,
+  body.light-mode .border-gray-600 { border-color: #dde1ea !important; }
+  body.light-mode .text-white, body.light-mode .text-gray-200 { color: #1a1d2e !important; }
+  body.light-mode .text-gray-300 { color: #3a4056 !important; }
+  body.light-mode .text-gray-400,
+  body.light-mode .text-gray-500,
+  body.light-mode .text-gray-600,
+  body.light-mode .text-slate-500,
+  body.light-mode .text-slate-600 { color: #5a6072 !important; }
+  body.light-mode .placeholder-gray-700::placeholder { color: #5a6072 !important; }
+  body.light-mode .hover\:bg-gray-700:hover,
+  body.light-mode .hover\:bg-gray-600:hover { background-color: #e6e9f0 !important; }
+
+  body.light-mode .bg-emerald-600 { background-color: #2563eb !important; }
+  body.light-mode .hover\:bg-emerald-500:hover { background-color: #2563eb !important; opacity: 0.88; }
+  body.light-mode .text-emerald-400,
+  body.light-mode .text-emerald-500,
+  body.light-mode .text-blue-300 { color: #2563eb !important; }
+  body.light-mode .text-green-400  { color: #16a34a !important; }
+  body.light-mode .text-yellow-400 { color: #d97706 !important; }
+  body.light-mode .text-red-400    { color: #dc2626 !important; }
+
+  /* icons in the toggle button follow the accent, not neon yellow */
+  .text-yellow-400 > svg, button .text-yellow-400 { color: inherit; }
+
+  /* ── Tables ── */
+  th {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  td { font-size: 13px; }
+
+  /* ── Focus rings ── */
+  input:focus, textarea:focus, select:focus {
+    outline: none !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.2) !important;
+  }
+  body.light-mode input:focus,
+  body.light-mode textarea:focus,
+  body.light-mode select:focus {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15) !important;
+  }
+
+  /* ── Footer ── */
+  .vc-footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+    color: #8b91aa;
+    border-top: 1px solid #2a2f47;
+    margin-top: auto;
+  }
+  body.light-mode .vc-footer { color: #5a6072; border-top-color: #dde1ea; }
+</style>
 </head>
 <body class="bg-gray-950 text-gray-200 font-sans min-h-screen flex flex-col">
 
@@ -144,7 +258,7 @@
         }
 
         function loadTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'dark';
+            const savedTheme = localStorage.getItem('theme') || 'light';
             const body = document.body;
             
             if (savedTheme === 'light') {

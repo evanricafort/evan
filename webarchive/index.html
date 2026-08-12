@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Archive URL Fetcher</title>
     <link href="/profile.jpg" type="image/jpeg" rel="shortcut icon" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
@@ -76,7 +77,183 @@
             background: #64748b; 
         }
 
-    </style>
+    
+  /* ═══════════════════════════════════════════════════════════════
+     UI ALIGNMENT LAYER — matches /googleapikeychecker
+     Presentation only. Injected after the Tailwind CDN stylesheet so
+     these rules win; no markup classes or JS handlers are relied upon
+     beyond what already exists.
+     ═══════════════════════════════════════════════════════════════ */
+  :root {
+    --accent:      #2563eb;
+    --accent-glow: rgba(37,99,235,0.15);
+    --radius:      12px;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+    --surface:     #ffffff;
+    --surface2:    #f0f2f6;
+    --border-c:    #dde1ea;
+    --text-c:      #1a1d2e;
+    --text2-c:     #5a6072;
+    --bg-c:        #f4f6f9;
+  }
+  html.dark {
+    --accent:      #3b82f6;
+    --accent-glow: rgba(59,130,246,0.2);
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.3);
+    --surface:     #151825;
+    --surface2:    #1e2133;
+    --border-c:    #2a2f47;
+    --text-c:      #e8eaf2;
+    --text2-c:     #8b91aa;
+    --bg-c:        #0d0f1a;
+  }
+
+  /* ── Typography ── */
+  body, .font-sans, button, input, select, textarea {
+    font-family: 'Sora', sans-serif;
+  }
+  .font-mono, code, pre, th { font-family: 'JetBrains Mono', monospace; }
+  body { line-height: 1.6; letter-spacing: 0; }
+
+  /* ── Accent normalisation: indigo / emerald / blue → reference blue ── */
+  .bg-blue-600, .bg-indigo-600, .bg-indigo-500, .bg-emerald-600 {
+    background-color: var(--accent) !important;
+  }
+  .hover\:bg-blue-700:hover, .hover\:bg-indigo-700:hover,
+  .hover\:bg-emerald-500:hover, .hover\:bg-emerald-700:hover {
+    background-color: var(--accent) !important;
+    opacity: 0.88;
+  }
+  .text-blue-600, .text-blue-800, .text-blue-900,
+  .text-indigo-600, .text-emerald-600 { color: var(--accent) !important; }
+  .hover\:text-indigo-800:hover { color: var(--accent) !important; opacity: 0.85; }
+  .border-blue-200, .border-blue-100 { border-color: var(--accent-glow) !important; }
+  .bg-blue-50 { background-color: var(--accent-glow) !important; }
+
+  /* ── Card geometry: reference radius + shadow (pills untouched) ── */
+  .rounded, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl {
+    border-radius: var(--radius) !important;
+  }
+  .shadow, .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl {
+    box-shadow: var(--card-shadow) !important;
+  }
+
+  /* ── Focus rings match the reference ── */
+  input:focus, textarea:focus, select:focus {
+    outline: none !important;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px var(--accent-glow) !important;
+  }
+
+  /* ── Tables: reference header treatment ── */
+  th {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text2-c) !important;
+  }
+  td { font-size: 13px; }
+
+  /* ── Reference chrome: header ── */
+  .vc-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-c);
+    padding: 16px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+  }
+  .vc-header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .vc-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-c);
+    text-decoration: none;
+  }
+  .vc-brand-icon {
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .vc-brand-sub {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text2-c);
+  }
+
+  /* ── Reference chrome: theme toggle pill ── */
+  .vc-toggle {
+    background: var(--surface2);
+    border: 1px solid var(--border-c);
+    border-radius: 50px;
+    padding: 6px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2-c);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .vc-toggle:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ── Reference chrome: hero ── */
+  .vc-hero { text-align: center; margin: 0 auto 32px; max-width: 640px; }
+  .vc-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent-glow);
+    color: var(--accent);
+    border: 1px solid var(--accent-glow);
+    border-radius: 50px;
+    padding: 4px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .vc-hero h1 {
+    font-size: clamp(22px, 4vw, 30px);
+    font-weight: 700;
+    color: var(--text-c);
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+  }
+  .vc-hero p {
+    font-size: 14px;
+    color: var(--text2-c);
+    margin: 0 auto;
+  }
+
+  /* ── Reference chrome: footer ── */
+  .vc-footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+    color: var(--text2-c);
+    border-top: 1px solid var(--border-c);
+    margin-top: auto;
+  }
+</style>
 </head>
 <body class="bg-gray-100 dark:bg-slate-900 min-h-screen flex flex-col items-center justify-center p-6 font-sans text-gray-700 dark:text-slate-300 transition-colors duration-300">
 <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl dark:shadow-slate-950/50 w-full max-w-2xl overflow-hidden transition-colors duration-300 border border-gray-200 dark:border-slate-700">
@@ -498,5 +675,8 @@
             });
         });
     </script>
+<footer class="vc-footer w-full">
+  For authorized security testing only &nbsp;&middot;&nbsp; All processing runs client-side &nbsp;&middot;&nbsp; No data is stored
+</footer>
 </body>
 </html>
