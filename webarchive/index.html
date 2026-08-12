@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,10 +16,10 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
                     colors: {
-                        slate: {
-                            850: '#1e293b', 
-                            900: '#0f172a',
-                            950: '#020617',
+                        gray: {
+                            850: '#1f2937',
+                            900: '#111827',
+                            950: '#0b0f19',
                         },
                         indigo: {
                             600: '#4f46e5',
@@ -77,222 +77,51 @@
         .dark #resultsOutput::-webkit-scrollbar-thumb:hover {
             background: #64748b; 
         }
-
-    
-  /* ═══════════════════════════════════════════════════════════════
-     UI ALIGNMENT LAYER — matches /googleapikeychecker
-     Presentation only. Injected after the Tailwind CDN stylesheet so
-     these rules win; no markup classes or JS handlers are relied upon
-     beyond what already exists.
-     ═══════════════════════════════════════════════════════════════ */
-  :root {
-    --accent:      #2563eb;
-    --accent-glow: rgba(37,99,235,0.15);
-    --radius:      12px;
-    --card-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
-    --surface:     #ffffff;
-    --surface2:    #f0f2f6;
-    --border-c:    #dde1ea;
-    --text-c:      #1a1d2e;
-    --text2-c:     #5a6072;
-    --bg-c:        #f4f6f9;
-  }
-  html.dark {
-    --accent:      #3b82f6;
-    --accent-glow: rgba(59,130,246,0.2);
-    --card-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.3);
-    --surface:     #151825;
-    --surface2:    #1e2133;
-    --border-c:    #2a2f47;
-    --text-c:      #e8eaf2;
-    --text2-c:     #8b91aa;
-    --bg-c:        #0d0f1a;
-  }
-
-  /* ── Typography ── */
-  body, .font-sans, button, input, select, textarea {
-    font-family: 'Inter', sans-serif;
-  }
-  .font-mono, code, pre, th { font-family: 'JetBrains Mono', monospace; }
-  body { line-height: 1.6; letter-spacing: 0; }
-
-  /* ── Accent normalisation: indigo / emerald / blue → reference blue ── */
-  .bg-blue-600, .bg-indigo-600, .bg-indigo-500, .bg-emerald-600 {
-    background-color: var(--accent) !important;
-  }
-  .hover\:bg-blue-700:hover, .hover\:bg-indigo-700:hover,
-  .hover\:bg-emerald-500:hover, .hover\:bg-emerald-700:hover {
-    background-color: var(--accent) !important;
-    opacity: 0.88;
-  }
-  .text-blue-600, .text-blue-800, .text-blue-900,
-  .text-indigo-600, .text-emerald-600 { color: var(--accent) !important; }
-  .hover\:text-indigo-800:hover { color: var(--accent) !important; opacity: 0.85; }
-  .border-blue-200, .border-blue-100 { border-color: var(--accent-glow) !important; }
-  .bg-blue-50 { background-color: var(--accent-glow) !important; }
-
-  /* ── Card geometry: reference radius + shadow (pills untouched) ── */
-  .rounded, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl {
-    border-radius: var(--radius) !important;
-  }
-  .shadow, .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl {
-    box-shadow: var(--card-shadow) !important;
-  }
-
-  /* ── Focus rings match the reference ── */
-  input:focus, textarea:focus, select:focus {
-    outline: none !important;
-    border-color: var(--accent) !important;
-    box-shadow: 0 0 0 3px var(--accent-glow) !important;
-  }
-
-  /* ── Tables: reference header treatment ── */
-  th {
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    color: var(--text2-c) !important;
-  }
-  td { font-size: 13px; }
-
-  /* ── Reference chrome: header ── */
-  .vc-header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border-c);
-    padding: 16px 0;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(10px);
-  }
-  .vc-header-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .vc-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text-c);
-    text-decoration: none;
-  }
-  .vc-brand-icon {
-    width: 30px; height: 30px;
-    background: linear-gradient(135deg, #2563eb, #7c3aed);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
-    flex-shrink: 0;
-  }
-  .vc-brand-sub {
-    font-size: 11px;
-    font-weight: 400;
-    color: var(--text2-c);
-  }
-
-  /* ── Reference chrome: theme toggle pill ── */
-  .vc-toggle {
-    background: var(--surface2);
-    border: 1px solid var(--border-c);
-    border-radius: 50px;
-    padding: 6px 14px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text2-c);
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-  .vc-toggle:hover { color: var(--accent); border-color: var(--accent); }
-
-  /* ── Reference chrome: hero ── */
-  .vc-hero { text-align: center; margin: 0 auto 32px; max-width: 640px; }
-  .vc-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: var(--accent-glow);
-    color: var(--accent);
-    border: 1px solid var(--accent-glow);
-    border-radius: 50px;
-    padding: 4px 14px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    margin-bottom: 16px;
-  }
-  .vc-hero h1 {
-    font-size: clamp(22px, 4vw, 30px);
-    font-weight: 700;
-    color: var(--text-c);
-    letter-spacing: -0.02em;
-    margin-bottom: 10px;
-  }
-  .vc-hero p {
-    font-size: 14px;
-    color: var(--text2-c);
-    margin: 0 auto;
-  }
-
-  /* ── Reference chrome: footer ── */
-  .vc-footer {
-    text-align: center;
-    padding: 24px;
-    font-size: 12px;
-    color: var(--text2-c);
-    border-top: 1px solid var(--border-c);
-    margin-top: auto;
-  }
+        .tk-anim-logo { display:inline-block; animation: tk-logo-float 4.5s ease-in-out infinite; transform-origin:center; }
+        @keyframes tk-logo-float { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-5px) rotate(-6deg)} 75%{transform:translateY(-2px) rotate(6deg)} }
+        @media (prefers-reduced-motion: reduce){ .tk-anim-logo{animation:none} }
 </style>
 </head>
-<body class="bg-gray-100 dark:bg-slate-900 min-h-screen flex flex-col items-center justify-center p-6 font-sans text-gray-700 dark:text-slate-300 transition-colors duration-300">
-<div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl dark:shadow-slate-950/50 w-full max-w-2xl overflow-hidden transition-colors duration-300 border border-gray-200 dark:border-slate-700">
-<div class="bg-indigo-600 dark:bg-indigo-700 p-5 flex items-center shadow-lg relative">
-            
-            <div class="w-14 h-7"></div>
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200 font-sans min-h-screen flex flex-col items-center py-8 md:py-12 px-4 antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300">
 
-            <h1 class="flex-grow text-xl font-extrabold text-white tracking-wide text-center">
-                <i class="fas fa-archive mr-3 text-indigo-200"></i>Web Archive URL Fetcher
+    <div class="absolute top-4 right-4 md:top-8 md:right-8 z-30">
+        <label for="themeToggle" class="cursor-pointer inline-flex items-center justify-center p-3 rounded-full bg-white dark:bg-gray-800 text-gray-600 dark:text-yellow-400 shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform" title="Toggle theme">
+            <input type="checkbox" id="themeToggle" class="sr-only peer">
+            <i class="fas fa-sun text-xl block dark:hidden"></i>
+            <i class="fas fa-moon text-xl hidden dark:block"></i>
+        </label>
+    </div>
+
+    <main class="w-full max-w-3xl space-y-8 mt-8">
+
+        <div class="text-center space-y-3">
+            <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center justify-center gap-3">
+                <i class="fas fa-archive tk-anim-logo text-indigo-600 dark:text-indigo-500"></i>
+                <span><span class="text-indigo-600 dark:text-indigo-500">Web Archive</span> URL Fetcher</span>
             </h1>
-            
-            <label for="themeToggle" class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="themeToggle" class="sr-only peer">
-                
-                <div class="w-14 h-7 bg-indigo-500 rounded-full peer peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-slate-800 dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-slate-900">
-                    <i class="fas fa-sun text-yellow-300 absolute left-1 top-1.5 transition-opacity duration-300 peer-checked:opacity-0"></i>
-                    <i class="fas fa-moon text-indigo-200 absolute right-1 top-1.5 opacity-0 transition-opacity duration-300 peer-checked:opacity-100"></i>
-                </div>
-            </label>
+            <p class="text-gray-600 dark:text-gray-400 text-sm md:text-lg max-w-xl mx-auto">
+                Fetch archived records with status 200 for a domain, straight from the Wayback Machine.
+            </p>
         </div>
 
-        <div class="p-6 sm:p-8">
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50">
+        <div class="space-y-6">
             
-            <p class="mb-6 text-base text-gray-500 dark:text-slate-400 text-center">
+            <p class="mb-6 text-base text-gray-500 dark:text-gray-400 text-center">
                 Enter a URL to fetch archived records (Status 200) directly.
             </p>
 
             <div class="mb-4 relative">
-                <label for="urlInput" class="block text-xs font-semibold uppercase text-gray-500 dark:text-slate-400 mb-2">Target URL</label>
+                <label for="urlInput" class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Target URL</label>
                 <div class="flex shadow-md rounded-lg overflow-hidden">
-                    <span class="inline-flex items-center px-4 bg-gray-50 dark:bg-slate-700 text-gray-500 dark:text-slate-400 text-sm">
+                    <span class="inline-flex items-center px-4 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-sm">
                         <i class="fas fa-link"></i>
                     </span>
                     <input 
                         type="text" 
                         id="urlInput" 
                         placeholder="e.g., example.com or https://example.com/page" 
-                        class="input-accent flex-1 block w-full rounded-none sm:text-sm border-none p-3 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-100 transition-colors duration-200 focus:ring-2 focus:ring-red-400 outline-none"
+                        class="input-accent flex-1 block w-full rounded-none sm:text-sm border-none p-3 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-100 transition-colors duration-200 focus:ring-2 focus:ring-red-400 outline-none"
                     >
                 </div>
             </div>
@@ -302,44 +131,44 @@
                     <input 
                         id="subdomainToggle" 
                         type="checkbox" 
-                        class="h-5 w-5 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded focus:ring-indigo-500 cursor-pointer"
+                        class="h-5 w-5 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 rounded focus:ring-indigo-500 cursor-pointer"
                         checked
                     >
-                    <label for="subdomainToggle" class="ml-3 block text-sm font-medium text-gray-700 dark:text-slate-300 cursor-pointer">
+                    <label for="subdomainToggle" class="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
                         Include Subdomains (*.example.com)
                     </label>
                 </div>
             </div>
 
-            <div class="mb-6 p-4 border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 shadow-sm">
-                <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-slate-400 mb-3">
+            <div class="mb-6 p-4 border border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-gray-900 shadow-sm">
+                <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-3">
                     <i class="fas fa-filter mr-1"></i> Filter by File Extension (MIME Type)
                 </label>
                 <div class="grid grid-cols-3 gap-y-2 gap-x-4 text-sm">
                     
                     <div class="flex items-center">
-                        <input id="ext-pdf" type="checkbox" data-ext="pdf" class="ext-checkbox h-4 w-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded focus:ring-indigo-500 cursor-pointer">
-                        <label for="ext-pdf" class="ml-2 text-gray-700 dark:text-slate-300 cursor-pointer">.pdf</label>
+                        <input id="ext-pdf" type="checkbox" data-ext="pdf" class="ext-checkbox h-4 w-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 rounded focus:ring-indigo-500 cursor-pointer">
+                        <label for="ext-pdf" class="ml-2 text-gray-700 dark:text-gray-300 cursor-pointer">.pdf</label>
                     </div>
                     <div class="flex items-center">
-                        <input id="ext-xml" type="checkbox" data-ext="xml" class="ext-checkbox h-4 w-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded focus:ring-indigo-500 cursor-pointer">
-                        <label for="ext-xml" class="ml-2 text-gray-700 dark:text-slate-300 cursor-pointer">.xml</label>
+                        <input id="ext-xml" type="checkbox" data-ext="xml" class="ext-checkbox h-4 w-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 rounded focus:ring-indigo-500 cursor-pointer">
+                        <label for="ext-xml" class="ml-2 text-gray-700 dark:text-gray-300 cursor-pointer">.xml</label>
                     </div>
                     <div class="flex items-center">
-                        <input id="ext-html" type="checkbox" data-ext="html" class="ext-checkbox h-4 w-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded focus:ring-indigo-500 cursor-pointer">
-                        <label for="ext-html" class="ml-2 text-gray-700 dark:text-slate-300 cursor-pointer">.html</label>
+                        <input id="ext-html" type="checkbox" data-ext="html" class="ext-checkbox h-4 w-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 rounded focus:ring-indigo-500 cursor-pointer">
+                        <label for="ext-html" class="ml-2 text-gray-700 dark:text-gray-300 cursor-pointer">.html</label>
                     </div>
                     <div class="flex items-center">
-                        <input id="ext-php" type="checkbox" data-ext="php" class="ext-checkbox h-4 w-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded focus:ring-indigo-500 cursor-pointer">
-                        <label for="ext-php" class="ml-2 text-gray-700 dark:text-slate-300 cursor-pointer">.php</label>
+                        <input id="ext-php" type="checkbox" data-ext="php" class="ext-checkbox h-4 w-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 rounded focus:ring-indigo-500 cursor-pointer">
+                        <label for="ext-php" class="ml-2 text-gray-700 dark:text-gray-300 cursor-pointer">.php</label>
                     </div>
                     <div class="flex items-center">
-                        <input id="ext-txt" type="checkbox" data-ext="txt" class="ext-checkbox h-4 w-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded focus:ring-indigo-500 cursor-pointer">
-                        <label for="ext-txt" class="ml-2 text-gray-700 dark:text-slate-300 cursor-pointer">.txt</label>
+                        <input id="ext-txt" type="checkbox" data-ext="txt" class="ext-checkbox h-4 w-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 rounded focus:ring-indigo-500 cursor-pointer">
+                        <label for="ext-txt" class="ml-2 text-gray-700 dark:text-gray-300 cursor-pointer">.txt</label>
                     </div>
                     <div class="flex items-center">
-                        <input id="ext-any" type="checkbox" class="ext-checkbox h-4 w-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 rounded focus:ring-indigo-500 cursor-pointer" checked>
-                        <label for="ext-any" class="ml-2 text-gray-700 dark:text-slate-300 cursor-pointer font-bold">Any / Clear Filter</label>
+                        <input id="ext-any" type="checkbox" class="ext-checkbox h-4 w-4 text-indigo-600 dark:text-indigo-400 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 rounded focus:ring-indigo-500 cursor-pointer" checked>
+                        <label for="ext-any" class="ml-2 text-gray-700 dark:text-gray-300 cursor-pointer font-bold">Any / Clear Filter</label>
                     </div>
                 </div>
             </div>
@@ -359,19 +188,19 @@
                     <label class="block text-xs font-semibold uppercase text-indigo-600 dark:text-indigo-400">
                         Results:
                     </label>
-                    <button id="copyButton" class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold focus:outline-none transition-colors duration-200 p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-700">
+                    <button id="copyButton" class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold focus:outline-none transition-colors duration-200 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
                         <i class="far fa-copy mr-1"></i> Copy Content
                     </button>
                 </div>
                 <div class="relative group">
-                    <pre id="resultsOutput" class="w-full bg-slate-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-4 text-xs font-mono text-gray-700 dark:text-slate-300 overflow-auto shadow-inner"></pre>
+                    <pre id="resultsOutput" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-lg p-4 text-xs font-mono text-gray-700 dark:text-gray-300 overflow-auto shadow-inner"></pre>
                 </div>
             </div>
 
         </div>
 
-        <div class="bg-gray-100 dark:bg-slate-950 px-6 py-4 border-t border-gray-200 dark:border-slate-700 flex justify-center items-center transition-colors duration-300">
-            <span class="text-xs text-gray-400 dark:text-slate-600">&copy; <span id="year"></span> Web Archive URL Fetcher - Powered by Internet Archive (archive.org)</span>
+        <div class="bg-gray-100 dark:bg-gray-950 px-6 py-4 border-t border-gray-200 dark:border-gray-800 flex justify-center items-center transition-colors duration-300">
+            <span class="text-xs text-gray-400 dark:text-gray-600">&copy; <span id="year"></span> Web Archive URL Fetcher - Powered by Internet Archive (archive.org)</span>
         </div>
 
     </div>
@@ -676,7 +505,9 @@
             });
         });
     </script>
-<footer class="vc-footer w-full">
+</main>
+
+<footer class="mt-auto py-8 text-center text-gray-500 dark:text-gray-600 text-xs font-medium">
   For authorized security testing only &nbsp;&middot;&nbsp; All processing runs client-side &nbsp;&middot;&nbsp; No data is stored
 </footer>
 </body>
