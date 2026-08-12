@@ -1,56 +1,37 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" class="dark">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Google / Gemini API Key Checker</title>
 <link href="/profile.jpg" type="image/jpeg" rel="shortcut icon" />
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
   :root {
-    --bg: #f4f6f9;
-    --surface: #ffffff;
-    --surface2: #f0f2f6;
-    --border: #dde1ea;
-    --text: #1a1d2e;
-    --text2: #5a6072;
-    --accent: #2563eb;
-    --accent-glow: rgba(37,99,235,0.15);
-    --green: #16a34a;
-    --green-bg: #dcfce7;
-    --red: #dc2626;
-    --red-bg: #fee2e2;
-    --yellow: #d97706;
-    --yellow-bg: #fef3c7;
-    --blue: #2563eb;
-    --blue-bg: #dbeafe;
-    --gray: #6b7280;
-    --gray-bg: #f3f4f6;
-    --card-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
-    --radius: 12px;
+    --bg: #f3f4f6;        --surface: #ffffff;   --surface2: #f9fafb;
+    --border: #e5e7eb;    --text: #111827;      --text2: #4b5563;
+    --accent: #4f46e5;    --accent-glow: rgba(79,70,229,0.30);
+    --green: #059669;     --green-bg: rgba(5,150,105,0.10);
+    --red: #dc2626;       --red-bg: rgba(220,38,38,0.10);
+    --yellow: #d97706;    --yellow-bg: rgba(217,119,6,0.10);
+    --blue: #4f46e5;      --blue-bg: rgba(79,70,229,0.10);
+    --gray: #6b7280;      --gray-bg: #f3f4f6;
+    --card-shadow: 0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -4px rgba(0,0,0,0.05);
+    --radius: 16px;
     --mono: 'JetBrains Mono', monospace;
     --sans: 'Inter', sans-serif;
   }
-  [data-theme="dark"] {
-    --bg: #0d0f1a;
-    --surface: #151825;
-    --surface2: #1e2133;
-    --border: #2a2f47;
-    --text: #e8eaf2;
-    --text2: #8b91aa;
-    --accent: #3b82f6;
-    --accent-glow: rgba(59,130,246,0.2);
-    --green: #22c55e;
-    --green-bg: rgba(34,197,94,0.12);
-    --red: #ef4444;
-    --red-bg: rgba(239,68,68,0.12);
-    --yellow: #f59e0b;
-    --yellow-bg: rgba(245,158,11,0.12);
-    --blue: #60a5fa;
-    --blue-bg: rgba(96,165,250,0.12);
-    --gray: #6b7280;
-    --gray-bg: rgba(107,114,128,0.12);
-    --card-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.3);
+  html.dark {
+    --bg: #0b0f19;        --surface: #111827;   --surface2: #1f2937;
+    --border: #1f2937;    --text: #ffffff;      --text2: #d1d5db;
+    --accent: #6366f1;    --accent-glow: rgba(99,102,241,0.40);
+    --green: #34d399;     --green-bg: rgba(52,211,153,0.14);
+    --red: #f87171;       --red-bg: rgba(248,113,113,0.14);
+    --yellow: #fbbf24;    --yellow-bg: rgba(251,191,36,0.14);
+    --blue: #a5b4fc;      --blue-bg: rgba(99,102,241,0.14);
+    --gray: #9ca3af;      --gray-bg: #1f2937;
+    --card-shadow: 0 20px 25px -5px rgba(0,0,0,0.5), 0 8px 10px -6px rgba(0,0,0,0.5);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -472,28 +453,50 @@
   html body, body button { font-family: 'Inter', sans-serif; }
   body code, body pre, body kbd, body samp, body .font-mono,
   body textarea, body input, body select { font-family: 'JetBrains Mono', monospace; }
-</style>
+
+  /* ── SPF/weaksslcerts format alignment ── */
+  body { background: var(--bg); color: var(--text); font-family: var(--sans);
+         min-height:100vh; display:flex; flex-direction:column; align-items:center;
+         padding: 2rem 1rem; }
+  @media(min-width:768px){ body { padding: 3rem 1rem; } }
+  main { max-width: 48rem; width:100%; margin: 2rem auto 0; padding: 0; }
+  .tk-toggle-wrap { position: fixed; top: 1rem; right: 1rem; z-index: 200; }
+  @media(min-width:768px){ .tk-toggle-wrap { top: 2rem; right: 2rem; } }
+  .dark-toggle { width:3rem; height:3rem; padding:0; border-radius:9999px;
+    background: var(--surface); border:1px solid var(--border);
+    box-shadow: var(--card-shadow); color: var(--yellow); font-size:1.15rem;
+    display:inline-flex; align-items:center; justify-content:center; cursor:pointer;
+    transition: transform .2s; }
+  .dark-toggle:hover { transform: scale(1.08); }
+  .page-hero { text-align:center; margin-bottom: 2rem; }
+  .page-hero h1 { font-size: clamp(1.875rem, 5vw, 3rem); font-weight:800;
+    letter-spacing:-0.025em; color: var(--text); display:flex; align-items:center;
+    justify-content:center; gap:.75rem; flex-wrap:wrap; }
+  .page-hero .tk-accent { color: var(--accent); }
+  .page-hero .tk-anim-logo { color: var(--accent); display:inline-block;
+    animation: tk-logo-float 4.5s ease-in-out infinite; transform-origin:center; }
+  @keyframes tk-logo-float { 0%,100%{transform:translateY(0) rotate(0)}
+    25%{transform:translateY(-5px) rotate(-6deg)} 75%{transform:translateY(-2px) rotate(6deg)} }
+  @media (prefers-reduced-motion: reduce){ .page-hero .tk-anim-logo{animation:none} }
+  .hero-sub { color: var(--text2); font-size:.875rem; max-width:36rem; margin:.75rem auto 0; }
+  @media(min-width:768px){ .hero-sub { font-size:1.125rem; } }
+  .card { border-radius: var(--radius); box-shadow: var(--card-shadow); }
+  footer { margin-top:auto; padding:2rem 1rem; text-align:center; font-size:.75rem;
+    font-weight:500; color: var(--gray); border-top:none; width:100%; }</style>
 </head>
 <body>
 
-<header>
-  <div class="header-inner">
-    <a class="brand" href="#">
-      <div class="brand-icon">🔑</div>
-      API Key Checker
-    </a>
-    <button class="dark-toggle" id="themeToggle" onclick="toggleTheme()">
-      <span id="themeIcon">🌙</span>
-      <span id="themeLabel">Dark Mode</span>
-    </button>
-  </div>
-</header>
+<div class="tk-toggle-wrap">
+  <button class="dark-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle theme">
+    <span id="themeIcon">&#9728;&#65039;</span>
+  </button>
+  <span id="themeLabel" hidden></span>
+</div>
 
 <main>
 
   <div class="page-hero fade-in">
-    <div class="hero-badge">🔍 Security Tool</div>
-    <h1>Google / Gemini API Key Checker</h1>
+    <h1><i class="fas fa-key tk-anim-logo"></i> <span class="tk-accent">Google / Gemini</span> API Key Checker</h1>
     <p class="hero-sub">Test a leaked API key against Gemini and Google services to determine its scope and enabled permissions.</p>
   </div>
 
@@ -1008,6 +1011,20 @@ function copyReport() {
     setTimeout(() => btn.textContent = orig, 2000);
   });
 }
-</script>
+
+/* theme: dark class on <html>, matching the other tools */
+function toggleTheme() {
+  var dark = document.documentElement.classList.toggle('dark');
+  try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
+  var i = document.getElementById('themeIcon');
+  if (i) i.innerHTML = dark ? '&#9728;&#65039;' : '&#127769;';
+}
+(function () {
+  var s = null; try { s = localStorage.getItem('theme'); } catch (e) {}
+  if (s === 'light') document.documentElement.classList.remove('dark');
+  else document.documentElement.classList.add('dark');
+  var i = document.getElementById('themeIcon');
+  if (i) i.innerHTML = document.documentElement.classList.contains('dark') ? '&#9728;&#65039;' : '&#127769;';
+})();</script>
 </body>
 </html>
