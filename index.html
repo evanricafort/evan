@@ -1,1316 +1,1468 @@
-<!DOCTYPE HTML>
-<html>
-
-    <!-- 
-    Awesome! You came across this not really fancy art; if you want to tweet about it, don't forget to include my handle, @evanricafort.
-    
-    EEEEEEEEEEEEEEEEEEEEEE     VVVVVVVV           VVVVVVVV                    AAA                    NNNNNNNN        NNNNNNNN  
-    E::::::::::::::::::::E     V::::::V           V::::::V                   A:::A                   N:::::::N       N::::::N
-    E::::::::::::::::::::E     V::::::V           V::::::V                  A:::::A                  N::::::::N      N::::::N
-    EE::::::EEEEEEEEE::::E     V::::::V           V::::::V                 A:::::::A                 N:::::::::N     N::::::N
-    E:::::E         EEEEEE      V:::::V           V:::::V                 A:::::::::A                N::::::::::N    N::::::N
-    E:::::E                      V:::::V         V:::::V                 A:::::A:::::A               N:::::::::::N   N::::::N
-    E::::::EEEEEEEEEE             V:::::V       V:::::V                 A:::::A A:::::A              N:::::::N::::N  N::::::N
-    E:::::::::::::::E              V:::::V     V:::::V                 A:::::A   A:::::A             N::::::N N::::N N::::::N
-    E:::::::::::::::E               V:::::V   V:::::V                 A:::::A     A:::::A            N::::::N  N::::N:::::::N
-    E::::::EEEEEEEEEE                V:::::V V:::::V                 A:::::AAAAAAAAA:::::A           N::::::N   N:::::::::::N
-    E:::::E                           V:::::V:::::V                 A:::::::::::::::::::::A          N::::::N    N::::::::::N
-    E:::::E         EEEEEE             V:::::::::V                 A:::::AAAAAAAAAAAAA:::::A         N::::::N     N:::::::::N
-    EE::::::EEEEEEEE:::::E              V:::::::V                 A:::::A             A:::::A        N::::::N      N::::::::N
-    E::::::::::::::::::::E               V:::::V                 A:::::A               A:::::A       N::::::N       N:::::::N
-    E::::::::::::::::::::E                V:::V                 A:::::A                 A:::::A      N::::::N        N::::::N
-    EEEEEEEEEEEEEEEEEEEEEE                 VVV                 AAAAAAA                   AAAAAAA     NNNNNNNN         NNNNNNN
-    -->
-
-    <head>
-        
-        <title>Evan Ricafort | @evanricafort</title>
-        <meta content="summary_large_image" name="twitter:card" />
-        <meta content="Evan Ricafort" name="twitter:site" />
-        <meta content="Evan Ricafort" name="twitter:creator" />
-        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-        <meta name="description" content="Offensive Security Engineer | Security Researcher" />
-        <meta name="keywords" content="bug bounty, evan, evan ricafort, security, evanricafort, infosec" />
-        <meta name="author" content="Evan Ricafort">
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=8" />
-        <meta http-equiv="X-Frame-Options" content="deny">
-        <link href="profile.jpg" type="image/jpg" rel="shortcut icon" />
-        <meta name="viewport" content="width=device-width">
-        <meta content="Evan Ricafort | Just another bug bounty program participant" property="og:title" />
-        <meta content="Evan Ricafort." property="og:site_name" />
-        <meta content="website" property="og:type" />
-        <meta name="google-site-verification" content="rsX_5ZLQ2CLU43PcjKI6psdvB6HWeFvnkaOj8nXDyeo" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512..." crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <link rel="stylesheet" type="text/css" href="css/style.css">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
-        <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
-
-            <style>
-              
-              * {
-                margin: 0;
-                padding: 0;
-                border: 0;
-                text-decoration: none;
-              }
-
-              
-              a {
-                text-decoration: none;
-              }
-
-              
-              p {
-                padding-bottom: 5px;
-              }
-
-              
-              body {
-                padding: 10px;
-                font-size: 80%;
-                font-optical-sizing: auto;
-                font-family: "Bitter", serif;
-                font-weight: 400;
-                font-style: normal;
-                background-color: #fff; 
-                color: #000; 
-                transition: background-color 0.5s ease, color 0.5s ease; 
-              }
-
-              
-              header {
-                padding: 5px;
-              }
-
-              footer {
-                padding-top: 30px;
-              }
-
-              
-              section {
-                padding-top: 12px;
-              }
-
-              
-              h1 {
-                margin-bottom: 5px;
-                text-align: center;
-              }
-
-              
-              #i {
-                margin: 0 auto;
-                margin-bottom: 5px;
-                text-align: center;
-              }
-
-              
-              h2 {
-                border-bottom: 1px solid #ddd;
-                margin: 10px 0; 
-                padding: 0 0 5px;
-              }
-
-              
-              ul > li {
-                margin: 0 0 1px 20px;
-              }
-
-              
-              ul ul {
-                list-style-type: none;
-                padding-left: 0;
-                margin-left: 0;
-              }
-
-              
-              ul ul li {
-                position: relative;
-                padding-left: 1.4em;
-              }
-
-              
-              ul ul li::before {
-                content: "\02937"; 
-                position: absolute;
-                font-weight: bold;
-                left: 0;
-                top: 0;
-                width: 0.8em;
-                text-align: center;
-              }
-
-              
-              #bio_left {
-                float: left;
-              }
-
-              #bio_right {
-                float: right;
-              }
-
-              
-              #bio_center {
-                margin: 0 auto;
-                text-align: center;
-                width: 200px;
-              }
-
-              
-              .container {
-                position: relative;
-                display: inline-block;
-              }
-
-              
-              .cool-link::after {
-                content: "";
-                display: block;
-                width: 0;
-                height: 2px;
-                background: #080fad;
-                transition: width 0.3s ease-in-out; 
-              }
-
-              .cool-link:hover::after {
-                width: 100%;
-              }
-
-              
-              body.dark-mode {
-                background-color: #1e1e1e;
-                color: #cccccc;
-              }
-
-              
-              body.dark-mode a,
-              body.dark-mode h1,
-              body.dark-mode h2,
-              body.dark-mode p,
-              body.dark-mode ul li {
-                transition: color 0.5s ease;
-              }
-
-              
-              body.dark-mode a {
-                color: #4ea3ff;
-              }
-
-              body.dark-mode a:hover {
-                color: #7ec8ff;
-              }
-
-              
-              #loading-bar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                height: 4px;
-                background-color: #054b82;
-                width: 0;
-                z-index: 9999;
-                animation: loadingBarGrow 2s ease-out forwards;
-              }
-
-              @keyframes loadingBarGrow {
-                0% {
-                  width: 0%;
-                }
-                80% {
-                  width: 90%;
-                }
-                100% {
-                  width: 100%;
-                }
-              }
-
-              
-              #scroll-progress {
-                position: fixed;
-                top: 0;
-                left: 0;
-                height: 4px;
-                background-color: #113959;
-                width: 0%;
-                z-index: 9999;
-                transition: width 0.2s ease-out;
-              }
-
-              
-              #more {
-                max-height: 0;
-                opacity: 0;
-                overflow: hidden;
-                transition: max-height 0.8s ease, opacity 0.8s ease;
-                will-change: max-height, opacity; 
-              }
-
-              #more.show {
-                max-height: 10000px; 
-                opacity: 1;
-              }
-
-              
-              #bio_center a {
-                margin: 0 6px;
-                color: inherit; 
-                transition: color 0.3s;
-              }
-
-              #bio_center a:hover {
-                color: #0073e6;
-              }
-
-            .glow-text {
-              text-align: center;
-              color: inherit; 
-              }
-
-            .glow-text span {
-              display: inline-block;
-              transition: text-shadow 0.3s ease;
-              cursor: default;
-              }
-
-            
-            .glow-text span:hover {
-              text-shadow:
-                0 0 10px rgba(255, 255, 255, 0.9), 
-                0 0 20px rgba(255, 255, 255, 0.7),
-                0 0 30px rgba(255, 255, 255, 0.5);
-              }
-
-              .glow-text span {
-                transition: text-shadow 0.3s ease;
-                color: inherit;
-              }
-
-              
-              body:not(.dark-mode) .glow-text .flicker-glow {
-                text-shadow:
-                  0 0 6px rgba(0, 0, 0, 0.4),
-                  0 0 14px rgba(0, 0, 0, 0.5),
-                  0 0 18px rgba(0, 0, 0, 0.6);
-              }
-
-              
-              body.dark-mode .glow-text .flicker-glow {
-                text-shadow:
-                  0 0 8px rgba(255, 255, 255, 0.4),
-                  0 0 18px rgba(255, 255, 255, 0.6),
-                  0 0 24px rgba(255, 255, 255, 0.8);
-              }
-
-              
-              .glow-text span:hover {
-                color: inherit;
-              }
-
-            
-            body.dark-mode .glow-text span:hover {
-              text-shadow:
-                0 0 12px rgba(255, 255, 255, 0.9),  
-                0 0 25px rgba(255, 255, 255, 0.8),
-                0 0 40px rgba(255, 255, 255, 0.6);
-              }
-
-            
-            body:not(.dark-mode) .glow-text span:hover {
-              text-shadow:
-                0 0 10px rgba(0, 0, 0, 0.5),  
-                0 0 20px rgba(0, 0, 0, 0.4),
-                0 0 30px rgba(0, 0, 0, 0.3);
-              }
-
-            
-            #map-circle {
-              position: fixed;
-              width: 250px;
-              height: 250px;
-              border-radius: 50%;
-              overflow: hidden;
-              border: 3px solid rgba(255, 255, 255, 0.9); 
-              box-shadow: 0 0 12px rgba(0, 0, 0, 0.35);
-              pointer-events: none;
-              z-index: 9999;
-              transform: scale(0);
-              transition: transform 0.2s ease;
-              }
-
-            body:not(.dark-mode) #map-circle {
-              border-color: rgba(0, 0, 0, 0.4); 
-              }
-
-            #map-circle iframe {
-              width: 100%;
-              height: 100%;
-              border: none;
-              }
-
-            
-            .dark-toggle {
-              position: fixed;
-              top: 35px;
-              right: 35px;
-              background-color: #e4e4e4;
-              color: #1e1e1e;
-              border: none;
-              padding: 8px 12px;
-              cursor: pointer;
-              z-index: 9999;
-              border-radius: 6px;
-              font-family: "Bitter", serif;
-              font-size: 1.6rem;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              transition:
-                background-color 0.3s ease,
-                color 0.3s ease,
-                transform 0.2s ease,
-                box-shadow 0.2s ease;
-              }
-
-            .dark-toggle:hover {
-              transform: scale(1.08);
-              background-color: #d5d5d5;
-              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-              }
-
-            
-            .dark-toggle span {
-              position: absolute;
-              font-size: 1.6rem;
-              transition: opacity 0.4s ease, transform 0.6s ease;
-              transform-origin: center;
-              }
-
-
-            
-            .icon-sun {
-              opacity: 1;
-              transform: rotate(0deg);
-              }
-
-            .icon-moon {
-              opacity: 0;
-              transform: rotate(-90deg);
-              }
-
-            
-            body.dark-mode .dark-toggle {
-              background-color: #2e2e2e;
-              color: #fff;
-              }
-
-            body.dark-mode .dark-toggle:hover {
-              background-color: #3a3a3a;
-              box-shadow: 0 4px 16px rgba(255, 255, 255, 0.1);
-              }
-
-            body.dark-mode .icon-sun {
-              opacity: 0;
-              transform: rotate(90deg);
-              }
-
-            body.dark-mode .icon-moon {
-              opacity: 1;
-              transform: rotate(0deg);
-              }
-   
-            @keyframes icon-pulse-rotate {
-              0% {
-                transform: scale(1) rotate(0deg);
-              }
-              50% {
-                transform: scale(1.2) rotate(15deg);
-              }
-              100% {
-                transform: scale(1) rotate(0deg);
-              }
-            }
-
-            
-            .dark-toggle:hover {
-              transform: scale(1.08);
-              background-color: #d5d5d5;
-              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-              }
-
-            
-            .dark-toggle:hover .icon-sun {
-              animation: icon-pulse-rotate 0.5s ease;
-              }
-
-            .dark-toggle:hover .icon-moon {
-              animation: icon-pulse-rotate 0.5s ease;
-              }
-
-              
-              .center {
-                max-width: 100%;
-                height: auto;
-                display: block;
-                margin: 0 auto;
-                cursor: pointer;
-                transition: transform 0.3s ease;
-              }
-
-              
-              .center:hover {
-                transform: scale(1.05);
-              }
-
-              
-              body.dark-mode {
-                background-color: #1e1e1e; 
-                color: #f0f0f0; 
-              }
-
-              body.dark-mode a {
-                color: #4ea3ff;
-              }
-
-              body.dark-mode a:hover {
-                color: #7ec8ff;
-              }
-
-              .glitch-wrapper {
-                position: relative;
-                display: inline-block;
-              }
-
-              .typing {
-                position: relative;
-                z-index: 1;
-              }
-
-              .glitch-wrapper {
-                display: inline-block;
-                position: relative;
-                cursor: pointer;
-              }
-
-              #typing-text {
-                position: relative;
-                display: inline-block;
-                transition: all 0.3s ease;
-              }
-
-              
-              .glitch-wrapper:hover #typing-text::before,
-              .glitch-wrapper:hover #typing-text::after {
-                content: attr(data-text);
-                position: absolute;
-                top: 0;
-                left: 0;
-                opacity: 0.6;
-                pointer-events: none;
-                animation: rgb-glitch 0.25s infinite;
-                font-family: inherit;
-              }
-
-              .glitch-wrapper:hover #typing-text::before {
-                color: #ff00ff; 
-                transform: translate(-2px, -1px);
-              }
-
-              .glitch-wrapper:hover #typing-text::after {
-                color: #00ffff; 
-                transform: translate(2px, 1px);
-              }
-
-              @keyframes rgb-glitch {
-                0%    { clip-path: inset(25% 0 90% 0); }
-                25%   { clip-path: inset(10% 0 80% 0); }
-                50%   { clip-path: inset(20% 0 60% 0); }
-                75%   { clip-path: inset(5% 0 85% 0); }
-                100% { clip-path: inset(40% 0 90% 0); }
-              }
-
-              #bio_center a {
-                display: inline-block;
-                transition: transform 0.3s ease, color 0.3s ease;
-                color: inherit;
-                font-size: 0.8rem;
-              }
-
-              
-              #bio_center a:hover {
-                transform: scale(1.7);
-              }
-
-              #bio_center a[href*="instagram.com"]:hover i {
-                color: #E4405F;
-              }
-
-              #bio_center a[href*="twitter.com"]:hover i {
-                color: #1DA1F2;
-              }
-
-              #bio_center a[href*="github.com"]:hover i {
-                color: #333;
-              }
-
-              #bio_center a[href*="linkedin.com"]:hover i {
-                color: #0077B5;
-              }
-
-              #scrollToTopBtn {
-                position: fixed;
-                bottom: 40px;
-                right: 40px;
-                background: none;
-                border: none;
-                font-size: 2rem;
-                z-index: 9999;
-                color: #333;
-                opacity: 0;
-                transform: translateY(30px);
-                transition: opacity 0.4s ease, transform 0.4s ease;
-                pointer-events: none;
-              }
-
-              #scrollToTopBtn.show {
-                opacity: 1;
-                transform: translateY(0);
-                pointer-events: auto;
-              }
-
-              #airplaneIcon {
-                display: inline-block;
-                transform: rotate(-90deg);
-                transition: transform 0.3s ease;
-              }
-
-              body.dark-mode #scrollToTopBtn {
-                color: #ccc;
-              }
-
-              .trail-dot {
-                position: fixed;
-                width: 8px;
-                height: 8px;
-                background: rgba(0, 0, 0, 0.2);
-                border-radius: 50%;
-                pointer-events: none;
-                z-index: 9998;
-                animation: trailFade 0.6s ease-out forwards;
-              }
-
-              body.dark-mode .trail-dot {
-                background: rgba(255, 255, 255, 0.1);
-              }
-
-              @keyframes trailFade {
-                0%    { opacity: 1; transform: scale(1); }
-                100% { opacity: 0; transform: scale(0.3); }
-              }
-            </style>
-
-    </head>
-
-            <div id="loading-bar"></div>
-            <div id="scroll-progress"></div>
-
-      <body>
-          
-
-      <header>
-            <br />
-                <div class="circle-1" data-aos="fade-down" data-aos-delay="200">
-                  <img src="profile.jpg" class="center" id="dark-mode-toggle" title="Hello!">
-                </div>
-                <h1 data-aos="fade-down" class="glow-text">
-                      <span>E</span><span>v</span><span>a</span><span>n</span> 
-                      <span>R</span><span>i</span><span>c</span><span>a</span><span>f</span><span>o</span><span>r</span><span>t</span>
-                </h1>
-
-        <div id="i">
-              <p class="glitch-wrapper">
-                <span class="typing" id="typing-text" data-text=""></span>
-              </p>
-
-        </div>
-            <div id="bio_left" data-aos="fade-right" class="address-hover">
-              Poblacion, Ipil<br />
-              Zamboanga Sibugay<br />
-              7001, Philippines
-            </div>
-
-            
-            <div id="map-circle">
-              <iframe
-                src="https://www.google.com/maps?q=7.7840,122.5869&z=10&output=embed"
-                loading="lazy"
-                allowfullscreen
-                referrerpolicy="no-referrer-when-downgrade">
-              </iframe>
-        </div>
-
-
-
-                <script src="typed.js"></script>
-                <script>
-                  const typingEl = document.getElementById('typing-text');
-                  const phrases = [
-                    "pWning since 2006",
-                    "infosec, nature, music, trail running and bikes",
-                    "will hack for burger and fries"
-                  ];
-
-                  const typed = new Typed(typingEl, {
-                    strings: phrases,
-                    loop: true,
-                    typeSpeed: 50,
-                    backSpeed: 50,
-                    backDelay: 1000,
-                    smartBackspace: true,
-                    onStringTyped: function(pos, self) {
-                      typingEl.setAttribute('data-text', self.strings[pos]);
-                    },
-                    onComplete: function(self) {
-                      typingEl.setAttribute('data-text', self.strings[0]);
-                    }
-                  });
-                </script>
-
-        <div id="bio_right" data-aos="fade-left">
-          Work Email: <a href="mailto:root@evanricafort.com" target="_blank" title="Hit me up!" class="container cool-link">root@evanricafort.com</a><br>
-          Download my CV: <a href="/Evan Ricafort - CV.pdf" target="_blank" title="Hire me!" class="container cool-link">Click Here!</a><br />
-          <a href="#" class="container cool-link">https://evanricafort.com</a>
-        </div>
-        <div id="bio_center" data-aos="fade-up"> 
-          <a href="https://instagram.com/evanricafort" target="_blank" title="Instagram @evanricafort"><i class="fab fa-instagram fa-lg"></i></a>
-          <a href="https://twitter.com/evanricafort" target="_blank" title="X @evanricafort"><i class="fab fa-x-twitter fa-lg"></i></a>
-          <a href="https://github.com/evanricafort" target="_blank" title="GitHub /evanricafort"><i class="fab fa-github fa-lg"></i></a>
-          <a href="https://www.linkedin.com/in/evanricafort" target="_blank" title="LinkedIn /evanricafort"><i class="fab fa-linkedin fa-lg"></i></a>
-        </div>
-        <br />
-        <br />
-        <br />
-    </header>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+
+  <!--
+  Awesome! You came across this not really fancy art; if you want to tweet about it, don't forget to include my handle, @evanricafort.
+
+  EEEEEEEEEEEEEEEEEEEEEE     VVVVVVVV           VVVVVVVV                    AAA                    NNNNNNNN        NNNNNNNN
+  E::::::::::::::::::::E     V::::::V           V::::::V                   A:::A                   N:::::::N       N::::::N
+  E::::::::::::::::::::E     V::::::V           V::::::V                  A:::::A                  N::::::::N      N::::::N
+  EE::::::EEEEEEEEE::::E     V::::::V           V::::::V                 A:::::::A                 N:::::::::N     N::::::N
+  E:::::E         EEEEEE      V:::::V           V:::::V                 A:::::::::A                N::::::::::N    N::::::N
+  E:::::E                      V:::::V         V:::::V                 A:::::A:::::A               N:::::::::::N   N::::::N
+  E::::::EEEEEEEEEE             V:::::V       V:::::V                 A:::::A A:::::A              N:::::::N::::N  N::::::N
+  E:::::::::::::::E              V:::::V     V:::::V                 A:::::A   A:::::A             N::::::N N::::N N::::::N
+  E:::::::::::::::E               V:::::V   V:::::V                 A:::::A     A:::::A            N::::::N  N::::N:::::::N
+  E::::::EEEEEEEEEE                V:::::V V:::::V                 A:::::AAAAAAAAA:::::A           N::::::N   N:::::::::::N
+  E:::::E                           V:::::V:::::V                 A:::::::::::::::::::::A          N::::::N    N::::::::::N
+  E:::::E         EEEEEE             V:::::::::V                 A:::::AAAAAAAAAAAAA:::::A         N::::::N     N:::::::::N
+  EE::::::EEEEEEEE:::::E              V:::::::V                 A:::::A             A:::::A        N::::::N      N::::::::N
+  E::::::::::::::::::::E               V:::::V                 A:::::A               A:::::A       N::::::N       N:::::::N
+  E::::::::::::::::::::E                V:::V                 A:::::A                 A:::::A      N::::::N        N::::::N
+  EEEEEEEEEEEEEEEEEEEEEE                 VVV                 AAAAAAA                   AAAAAAA     NNNNNNNN         NNNNNNN
+  -->
+
+  <title>Evan Ricafort | @evanricafort</title>
+
+  <meta name="viewport" content="width=device-width" />
+  <meta name="description" content="Offensive Security Engineer | Security Researcher" />
+  <meta name="keywords" content="bug bounty, evan, evan ricafort, security, evanricafort, infosec" />
+  <meta name="author" content="Evan Ricafort" />
+  <meta name="google-site-verification" content="rsX_5ZLQ2CLU43PcjKI6psdvB6HWeFvnkaOj8nXDyeo" />
+  <meta http-equiv="X-Frame-Options" content="deny" />
+
+  <!-- Social cards -->
+  <meta property="og:title" content="Evan Ricafort | Just another bug bounty program participant" />
+  <meta property="og:site_name" content="Evan Ricafort." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="Evan Ricafort" />
+  <meta name="twitter:creator" content="Evan Ricafort" />
+
+  <link rel="shortcut icon" type="image/jpg" href="profile.jpg" />
+
+  <!-- Third-party styles (load order preserved: icons, site stylesheet, webfont, scroll animations) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" type="text/css" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,100..900;1,100..900&display=swap" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+
+  <style>
+    /* --- Design tokens ------------------------------------------------ */
+    :root {
+      --bg: #ffffff;
+      --fg: #000000;
+      --rule: #dddddd;
+      --underline: #080fad;
+      --social-hover: #0073e6;
+      --loading-bar: #054b82;
+      --progress-bar: #113959;
+      --to-top: #333333;
+      --trail: rgba(0, 0, 0, 0.2);
+      --map-border: rgba(0, 0, 0, 0.4);
+      --glow: 0, 0, 0;
+      --geo-line: 22, 44, 66;
+      --geo-accent: 0, 118, 168;
+    }
+
+    body.dark-mode {
+      --bg: #1e1e1e;
+      --fg: #f0f0f0;
+      --to-top: #cccccc;
+      --trail: rgba(255, 255, 255, 0.1);
+      --map-border: rgba(255, 255, 255, 0.9);
+      --glow: 255, 255, 255;
+      --geo-line: 200, 220, 240;
+      --geo-accent: 96, 208, 255;
+    }
+
+    /* --- Base --------------------------------------------------------- */
+    * { margin: 0; padding: 0; border: 0; text-decoration: none; }
+
+    body {
+      padding: 10px;
+      font-family: "Bitter", serif;
+      font-size: 80%;
+      font-style: normal;
+      font-weight: 400;
+      font-optical-sizing: auto;
+      background-color: var(--bg);
+      color: var(--fg);
+      transition: background-color 0.5s ease, color 0.5s ease;
+    }
+
+    a, h1, h2, p, ul li { transition: color 0.5s ease; }
+    a { text-decoration: none; }
+    p { padding-bottom: 5px; }
+    h1 { margin-bottom: 5px; text-align: center; }
+    h2 { margin: 10px 0; padding: 0 0 5px; border-bottom: 1px solid var(--rule); }
+    header { padding: 5px; }
+    section { padding-top: 12px; }
+    footer { padding-top: 30px; }
+    body.dark-mode a { color: #4ea3ff; }
+    body.dark-mode a:hover { color: #7ec8ff; }
+
+    /* --- Lists -------------------------------------------------------- */
+    ul > li { margin: 0 0 1px 20px; }
+    ul ul { margin-left: 0; padding-left: 0; list-style-type: none; }
+    ul ul li { position: relative; padding-left: 1.4em; }
+
+    ul ul li::before {
+      content: "\02937";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0.8em;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    /* --- Header and contact blocks ------------------------------------ */
+    #i { margin: 0 auto 5px; text-align: center; }
+    #bio_left { float: left; }
+    #bio_right { float: right; }
+    #bio_center { width: 200px; margin: 0 auto; text-align: center; }
+
+    #bio_center a {
+      display: inline-block;
+      margin: 0 6px;
+      color: inherit;
+      font-size: 0.8rem;
+      transition: transform 0.3s ease, color 0.3s ease;
+    }
+
+    #bio_center a:hover { color: var(--social-hover); transform: scale(1.7); }
+    #bio_center a[href*="instagram.com"]:hover i { color: #e4405f; }
+    #bio_center a[href*="twitter.com"]:hover i { color: #1da1f2; }
+    #bio_center a[href*="github.com"]:hover i { color: #333333; }
+    #bio_center a[href*="linkedin.com"]:hover i { color: #0077b5; }
+
+    /* Profile photo (also the dark-mode trigger). */
+    .center {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .center:hover { transform: scale(1.05); }
+
+    /* --- Underlined links --------------------------------------------- */
+    .container { position: relative; display: inline-block; }
+
+    .cool-link::after {
+      content: "";
+      display: block;
+      width: 0;
+      height: 2px;
+      background: var(--underline);
+      transition: width 0.3s ease-in-out;
+    }
+
+    .cool-link:hover::after { width: 100%; }
+
+    /* --- Glowing name -------------------------------------------------- */
+    .glow-text { color: inherit; text-align: center; }
+
+    .glow-text span {
+      display: inline-block;
+      color: inherit;
+      cursor: default;
+      transition: text-shadow 0.3s ease;
+    }
+
+    .glow-text .flicker-glow {
+      text-shadow: 0 0 6px rgba(var(--glow), 0.4), 0 0 14px rgba(var(--glow), 0.5), 0 0 18px rgba(var(--glow), 0.6);
+    }
+
+    body.dark-mode .glow-text .flicker-glow {
+      text-shadow: 0 0 8px rgba(var(--glow), 0.4), 0 0 18px rgba(var(--glow), 0.6), 0 0 24px rgba(var(--glow), 0.8);
+    }
+
+    .glow-text span:hover {
+      text-shadow: 0 0 10px rgba(var(--glow), 0.5), 0 0 20px rgba(var(--glow), 0.4), 0 0 30px rgba(var(--glow), 0.3);
+    }
+
+    body.dark-mode .glow-text span:hover {
+      text-shadow: 0 0 12px rgba(var(--glow), 0.9), 0 0 25px rgba(var(--glow), 0.8), 0 0 40px rgba(var(--glow), 0.6);
+    }
+
+    /* --- Typed tagline with RGB glitch on hover ------------------------ */
+    .glitch-wrapper { position: relative; display: inline-block; cursor: pointer; }
+    #typing-text { position: relative; z-index: 1; display: inline-block; transition: all 0.3s ease; }
+
+    .glitch-wrapper:hover #typing-text::before,
+    .glitch-wrapper:hover #typing-text::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0.6;
+      font-family: inherit;
+      pointer-events: none;
+      animation: rgb-glitch 0.25s infinite;
+    }
+
+    .glitch-wrapper:hover #typing-text::before { color: #ff00ff; transform: translate(-2px, -1px); }
+    .glitch-wrapper:hover #typing-text::after { color: #00ffff; transform: translate(2px, 1px); }
+
+    @keyframes rgb-glitch {
+      0%   { clip-path: inset(25% 0 90% 0); }
+      25%  { clip-path: inset(10% 0 80% 0); }
+      50%  { clip-path: inset(20% 0 60% 0); }
+      75%  { clip-path: inset(5% 0 85% 0); }
+      100% { clip-path: inset(40% 0 90% 0); }
+    }
+
+    /* --- Address hover map --------------------------------------------- */
+    #map-circle {
+      position: fixed;
+      width: 250px;
+      height: 250px;
+      overflow: hidden;
+      border: 3px solid var(--map-border);
+      border-radius: 50%;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.35);
+      transform: scale(0);
+      transition: transform 0.2s ease;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    #map-circle iframe { width: 100%; height: 100%; border: none; }
+
+    /* --- Page load and scroll indicators -------------------------------- */
+    #loading-bar,
+    #scroll-progress { position: fixed; top: 0; left: 0; width: 0; height: 4px; z-index: 9999; }
+    #loading-bar { background-color: var(--loading-bar); animation: loading-bar-grow 2s ease-out forwards; }
+    #scroll-progress { background-color: var(--progress-bar); transition: width 0.2s ease-out; }
+
+    @keyframes loading-bar-grow {
+      0%   { width: 0%; }
+      80%  { width: 90%; }
+      100% { width: 100%; }
+    }
+
+    /* --- "Read More" disclosure ----------------------------------------- */
+    #more {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.8s ease, opacity 0.8s ease;
+      will-change: max-height, opacity;
+    }
+
+    #more.show { max-height: 10000px; opacity: 1; }
+
+    /* --- Scroll-to-top plane -------------------------------------------- */
+    #scrollToTopBtn {
+      position: fixed;
+      right: 40px;
+      bottom: 40px;
+      background: none;
+      color: var(--to-top);
+      font-size: 2rem;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    #scrollToTopBtn.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    #airplaneIcon { display: inline-block; transform: rotate(-90deg); transition: transform 0.3s ease; }
+
+    .trail-dot {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      background: var(--trail);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      animation: trail-fade 0.6s ease-out forwards;
+    }
+
+    @keyframes trail-fade {
+      0%   { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0.3); }
+    }
+
+    /* --- Geometric web canvas (sits behind every other layer) ------------ */
+    #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
+  </style>
+</head>
+
+<body>
+  <!-- Restores the stored theme before the first paint so dark mode does not flash white. -->
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem('theme') === 'dark') {
+          document.body.classList.add('dark-mode');
+        }
+      } catch (error) {
+        /* Storage unavailable (private mode, blocked cookies) - fall back to light. */
+      }
+    })();
+  </script>
+
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+  <div id="loading-bar"></div>
+  <div id="scroll-progress"></div>
+
+  <header>
+    <br />
+
+    <div class="circle-1" data-aos="fade-down" data-aos-delay="200">
+      <img src="profile.jpg" class="center" id="dark-mode-toggle" alt="Evan Ricafort" title="Hello!" />
+    </div>
+
+    <h1 data-aos="fade-down" class="glow-text">
+      <span>E</span><span>v</span><span>a</span><span>n</span>
+      <span>R</span><span>i</span><span>c</span><span>a</span><span>f</span><span>o</span><span>r</span><span>t</span>
+    </h1>
+
+    <div id="i">
+      <p class="glitch-wrapper">
+        <span class="typing" id="typing-text" data-text=""></span>
+      </p>
+    </div>
+
+    <div id="bio_left" data-aos="fade-right" class="address-hover">
+      Poblacion, Ipil<br />
+      Zamboanga Sibugay<br />
+      7001, Philippines
+    </div>
+
+    <div id="map-circle">
+      <iframe
+        src="https://www.google.com/maps?q=7.7840,122.5869&z=10&output=embed"
+        title="Ipil, Zamboanga Sibugay"
+        loading="lazy"
+        allowfullscreen
+        referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+    </div>
+
+    <div id="bio_right" data-aos="fade-left">
+      Work Email: <a href="mailto:root@evanricafort.com" target="_blank" title="Hit me up!" class="container cool-link">root@evanricafort.com</a><br />
+      Download my CV: <a href="/Evan Ricafort - CV.pdf" target="_blank" title="Hire me!" class="container cool-link">Click Here!</a><br />
+      <a href="#" class="container cool-link">https://evanricafort.com</a>
+    </div>
+
+    <div id="bio_center" data-aos="fade-up">
+      <a href="https://instagram.com/evanricafort" target="_blank" title="Instagram @evanricafort"><i class="fab fa-instagram fa-lg"></i></a>
+      <a href="https://twitter.com/evanricafort" target="_blank" title="X @evanricafort"><i class="fab fa-x-twitter fa-lg"></i></a>
+      <a href="https://github.com/evanricafort" target="_blank" title="GitHub /evanricafort"><i class="fab fa-github fa-lg"></i></a>
+      <a href="https://www.linkedin.com/in/evanricafort" target="_blank" title="LinkedIn /evanricafort"><i class="fab fa-linkedin fa-lg"></i></a>
+    </div>
+
+    <br />
+    <br />
+    <br />
+  </header>
 
   <section data-aos="fade-up">
-        <h2>About</h2>
-          <p>I'm <strong>Evan Ricafort</strong>, a cybersecurity consultant based in the Philippines with a specialized focus on web application security testing. Born and raised in Ipil, a little town of Zamboanga Sibugay. I studied computer networking and analysis at <i><a href="https://adzu.edu.ph/" target="_blank" class="container cool-link">Ateneo de Zamboanga University</a></i>. Currently, I work as an Offensive Security Engineer for a cybersecurity firm based in Chicago, Illinois, where I conduct in-depth security assessments and penetration tests for organizations across various industries. With over a decade of experience in the cybersecurity field, I have honed my expertise in identifying and exploiting vulnerabilities in web applications. I have been actively contributing to the bug bounty community since 2013. Throughout my career, I have successfully disclosed high-impact vulnerabilities for prominent companies, including Microsoft, Google, and Twitter, among others. Outside of my professional life, I maintain a balanced lifestyle, enjoying activities like mountain biking, trail riding, trail running and other outdoor adventures. If you're looking to strengthen the security of your platform, I’d be happy to collaborate. Feel free to reach out via email or direct message on Twitter/X (@evanricafort). I am committed to providing thorough and impactful security research to help safeguard your digital assets.</p>
-    </section>
-
-    <section data-aos="fade-up">
-        <h2>Languages</h2>
-        <ul>
-          <li><p>Visayan</p></li>
-          <li><p>Tagalog</p></li>
-          <li><p>English</p></li>
-        </ul>
-    </section>
-
-    <section data-aos="fade-up">
-        <h2>Technical Skills</h2>
-        <ul>
-          <li><p>API Security Testing</p></li>
-          <li><p>Web Application Assessment</p></li>
-          <li><p>Network Penetration Testing</p></li>
-          <li><p>Network Segmentation Testing</p></li>
-        </ul>
-    </section>
-
-    <section data-aos="fade-up">
-        <h2>Work Experience</h2>
-        <ul>
-          <li><p><strong>Offensive Security Consultant</strong> at Confidential - <a href="https://www.evanricafort.com" target="_blank" class="container cool-link">https://www.evanricafort.com/#</a> (May 2025 - present)</p></li>
-          <li><p><strong>Offensive Security Engineer I</strong> at VikingCloud - <a href="https://www.vikingcloud.com" target="_blank" class="container cool-link">https://www.vikingcloud.com</a> (April 2022 - April 2025)</p></li>
-            <ul>
-              <li><p><strong>Offensive Security Engineer III</strong> at VikingCloud - <a href="https://www.vikingcloud.com" target="_blank" class="container cool-link">https://www.vikingcloud.com</a> (April 2025 - present)</p></li>
-            </ul>
-          <li><p><strong>Security Researcher</strong> at Invalid Web Security - <a href="https://www.invalidwebsecurity.info" target="_blank" class="container cool-link">https://www.invalidwebsecurity.info</a> (October 2013 - present)</p></li>
-          <li><p><strong>Security Researcher</strong> at AegisOne Cyberdefense Corporation - <a href="https://aegisonesecure.com" target="_blank" class="container cool-link">https://aegisonesecure.com</a> (June 2019 - 2022)</p></li>
-          <li><p><strong>Security Researcher</strong> at Finalify Ltd., - <a href="https://www.spectrocoin.com" target="_blank" class="container cool-link">https://www.spectrocoin.com</a> (February 2019 - March 2019)</p></li>
-          <li><p><strong>Security Researcher</strong> at Synack Red Team - <a href="https://www.synack.com/red-team/" target="_blank" class="container cool-link">https://www.synack.com/red-team/</a> (November 2016 - August 2022)</p></li>
-        </ul>
-    </section>
-
-    <section data-aos="fade-up">
-        <h2>Badge & Certificate</h2>
-        <ul>
-          <li><p><strong>Cyber Security and Privacy Foundation Pte Ltd</strong> - Certified Whitehat Hacker v1 (CWHH) - Certificate ID. <a href="https://www.udemy.com/certificate/UC-SD45SNW8/" target="_blank" class="container cool-link">UC-SD45SNW8</a></p></li>
-          <li><p><strong>Ben Sadeghipour (@NahamSec)</strong> - Intro to Bug Bounty Hunting and Web Application Hacking - Certificate ID. <a href="https://www.ude.my/UC-d8e7bc7d-d3eb-4646-9a06-3c09d1bbf5f5/" target="_blank" class="container cool-link">UC-d8e7bc7d-d3eb-4646-9a06-3c09d1bbf5f5</a></p></li>
-          <li><p><strong>TCM Security Inc.</strong> - Practical Ethical Hacking - The Complete Course
- <a href="https://evanricafort.com/PEHTCCCertificate.pdf" target="_blank" class="container cool-link">PEH - The Complete Course</a></p></li>
-          <li><p><strong>The SecOps Group</strong> - Certified AppSec Practitioner (CAP) - Certificate ID. <a href="https://evanricafort.com/EvandneDylRicafort-CertifiedAppSecPractitioner(CAP).pdf" target="_blank" class="container cool-link">8860312</a></p></li>
-          <li><p><strong>The SecOps Group</strong> - Certified Network Security Practitioner (CNSP) - Certificate ID. <a href="https://evanricafort.com/EvandneDylRicafort-CertifiedNetworkSecurityPractitioner.pdf" target="_blank" class="container cool-link">8907719</a></p></li>
-          <li><p><strong>PentesterLab</strong> - PentesterLab's Introduction Badge - Badge ID. <a href="https://pentesterlab.com/profile/evanricafort" target="_blank" class="container cool-link">PTLN9552</a></p></li>
-          <li><p><strong>PentesterLab</strong> - PentesterLab's Essential Badge - Badge ID. <a href="https://pentesterlab.com/profile/evanricafort" target="_blank" class="container cool-link">PTLE2521</a></p></li>
-        </ul>
-    </section>
-
-    <section data-aos="fade-up">
-        <h2>News & Press</h2>
-        <ul>
-          <p><strong>Featured in SecurityWeek (Google Nest Findings)</strong></p>
-        <li><p>Security Week — <a href="http://www.securityweek.com/vulnerabilities-found-website-google-owned-nest" target="_blank" class="container cool-link">http://www.securityweek.com/vulnerabilities-found-website-google-owned-nest</a></p></li>
-        <p><strong>Featured in Pinoy Hack News (XSS Vulnerabilities)</strong></p>
-        <li><p>Pinoy Hack News — <a href="https://web.archive.org/web/20211206202021/http://www.pinoyhacknews.com/xss-in-natgeo-playstation-and-barack-obama" target="_blank" class="container cool-link">http://www.pinoyhacknews.com/xss-in-natgeo-playstation-and-barack-obama (Archived)</a></p></li>
-        <p><strong>Featured in CKEditor (4.4.6 Security Patch Released)</strong></p>
-        <li><p>CKEditor — <a href="https://web.archive.org/web/20210411181536/https://ckeditor.com/blog/CKEditor-4.4.6-Released/" target="_blank" class="container cool-link">http://ckeditor.com/blog/CKEditor-4.4.6-Released (Archived)</a></p></li>
-        <p><strong>Featured in Blesta Security Advisory (XSS Vulnerabilities)</strong></p>
-        <li><p>Blest Security Advisory (Core-931) — <a href="http://www.blesta.com/2013/12/20/security-advisory-cross-site-scripting-vulnerabilities-2/" target="_blank" class="container cool-link">http://www.blesta.com/2013/12/20/security-advisory-cross-site-scripting-vulnerabilities-2/</a></p></li>
-        <p><strong>Featured in MIT Technology Review</strong></p>
-        <li><p>Life as a bug bounty hunter — <a href="https://www.technologyreview.com/s/611896/life-as-a-bug-bounty-hunter/" target="_blank" class="container cool-link">https://www.technologyreview.com/s/611896/life-as-a-bug-bounty-hunter/</a></p></li>
-        <p><strong>Featured in Peerio (Security Patch Released)</strong></p>
-        <li><p>Security Patch Released — <a href="https://web.archive.org/web/20201029003613/github.com/PeerioTechnologies/peerio-desktop/releases/tag/v2.98.7" target="_blank" class="container cool-link">https://github.com/PeerioTechnologies/peerio-desktop/releases/tag/v2.98.7 (Archived)</a></p></li>
-        <p><strong>Featured in Synack Red Team Calendars (2018 & 2019)</strong></p>
-        <li><p>The Places You Go with the Synack Red Team (2018 SRT Calendar)</p></li>
-        <li><p>Hacker-to-Hacker (2019 SRT Calendar)</p></li>
-        <p><strong>Featured in Bugcrowd (Inside the Mind of a Hacker)</strong></p>
-        <li><p>Inside the Mind of a Hacker (2019 Edition [Page 16]) — <a href="https://dochub.com/evanricafort/P0B76b3K6dd453kwn2y1Gg/itmoah2019-pdf?dt=zzhzncmAKDBtGjznrQTH" target="_blank" class="container cool-link">https://dochub.com/P0B76b3K6dd453kwn2y1Gg/itmoah2019-pdf</a></p></li>
-        <p><strong>Featured in Wordfence Intelligence</strong></p>
-        <li><p>Wordfence Intelligence Vulnerability Researchers Profile — <a href="https://www.wordfence.com/threat-intel/vulnerabilities/researchers/evan-ricafort" target="_blank" class="container cool-link">https://www.wordfence.com/threat-intel/vulnerabilities/researchers/evan-ricafort</a></p></li>
-        <p><strong>Featured in Wordpress (WordPress 5.2.4 and 5.4.1 Security Patch Release)</strong>  </p>
-        <li><p>WordPress 5.2.4 - <a href="https://wordpress.org/news/2019/10/wordpress-5-2-4-security-release/" target="_blank" class="container cool-link">https://wordpress.org/news/2019/10/wordpress-5-2-4-security-release/</a></p></li>
-        <li><p>WordPress 5.4.1 - <a href="https://wordpress.org/news/2020/04/wordpress-5-4-1/" target="_blank" class="container cool-link">https://wordpress.org/news/2020/04/wordpress-5-4-1/</a></p></li>
-        <li><p>WPVulnhub - <a href="https://wpvulndb.com/vulnerabilities/9908" target="_blank" class="container cool-link">https://wpvulndb.com/vulnerabilities/9908</a></p></li>
-        <li><p>SecurityWeek - <a href="https://www.securityweek.com/wordpress-524-patches-six-vulnerabilities" target="_blank" class="container cool-link">https://www.securityweek.com/wordpress-524-patches-six-vulnerabilities</a></p></li>
-        <li><p>Rapid7 - <a href="https://www.rapid7.com/db/vulnerabilities/freebsd-vid-459df1ba-051c-11ea-9673-4c72b94353b5" target="_blank" class="container cool-link">https://www.rapid7.com/db/vulnerabilities/freebsd-vid-459df1ba-051c-11ea-9673-4c72b94353b5</a></p></li>
-        <li><p>MITRE (CVE-2019-17674) - <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-17674" target="_blank" class="container cool-link">https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-17674</a></p></li>
-        <li><p>MITRE (CVE-2020-11025) - <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-11025" target="_blank" class="container cool-link">https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-11025</a></p></li>
-        <li><p>NIST (CVE-2019-17674) - <a href="https://nvd.nist.gov/vuln/detail/CVE-2019-17674" target="_blank" class="container cool-link">https://nvd.nist.gov/vuln/detail/CVE-2019-17674</a></p></li>
-        <li><p>NIST (CVE-2020-11025) - <a href="https://nvd.nist.gov/vuln/detail/CVE-2020-11025" target="_blank" class="container cool-link">https://nvd.nist.gov/vuln/detail/CVE-2020-11025</a></p></li>
-        <p><strong>Featured in Wordpress (WordPress 5.8.1 Security Patch Release)</strong></p>
-        <li><p>WordPress 5.8.1 - <a href="https://wordpress.org/news/2021/09/wordpress-5-8-1-security-and-maintenance-release/" target="_blank" class="container cool-link">https://wordpress.org/news/2021/09/wordpress-5-8-1-security-and-maintenance-release/</a></p></li>
-        <li><p>SoMag News - <a href="https://www.somagnews.com/security-focused-wordpress-5-8-1-is-live-heres-whats-new/" target="_blank" class="container cool-link">https://www.somagnews.com/security-focused-wordpress-5-8-1-is-live-heres-whats-new/</a></p></li>
-        <li><p>WPMainline - <a href="https://wpmainline.com/2021/09/09/wordpress-5-8-1-released-squashes-60-bugs-and-patches-three-security-vulnerabilities/" target="_blank" class="container cool-link">https://wpmainline.com/2021/09/09/wordpress-5-8-1-released-squashes-60-bugs-and-patches-three-security-vulnerabilities/</a></p></li>
-        <li><p>Paradox Digital (UK) - <a href="https://paradoxdigital.uk/blog/wordpress-5-8-1-security-update/" target="_blank" class="container cool-link">https://paradoxdigital.uk/blog/wordpress-5-8-1-security-update/</a></p></li>
-        <li><p>MITRE (CVE-2021-39202) - <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-39202" target="_blank" class="container cool-link">https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-39202</a></p></li>
-        <li><p>NIST (CVE-2021-39202) - <a href="https://nvd.nist.gov/vuln/detail/CVE-2021-39202" target="_blank" class="container cool-link">https://nvd.nist.gov/vuln/detail/CVE-2021-39202</a></p></li>
-        <p><strong>Featured in Apple (Apple Security Update - Fall 2022)</strong></p>
-        <li><p>Apple - macOS Ventura 13 (CVE-2022-32918 - Photos Privacy Issue) - <a href="https://support.apple.com/en-us/HT213488" target="_blank" class="container cool-link">https://support.apple.com/en-us/HT213488</a></p></li>
-        <li><p>SecList - <a href="https://seclists.org/fulldisclosure/2022/Oct/39" target="_blank" class="container cool-link">https://seclists.org/fulldisclosure/2022/Oct/39</a></p></li>
-        <li><p>MITRE (CVE-2022-32918) - <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-32918" target="_blank" class="container cool-link">https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-32918</a></p></li>
-        <li><p>NIST (CVE-2022-32918) - <a href="https://nvd.nist.gov/vuln/detail/CVE-2022-32918" target="_blank" class="container cool-link">https://nvd.nist.gov/vuln/detail/CVE-2022-32918</a></p></li>
-        </ul>
+    <h2>About</h2>
+    <p>I'm <strong>Evan Ricafort</strong>, a cybersecurity consultant based in the Philippines with a specialized focus on web application security testing. Born and raised in Ipil, a little town of Zamboanga Sibugay. I studied computer networking and analysis at <i><a href="https://adzu.edu.ph/" target="_blank" class="container cool-link">Ateneo de Zamboanga University</a></i>. Currently, I work as an Offensive Security Engineer for a cybersecurity firm based in Chicago, Illinois, where I conduct in-depth security assessments and penetration tests for organizations across various industries. With over a decade of experience in the cybersecurity field, I have honed my expertise in identifying and exploiting vulnerabilities in web applications. I have been actively contributing to the bug bounty community since 2013. Throughout my career, I have successfully disclosed high-impact vulnerabilities for prominent companies, including Microsoft, Google, and Twitter, among others. Outside of my professional life, I maintain a balanced lifestyle, enjoying activities like mountain biking, trail riding, trail running and other outdoor adventures. If you're looking to strengthen the security of your platform, I’d be happy to collaborate. Feel free to reach out via email or direct message on Twitter/X (@evanricafort). I am committed to providing thorough and impactful security research to help safeguard your digital assets.</p>
   </section>
 
+  <section data-aos="fade-up">
+    <h2>Languages</h2>
+    <ul>
+      <li><p>Visayan</p></li>
+      <li><p>Tagalog</p></li>
+      <li><p>English</p></li>
+    </ul>
+  </section>
 
   <section data-aos="fade-up">
-        <h2>Projects & Toolkits</h2>
-        <ul>
-          <p><strong>Lazymap</strong></p>
-        <li><p>NMAP Equipped Network Penetration Testing Tool — <a href="https://github.com/evanricafort/lazymap" target="_blank" class="container cool-link">https://github.com/evanricafort/lazymap</a></p></li>
-          <p><strong>SegIt</strong></p>
-        <li><p>Automated Network Segmentation Testing Kit — <a href="https://github.com/evanricafort/segit" target="_blank" class="container cool-link">https://github.com/evanricafort/segit</a></p></li>
-          <p><strong>SPF Record Detector</strong></p>
-        <li><p>Validate email security configurations and analyze SPF records — <a href="/spfrecordchecker" target="_blank" class="container cool-link">https://evanricafort.com/spfrecordchecker</a></p></li>
-          <p><strong>SSL Certificate Analyzer</strong></p>
-        <li><p>Analyze weak hash, expiry, wildcards and issuer — <a href="/weaksslcerts" target="_blank" class="container cool-link">https://evanricafort.com/weaksslcerts</a></p></li>
-          <p><strong>Weak SSL Cipher Analyzer</strong></p>
-        <li><p>Analyze weak SSL Cipher/Protocols from nmap scan result. — <a href="/weaksslciphers" target="_blank" class="container cool-link">https://evanricafort.com/weaksslciphers</a></p></li>
-          <p><strong>SSH Security Analyzer</strong></p>
-        <li><p>Analyze SSH configurations or nmap scans for cryptographic risks. — <a href="/sshsecurity" target="_blank" class="container cool-link">https://evanricafort.com/sshsecurity</a></p></li>
-          <p><strong>Wayback (Web Archive)</strong></p>
-        <li><p>Web archive URL fetcher. — <a href="/webarchive" target="_blank" class="container cool-link">https://evanricafort.com/webarchive</a></p></li>
-          <p><strong>Google / Gemini API Key Checker</strong></p>
-        <li><p>Test a leaked API key against Gemini and Google services. — <a href="/googleapikeychecker" target="_blank" class="container cool-link">https://evanricafort.com/googleapikeychecker</a></p></li>
-          <p><strong>JWT Auditor</strong></p>
-        <li><p>JWT Security Testing Tool — <a href="/jwtauditor" target="_blank" class="container cool-link">https://evanricafort.com/jwtauditor</a></p></li>
-          <p><strong>NMAP Sorting Kit</strong></p>
-        <li><p>NMAP result sorting kit. — <a href="nmapsorter.html" target="_blank" class="container cool-link">https://evanricafort.com/nmapsorter.html</a></p></li>
-          <p><strong>Nmap Result Parser</strong></p>
-        <li><p>NMAP sorting tool for version disclosure. — <a href="/nmapresultparser" target="_blank" class="container cool-link">https://evanricafort.com/nmapresultparser</a></p></li>
-        </ul>
-  </section> 
-
+    <h2>Technical Skills</h2>
+    <ul>
+      <li><p>API Security Testing</p></li>
+      <li><p>Web Application Assessment</p></li>
+      <li><p>Network Penetration Testing</p></li>
+      <li><p>Network Segmentation Testing</p></li>
+    </ul>
+  </section>
 
   <section data-aos="fade-up">
-      <h2>Testimonials</h2>
+    <h2>Work Experience</h2>
+    <ul>
+      <li><p><strong>Offensive Security Consultant</strong> at Confidential - <a href="https://www.evanricafort.com" target="_blank" class="container cool-link">https://www.evanricafort.com/#</a> (May 2025 - present)</p></li>
+      <li><p><strong>Offensive Security Engineer I</strong> at VikingCloud - <a href="https://www.vikingcloud.com" target="_blank" class="container cool-link">https://www.vikingcloud.com</a> (April 2022 - April 2025)</p></li>
       <ul>
-        <p><strong><li>Dominic Yeadon</strong> - Managing Director at Data Harvesting U.K</li></p>
-        <p><i>"Evan helped us by identifying a vulnerability in our public website, and thanks to Evan's professional standards he did so in accordance with our Responsible Disclosure Policy. Evan is one of the good guys."</i></p>
-        <p><strong><li>Corina Mansueto</strong> - Director of Social Media & Customer Service at Lavasoft</li></p>
-        <p><i>"Evan assisted in identifying a vulnerability on our website. He was extremely easy to work with to have this issue resolved in a timely and professional manner. Thanks for all your help Evan, we greatly appreciate it."</i></p>
-        <p><strong><li>Max Hunter</strong> - Web Development Team Lead at Electronic Frontier Foundation (EFF)</li></p>
-        <p><i>"Evan's responsible disclosure helped keep our nonprofit's servers secure."</i></p>
-        <p><strong><li>Hipmunk</strong> - Hipmunk Security Team</li></p>
-        <p><i>"Thank you Evan for helping us uncover a hidden vulnerability issue in our account management flow. We couldn't have found it without your help! Now our team can work to fix this issue and give more protection to our customers accounts. Thanks!"</i></p>
+        <li><p><strong>Offensive Security Engineer III</strong> at VikingCloud - <a href="https://www.vikingcloud.com" target="_blank" class="container cool-link">https://www.vikingcloud.com</a> (April 2025 - present)</p></li>
       </ul>
-    </section>
+      <li><p><strong>Security Researcher</strong> at Invalid Web Security - <a href="https://www.invalidwebsecurity.info" target="_blank" class="container cool-link">https://www.invalidwebsecurity.info</a> (October 2013 - present)</p></li>
+      <li><p><strong>Security Researcher</strong> at AegisOne Cyberdefense Corporation - <a href="https://aegisonesecure.com" target="_blank" class="container cool-link">https://aegisonesecure.com</a> (June 2019 - 2022)</p></li>
+      <li><p><strong>Security Researcher</strong> at Finalify Ltd., - <a href="https://www.spectrocoin.com" target="_blank" class="container cool-link">https://www.spectrocoin.com</a> (February 2019 - March 2019)</p></li>
+      <li><p><strong>Security Researcher</strong> at Synack Red Team - <a href="https://www.synack.com/red-team/" target="_blank" class="container cool-link">https://www.synack.com/red-team/</a> (November 2016 - August 2022)</p></li>
+    </ul>
+  </section>
 
+  <section data-aos="fade-up">
+    <h2>Badge &amp; Certificate</h2>
+    <ul>
+      <li><p><strong>Cyber Security and Privacy Foundation Pte Ltd</strong> - Certified Whitehat Hacker v1 (CWHH) - Certificate ID. <a href="https://www.udemy.com/certificate/UC-SD45SNW8/" target="_blank" class="container cool-link">UC-SD45SNW8</a></p></li>
+      <li><p><strong>Ben Sadeghipour (@NahamSec)</strong> - Intro to Bug Bounty Hunting and Web Application Hacking - Certificate ID. <a href="https://www.ude.my/UC-d8e7bc7d-d3eb-4646-9a06-3c09d1bbf5f5/" target="_blank" class="container cool-link">UC-d8e7bc7d-d3eb-4646-9a06-3c09d1bbf5f5</a></p></li>
+      <li><p><strong>TCM Security Inc.</strong> - Practical Ethical Hacking - The Complete Course <a href="https://evanricafort.com/PEHTCCCertificate.pdf" target="_blank" class="container cool-link">PEH - The Complete Course</a></p></li>
+      <li><p><strong>The SecOps Group</strong> - Certified AppSec Practitioner (CAP) - Certificate ID. <a href="https://evanricafort.com/EvandneDylRicafort-CertifiedAppSecPractitioner(CAP).pdf" target="_blank" class="container cool-link">8860312</a></p></li>
+      <li><p><strong>The SecOps Group</strong> - Certified Network Security Practitioner (CNSP) - Certificate ID. <a href="https://evanricafort.com/EvandneDylRicafort-CertifiedNetworkSecurityPractitioner.pdf" target="_blank" class="container cool-link">8907719</a></p></li>
+      <li><p><strong>PentesterLab</strong> - PentesterLab's Introduction Badge - Badge ID. <a href="https://pentesterlab.com/profile/evanricafort" target="_blank" class="container cool-link">PTLN9552</a></p></li>
+      <li><p><strong>PentesterLab</strong> - PentesterLab's Essential Badge - Badge ID. <a href="https://pentesterlab.com/profile/evanricafort" target="_blank" class="container cool-link">PTLE2521</a></p></li>
+    </ul>
+  </section>
 
-    <section data-aos="fade-up">
-        <h2>Achievements</h2>
-        <ul>
-          <p>I reported valid security vulnerability to the following companies. (Last Update July 29, 2026)</p>
-        </ul>
-           
-                      <strong>• 123 Contact Form</strong> — http://www.123contactform.com/security-acknowledgements.htm<br/>
-                      <strong>• 4chan</strong> — https://hackerone.com/4chan/thanks<br/>
-                      <strong>• ActiveCampaign</strong> — http://www.activecampaign.com/security/<br/>
-                      <strong>• Adobe</strong> — http://helpx.adobe.com/security/acknowledgements.html (2014)<br/>
-                      <strong>• Advance Custom Fields (WP Plugin)</strong> — https://www.advancedcustomfields.com/contact/<br/>
-                      <strong>• Aha IO</strong> — http://aha.io/legal/security<br/>
-                      <strong>• Aimlab</strong> — https://aimlab.gg/bug-bounty<br/>
-                      <strong>• Airbnb</strong> — https://www.airbnb.com/help/policies/responsible_disclosure#responsible_disclosure_policy<br/>
-                      <strong>• AndroidFreeApps</strong> — http://www.androidfreeapp.net/security-researcher-acknowledgments/ (May 2014)<br/>
-                      <strong>• Appcelerator</strong> — https://www.appcelerator.com/privacy/responsible-disclosure-of-security-vulnerabilities/<br/>
-                      <strong>• Apple</strong> — http://support.apple.com/kb/HT1318 (2014, 2021 & 2022)<br/>
-                      <strong>• Apptentive</strong> — https://www.apptentive.com/contact/<br/>
-                      <strong>• Appointlet</strong> — https://www.appointlet.com/<br/>
-                      <strong>• Artsy</strong> — https://artsy.net/security<br/>
-                      <strong>• AT&T</strong> — https://hackerone.com/att/thanks<br/>
-                      <strong>• Atlassian</strong> — https://bugcrowd.com/atlassian/hall-of-fame<br/>
-                      <strong>• Attack Secure</strong> — http://attack-secure.com/whitehat/<br/>
-                      <strong>• Audiomack</strong> — http://www.audiomack.com/about<br/>
-                      <strong>• Automattic</strong> — https://hackerone.com/automattic/thanks<br/>
-                      <strong>• AVG Technologies</strong> — https://support.avg.com/support_contact_form?l=en_US<br/>
-                      <strong>• AwardWallet</strong> — https://app.cobalt.io/awardwallet/awardwallet/hall-of-fame/all<br/>
-                      <p id="more">
-                      <strong>• Bandcamp</strong> — https://get.bandcamp.help/hc/en-us<br/> 
-                      <strong>• Barracuda Labs</strong> — https://barracudalabs.com/research-resources/bug-bounty-program/bug-bounty-hall-of-fame-2/<br/>
-                      <strong>• Base CRM</strong> — https://getbase.com/security/<br/>
-                      <strong>• Blackberry</strong> — http://ca.blackberry.com/business/enterprise-mobility/mobile-security/incident-response-team/collaborations.html (2014)<br/>
-                      <strong>• Blackboard </strong>— https://bugcrowd.com/blackboard<br/>
-                      <strong>• Blesta</strong> — http://www.blesta.com/responsible-disclosure/(CORE-931)<br/>
-                      <strong>• Bidmail</strong> — http://www.bidmail.com/index.php/contact/<br/>
-                      <strong>• Big Commerce</strong> — http://www.bigcommerce.com/about-us/<br/>
-                      <strong>• BigParser</strong> — https://www.bigparser.com/security<br/>
-                      <strong>• Birst</strong> — http://www.birst.com/security-reporting<br/>
-                      <strong>• Bitcasa </strong>— https://support.bitcasa.com/hc/en-us/articles/202210658-How-To-Responsibly-Report-Security-Concerns<br/>
-                      <strong>• Bitcurex</strong> — https://bitcurex.com/page/1485694-bezpieczenstwo<br/>
-                      <strong>• Bitdefender</strong> — http://www.bitdefender.com/site/view/bug-bounty-hall-of-fame.html<br/>
-                      <strong>• Bitvavo</strong> — https://bitvavo.com/en/responsible-disclosure<br/>
-                      <strong>• Braintree Payment Solutions</strong> — https://www.braintreepayments.com/developers/disclosure<br/>
-                      <strong>• Brand and Sign</strong> — http://www.brandandsign.com/privacy/responsible-disclosure-policy/<br/>
-                      <strong>• BoardGameGeek</strong> — https://boardgamegeek.com/responsible_disclosure_policy<br/>
-                      <strong>• Bonusly</strong> — https://bonus.ly/security<br/>
-                      <strong>• Box</strong> — https://www.box.com/about-us/security<br/>
-                      <strong>• Bufferapp </strong>— https://bufferapp.com/security<br/>
-                      <strong>• Bugcrowd</strong> — https://bugcrowd.com/bugcrowd/hall-of-fame<br/>
-                      <strong>• Bugherd</strong> — http://bugherd.com/security<br/>
-                      <strong>• Bugify </strong>— https://bugify.com/security<br/>
-                      <strong>• Calameo</strong> — http://en.calameo.com/content/about_calameo-about-calameo.htm<br/>
-                      <strong>• Calendar Budget</strong> — https://calendarbudget.com/support2/open.php<br/>
-                      <strong>• Changetip</strong> — https://www.crowdcurity.com/changetip/hall-of-fame/all<br/>
-                      <strong>• Cisco</strong> — http://www.cisco.com/web/about/security/psirt/security_vulnerability_policy.html<br/>
-                      <strong>• CKEditor</strong> — http://ckeditor.com/blog/CKEditor-4.4.6-Released (CKEditor 4.4.6 Critical Patch)<br/>
-                      <strong>• Clause I/O</strong> — https://clause.io/security<br/>
-                      <strong>• Cloudflare </strong>— https://hackerone.com/cloudflare/thanks<br/>
-                      <strong>• Cloudsmith</strong> — https://help.cloudsmith.io/docs/exploits-hall-of-fame<br/>
-                      <strong>• Colupon</strong> — https://bugcrowd.com/c028<br/>
-                      <strong>• Commando IO</strong> — https://commando.io/security.html#hall-of-fame-section<br/>
-                      <strong>• Compilr</strong> — https://compilr.com/forum/security-thanks<br/>
-                      <strong>• Comodo Dragon</strong> — http://www.comodo.com/contact-comodo/contact-us.php<br/>
-                      <strong>• Coinbase</strong> — https://hackerone.com/coinbase/thanks<br/>
-                      <strong>• Constant Contact</strong> — http://www.constantcontact.com/about-constant-contact/security/report-vulnerability.jsp<br/>
-                      <strong>• Crowdcurity</strong> — https://www.crowdcurity.com/crowdcurity/hall-of-fame/all<br/>
-                      <strong>• Crowdrise</strong> — http://www.crowdrise.com/UnitedRelief-ARC (Reward ($100) Donated to Typhoon Haiyan Victims in the Philippines [2013])<br/>
-                      <strong>• Cozy</strong> — https://cozy.co/security-and-privacy/<br/>
-                      <strong>• Dell Secureworks</strong> — http://www.secureworks.co.uk/contact/disclosure/<br/>
-                      <strong>• Deskera</strong> — https://www.deskera.com/blog/deskera-responsible-disclosure-reward-program<br/>
-                      <strong>• Detectify</strong> — https://detectify.com/responsible_disclosure/hall_of_fame<br/>
-                      <strong>• Deutsche Telekom</strong> — http://www.telekom.com/security/acknowledgements<br/>
-                      <strong>• Digital Fire</strong> — http://digitalfire.com/services/contact.php<br/>
-                      <strong>• Dropbox</strong> — https://www.dropbox.com/special_thanks<br/>
-                      <strong>• Dropcam</strong> — https://www.dropcam.com/security<br/>
-                      <strong>• DuckDuckGo </strong>— https://duck.co/feedback/bug/-<br/>
-                      <strong>• Duke University</strong> — https://security.duke.edu/policies/responsible-disclosure<br/>
-                      <strong>• Duo Security</strong> — https://www.duosecurity.com/security<br/>
-                      <strong>• Eco Home</strong> — https://www.ecohome.net/bug-reward-disclosure-program/<br/>
-                      <strong>• Ecstasy Data</strong> — http://www.ecstasydata.org/contact.php<br/>
-                      <strong>• Edmodo</strong> — https://www.edmodo.com/contact<br/>
-                      <strong>• Electronic Frontier Foundation</strong> — https://www.eff.org/security/hall-of-fame<br/>
-                      <strong>• Email On Acid</strong> — http://www.emailonacid.com/contact/<br/>
-                      <strong>• EMC Corporation </strong>— http://www.emc.com/contact-us/contact/product-security-response-center.htm<br/>
-                      <strong>• ESET Nod32 (Russia)</strong> — https://club.esetnod32.ru/about/<br/>
-                      <strong>• Europa (CERT-EU)</strong> — https://cert.europa.eu/cert/newsletter/en/latest_HallOfFame_.html<br/>
-                      <strong>• File Pigeon</strong> — http://www.filepigeon.com/faq/<br/>
-                      <strong>• Ford Motor Company (Fleet Department)</strong> — http://www.fleet.ford.com/contact-us/<br/>
-                      <strong>• Form Assembly</strong> — http://www3.formassembly.com/blog/formassembly-vulnerability-and-security-reporting/<br/>
-                      <strong>• FoxyCart</strong> — http://www.foxycart.com/security-contact/<br/>
-                      <strong>• Freelancer</strong> — https://www.freelancer.com/about/security/hall-of-fame<br/>
-                      <strong>• Friendster</strong> — http://www.friendster.com/contact_us<br/>
-                      <strong>• Game Institute</strong> — https://www.gameinstitute.com/contact.php<br/>
-                      <strong>• Gapminder</strong> — http://www.gapminder.org/about-gapminder/contact/<br/>
-                      <strong>• Gearbest</strong> — https://www.gearbest.com/about/report-security-issue.html<br/>
-                      <strong>• Gemini</strong> — https://exchange.gemini.com/security<br/>
-                      <strong>• Geonode</strong> — https://github.com/GeoNode/geonode/commit/f48b14e26894c21006c165beb62a9a13265dba0e<br/>
-                      <strong>• GetJobber</strong> — https://getjobber.com/security/bug-bounty/<br/>
-                      <strong>• GF Overflow</strong> — http://www.gfoverflow.com/contact.php<br/>
-                      <strong>• GitBook</strong> — https://www.gitbook.com/security<br/>
-                      <strong>• GitLab</strong> — https://about.gitlab.com/vulnerability-acknowledgements/ (2014)<br/>
-                      <strong>• Gizmo Host</strong> — http://www.gizmohost.com/contact<br/>
-                      <strong>• Gizmo Quip </strong>— http://gizmoquip.com/#contact<br/>
-                      <strong>• Gli.PH</strong> — https://gli.ph/security.html<br/>
-                      <strong>• Globe Telecom</strong> — https://www.globe.com.ph/privacy-policy.html<br/>
-                      <strong>• Google</strong> — https://www.google.com/about/appsecurity/hall-of-fame (Q3 - 2014 Reward Receipient & Honorable Mention & Q3 - 2017 Reward Receipient)<br/>
-                      <strong>• Guidebook </strong>— https://guidebook.com/security/<br/>
-                      <strong>• Hackerearth</strong> — http://www.hackerearth.com/recruit/faq/<br/>
-                      <strong>• HackForCause</strong> — http://hackforcause.com/hall-of-fame/<br/>
-                      <strong>• Hackerone</strong> — https://hackerone.com/security/thanks<br/>
-                      <strong>• Halodoc</strong> — https://www.halodoc.com/security<br/>
-                      <strong>• Harvard University</strong> — http://about.worldmap.harvard.edu/sponsors<br/>
-                      <strong>• Hash</strong> — https://hash.ai/security<br/>
-                      <strong>• Hipmunk</strong> — https://www.hipmunk.com/about<br/>
-                      <strong>• Honeybadger</strong> — http://docs.honeybadger.io/article/181-security<br/>
-                      <strong>• Hotgloo</strong> — http://www.hotgloo.com/security/hall-of-fame<br/>
-                      <strong>• HTC</strong> — http://www.htc.com/us/terms/product-security/<br/>
-                      <strong>• Huawei</strong> — http://www.huawei.com/en/security/psirt/report-vulnerabilities/index.htm<br/>
-                      <strong>• Hubspot </strong>— https://bugcrowd.com/hubspot<br/>
-                      <strong>• Hubdia</strong> — https://hackerone.com/hubdia/thanks<br/>
-                      <strong>• Hunter I/O</strong> — https://blog.hunter.io/security-bounty-program/<br/>
-                      <strong>• IBM Corporation</strong> — http://www-03.ibm.com/security/secure-engineering/report.html<br/>
-                      <strong>• iBuildApp</strong> — http://ibuildapp.com/about-us/<br/>
-                      <strong>• Icecoder</strong> — https://bugcrowd.com/icecoder/hall-of-fame<br/>
-                      <strong>• iDevAffiliate </strong>— http://www.idevdirect.com/contact.php<br/>
-                      <strong>• Intel</strong> — https://www-ssl.intel.com/content/www/us/en/forms/webmaster-contact-us.html<br/>
-                      <strong>• Internetwache</strong> — https://en.internetwache.org/security/<br/>
-                      <strong>• Invision</strong> — https://bugcrowd.com/invision/hall-of-fame<br/>
-                      <strong>• Jumpshare</strong> — https://jumpshare.com/security<br/>
-                      <strong>• Joomlart</strong> — http://www.joomlart.com/joomlart/contact-us<br/>
-                      <strong>• JotForm </strong>— http://www.jotform.com/about/<br/>
-                      <strong>• Juniper Networks</strong> — https://www.juniper.net/us/en/security/report-vulnerability/<br/>
-                      <strong>• Kayako</strong> — https://classichelp.kayako.com/hc/en-us/articles/360006380700-Security-Vulnerabilities-in-Kayako<br/>
-                      <strong>• Khan Academy</strong> — https://hackerone.com/khanacademy/thanks<br/>
-                      <strong>• Lark Technologies</strong> — https://hackerone.com/lark_technologies<br/>
-                      <strong>• Lavasoft</strong> — http://lavasoft.com/mylavasoft/company/about.php<br/>
-                      <strong>• Lleida</strong> — http://www.lleida.net/en/company/about-us<br/>
-                      <strong>• LG Developers</strong> — http://developer.lge.com/footer/footer/RetrieveContactInfo.dev<br/>
-                      <strong>• LinkedIn</strong> — http://help.linkedin.com/app/safety/answers/detail/a_id/37022<br/>
-                      <strong>• Logentries </strong>— https://logentries.com/doc/security/<br/>
-                      <strong>• Loginradius </strong>— https://www.loginradius.com/bug-bounty/<br/>
-                      <strong>• Magix AG</strong> — http://research.magix.com/(May 2014)<br/>
-                      <strong>• MailChimp</strong> — http://mailchimp.com/about/security-response/<br/>
-                      <strong>• MailRU</strong> — https://hackerone.com/mailru/thanks<br/>
-                      <strong>• Mastercoin Foundation</strong> — https://bugcrowd.com/mastercoin/hall-of-fame<br/>
-                      <strong>• MaxCDN</strong> — http://www.maxcdn.com/company/security/<br/>
-                      <strong>• Meldium</strong> — https://www.meldium.com/security<br/>
-                      <strong>• Memberful</strong> — https://memberful.com/help/general/security/<br/>
-                      <strong>• Metrodeal</strong> — http://www.metrodeal.com/about-us<br/>
-                      <strong>• Microsoft</strong> — http://technet.microsoft.com/en-us/security/cc308575#0114 (January 2014 and July 2016)<br/>
-                      <strong>• Mixmax </strong> — https://hackerone.com/mixmax/thanks<br/>
-                      <strong>• Moment.Me </strong>— http://www.moment.me/<br/>
-                      <strong>• Motorola</strong> — http://www.motorolasolutions.com/US-EN/About/Security%20Vulnerability<br/>
-                      <strong>• Movember</strong> — https://bugcrowd.com/movember/hall-of-fame<br/>
-                      <strong>• My News Desk</strong> — http://www.mynewsdesk.com/about<br/>
-                      <strong>• Narrative Science</strong> — https://bugcrowd.com/narrativescience<br/>
-                      <strong>• National Cyber Security Center (Netherlands)</strong> — https://www.ncsc.nl/security<br/>
-                      <strong>• Niteflirt</strong> — https://support.niteflirt.com/hc/en-us/articles/216991547-Security-Exploit-Bounty-Program<br/>
-                      <strong>• Nitrous I/O</strong> — http://help.nitrous.io/admin-security-response/ (2014)<br/>
-                      <strong>• Nucivic</strong> — http://nucivic.com/security/<br/>
-                      <strong>• Oculus VR</strong> — https://www.oculusvr.com/bug-submission/<br/>
-                      <strong>• oDesk</strong> — https://bugcrowd.com/odesk/hall-of-fame<br/>
-                      <strong>• Omnialert</strong> — https://www.omnilert.com/company/security<br/>
-                      <strong>• OpenDrive</strong> — https://www.opendrive.com/security<br/>
-                      <strong>• OpenText </strong>— http://www.opentext.com/Who-We-Are/Copyright-Information/Security-Acknowledgements<br/>
-                      <strong>• Oracle</strong> — http://www.oracle.com/ocom/groups/public/@otn/documents/webcontent/2367958.xml (April 2015)<br/>
-                      <strong>• OutSystems Inc.</strong> — https://hackerone.com/outsystems_bbp/thanks<br/>
-                      <strong>• Pagerduty</strong> — http://www.pagerduty.com/security/disclosure/<br/>
-                      <strong>• Pandora Media, Inc.</strong> — https://bugcrowd.com/pandora<br/>
-                      <strong>• Panorama9</strong> — http://www.panorama9.com/security<br/>
-                      <strong>• Patreon Technology</strong> — https://www.patrontechnology.com/security-vulnerability-program<br/>
-                      <strong>• Paysa</strong> — https://www.paysa.com/security/whitehat<br/>
-                      <strong>• PayPal </strong>— https://www.paypal.com/webapps/mpp/security-tools/wall-of-fame-honorable-mention (Quarter 2 of 2014)<br/>
-                      <strong>• Peerio </strong>— https://www.peerio.com/bug.html (https://github.com/PeerioTechnologies/peerio-desktop/releases/tag/v2.98.7)<br/>
-                      <strong>• Perfectcloud </strong>— https://www.perfectcloud.io/about.html<br/>
-                      <strong>• Pleio</strong> — https://www.pleio.nl/#support<br/>
-                      <strong>• PhpNuke</strong> — https://downloads.phpnuke.org/en/email/contact_us.htm<br/>
-                      <strong>• Poll Everywhere</strong> — https://www.polleverywhere.com/security<br/>
-                      <strong>• PowerSchool: School Spring 2021</strong> — https://www.bugcrowd.com/powerschool-ss-2021<br/>
-                      <strong>• Pwnie Express</strong> — https://www.pwnieexpress.com/contact-us/<br/>
-                      <strong>• Quantopian</strong> — https://www.quantopian.com/security<br/>
-                      <strong>• Quora </strong>— https://bugcrowd.com/quora/hall-of-fame<br/>
-                      <strong>• Rackspace </strong>— http://www.rackspace.com/information/legal/rsdp<br/>
-                      <strong>• Rainedout</strong> — http://www.rainedout.com/contact<br/>
-                      <strong>• Rapid7</strong> — https://www.rapid7.com/disclosure.jsp<br/>
-                      <strong>• Rebelmouse</strong> — https://about.rebelmouse.com/company<br/>
-                      <strong>• RelateIQ </strong>— https://hackerone.com/relateiq/thanks<br/>
-                      <strong>• Retool </strong>— https://docs.retool.com/docs/security<br/>                      
-                      <strong>• Ribose </strong>— https://www.ribose.com/security/hall_of_fame<br/>
-                      <strong>• Rietta</strong> — http://rietta.com/contact/security/<br/>
-                      <strong>• Risk I/O </strong>— https://www.risk.io/security<br/>
-                      <strong>• Robocoin</strong> — https://hackerone.com/robocoin/thanks<br/>
-                      <strong>• Samsung</strong> — https://samsungtvbounty.com/HallOfFame.aspx<br/>
-                      <strong>• Sendcloud</strong> — https://www.sendcloud.com/bug-bounty-program/<br/>
-                      <strong>• Scroll</strong> — https://scroll.help/en/articles/3344853-does-scroll-have-a-bug-bounty-or-responsible-disclosure-program<br />
-                      <strong>• Search on Zippy</strong> — http://www.searchonzippy.com/contact<br/>
-                      <strong>• Sellfy</strong> — https://sellfy.com/security/<br/>
-                      <strong>• Senate (GOV)</strong> — https://www.senate.gov/general/content_responsibility.htm<br/>
-                      <strong>• Shaukk</strong> — http://shaukk.com/developers.php<br/>
-                      <strong>• Site Liner</strong> — http://www.siteliner.com/contact<br/>
-                      <strong>• Silent Circle</strong> — https://bugcrowd.com/silentcircle<br/>
-                      <strong>• Slack</strong> — https://hackerone.com/slack/thanks<br/>
-                      <strong>• SmartQ</strong> — http://www.getsmartq.com/support.php<br/>
-                      <strong>• Sony</strong> — https://secure.sony.net/hallofthanks<br/>
-                      <strong>• Sophos</strong> — https://bugcrowd.com/sophos/hall-of-fame<br/>
-                      <strong>• Sourceforge Japan</strong> — http://sourceforge.jp/docs/SourceForge.JP%E3%81%AE%E9%80%A3%E7%B5%A1%E5%85%88<br/>
-                      <strong>• SoundCloud</strong> — http://help.soundcloud.com/customer/portal/articles/439715-responsible-disclosure<br/>
-                      <strong>• Splitwise </strong>— http://blog.splitwise.com/about/responsible-disclosure-special-thanks/<br/>
-                      <strong>• StarHub </strong>— http://www.starhub.com/personal/support/contact-us.html<br/>
-                      <strong>• Survey Gizmo</strong> — http://surveygizmo.helpgizmo.com/help/contact-us<br/>
-                      <strong>• Spectrocoin</strong> — https://www.crowdcurity.com/spectrocoin/hall-of-fame/all<br/>
-                      <strong>• Spotify</strong> — https://www.spotify.com/us/bounty/<br/>
-                      <strong>• Sprout Social</strong> — http://sproutsocial.com/responsible-disclosure-policy<br/>
-                      <strong>• SSLMate</strong> — https://sslmate.com/security<br/>
-                      <strong>• Steam</strong> — https://support.steampowered.com/index.php<br/>
-                      <strong>• StoptheHacker</strong> — https://hackerone.com/stopthehacker/thanks<br/>
-                      <strong>• Stripe</strong> — https://stripe.com/docs/security<br/>
-                      <strong>• Strivewire</strong> — https://strivewire.com/security<br/>
-                      <strong>• Student CRM - Data Harvesting U.K</strong> — http://www.student-crm.co.uk/about/security/<br/>
-                      <strong>• Swipe Identity</strong> — https://bugcrowd.com/c030/hall-of-fame<br/>
-                      <strong>• Tagged</strong> — http://safety.tagged.com/security/<br/>
-                      <strong>• The Email Laundry</strong> — https://www.theemaillaundry.com/responsible-disclosure/<br/>
-                      <strong>• Thumbr</strong> — http://www.thumbr.io/tos<br/>
-                      <strong>• TikTok</strong> — https://hackerone.com/tiktok/thanks/2022?type=team<br/>
-                      <strong>• Trend Micro </strong>— http://esupport.trendmicro.com/en-us/business/pages/vulnerability-response.aspx#acknowledgement<br/>
-                      <strong>• Tresorit</strong> — https://tresorit.com/hacking-challenge<br/>
-                      <strong>• Tumblr</strong> — http://www.tumblr.com/security<br/>
-                      <strong>• Twitch TV</strong> — http://www.twitch.tv/p/security<br/>
-                      <strong>• Twilio</strong> — https://bugcrowd.com/twilio/hall-of-fame<br/>
-                      <strong>• Twitter</strong> — https://about.twitter.com/company/security (2013, 2014, 2016, 2018)<br/>
-                      <strong>• Typo3</strong> — https://typo3.org/community/teams/security/bug-bounty-program<br/>
-                      <strong>• Uber</strong> — https://www.uber.com/security<br/>
-                      <strong>• uShip</strong> — https://help.uship.com/hc/en-us<br/>
-                      <strong>• United States Naval Academy</strong> — http://www.usna.edu/About/<br/>
-                      <strong>• UK Secure Web Hosting</strong> — http://www.uksecurewebhosting.co.uk/contact.php<br/>
-                      <strong>• Upstox</strong> — https://upstox.com/bug-bounty/<br/>
-                      <strong>• Upwork</strong> — https://bugcrowd.com/upwork<br/>
-                      <strong>• US Unlocked</strong> — https://www.usunlocked.com/contact_us.php<br/>
-                      <strong>• U.S Department of Defense</strong> — https://hackerone.com/deptofdefense/thanks<br/>
-                      <strong>• Valve Software</strong> — http://www.valvesoftware.com/security/<br/>
-                      <strong>• Veridu</strong> — https://veridu.com/wiki/Security_Procedures#Vulnerability_Reward_Program<br/>
-                      <strong>• Via Forensics</strong> — https://viaforensics.com/company/contact/<br/>
-                      <strong>• VidaXL </strong> — https://www.vidaxl.com.au/security<br/>
-                      <strong>• Visa Incorporation</strong> — http://www.visa.com/globalgateway/<br/>
-                      <strong>• Vox Analytics</strong> — https://www.voxanalytics.com/contact<br/>
-                      <strong>• Wattpad </strong>— https://support.wattpad.com/hc/en-us<br/>
-                      <strong>• WePay</strong> — https://hackerone.com/wepay/thanks<br/>
-                      <strong>• Western Union</strong> — https://bugcrowd.com/westernunion/hall-of-fame<br/>
-                      <strong>• Winni</strong> — https://www.winni.in/bug-bounty#bbHOF<br/>
-                      <strong>• Wizehive</strong> — https://www.wizehive.com/security/<br/>
-                      <strong>• Wordpress</strong> — https://hackerone.com/wordpress/thanks<br/>
-                      <strong>• World Vision Philippines</strong> — http://worldvision.org.ph/contact-us<br/>
-                      <strong>• WPEngine</strong> — http://wpengine.com/contact/<br/>
-                      <strong>• Yahoo!</strong> — https://hackerone.com/yahoo/thanks<br/>
-                      <strong>• Yamaha Club Philippines</strong> — https://www.yamahaclub.com.ph/contact/<br/>
-                      <strong>• Yandex </strong>— http://company.yandex.com/security/hall-of-fame.xml (March 2014)<br/>
-                      <strong>• YCombinator</strong> — https://www.ycombinator.com/security/<br/>
-                      <strong>• Yesware </strong>— http://www.yesware.com/security/<br/>
-                      <strong>• YiiFramework</strong> — http://www.yiiframework.com/security/<br/>
-                      <strong>• Zendesk</strong> — http://www.zendesk.com/company/responsible-disclosure-policy<br/>
-                      <strong>• Zynga</strong> — http://company.zynga.com/security/whitehats (2014)<br/>
-                      </p>
-                            <a href="#" onclick="toggleText(this, 'more'); return false;" class="container cool-link">Read More</a>
-    </section>
-          
+  <section data-aos="fade-up">
+    <h2>News &amp; Press</h2>
 
-    <section data-aos="fade-up">
-          <h2>Blog</h2>
-          <p>To read my write ups, just click <a href="https://blog.evanricafort.com" target="_blank" title="Blog" class="container cool-link">here!</a></p>
-    </section>
-                                
-                            <script>
-                              function toggleText(btn, id) {
-                                const content = document.getElementById(id);
+    <p><strong>Featured in SecurityWeek (Google Nest Findings)</strong></p>
+    <ul>
+      <li><p>Security Week — <a href="http://www.securityweek.com/vulnerabilities-found-website-google-owned-nest" target="_blank" class="container cool-link">http://www.securityweek.com/vulnerabilities-found-website-google-owned-nest</a></p></li>
+    </ul>
 
-                                if (content.classList.contains("show")) {
-                                  content.classList.remove("show");
-                                  btn.textContent = "Read More";
-                                } else {
-                                  content.classList.add("show");
-                                  btn.textContent = "Show Less";
-                                }
-                              }
-                            </script>
+    <p><strong>Featured in Pinoy Hack News (XSS Vulnerabilities)</strong></p>
+    <ul>
+      <li><p>Pinoy Hack News — <a href="https://web.archive.org/web/20211206202021/http://www.pinoyhacknews.com/xss-in-natgeo-playstation-and-barack-obama" target="_blank" class="container cool-link">http://www.pinoyhacknews.com/xss-in-natgeo-playstation-and-barack-obama (Archived)</a></p></li>
+    </ul>
 
-                            <script>
-                              
-                              let canToggle = true;
+    <p><strong>Featured in CKEditor (4.4.6 Security Patch Released)</strong></p>
+    <ul>
+      <li><p>CKEditor — <a href="https://web.archive.org/web/20210411181536/https://ckeditor.com/blog/CKEditor-4.4.6-Released/" target="_blank" class="container cool-link">http://ckeditor.com/blog/CKEditor-4.4.6-Released (Archived)</a></p></li>
+    </ul>
 
-                              const imageToggle = document.getElementById('dark-mode-toggle');
+    <p><strong>Featured in Blesta Security Advisory (XSS Vulnerabilities)</strong></p>
+    <ul>
+      <li><p>Blest Security Advisory (Core-931) — <a href="http://www.blesta.com/2013/12/20/security-advisory-cross-site-scripting-vulnerabilities-2/" target="_blank" class="container cool-link">http://www.blesta.com/2013/12/20/security-advisory-cross-site-scripting-vulnerabilities-2/</a></p></li>
+    </ul>
 
-                              
-                              imageToggle.addEventListener('mouseenter', () => {
-                                if (canToggle) {
-                                  document.body.classList.toggle('dark-mode');
-                                  const mode = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
-                                  localStorage.setItem('theme', mode);
-                                  canToggle = false; 
-                                }
-                              });
+    <p><strong>Featured in MIT Technology Review</strong></p>
+    <ul>
+      <li><p>Life as a bug bounty hunter — <a href="https://www.technologyreview.com/s/611896/life-as-a-bug-bounty-hunter/" target="_blank" class="container cool-link">https://www.technologyreview.com/s/611896/life-as-a-bug-bounty-hunter/</a></p></li>
+    </ul>
 
-                              imageToggle.addEventListener('mouseleave', () => {
-                                canToggle = true; 
-                              });
+    <p><strong>Featured in Peerio (Security Patch Released)</strong></p>
+    <ul>
+      <li><p>Security Patch Released — <a href="https://web.archive.org/web/20201029003613/github.com/PeerioTechnologies/peerio-desktop/releases/tag/v2.98.7" target="_blank" class="container cool-link">https://github.com/PeerioTechnologies/peerio-desktop/releases/tag/v2.98.7 (Archived)</a></p></li>
+    </ul>
 
-                              
-                              window.onload = function() {
-                                if (localStorage.getItem('theme') === 'dark') {
-                                  document.body.classList.add('dark-mode');
-                                }
-                              };
-                            </script>
+    <p><strong>Featured in Synack Red Team Calendars (2018 &amp; 2019)</strong></p>
+    <ul>
+      <li><p>The Places You Go with the Synack Red Team (2018 SRT Calendar)</p></li>
+      <li><p>Hacker-to-Hacker (2019 SRT Calendar)</p></li>
+    </ul>
 
-                            <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <p><strong>Featured in Bugcrowd (Inside the Mind of a Hacker)</strong></p>
+    <ul>
+      <li><p>Inside the Mind of a Hacker (2019 Edition [Page 16]) — <a href="https://dochub.com/evanricafort/P0B76b3K6dd453kwn2y1Gg/itmoah2019-pdf?dt=zzhzncmAKDBtGjznrQTH" target="_blank" class="container cool-link">https://dochub.com/P0B76b3K6dd453kwn2y1Gg/itmoah2019-pdf</a></p></li>
+    </ul>
 
-                            <script>
-                              AOS.init({
-                                duration: 700,
-                                easing: 'ease-out-quad',
-                                once: true,
-                                mirror: false,
-                              });
-                            </script>
+    <p><strong>Featured in Wordfence Intelligence</strong></p>
+    <ul>
+      <li><p>Wordfence Intelligence Vulnerability Researchers Profile — <a href="https://www.wordfence.com/threat-intel/vulnerabilities/researchers/evan-ricafort" target="_blank" class="container cool-link">https://www.wordfence.com/threat-intel/vulnerabilities/researchers/evan-ricafort</a></p></li>
+    </ul>
 
-                            <script>
-                              
-                              window.addEventListener('load', function () {
-                                const bar = document.getElementById('loading-bar');
-                                bar.style.transition = 'opacity 0.5s ease';
-                                bar.style.opacity = 0;
-                                setTimeout(() => bar.remove(), 500);
-                              });
-                            </script>
+    <p><strong>Featured in Wordpress (WordPress 5.2.4 and 5.4.1 Security Patch Release)</strong></p>
+    <ul>
+      <li><p>WordPress 5.2.4 - <a href="https://wordpress.org/news/2019/10/wordpress-5-2-4-security-release/" target="_blank" class="container cool-link">https://wordpress.org/news/2019/10/wordpress-5-2-4-security-release/</a></p></li>
+      <li><p>WordPress 5.4.1 - <a href="https://wordpress.org/news/2020/04/wordpress-5-4-1/" target="_blank" class="container cool-link">https://wordpress.org/news/2020/04/wordpress-5-4-1/</a></p></li>
+      <li><p>WPVulnhub - <a href="https://wpvulndb.com/vulnerabilities/9908" target="_blank" class="container cool-link">https://wpvulndb.com/vulnerabilities/9908</a></p></li>
+      <li><p>SecurityWeek - <a href="https://www.securityweek.com/wordpress-524-patches-six-vulnerabilities" target="_blank" class="container cool-link">https://www.securityweek.com/wordpress-524-patches-six-vulnerabilities</a></p></li>
+      <li><p>Rapid7 - <a href="https://www.rapid7.com/db/vulnerabilities/freebsd-vid-459df1ba-051c-11ea-9673-4c72b94353b5" target="_blank" class="container cool-link">https://www.rapid7.com/db/vulnerabilities/freebsd-vid-459df1ba-051c-11ea-9673-4c72b94353b5</a></p></li>
+      <li><p>MITRE (CVE-2019-17674) - <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-17674" target="_blank" class="container cool-link">https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-17674</a></p></li>
+      <li><p>MITRE (CVE-2020-11025) - <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-11025" target="_blank" class="container cool-link">https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-11025</a></p></li>
+      <li><p>NIST (CVE-2019-17674) - <a href="https://nvd.nist.gov/vuln/detail/CVE-2019-17674" target="_blank" class="container cool-link">https://nvd.nist.gov/vuln/detail/CVE-2019-17674</a></p></li>
+      <li><p>NIST (CVE-2020-11025) - <a href="https://nvd.nist.gov/vuln/detail/CVE-2020-11025" target="_blank" class="container cool-link">https://nvd.nist.gov/vuln/detail/CVE-2020-11025</a></p></li>
+    </ul>
 
-                            <script>
-                              window.addEventListener('scroll', () => {
-                                const scrollBar = document.getElementById('scroll-progress');
-                                const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-                                const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-                                const scrollPercent = (scrollTop / scrollHeight) * 100;
-                                scrollBar.style.width = scrollPercent + '%';
-                              });
-                            </script>
+    <p><strong>Featured in Wordpress (WordPress 5.8.1 Security Patch Release)</strong></p>
+    <ul>
+      <li><p>WordPress 5.8.1 - <a href="https://wordpress.org/news/2021/09/wordpress-5-8-1-security-and-maintenance-release/" target="_blank" class="container cool-link">https://wordpress.org/news/2021/09/wordpress-5-8-1-security-and-maintenance-release/</a></p></li>
+      <li><p>SoMag News - <a href="https://www.somagnews.com/security-focused-wordpress-5-8-1-is-live-heres-whats-new/" target="_blank" class="container cool-link">https://www.somagnews.com/security-focused-wordpress-5-8-1-is-live-heres-whats-new/</a></p></li>
+      <li><p>WPMainline - <a href="https://wpmainline.com/2021/09/09/wordpress-5-8-1-released-squashes-60-bugs-and-patches-three-security-vulnerabilities/" target="_blank" class="container cool-link">https://wpmainline.com/2021/09/09/wordpress-5-8-1-released-squashes-60-bugs-and-patches-three-security-vulnerabilities/</a></p></li>
+      <li><p>Paradox Digital (UK) - <a href="https://paradoxdigital.uk/blog/wordpress-5-8-1-security-update/" target="_blank" class="container cool-link">https://paradoxdigital.uk/blog/wordpress-5-8-1-security-update/</a></p></li>
+      <li><p>MITRE (CVE-2021-39202) - <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-39202" target="_blank" class="container cool-link">https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-39202</a></p></li>
+      <li><p>NIST (CVE-2021-39202) - <a href="https://nvd.nist.gov/vuln/detail/CVE-2021-39202" target="_blank" class="container cool-link">https://nvd.nist.gov/vuln/detail/CVE-2021-39202</a></p></li>
+    </ul>
 
-                            <script>
-                                  const mapCircle = document.getElementById('map-circle');
-                                  const address = document.getElementById('bio_left');
+    <p><strong>Featured in Apple (Apple Security Update - Fall 2022)</strong></p>
+    <ul>
+      <li><p>Apple - macOS Ventura 13 (CVE-2022-32918 - Photos Privacy Issue) - <a href="https://support.apple.com/en-us/HT213488" target="_blank" class="container cool-link">https://support.apple.com/en-us/HT213488</a></p></li>
+      <li><p>SecList - <a href="https://seclists.org/fulldisclosure/2022/Oct/39" target="_blank" class="container cool-link">https://seclists.org/fulldisclosure/2022/Oct/39</a></p></li>
+      <li><p>MITRE (CVE-2022-32918) - <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-32918" target="_blank" class="container cool-link">https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-32918</a></p></li>
+      <li><p>NIST (CVE-2022-32918) - <a href="https://nvd.nist.gov/vuln/detail/CVE-2022-32918" target="_blank" class="container cool-link">https://nvd.nist.gov/vuln/detail/CVE-2022-32918</a></p></li>
+    </ul>
+  </section>
 
-                                  address.addEventListener('mouseenter', () => {
-                                    mapCircle.style.transform = 'scale(1)';
-                                  });
+  <section data-aos="fade-up">
+    <h2>Projects &amp; Toolkits</h2>
 
-                                  address.addEventListener('mouseleave', () => {
-                                    mapCircle.style.transform = 'scale(0)';
-                                  });
+    <p><strong>Lazymap</strong></p>
+    <ul>
+      <li><p>NMAP Equipped Network Penetration Testing Tool — <a href="https://github.com/evanricafort/lazymap" target="_blank" class="container cool-link">https://github.com/evanricafort/lazymap</a></p></li>
+    </ul>
 
-                                  address.addEventListener('mousemove', (e) => {
-                                    const offsetX = 20;
-                                    const offsetY = 20;
-                                    mapCircle.style.top = `${e.clientY + offsetY}px`;
-                                    mapCircle.style.left = `${e.clientX + offsetX}px`;
-                              });
-                            </script>
+    <p><strong>SegIt</strong></p>
+    <ul>
+      <li><p>Automated Network Segmentation Testing Kit — <a href="https://github.com/evanricafort/segit" target="_blank" class="container cool-link">https://github.com/evanricafort/segit</a></p></li>
+    </ul>
 
-                            <script>
-                            const flickerChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-                            const glowSpans = document.querySelectorAll('.glow-text span');
+    <p><strong>SPF Record Detector</strong></p>
+    <ul>
+      <li><p>Validate email security configurations and analyze SPF records — <a href="/spfrecordchecker" target="_blank" class="container cool-link">https://evanricafort.com/spfrecordchecker</a></p></li>
+    </ul>
 
-                            glowSpans.forEach(span => {
-                              const originalChar = span.textContent;
+    <p><strong>SSL Certificate Analyzer</strong></p>
+    <ul>
+      <li><p>Analyze weak hash, expiry, wildcards and issuer — <a href="/weaksslcerts" target="_blank" class="container cool-link">https://evanricafort.com/weaksslcerts</a></p></li>
+    </ul>
 
-                              span.addEventListener('mouseenter', () => {
-                                let frame = 0;
-                                const maxFrames = 15;
+    <p><strong>Weak SSL Cipher Analyzer</strong></p>
+    <ul>
+      <li><p>Analyze weak SSL Cipher/Protocols from nmap scan result. — <a href="/weaksslciphers" target="_blank" class="container cool-link">https://evanricafort.com/weaksslciphers</a></p></li>
+    </ul>
 
-                                span.classList.add('flicker-glow');
+    <p><strong>SSH Security Analyzer</strong></p>
+    <ul>
+      <li><p>Analyze SSH configurations or nmap scans for cryptographic risks. — <a href="/sshsecurity" target="_blank" class="container cool-link">https://evanricafort.com/sshsecurity</a></p></li>
+    </ul>
 
-                                const interval = setInterval(() => {
-                                  span.textContent = flickerChars.charAt(Math.floor(Math.random() * flickerChars.length));
-                                  frame++;
-                                  if (frame >= maxFrames) {
-                                    clearInterval(interval);
-                                    span.textContent = originalChar;
-                                    span.classList.remove('flicker-glow');
-                                  }
-                                }, 40);
-                              });
-                            });
-                            </script>
+    <p><strong>Wayback (Web Archive)</strong></p>
+    <ul>
+      <li><p>Web archive URL fetcher. — <a href="/webarchive" target="_blank" class="container cool-link">https://evanricafort.com/webarchive</a></p></li>
+    </ul>
 
-                            <button id="scrollToTopBtn" title="Scroll to Top">
-                              <i class="fas fa-plane" id="airplaneIcon"></i>
-                            </button>
+    <p><strong>Google / Gemini API Key Checker</strong></p>
+    <ul>
+      <li><p>Test a leaked API key against Gemini and Google services. — <a href="/googleapikeychecker" target="_blank" class="container cool-link">https://evanricafort.com/googleapikeychecker</a></p></li>
+    </ul>
 
-                            <script>
-                            const scrollBtn = document.getElementById('scrollToTopBtn');
-                            const airplane = document.getElementById('airplaneIcon');
+    <p><strong>JWT Auditor</strong></p>
+    <ul>
+      <li><p>JWT Security Testing Tool — <a href="/jwtauditor" target="_blank" class="container cool-link">https://evanricafort.com/jwtauditor</a></p></li>
+    </ul>
 
-                            let isFlying = false;
+    <p><strong>NMAP Sorting Kit</strong></p>
+    <ul>
+      <li><p>NMAP result sorting kit. — <a href="/nmapsortingkit" target="_blank" class="container cool-link">https://evanricafort.com/nmapsortingkit</a></p></li>
+    </ul>
 
-                            window.addEventListener('scroll', () => {
-                              const nearBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 100;
-                              if (!isFlying) scrollBtn.classList.toggle('show', nearBottom);
-                            });
+    <p><strong>Nmap Result Parser</strong></p>
+    <ul>
+      <li><p>NMAP sorting tool for version disclosure. — <a href="/nmapresultparser" target="_blank" class="container cool-link">https://evanricafort.com/nmapresultparser</a></p></li>
+    </ul>
+  </section>
 
-                            scrollBtn.addEventListener('click', () => {
-                              if (isFlying) return;
-                              isFlying = true;
+  <section data-aos="fade-up">
+    <h2>Testimonials</h2>
 
-                              const originalStyle = scrollBtn.getAttribute('style') || '';
-                              const rect = scrollBtn.getBoundingClientRect();
-                              const startScroll = window.scrollY;
-                              const startTop = rect.top;
-                              const duration = 2500;
-                              const startTime = performance.now();
+    <ul>
+      <li><p><strong>Dominic Yeadon</strong> - Managing Director at Data Harvesting U.K</p></li>
+    </ul>
+    <p><i>"Evan helped us by identifying a vulnerability in our public website, and thanks to Evan's professional standards he did so in accordance with our Responsible Disclosure Policy. Evan is one of the good guys."</i></p>
 
-                              scrollBtn.style.position = 'fixed';
-                              scrollBtn.style.left = `${rect.left}px`;
-                              scrollBtn.style.top = `${rect.top}px`;
-                              scrollBtn.style.margin = '0';
-                              scrollBtn.style.transition = 'none';
-                              scrollBtn.style.pointerEvents = 'none';
-                              scrollBtn.classList.remove('show');
+    <ul>
+      <li><p><strong>Corina Mansueto</strong> - Director of Social Media &amp; Customer Service at Lavasoft</p></li>
+    </ul>
+    <p><i>"Evan assisted in identifying a vulnerability on our website. He was extremely easy to work with to have this issue resolved in a timely and professional manner. Thanks for all your help Evan, we greatly appreciate it."</i></p>
 
-                              let lastTrailTime = 0;
+    <ul>
+      <li><p><strong>Max Hunter</strong> - Web Development Team Lead at Electronic Frontier Foundation (EFF)</p></li>
+    </ul>
+    <p><i>"Evan's responsible disclosure helped keep our nonprofit's servers secure."</i></p>
 
-                              function animateFlight(time) {
-                                const t = Math.min((time - startTime) / duration, 1);
-                                const yOffset = t * window.innerHeight;
-                                const fade = 1 - t * 0.8;
+    <ul>
+      <li><p><strong>Hipmunk</strong> - Hipmunk Security Team</p></li>
+    </ul>
+    <p><i>"Thank you Evan for helping us uncover a hidden vulnerability issue in our account management flow. We couldn't have found it without your help! Now our team can work to fix this issue and give more protection to our customers accounts. Thanks!"</i></p>
+  </section>
 
-                                const currentTop = startTop - yOffset;
-                                scrollBtn.style.top = `${currentTop}px`;
-                                scrollBtn.style.opacity = fade;
+  <section data-aos="fade-up">
+    <h2>Achievements</h2>
+    <p>I reported valid security vulnerability to the following companies. (Last Update August 12, 2026)</p>
 
-                                window.scrollTo({ top: startScroll - startScroll * t, behavior: 'instant' });
+    <!-- The entries below are always visible; everything inside #more is revealed by "Read More". -->
+    <strong>• 123 Contact Form</strong> — http://www.123contactform.com/security-acknowledgements.htm<br />
+    <strong>• 4chan</strong> — https://hackerone.com/4chan/thanks<br />
+    <strong>• ActiveCampaign</strong> — http://www.activecampaign.com/security/<br />
+    <strong>• Adobe</strong> — http://helpx.adobe.com/security/acknowledgements.html (2014)<br />
+    <strong>• Advance Custom Fields (WP Plugin)</strong> — https://www.advancedcustomfields.com/contact/<br />
+    <strong>• Aha IO</strong> — http://aha.io/legal/security<br />
+    <strong>• Aimlab</strong> — https://aimlab.gg/bug-bounty<br />
+    <strong>• Airbnb</strong> — https://www.airbnb.com/help/policies/responsible_disclosure#responsible_disclosure_policy<br />
+    <strong>• AndroidFreeApps</strong> — http://www.androidfreeapp.net/security-researcher-acknowledgments/ (May 2014)<br />
+    <strong>• Appcelerator</strong> — https://www.appcelerator.com/privacy/responsible-disclosure-of-security-vulnerabilities/<br />
+    <strong>• Apple</strong> — http://support.apple.com/kb/HT1318 (2014, 2021 &amp; 2022)<br />
+    <strong>• Apptentive</strong> — https://www.apptentive.com/contact/<br />
+    <strong>• Appointlet</strong> — https://www.appointlet.com/<br />
+    <strong>• Artsy</strong> — https://artsy.net/security<br />
+    <strong>• AT&amp;T</strong> — https://hackerone.com/att/thanks<br />
+    <strong>• Atlassian</strong> — https://bugcrowd.com/atlassian/hall-of-fame<br />
+    <strong>• Attack Secure</strong> — http://attack-secure.com/whitehat/<br />
+    <strong>• Audiomack</strong> — http://www.audiomack.com/about<br />
+    <strong>• Automattic</strong> — https://hackerone.com/automattic/thanks<br />
+    <strong>• AVG Technologies</strong> — https://support.avg.com/support_contact_form?l=en_US<br />
+    <strong>• AwardWallet</strong> — https://app.cobalt.io/awardwallet/awardwallet/hall-of-fame/all<br />
 
-                                
-                                const planeBox = airplane.getBoundingClientRect();
-                                const trailX = planeBox.left + planeBox.width / 2 - 4;
-                                const trailY = planeBox.top + planeBox.height / 2 + 25;
+    <p id="more">
+      <strong>• Bandcamp</strong> — https://get.bandcamp.help/hc/en-us<br />
+      <strong>• Barracuda Labs</strong> — https://barracudalabs.com/research-resources/bug-bounty-program/bug-bounty-hall-of-fame-2/<br />
+      <strong>• Base CRM</strong> — https://getbase.com/security/<br />
+      <strong>• Blackberry</strong> — http://ca.blackberry.com/business/enterprise-mobility/mobile-security/incident-response-team/collaborations.html (2014)<br />
+      <strong>• Blackboard</strong> — https://bugcrowd.com/blackboard<br />
+      <strong>• Blesta</strong> — http://www.blesta.com/responsible-disclosure/(CORE-931)<br />
+      <strong>• Bidmail</strong> — http://www.bidmail.com/index.php/contact/<br />
+      <strong>• Big Commerce</strong> — http://www.bigcommerce.com/about-us/<br />
+      <strong>• BigParser</strong> — https://www.bigparser.com/security<br />
+      <strong>• Birst</strong> — http://www.birst.com/security-reporting<br />
+      <strong>• Bitcasa</strong> — https://support.bitcasa.com/hc/en-us/articles/202210658-How-To-Responsibly-Report-Security-Concerns<br />
+      <strong>• Bitcurex</strong> — https://bitcurex.com/page/1485694-bezpieczenstwo<br />
+      <strong>• Bitdefender</strong> — http://www.bitdefender.com/site/view/bug-bounty-hall-of-fame.html<br />
+      <strong>• Bitvavo</strong> — https://bitvavo.com/en/responsible-disclosure<br />
+      <strong>• Braintree Payment Solutions</strong> — https://www.braintreepayments.com/developers/disclosure<br />
+      <strong>• Brand and Sign</strong> — http://www.brandandsign.com/privacy/responsible-disclosure-policy/<br />
+      <strong>• BoardGameGeek</strong> — https://boardgamegeek.com/responsible_disclosure_policy<br />
+      <strong>• Bonusly</strong> — https://bonus.ly/security<br />
+      <strong>• Box</strong> — https://www.box.com/about-us/security<br />
+      <strong>• Bufferapp</strong> — https://bufferapp.com/security<br />
+      <strong>• Bugcrowd</strong> — https://bugcrowd.com/bugcrowd/hall-of-fame<br />
+      <strong>• Bugherd</strong> — http://bugherd.com/security<br />
+      <strong>• Bugify</strong> — https://bugify.com/security<br />
+      <strong>• Calameo</strong> — http://en.calameo.com/content/about_calameo-about-calameo.htm<br />
+      <strong>• Calendar Budget</strong> — https://calendarbudget.com/support2/open.php<br />
+      <strong>• Changetip</strong> — https://www.crowdcurity.com/changetip/hall-of-fame/all<br />
+      <strong>• Cisco</strong> — http://www.cisco.com/web/about/security/psirt/security_vulnerability_policy.html<br />
+      <strong>• CKEditor</strong> — http://ckeditor.com/blog/CKEditor-4.4.6-Released (CKEditor 4.4.6 Critical Patch)<br />
+      <strong>• Clause I/O</strong> — https://clause.io/security<br />
+      <strong>• Cloudflare</strong> — https://hackerone.com/cloudflare/thanks<br />
+      <strong>• Cloudsmith</strong> — https://help.cloudsmith.io/docs/exploits-hall-of-fame<br />
+      <strong>• Colupon</strong> — https://bugcrowd.com/c028<br />
+      <strong>• Commando IO</strong> — https://commando.io/security.html#hall-of-fame-section<br />
+      <strong>• Compilr</strong> — https://compilr.com/forum/security-thanks<br />
+      <strong>• Comodo Dragon</strong> — http://www.comodo.com/contact-comodo/contact-us.php<br />
+      <strong>• Coinbase</strong> — https://hackerone.com/coinbase/thanks<br />
+      <strong>• Constant Contact</strong> — http://www.constantcontact.com/about-constant-contact/security/report-vulnerability.jsp<br />
+      <strong>• Crowdcurity</strong> — https://www.crowdcurity.com/crowdcurity/hall-of-fame/all<br />
+      <strong>• Crowdrise</strong> — http://www.crowdrise.com/UnitedRelief-ARC (Reward ($100) Donated to Typhoon Haiyan Victims in the Philippines [2013])<br />
+      <strong>• Cozy</strong> — https://cozy.co/security-and-privacy/<br />
+      <strong>• Dell Secureworks</strong> — http://www.secureworks.co.uk/contact/disclosure/<br />
+      <strong>• Deskera</strong> — https://www.deskera.com/blog/deskera-responsible-disclosure-reward-program<br />
+      <strong>• Detectify</strong> — https://detectify.com/responsible_disclosure/hall_of_fame<br />
+      <strong>• Deutsche Telekom</strong> — http://www.telekom.com/security/acknowledgements<br />
+      <strong>• Digital Fire</strong> — http://digitalfire.com/services/contact.php<br />
+      <strong>• Dropbox</strong> — https://www.dropbox.com/special_thanks<br />
+      <strong>• Dropcam</strong> — https://www.dropcam.com/security<br />
+      <strong>• DuckDuckGo</strong> — https://duck.co/feedback/bug/-<br />
+      <strong>• Duke University</strong> — https://security.duke.edu/policies/responsible-disclosure<br />
+      <strong>• Duo Security</strong> — https://www.duosecurity.com/security<br />
+      <strong>• Eco Home</strong> — https://www.ecohome.net/bug-reward-disclosure-program/<br />
+      <strong>• Ecstasy Data</strong> — http://www.ecstasydata.org/contact.php<br />
+      <strong>• Edmodo</strong> — https://www.edmodo.com/contact<br />
+      <strong>• Electronic Frontier Foundation</strong> — https://www.eff.org/security/hall-of-fame<br />
+      <strong>• Email On Acid</strong> — http://www.emailonacid.com/contact/<br />
+      <strong>• EMC Corporation</strong> — http://www.emc.com/contact-us/contact/product-security-response-center.htm<br />
+      <strong>• ESET Nod32 (Russia)</strong> — https://club.esetnod32.ru/about/<br />
+      <strong>• Europa (CERT-EU)</strong> — https://cert.europa.eu/cert/newsletter/en/latest_HallOfFame_.html<br />
+      <strong>• File Pigeon</strong> — http://www.filepigeon.com/faq/<br />
+      <strong>• Ford Motor Company (Fleet Department)</strong> — http://www.fleet.ford.com/contact-us/<br />
+      <strong>• Form Assembly</strong> — http://www3.formassembly.com/blog/formassembly-vulnerability-and-security-reporting/<br />
+      <strong>• FoxyCart</strong> — http://www.foxycart.com/security-contact/<br />
+      <strong>• Freelancer</strong> — https://www.freelancer.com/about/security/hall-of-fame<br />
+      <strong>• Friendster</strong> — http://www.friendster.com/contact_us<br />
+      <strong>• Game Institute</strong> — https://www.gameinstitute.com/contact.php<br />
+      <strong>• Gapminder</strong> — http://www.gapminder.org/about-gapminder/contact/<br />
+      <strong>• Gearbest</strong> — https://www.gearbest.com/about/report-security-issue.html<br />
+      <strong>• Gemini</strong> — https://exchange.gemini.com/security<br />
+      <strong>• Geonode</strong> — https://github.com/GeoNode/geonode/commit/f48b14e26894c21006c165beb62a9a13265dba0e<br />
+      <strong>• GetJobber</strong> — https://getjobber.com/security/bug-bounty/<br />
+      <strong>• GF Overflow</strong> — http://www.gfoverflow.com/contact.php<br />
+      <strong>• GitBook</strong> — https://www.gitbook.com/security<br />
+      <strong>• GitLab</strong> — https://about.gitlab.com/vulnerability-acknowledgements/ (2014)<br />
+      <strong>• Gizmo Host</strong> — http://www.gizmohost.com/contact<br />
+      <strong>• Gizmo Quip</strong> — http://gizmoquip.com/#contact<br />
+      <strong>• Gli.PH</strong> — https://gli.ph/security.html<br />
+      <strong>• Globe Telecom</strong> — https://www.globe.com.ph/privacy-policy.html<br />
+      <strong>• Google</strong> — https://www.google.com/about/appsecurity/hall-of-fame (Q3 - 2014 Reward Receipient &amp; Honorable Mention &amp; Q3 - 2017 Reward Receipient)<br />
+      <strong>• Guidebook</strong> — https://guidebook.com/security/<br />
+      <strong>• Hackerearth</strong> — http://www.hackerearth.com/recruit/faq/<br />
+      <strong>• HackForCause</strong> — http://hackforcause.com/hall-of-fame/<br />
+      <strong>• Hackerone</strong> — https://hackerone.com/security/thanks<br />
+      <strong>• Halodoc</strong> — https://www.halodoc.com/security<br />
+      <strong>• Harvard University</strong> — http://about.worldmap.harvard.edu/sponsors<br />
+      <strong>• Hash</strong> — https://hash.ai/security<br />
+      <strong>• Hipmunk</strong> — https://www.hipmunk.com/about<br />
+      <strong>• Honeybadger</strong> — http://docs.honeybadger.io/article/181-security<br />
+      <strong>• Hotgloo</strong> — http://www.hotgloo.com/security/hall-of-fame<br />
+      <strong>• HTC</strong> — http://www.htc.com/us/terms/product-security/<br />
+      <strong>• Huawei</strong> — http://www.huawei.com/en/security/psirt/report-vulnerabilities/index.htm<br />
+      <strong>• Hubspot</strong> — https://bugcrowd.com/hubspot<br />
+      <strong>• Hubdia</strong> — https://hackerone.com/hubdia/thanks<br />
+      <strong>• Hunter I/O</strong> — https://blog.hunter.io/security-bounty-program/<br />
+      <strong>• IBM Corporation</strong> — http://www-03.ibm.com/security/secure-engineering/report.html<br />
+      <strong>• iBuildApp</strong> — http://ibuildapp.com/about-us/<br />
+      <strong>• Icecoder</strong> — https://bugcrowd.com/icecoder/hall-of-fame<br />
+      <strong>• iDevAffiliate</strong> — http://www.idevdirect.com/contact.php<br />
+      <strong>• Intel</strong> — https://www-ssl.intel.com/content/www/us/en/forms/webmaster-contact-us.html<br />
+      <strong>• Internetwache</strong> — https://en.internetwache.org/security/<br />
+      <strong>• Invision</strong> — https://bugcrowd.com/invision/hall-of-fame<br />
+      <strong>• Jumpshare</strong> — https://jumpshare.com/security<br />
+      <strong>• Joomlart</strong> — http://www.joomlart.com/joomlart/contact-us<br />
+      <strong>• JotForm</strong> — http://www.jotform.com/about/<br />
+      <strong>• Juniper Networks</strong> — https://www.juniper.net/us/en/security/report-vulnerability/<br />
+      <strong>• Kayako</strong> — https://classichelp.kayako.com/hc/en-us/articles/360006380700-Security-Vulnerabilities-in-Kayako<br />
+      <strong>• Khan Academy</strong> — https://hackerone.com/khanacademy/thanks<br />
+      <strong>• Lark Technologies</strong> — https://hackerone.com/lark_technologies<br />
+      <strong>• Lavasoft</strong> — http://lavasoft.com/mylavasoft/company/about.php<br />
+      <strong>• Lleida</strong> — http://www.lleida.net/en/company/about-us<br />
+      <strong>• LG Developers</strong> — http://developer.lge.com/footer/footer/RetrieveContactInfo.dev<br />
+      <strong>• LinkedIn</strong> — http://help.linkedin.com/app/safety/answers/detail/a_id/37022<br />
+      <strong>• Logentries</strong> — https://logentries.com/doc/security/<br />
+      <strong>• Loginradius</strong> — https://www.loginradius.com/bug-bounty/<br />
+      <strong>• Magix AG</strong> — http://research.magix.com/(May 2014)<br />
+      <strong>• MailChimp</strong> — http://mailchimp.com/about/security-response/<br />
+      <strong>• MailRU</strong> — https://hackerone.com/mailru/thanks<br />
+      <strong>• Mastercoin Foundation</strong> — https://bugcrowd.com/mastercoin/hall-of-fame<br />
+      <strong>• MaxCDN</strong> — http://www.maxcdn.com/company/security/<br />
+      <strong>• Meldium</strong> — https://www.meldium.com/security<br />
+      <strong>• Memberful</strong> — https://memberful.com/help/general/security/<br />
+      <strong>• Metrodeal</strong> — http://www.metrodeal.com/about-us<br />
+      <strong>• Microsoft</strong> — http://technet.microsoft.com/en-us/security/cc308575#0114 (January 2014 and July 2016)<br />
+      <strong>• Mixmax</strong> — https://hackerone.com/mixmax/thanks<br />
+      <strong>• Moment.Me</strong> — http://www.moment.me/<br />
+      <strong>• Motorola</strong> — http://www.motorolasolutions.com/US-EN/About/Security%20Vulnerability<br />
+      <strong>• Movember</strong> — https://bugcrowd.com/movember/hall-of-fame<br />
+      <strong>• My News Desk</strong> — http://www.mynewsdesk.com/about<br />
+      <strong>• Narrative Science</strong> — https://bugcrowd.com/narrativescience<br />
+      <strong>• National Cyber Security Center (Netherlands)</strong> — https://www.ncsc.nl/security<br />
+      <strong>• Niteflirt</strong> — https://support.niteflirt.com/hc/en-us/articles/216991547-Security-Exploit-Bounty-Program<br />
+      <strong>• Nitrous I/O</strong> — http://help.nitrous.io/admin-security-response/ (2014)<br />
+      <strong>• Nucivic</strong> — http://nucivic.com/security/<br />
+      <strong>• Oculus VR</strong> — https://www.oculusvr.com/bug-submission/<br />
+      <strong>• oDesk</strong> — https://bugcrowd.com/odesk/hall-of-fame<br />
+      <strong>• Omnialert</strong> — https://www.omnilert.com/company/security<br />
+      <strong>• OpenDrive</strong> — https://www.opendrive.com/security<br />
+      <strong>• OpenText</strong> — http://www.opentext.com/Who-We-Are/Copyright-Information/Security-Acknowledgements<br />
+      <strong>• Oracle</strong> — http://www.oracle.com/ocom/groups/public/@otn/documents/webcontent/2367958.xml (April 2015)<br />
+      <strong>• OutSystems Inc.</strong> — https://hackerone.com/outsystems_bbp/thanks<br />
+      <strong>• Pagerduty</strong> — http://www.pagerduty.com/security/disclosure/<br />
+      <strong>• Pandora Media, Inc.</strong> — https://bugcrowd.com/pandora<br />
+      <strong>• Panorama9</strong> — http://www.panorama9.com/security<br />
+      <strong>• Patreon Technology</strong> — https://www.patrontechnology.com/security-vulnerability-program<br />
+      <strong>• Paysa</strong> — https://www.paysa.com/security/whitehat<br />
+      <strong>• PayPal</strong> — https://www.paypal.com/webapps/mpp/security-tools/wall-of-fame-honorable-mention (Quarter 2 of 2014)<br />
+      <strong>• Peerio</strong> — https://www.peerio.com/bug.html (https://github.com/PeerioTechnologies/peerio-desktop/releases/tag/v2.98.7)<br />
+      <strong>• Perfectcloud</strong> — https://www.perfectcloud.io/about.html<br />
+      <strong>• Pleio</strong> — https://www.pleio.nl/#support<br />
+      <strong>• PhpNuke</strong> — https://downloads.phpnuke.org/en/email/contact_us.htm<br />
+      <strong>• Poll Everywhere</strong> — https://www.polleverywhere.com/security<br />
+      <strong>• PowerSchool: School Spring 2021</strong> — https://www.bugcrowd.com/powerschool-ss-2021<br />
+      <strong>• Pwnie Express</strong> — https://www.pwnieexpress.com/contact-us/<br />
+      <strong>• Quantopian</strong> — https://www.quantopian.com/security<br />
+      <strong>• Quora</strong> — https://bugcrowd.com/quora/hall-of-fame<br />
+      <strong>• Rackspace</strong> — http://www.rackspace.com/information/legal/rsdp<br />
+      <strong>• Rainedout</strong> — http://www.rainedout.com/contact<br />
+      <strong>• Rapid7</strong> — https://www.rapid7.com/disclosure.jsp<br />
+      <strong>• Rebelmouse</strong> — https://about.rebelmouse.com/company<br />
+      <strong>• RelateIQ</strong> — https://hackerone.com/relateiq/thanks<br />
+      <strong>• Retool</strong> — https://docs.retool.com/docs/security<br />
+      <strong>• Ribose</strong> — https://www.ribose.com/security/hall_of_fame<br />
+      <strong>• Rietta</strong> — http://rietta.com/contact/security/<br />
+      <strong>• Risk I/O</strong> — https://www.risk.io/security<br />
+      <strong>• Robocoin</strong> — https://hackerone.com/robocoin/thanks<br />
+      <strong>• Samsung</strong> — https://samsungtvbounty.com/HallOfFame.aspx<br />
+      <strong>• Sendcloud</strong> — https://www.sendcloud.com/bug-bounty-program/<br />
+      <strong>• Scroll</strong> — https://scroll.help/en/articles/3344853-does-scroll-have-a-bug-bounty-or-responsible-disclosure-program<br />
+      <strong>• Search on Zippy</strong> — http://www.searchonzippy.com/contact<br />
+      <strong>• Sellfy</strong> — https://sellfy.com/security/<br />
+      <strong>• Senate (GOV)</strong> — https://www.senate.gov/general/content_responsibility.htm<br />
+      <strong>• Shaukk</strong> — http://shaukk.com/developers.php<br />
+      <strong>• Site Liner</strong> — http://www.siteliner.com/contact<br />
+      <strong>• Silent Circle</strong> — https://bugcrowd.com/silentcircle<br />
+      <strong>• Slack</strong> — https://hackerone.com/slack/thanks<br />
+      <strong>• SmartQ</strong> — http://www.getsmartq.com/support.php<br />
+      <strong>• Sony</strong> — https://secure.sony.net/hallofthanks<br />
+      <strong>• Sophos</strong> — https://bugcrowd.com/sophos/hall-of-fame<br />
+      <strong>• Sourceforge Japan</strong> — http://sourceforge.jp/docs/SourceForge.JP%E3%81%AE%E9%80%A3%E7%B5%A1%E5%85%88<br />
+      <strong>• SoundCloud</strong> — http://help.soundcloud.com/customer/portal/articles/439715-responsible-disclosure<br />
+      <strong>• Splitwise</strong> — http://blog.splitwise.com/about/responsible-disclosure-special-thanks/<br />
+      <strong>• StarHub</strong> — http://www.starhub.com/personal/support/contact-us.html<br />
+      <strong>• Survey Gizmo</strong> — http://surveygizmo.helpgizmo.com/help/contact-us<br />
+      <strong>• Spectrocoin</strong> — https://www.crowdcurity.com/spectrocoin/hall-of-fame/all<br />
+      <strong>• Spotify</strong> — https://www.spotify.com/us/bounty/<br />
+      <strong>• Sprout Social</strong> — http://sproutsocial.com/responsible-disclosure-policy<br />
+      <strong>• SSLMate</strong> — https://sslmate.com/security<br />
+      <strong>• Steam</strong> — https://support.steampowered.com/index.php<br />
+      <strong>• StoptheHacker</strong> — https://hackerone.com/stopthehacker/thanks<br />
+      <strong>• Stripe</strong> — https://stripe.com/docs/security<br />
+      <strong>• Strivewire</strong> — https://strivewire.com/security<br />
+      <strong>• Student CRM - Data Harvesting U.K</strong> — http://www.student-crm.co.uk/about/security/<br />
+      <strong>• Swipe Identity</strong> — https://bugcrowd.com/c030/hall-of-fame<br />
+      <strong>• Tagged</strong> — http://safety.tagged.com/security/<br />
+      <strong>• The Email Laundry</strong> — https://www.theemaillaundry.com/responsible-disclosure/<br />
+      <strong>• Thumbr</strong> — http://www.thumbr.io/tos<br />
+      <strong>• TikTok</strong> — https://hackerone.com/tiktok/thanks/2022?type=team<br />
+      <strong>• Trend Micro</strong> — http://esupport.trendmicro.com/en-us/business/pages/vulnerability-response.aspx#acknowledgement<br />
+      <strong>• Tresorit</strong> — https://tresorit.com/hacking-challenge<br />
+      <strong>• Tumblr</strong> — http://www.tumblr.com/security<br />
+      <strong>• Twitch TV</strong> — http://www.twitch.tv/p/security<br />
+      <strong>• Twilio</strong> — https://bugcrowd.com/twilio/hall-of-fame<br />
+      <strong>• Twitter</strong> — https://about.twitter.com/company/security (2013, 2014, 2016, 2018)<br />
+      <strong>• Typo3</strong> — https://typo3.org/community/teams/security/bug-bounty-program<br />
+      <strong>• Uber</strong> — https://www.uber.com/security<br />
+      <strong>• uShip</strong> — https://help.uship.com/hc/en-us<br />
+      <strong>• United States Naval Academy</strong> — http://www.usna.edu/About/<br />
+      <strong>• UK Secure Web Hosting</strong> — http://www.uksecurewebhosting.co.uk/contact.php<br />
+      <strong>• Upstox</strong> — https://upstox.com/bug-bounty/<br />
+      <strong>• Upwork</strong> — https://bugcrowd.com/upwork<br />
+      <strong>• US Unlocked</strong> — https://www.usunlocked.com/contact_us.php<br />
+      <strong>• U.S Department of Defense</strong> — https://hackerone.com/deptofdefense/thanks<br />
+      <strong>• Valve Software</strong> — http://www.valvesoftware.com/security/<br />
+      <strong>• Veridu</strong> — https://veridu.com/wiki/Security_Procedures#Vulnerability_Reward_Program<br />
+      <strong>• Via Forensics</strong> — https://viaforensics.com/company/contact/<br />
+      <strong>• VidaXL</strong> — https://www.vidaxl.com.au/security<br />
+      <strong>• Visa Incorporation</strong> — http://www.visa.com/globalgateway/<br />
+      <strong>• Vox Analytics</strong> — https://www.voxanalytics.com/contact<br />
+      <strong>• Wattpad</strong> — https://support.wattpad.com/hc/en-us<br />
+      <strong>• WePay</strong> — https://hackerone.com/wepay/thanks<br />
+      <strong>• Western Union</strong> — https://bugcrowd.com/westernunion/hall-of-fame<br />
+      <strong>• Winni</strong> — https://www.winni.in/bug-bounty#bbHOF<br />
+      <strong>• Wizehive</strong> — https://www.wizehive.com/security/<br />
+      <strong>• Wordpress</strong> — https://hackerone.com/wordpress/thanks<br />
+      <strong>• World Vision Philippines</strong> — http://worldvision.org.ph/contact-us<br />
+      <strong>• WPEngine</strong> — http://wpengine.com/contact/<br />
+      <strong>• Yahoo!</strong> — https://hackerone.com/yahoo/thanks<br />
+      <strong>• Yamaha Club Philippines</strong> — https://www.yamahaclub.com.ph/contact/<br />
+      <strong>• Yandex</strong> — http://company.yandex.com/security/hall-of-fame.xml (March 2014)<br />
+      <strong>• YCombinator</strong> — https://www.ycombinator.com/security/<br />
+      <strong>• Yesware</strong> — http://www.yesware.com/security/<br />
+      <strong>• YiiFramework</strong> — http://www.yiiframework.com/security/<br />
+      <strong>• Zendesk</strong> — http://www.zendesk.com/company/responsible-disclosure-policy<br />
+      <strong>• Zynga</strong> — http://company.zynga.com/security/whitehats (2014)<br />
+    </p>
 
-                                if (time - lastTrailTime >= 60 && t < 1) {
-                                  lastTrailTime = time;
+    <a href="#" class="container cool-link" data-toggle-target="more" aria-controls="more" aria-expanded="false">Read More</a>
+  </section>
 
-                                  const trail = document.createElement('div');
-                                  trail.className = 'trail-dot';
-                                  trail.style.left = `${trailX}px`;
-                                  trail.style.top = `${trailY}px`;
-                                  trail.style.opacity = fade;
+  <section data-aos="fade-up">
+    <h2>Blog</h2>
+    <p>To read my write ups, just click <a href="https://blog.evanricafort.com" target="_blank" title="Blog" class="container cool-link">here!</a></p>
+  </section>
 
-                                  document.body.appendChild(trail);
-                                  setTimeout(() => trail.remove(), 600);
-                                }
+  <button id="scrollToTopBtn" title="Scroll to Top" aria-label="Scroll to top">
+    <i class="fas fa-plane" id="airplaneIcon"></i>
+  </button>
 
-                                if (t < 1) {
-                                  requestAnimationFrame(animateFlight);
-                                } else {
-                                  scrollBtn.setAttribute('style', originalStyle);
-                                  scrollBtn.classList.remove('show');
-                                  scrollBtn.style.pointerEvents = 'auto';
-                                  isFlying = false;
-                                  window.scrollTo({ top: 0 });
-                                }
-                              }
+  <img src="https://s09.flagcounter.com/count/iwvj/bg_FFFFFF/txt_000000/border_FFFFFF/columns_6/maxflags_50/viewers_0/labels_1/pageviews_1/flags_1/" alt="Free counters!" data-aos="fade-up" />
 
-                              requestAnimationFrame(animateFlight);
-                            });
-                            </script>
+  <footer data-aos="fade-up">&copy; Evan Ricafort - <a href="#" class="container cool-link">https://www.evanricafort.com</a></footer>
 
-                  <img src="https://s09.flagcounter.com/count/iwvj/bg_FFFFFF/txt_000000/border_FFFFFF/columns_6/maxflags_50/viewers_0/labels_1/pageviews_1/flags_1/" alt="Free counters!" border="0" data-aos="fade-up"> 
-<footer data-aos="fade-up">&copy; Evan Ricafort - <a href="#" class="container cool-link">https://www.evanricafort.com</a></footer>
- </body>
-    </html>
+  <script src="typed.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      var THEME_STORAGE_KEY = 'theme';
+      var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+      /* ============================================================
+         Scroll animations
+         ============================================================ */
+      function initScrollAnimations() {
+        if (typeof AOS === 'undefined') return;
+
+        AOS.init({
+          duration: 700,
+          easing: 'ease-out-quad',
+          once: true,
+          mirror: false
+        });
+      }
+
+      /* ============================================================
+         Dark mode
+         Hovering the profile photo flips the theme once per pass;
+         the choice is remembered in localStorage.
+         ============================================================ */
+      function readStoredTheme() {
+        try {
+          return localStorage.getItem(THEME_STORAGE_KEY);
+        } catch (error) {
+          return null;
+        }
+      }
+
+      function storeTheme(theme) {
+        try {
+          localStorage.setItem(THEME_STORAGE_KEY, theme);
+        } catch (error) {
+          /* Nothing to do - the theme simply will not persist. */
+        }
+      }
+
+      function initTheme() {
+        /* Idempotent - the inline script at the top of <body> normally wins the race. */
+        if (readStoredTheme() === 'dark') {
+          document.body.classList.add('dark-mode');
+        }
+
+        var trigger = document.getElementById('dark-mode-toggle');
+        if (!trigger) return;
+
+        var armed = true;
+
+        trigger.addEventListener('mouseenter', function () {
+          if (!armed) return;
+          var isDark = document.body.classList.toggle('dark-mode');
+          storeTheme(isDark ? 'dark' : 'light');
+          armed = false;
+        });
+
+        trigger.addEventListener('mouseleave', function () {
+          armed = true;
+        });
+      }
+
+      /* ============================================================
+         Typed tagline
+         ============================================================ */
+      function initTagline() {
+        var target = document.getElementById('typing-text');
+        if (!target || typeof Typed === 'undefined') return;
+
+        var phrases = [
+          'pWning since 2006',
+          'infosec, nature, music, trail running and bikes',
+          'will hack for burger and fries'
+        ];
+
+        /* data-text feeds the CSS glitch layers, so keep it in sync. */
+        new Typed(target, {
+          strings: phrases,
+          loop: true,
+          typeSpeed: 50,
+          backSpeed: 50,
+          backDelay: 1000,
+          smartBackspace: true,
+          onStringTyped: function (position, self) {
+            target.setAttribute('data-text', self.strings[position]);
+          },
+          onComplete: function (self) {
+            target.setAttribute('data-text', self.strings[0]);
+          }
+        });
+      }
+
+      /* ============================================================
+         "Read More" disclosures
+         ============================================================ */
+      function initDisclosures() {
+        var triggers = document.querySelectorAll('[data-toggle-target]');
+
+        Array.prototype.forEach.call(triggers, function (trigger) {
+          var panel = document.getElementById(trigger.getAttribute('data-toggle-target'));
+          if (!panel) return;
+
+          trigger.addEventListener('click', function (event) {
+            event.preventDefault();
+            var expanded = panel.classList.toggle('show');
+            trigger.textContent = expanded ? 'Show Less' : 'Read More';
+            trigger.setAttribute('aria-expanded', String(expanded));
+          });
+        });
+      }
+
+      /* ============================================================
+         Page load bar
+         ============================================================ */
+      function initLoadingBar() {
+        var bar = document.getElementById('loading-bar');
+        if (!bar) return;
+
+        window.addEventListener('load', function () {
+          bar.style.transition = 'opacity 0.5s ease';
+          bar.style.opacity = '0';
+          window.setTimeout(function () {
+            bar.remove();
+          }, 500);
+        });
+      }
+
+      /* ============================================================
+         Scroll progress bar
+         ============================================================ */
+      function initScrollProgress() {
+        var bar = document.getElementById('scroll-progress');
+        if (!bar) return;
+
+        function update() {
+          var doc = document.documentElement;
+          var scrolled = doc.scrollTop || document.body.scrollTop;
+          var scrollable = doc.scrollHeight - doc.clientHeight;
+          bar.style.width = (scrollable > 0 ? (scrolled / scrollable) * 100 : 0) + '%';
+        }
+
+        window.addEventListener('scroll', update, { passive: true });
+        update();
+      }
+
+      /* ============================================================
+         Address hover map
+         ============================================================ */
+      function initAddressMap() {
+        var circle = document.getElementById('map-circle');
+        var address = document.getElementById('bio_left');
+        if (!circle || !address) return;
+
+        var OFFSET = 20;
+
+        address.addEventListener('mouseenter', function () {
+          circle.style.transform = 'scale(1)';
+        });
+
+        address.addEventListener('mouseleave', function () {
+          circle.style.transform = 'scale(0)';
+        });
+
+        address.addEventListener('mousemove', function (event) {
+          circle.style.top = (event.clientY + OFFSET) + 'px';
+          circle.style.left = (event.clientX + OFFSET) + 'px';
+        });
+      }
+
+      /* ============================================================
+         Name flicker
+         ============================================================ */
+      function initNameFlicker() {
+        var FLICKER_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+        var FRAME_INTERVAL = 40;
+        var FRAME_COUNT = 15;
+        var letters = document.querySelectorAll('.glow-text span');
+
+        Array.prototype.forEach.call(letters, function (letter) {
+          var original = letter.textContent;
+          var timer = null;
+
+          letter.addEventListener('mouseenter', function () {
+            if (timer !== null) return;
+
+            var frame = 0;
+            letter.classList.add('flicker-glow');
+
+            timer = window.setInterval(function () {
+              letter.textContent = FLICKER_CHARS.charAt(Math.floor(Math.random() * FLICKER_CHARS.length));
+              frame += 1;
+
+              if (frame >= FRAME_COUNT) {
+                window.clearInterval(timer);
+                timer = null;
+                letter.textContent = original;
+                letter.classList.remove('flicker-glow');
+              }
+            }, FRAME_INTERVAL);
+          });
+        });
+      }
+
+      /* ============================================================
+         Scroll-to-top plane
+         The button appears near the bottom of the page and flies off
+         the top of the viewport, dragging the page back with it.
+         ============================================================ */
+      function initScrollToTop() {
+        var button = document.getElementById('scrollToTopBtn');
+        var plane = document.getElementById('airplaneIcon');
+        if (!button || !plane) return;
+
+        var REVEAL_MARGIN = 100;
+        var FLIGHT_DURATION = 2500;
+        var TRAIL_INTERVAL = 60;
+        var TRAIL_LIFETIME = 600;
+        var isFlying = false;
+
+        window.addEventListener('scroll', function () {
+          if (isFlying) return;
+          var nearBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - REVEAL_MARGIN;
+          button.classList.toggle('show', nearBottom);
+        }, { passive: true });
+
+        function dropTrail(opacity) {
+          var box = plane.getBoundingClientRect();
+          var dot = document.createElement('div');
+
+          dot.className = 'trail-dot';
+          dot.style.left = (box.left + box.width / 2 - 4) + 'px';
+          dot.style.top = (box.top + box.height / 2 + 25) + 'px';
+          dot.style.opacity = opacity;
+
+          document.body.appendChild(dot);
+          window.setTimeout(function () {
+            dot.remove();
+          }, TRAIL_LIFETIME);
+        }
+
+        button.addEventListener('click', function () {
+          if (isFlying) return;
+          isFlying = true;
+
+          var originalStyle = button.getAttribute('style') || '';
+          var box = button.getBoundingClientRect();
+          var startScroll = window.scrollY;
+          var startTop = box.top;
+          var startTime = performance.now();
+          var lastTrailTime = 0;
+
+          button.style.position = 'fixed';
+          button.style.left = box.left + 'px';
+          button.style.top = box.top + 'px';
+          button.style.margin = '0';
+          button.style.transition = 'none';
+          button.style.pointerEvents = 'none';
+          button.classList.remove('show');
+
+          function animateFlight(time) {
+            var progress = Math.min((time - startTime) / FLIGHT_DURATION, 1);
+            var fade = 1 - progress * 0.8;
+
+            button.style.top = (startTop - progress * window.innerHeight) + 'px';
+            button.style.opacity = fade;
+            window.scrollTo({ top: startScroll - startScroll * progress, behavior: 'instant' });
+
+            if (progress < 1 && time - lastTrailTime >= TRAIL_INTERVAL) {
+              lastTrailTime = time;
+              dropTrail(fade);
+            }
+
+            if (progress < 1) {
+              window.requestAnimationFrame(animateFlight);
+              return;
+            }
+
+            button.setAttribute('style', originalStyle);
+            button.classList.remove('show');
+            button.style.pointerEvents = 'auto';
+            isFlying = false;
+            window.scrollTo({ top: 0 });
+          }
+
+          window.requestAnimationFrame(animateFlight);
+        });
+      }
+
+      /* ============================================================
+         Geometric web
+         A lattice of dots drifting slowly behind the page, each one
+         linked to whichever neighbours are close enough. The cursor is
+         part of the web: nearby dots light up, link to the pointer and
+         are shouldered aside, then spring back once it moves on.
+         ============================================================ */
+      function initGeometricWeb() {
+        var canvas = document.getElementById('bg-canvas');
+        if (!canvas || typeof canvas.getContext !== 'function') return;
+
+        var ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        var TAU = Math.PI * 2;
+
+        var SETTINGS = {
+          areaPerNode: 15000,    /* one node per N square CSS pixels */
+          minNodes: 26,
+          maxNodes: 88,
+          linkDistance: 165,     /* neighbours closer than this are linked */
+          maxDrift: 0.13,        /* px per frame at 60fps */
+          minNodeRadius: 1,
+          maxNodeRadius: 2.2,
+          lineAlpha: 0.17,
+          dotAlpha: 0.34,
+          cursorRadius: 230,
+          cursorPush: 1,
+          springBack: 0.014,
+          damping: 0.9,
+          maxDisplacement: 120,
+          calmDrift: 0.35,       /* drift multiplier under "reduce motion" */
+          resizeDelay: 150
+        };
+
+        /* "Reduce motion" calms the web - slower drift - but it keeps
+           moving and keeps answering the cursor, because a frozen
+           background reads as broken rather than considerate. */
+        var calm = reducedMotion.matches;
+
+        var nodes = [];
+        var pointer = { x: -9999, y: -9999, influence: 0, target: 0 };
+        var palette = readPalette();
+        var viewport = { width: 0, height: 0 };
+        var frameId = null;
+        var lastFrameTime = 0;
+        var resizeTimer = null;
+
+        function random(min, max) {
+          return min + Math.random() * (max - min);
+        }
+
+        function clamp(value, min, max) {
+          return Math.min(Math.max(value, min), max);
+        }
+
+        function readPalette() {
+          var styles = window.getComputedStyle(document.body);
+          var line = styles.getPropertyValue('--geo-line').trim() || '0, 0, 0';
+          var accent = styles.getPropertyValue('--geo-accent').trim() || line;
+          return { line: line, accent: accent };
+        }
+
+        function rgba(rgb, alpha) {
+          return 'rgba(' + rgb + ', ' + alpha.toFixed(4) + ')';
+        }
+
+        function createNode() {
+          var x = random(0, viewport.width);
+          var y = random(0, viewport.height);
+
+          return {
+            x: x,
+            y: y,
+            renderX: x,     /* drift position plus the cursor offset */
+            renderY: y,
+            radius: random(SETTINGS.minNodeRadius, SETTINGS.maxNodeRadius),
+            driftX: random(-SETTINGS.maxDrift, SETTINGS.maxDrift),
+            driftY: random(-SETTINGS.maxDrift, SETTINGS.maxDrift),
+            offsetX: 0,
+            offsetY: 0,
+            pushX: 0,
+            pushY: 0,
+            nearness: 0     /* 0..1 proximity to the cursor */
+          };
+        }
+
+        function populate() {
+          var count = clamp(
+            Math.round((viewport.width * viewport.height) / SETTINGS.areaPerNode),
+            SETTINGS.minNodes,
+            SETTINGS.maxNodes
+          );
+
+          nodes.length = 0;
+          for (var i = 0; i < count; i += 1) {
+            nodes.push(createNode());
+          }
+        }
+
+        function resizeCanvas() {
+          var ratio = Math.min(window.devicePixelRatio || 1, 2);
+
+          viewport.width = window.innerWidth;
+          viewport.height = window.innerHeight;
+          canvas.width = Math.round(viewport.width * ratio);
+          canvas.height = Math.round(viewport.height * ratio);
+          ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        }
+
+        function step(delta) {
+          var decay = Math.pow(SETTINGS.damping, delta);
+          var drift = delta * (calm ? SETTINGS.calmDrift : 1);
+
+          for (var i = 0; i < nodes.length; i += 1) {
+            var node = nodes[i];
+
+            node.x += node.driftX * drift;
+            node.y += node.driftY * drift;
+
+            /* Bounce at the edges - wrapping would snap links across the page. */
+            if (node.x < 0) { node.x = 0; node.driftX = -node.driftX; }
+            else if (node.x > viewport.width) { node.x = viewport.width; node.driftX = -node.driftX; }
+            if (node.y < 0) { node.y = 0; node.driftY = -node.driftY; }
+            else if (node.y > viewport.height) { node.y = viewport.height; node.driftY = -node.driftY; }
+
+            var dx = node.renderX - pointer.x;
+            var dy = node.renderY - pointer.y;
+            var distance = Math.sqrt(dx * dx + dy * dy) || 1;
+            var falloff = Math.max(0, 1 - distance / SETTINGS.cursorRadius);
+
+            node.nearness = falloff * pointer.influence;
+
+            if (node.nearness > 0.01) {
+              var force = falloff * falloff * SETTINGS.cursorPush * pointer.influence;
+              node.pushX += (dx / distance) * force * delta;
+              node.pushY += (dy / distance) * force * delta;
+            }
+
+            /* Damped spring pulls each node back onto its drifting path. */
+            node.pushX = (node.pushX - node.offsetX * SETTINGS.springBack * delta) * decay;
+            node.pushY = (node.pushY - node.offsetY * SETTINGS.springBack * delta) * decay;
+            node.offsetX = clamp(node.offsetX + node.pushX * delta, -SETTINGS.maxDisplacement, SETTINGS.maxDisplacement);
+            node.offsetY = clamp(node.offsetY + node.pushY * delta, -SETTINGS.maxDisplacement, SETTINGS.maxDisplacement);
+
+            node.renderX = node.x + node.offsetX;
+            node.renderY = node.y + node.offsetY;
+          }
+        }
+
+        function draw() {
+          var count = nodes.length;
+          var reach = SETTINGS.linkDistance;
+          var reachSq = reach * reach;
+          var i, j, node;
+
+          ctx.clearRect(0, 0, viewport.width, viewport.height);
+
+          /* Links first, so the dots sit on top of them. */
+          for (i = 0; i < count; i += 1) {
+            var a = nodes[i];
+
+            for (j = i + 1; j < count; j += 1) {
+              var b = nodes[j];
+              var dx = a.renderX - b.renderX;
+              var dy = a.renderY - b.renderY;
+              var squared = dx * dx + dy * dy;
+              if (squared >= reachSq) continue;
+
+              var strength = 1 - Math.sqrt(squared) / reach;
+              var nearness = a.nearness > b.nearness ? a.nearness : b.nearness;
+
+              ctx.strokeStyle = rgba(
+                nearness > 0.05 ? palette.accent : palette.line,
+                strength * (SETTINGS.lineAlpha + nearness * 0.5)
+              );
+              ctx.lineWidth = 1 + nearness * 0.6;
+              ctx.beginPath();
+              ctx.moveTo(a.renderX, a.renderY);
+              ctx.lineTo(b.renderX, b.renderY);
+              ctx.stroke();
+            }
+          }
+
+          /* The cursor's own links into the web. */
+          if (pointer.influence > 0.01) {
+            ctx.lineWidth = 1;
+
+            for (i = 0; i < count; i += 1) {
+              node = nodes[i];
+              if (node.nearness <= 0.02) continue;
+
+              ctx.strokeStyle = rgba(palette.accent, node.nearness * 0.55);
+              ctx.beginPath();
+              ctx.moveTo(node.renderX, node.renderY);
+              ctx.lineTo(pointer.x, pointer.y);
+              ctx.stroke();
+            }
+          }
+
+          /* Dots. */
+          for (i = 0; i < count; i += 1) {
+            node = nodes[i];
+
+            ctx.fillStyle = rgba(
+              node.nearness > 0.05 ? palette.accent : palette.line,
+              SETTINGS.dotAlpha + node.nearness * 0.6
+            );
+            ctx.beginPath();
+            ctx.arc(node.renderX, node.renderY, node.radius + node.nearness * 1.8, 0, TAU);
+            ctx.fill();
+          }
+        }
+
+        function render(time) {
+          var delta = lastFrameTime ? Math.min((time - lastFrameTime) / 16.6667, 3) : 1;
+          lastFrameTime = time;
+
+          pointer.influence += (pointer.target - pointer.influence) * Math.min(0.08 * delta, 1);
+          step(delta);
+          draw();
+
+          frameId = window.requestAnimationFrame(render);
+        }
+
+        function start() {
+          if (frameId !== null) return;
+          lastFrameTime = 0;
+          frameId = window.requestAnimationFrame(render);
+        }
+
+        function stop() {
+          if (frameId === null) return;
+          window.cancelAnimationFrame(frameId);
+          frameId = null;
+        }
+
+        function handleResize() {
+          window.clearTimeout(resizeTimer);
+          resizeTimer = window.setTimeout(function () {
+            resizeCanvas();
+            for (var i = 0; i < nodes.length; i += 1) {
+              var node = nodes[i];
+              node.x = clamp(node.x, 0, viewport.width);
+              node.y = clamp(node.y, 0, viewport.height);
+              node.renderX = node.x + node.offsetX;
+              node.renderY = node.y + node.offsetY;
+            }
+          }, SETTINGS.resizeDelay);
+        }
+
+        function applyMotionPreference() {
+          calm = reducedMotion.matches;
+          start();
+        }
+
+        function releasePointer() {
+          pointer.target = 0;
+        }
+
+        window.addEventListener('pointermove', function (event) {
+          pointer.x = event.clientX;
+          pointer.y = event.clientY;
+          pointer.target = 1;
+        }, { passive: true });
+
+        /* pointerleave does not bubble, so it is bound to <html> rather than window. */
+        document.documentElement.addEventListener('pointerleave', releasePointer);
+        window.addEventListener('blur', releasePointer);
+        window.addEventListener('resize', handleResize);
+
+        document.addEventListener('visibilitychange', function () {
+          if (document.hidden) stop();
+          else start();
+        });
+
+        /* Pick up the theme's palette when dark mode is toggled. */
+        new MutationObserver(function () {
+          palette = readPalette();
+        }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+        if (typeof reducedMotion.addEventListener === 'function') {
+          reducedMotion.addEventListener('change', applyMotionPreference);
+        }
+
+        resizeCanvas();
+        populate();
+        applyMotionPreference();
+      }
+
+      initScrollAnimations();
+      initTheme();
+      initTagline();
+      initDisclosures();
+      initLoadingBar();
+      initScrollProgress();
+      initAddressMap();
+      initNameFlicker();
+      initScrollToTop();
+      initGeometricWeb();
+    })();
+  </script>
+</body>
+
+</html>
