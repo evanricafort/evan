@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,10 +14,10 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
                     colors: {
-                        slate: {
-                            850: '#1e293b', 
-                            900: '#0f172a',
-                            950: '#020617',
+                        gray: {
+                            850: '#1f2937',
+                              900: '#111827',
+                            950: '#0b0f19',
                         }
                     }
                 }
@@ -50,224 +50,41 @@
             transition-property: color, background-color, border-color;
             transition-duration: 200ms;
         }
-    
-  /* ═══════════════════════════════════════════════════════════════
-     UI ALIGNMENT LAYER — matches /googleapikeychecker
-     Presentation only. Injected after the Tailwind CDN stylesheet so
-     these rules win; no markup classes or JS handlers are relied upon
-     beyond what already exists.
-     ═══════════════════════════════════════════════════════════════ */
-  :root {
-    --accent:      #2563eb;
-    --accent-glow: rgba(37,99,235,0.15);
-    --radius:      12px;
-    --card-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
-    --surface:     #ffffff;
-    --surface2:    #f0f2f6;
-    --border-c:    #dde1ea;
-    --text-c:      #1a1d2e;
-    --text2-c:     #5a6072;
-    --bg-c:        #f4f6f9;
-  }
-  html.dark {
-    --accent:      #3b82f6;
-    --accent-glow: rgba(59,130,246,0.2);
-    --card-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.3);
-    --surface:     #151825;
-    --surface2:    #1e2133;
-    --border-c:    #2a2f47;
-    --text-c:      #e8eaf2;
-    --text2-c:     #8b91aa;
-    --bg-c:        #0d0f1a;
-  }
-
-  /* ── Typography ── */
-  body, .font-sans, button, input, select, textarea {
-    font-family: 'Inter', sans-serif;
-  }
-  .font-mono, code, pre, th { font-family: 'JetBrains Mono', monospace; }
-  body { line-height: 1.6; letter-spacing: 0; }
-
-  /* ── Accent normalisation: indigo / emerald / blue → reference blue ── */
-  .bg-blue-600, .bg-indigo-600, .bg-indigo-500, .bg-emerald-600 {
-    background-color: var(--accent) !important;
-  }
-  .hover\:bg-blue-700:hover, .hover\:bg-indigo-700:hover,
-  .hover\:bg-emerald-500:hover, .hover\:bg-emerald-700:hover {
-    background-color: var(--accent) !important;
-    opacity: 0.88;
-  }
-  .text-blue-600, .text-blue-800, .text-blue-900,
-  .text-indigo-600, .text-emerald-600 { color: var(--accent) !important; }
-  .hover\:text-indigo-800:hover { color: var(--accent) !important; opacity: 0.85; }
-  .border-blue-200, .border-blue-100 { border-color: var(--accent-glow) !important; }
-  .bg-blue-50 { background-color: var(--accent-glow) !important; }
-
-  /* ── Card geometry: reference radius + shadow (pills untouched) ── */
-  .rounded, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl {
-    border-radius: var(--radius) !important;
-  }
-  .shadow, .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl {
-    box-shadow: var(--card-shadow) !important;
-  }
-
-  /* ── Focus rings match the reference ── */
-  input:focus, textarea:focus, select:focus {
-    outline: none !important;
-    border-color: var(--accent) !important;
-    box-shadow: 0 0 0 3px var(--accent-glow) !important;
-  }
-
-  /* ── Tables: reference header treatment ── */
-  th {
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    color: var(--text2-c) !important;
-  }
-  td { font-size: 13px; }
-
-  /* ── Reference chrome: header ── */
-  .vc-header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border-c);
-    padding: 16px 0;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(10px);
-  }
-  .vc-header-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .vc-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text-c);
-    text-decoration: none;
-  }
-  .vc-brand-icon {
-    width: 30px; height: 30px;
-    background: linear-gradient(135deg, #2563eb, #7c3aed);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
-    flex-shrink: 0;
-  }
-  .vc-brand-sub {
-    font-size: 11px;
-    font-weight: 400;
-    color: var(--text2-c);
-  }
-
-  /* ── Reference chrome: theme toggle pill ── */
-  .vc-toggle {
-    background: var(--surface2);
-    border: 1px solid var(--border-c);
-    border-radius: 50px;
-    padding: 6px 14px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text2-c);
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-  .vc-toggle:hover { color: var(--accent); border-color: var(--accent); }
-
-  /* ── Reference chrome: hero ── */
-  .vc-hero { text-align: center; margin: 0 auto 32px; max-width: 640px; }
-  .vc-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: var(--accent-glow);
-    color: var(--accent);
-    border: 1px solid var(--accent-glow);
-    border-radius: 50px;
-    padding: 4px 14px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    margin-bottom: 16px;
-  }
-  .vc-hero h1 {
-    font-size: clamp(22px, 4vw, 30px);
-    font-weight: 700;
-    color: var(--text-c);
-    letter-spacing: -0.02em;
-    margin-bottom: 10px;
-  }
-  .vc-hero p {
-    font-size: 14px;
-    color: var(--text2-c);
-    margin: 0 auto;
-  }
-
-  /* ── Reference chrome: footer ── */
-  .vc-footer {
-    text-align: center;
-    padding: 24px;
-    font-size: 12px;
-    color: var(--text2-c);
-    border-top: 1px solid var(--border-c);
-    margin-top: auto;
-  }
 </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans min-h-screen flex flex-col transition-colors duration-200">
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200 font-sans min-h-screen flex flex-col items-center py-8 md:py-12 px-4 antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300">
 
-    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="bg-blue-600 p-2 rounded-lg shadow-md">
-                    <i data-lucide="shield-check" class="w-6 h-6 text-white"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold text-slate-800 dark:text-white">SSL Certificate Analyzer</h1>
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wide">Weak Hash • Expiry • Wildcards • Issuer</p>
-                </div>
-            </div>
-            
-            <div class="flex items-center gap-4">
-                <div class="text-sm text-slate-500 dark:text-slate-400 hidden lg:block">
-                    Parses output from <code class="bg-slate-100 dark:bg-slate-900 px-1 py-0.5 rounded text-blue-600 dark:text-blue-400 border border-slate-200 dark:border-slate-700">nmap --script ssl-cert</code>
-                </div>
-                <button id="btnThemeToggle" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700 transition-colors" title="Toggle Dark Mode">
-                    <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
-                    <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
-                </button>
-            </div>
+    <div class="absolute top-4 right-4 md:top-8 md:right-8 z-30">
+        <button id="btnThemeToggle" class="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-600 dark:text-yellow-400 shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-indigo-500" title="Toggle Dark Mode">
+            <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+            <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+        </button>
+    </div>
+
+    <main class="w-full max-w-7xl space-y-8 mt-8">
+
+        <div class="text-center space-y-3">
+            <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center justify-center gap-3">
+                <i data-lucide="shield-check" class="tk-anim-logo w-9 h-9 md:w-12 md:h-12 text-indigo-600 dark:text-indigo-500"></i>
+                <span><span class="text-indigo-600 dark:text-indigo-500">SSL Certificate</span> Analyzer</span>
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 text-sm md:text-lg max-w-xl mx-auto">
+                Analyze weak hashes, expiry, wildcards and issuers from <code class="font-mono text-indigo-600 dark:text-indigo-300">nmap --script ssl-cert</code> output.
+            </p>
         </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 flex-grow w-full">
         
-        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl p-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-xl p-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div class="flex gap-3">
-                <i data-lucide="info" class="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-1"></i>
+                <i data-lucide="info" class="w-6 h-6 text-indigo-600 dark:text-indigo-300 flex-shrink-0 mt-1"></i>
                 <div>
-                    <h3 class="font-semibold text-blue-900 dark:text-blue-100">How to use</h3>
-                    <p class="text-blue-800 dark:text-blue-200 text-sm mt-1">
+                    <h3 class="font-semibold text-indigo-900 dark:text-indigo-100">How to use</h3>
+                    <p class="text-indigo-800 dark:text-indigo-200 text-sm mt-1">
                         Paste your Nmap scan results below. This tool detects <strong>weak hashing algorithms</strong>, <strong>expired certificates</strong>, <strong>wildcard usage</strong>, and <strong>private/self-signed certificates</strong>.
                         Supports both <strong>Terminal Output</strong> and <strong>XML (-oX)</strong>.
                     </p>
                 </div>
             </div>
-            <button id="btnLoadExample" class="text-sm bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-lg border border-blue-200 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-slate-700 font-medium transition-colors whitespace-nowrap shadow-sm">
+            <button id="btnLoadExample" class="text-sm bg-white dark:bg-gray-900 text-indigo-600 dark:text-indigo-300 px-4 py-2 rounded-lg border border-indigo-200 dark:border-indigo-700 hover:bg-indigo-50 dark:hover:bg-gray-800 font-medium transition-colors whitespace-nowrap shadow-sm">
                 Load Example Data
             </button>
         </div>
@@ -275,22 +92,22 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             <div class="lg:col-span-1 flex flex-col gap-4">
-                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col h-[700px]">
-                    <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 rounded-t-xl">
-                        <label class="font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
-                            <i data-lucide="code" class="w-4 h-4 text-slate-400"></i>
+                <div class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col h-[700px]">
+                    <div class="p-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 rounded-t-xl">
+                        <label class="font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                            <i data-lucide="code" class="w-4 h-4 text-gray-400"></i>
                             Input Data
                         </label>
-                        <button id="btnClear" class="text-xs text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400 transition-colors hidden">
+                        <button id="btnClear" class="text-xs text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 transition-colors hidden">
                             Clear
                         </button>
                     </div>
                     <textarea id="inputData"
-                        class="flex-1 w-full p-4 font-mono text-xs sm:text-sm resize-none focus:outline-none focus:bg-slate-50 dark:focus:bg-slate-900 transition-colors text-slate-600 dark:text-slate-300 bg-transparent placeholder-slate-400 dark:placeholder-slate-600"
+                        class="flex-1 w-full p-4 font-mono text-xs sm:text-sm resize-none focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-900 transition-colors text-gray-600 dark:text-gray-300 bg-transparent placeholder-gray-400 dark:placeholder-gray-600"
                         placeholder="Paste nmap output here...&#10;&#10;Example command:&#10;nmap -p 443 --script ssl-cert <target>"
                         spellcheck="false"></textarea>
-                    <div class="p-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 rounded-b-xl">
-                        <button id="btnAnalyze" class="w-full bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-500 text-white font-medium py-2.5 rounded-lg transition-all active:scale-[0.98] shadow-sm flex justify-center items-center gap-2">
+                    <div class="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 rounded-b-xl">
+                        <button id="btnAnalyze" class="w-full bg-gray-900 dark:bg-indigo-600 hover:bg-gray-800 dark:hover:bg-indigo-500 text-white font-medium py-2.5 rounded-lg transition-all active:scale-[0.98] shadow-sm flex justify-center items-center gap-2">
                             <i data-lucide="search" class="w-4 h-4"></i>
                             Analyze Results
                         </button>
@@ -301,95 +118,95 @@
             <div class="lg:col-span-2 flex flex-col gap-4">
                 
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24">
+                    <div class="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between h-24">
                         <div class="flex justify-between items-start">
-                            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Analyzed</p>
-                            <div class="p-1.5 bg-slate-100 dark:bg-slate-700 rounded-md text-slate-500 dark:text-slate-300">
+                            <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Analyzed</p>
+                            <div class="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-md text-gray-500 dark:text-gray-300">
                                 <i data-lucide="file-text" class="w-4 h-4"></i>
                             </div>
                         </div>
-                        <p id="statTotal" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
+                        <p id="statTotal" class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
                     </div>
 
-                    <div id="cardWeak" class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24 transition-colors">
+                    <div id="cardWeak" class="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between h-24 transition-colors">
                         <div class="flex justify-between items-start">
-                            <p id="labelWeak" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Weak Hash</p>
-                            <div id="iconBgWeak" class="p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">
+                            <p id="labelWeak" class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Weak Hash</p>
+                            <div id="iconBgWeak" class="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-300">
                                 <i data-lucide="unlock" class="w-4 h-4"></i>
                             </div>
                         </div>
-                        <p id="statWeak" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
+                        <p id="statWeak" class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
                     </div>
 
-                    <div id="cardExpired" class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24 transition-colors">
+                    <div id="cardExpired" class="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between h-24 transition-colors">
                         <div class="flex justify-between items-start">
-                            <p id="labelExpired" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Expired</p>
-                            <div id="iconBgExpired" class="p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">
+                            <p id="labelExpired" class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Expired</p>
+                            <div id="iconBgExpired" class="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-300">
                                 <i data-lucide="clock" class="w-4 h-4"></i>
                             </div>
                         </div>
-                        <p id="statExpired" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
+                        <p id="statExpired" class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
                     </div>
 
-                    <div id="cardPrivate" class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24 transition-colors">
+                    <div id="cardPrivate" class="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between h-24 transition-colors">
                         <div class="flex justify-between items-start">
-                            <p id="labelPrivate" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Issuer (Self-Signed / Private or Internal)
+                            <p id="labelPrivate" class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Issuer (Self-Signed / Private or Internal)
 
 </p>
-                            <div id="iconBgPrivate" class="p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">
+                            <div id="iconBgPrivate" class="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-300">
                                 <i data-lucide="user-check" class="w-4 h-4"></i>
                             </div>
                         </div>
-                        <p id="statPrivate" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
+                        <p id="statPrivate" class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
                     </div>
 
-                    <div id="cardWildcard" class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24 transition-colors">
+                    <div id="cardWildcard" class="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between h-24 transition-colors">
                         <div class="flex justify-between items-start">
-                            <p id="labelWildcard" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Wildcard</p>
-                            <div id="iconBgWildcard" class="p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">
+                            <p id="labelWildcard" class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Wildcard</p>
+                            <div id="iconBgWildcard" class="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-300">
                                 <i data-lucide="asterisk" class="w-4 h-4"></i>
                             </div>
                         </div>
-                        <p id="statWildcard" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
+                        <p id="statWildcard" class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
                     </div>
 
-                    <div id="cardSecure" class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24 transition-colors">
+                    <div id="cardSecure" class="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between h-24 transition-colors">
                         <div class="flex justify-between items-start">
-                            <p id="labelSecure" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Secure</p>
-                            <div id="iconBgSecure" class="p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">
+                            <p id="labelSecure" class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Secure</p>
+                            <div id="iconBgSecure" class="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-300">
                                 <i data-lucide="check-circle" class="w-4 h-4"></i>
                             </div>
                         </div>
-                        <p id="statSecure" class="text-2xl font-bold text-slate-900 dark:text-white">0</p>
+                        <p id="statSecure" class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 flex-1 flex flex-col h-[560px] relative overflow-hidden">
-                    <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-800 z-10 relative">
-                        <h2 class="font-semibold text-slate-800 dark:text-slate-200">Analysis Details</h2>
-                        <div class="flex flex-wrap p-1 bg-slate-100 dark:bg-slate-700/50 rounded-lg self-start sm:self-auto" id="filterGroup">
-                            <button data-filter="all" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm">
+                <div class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 flex-1 flex flex-col h-[560px] relative overflow-hidden">
+                    <div class="p-4 border-b border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-gray-900 z-10 relative">
+                        <h2 class="font-semibold text-gray-900 dark:text-gray-200">Analysis Details</h2>
+                        <div class="flex flex-wrap p-1 bg-gray-100 dark:bg-gray-800/50 rounded-lg self-start sm:self-auto" id="filterGroup">
+                            <button data-filter="all" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm">
                                 All
                             </button>
-                            <button data-filter="weak" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+                            <button data-filter="weak" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
                                 Weak Hash
                             </button>
-                            <button data-filter="expired" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+                            <button data-filter="expired" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
                                 Expired
                             </button>
-                            <button data-filter="private" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+                            <button data-filter="private" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
                                 Issuer
                             </button>
-                            <button data-filter="wildcard" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+                            <button data-filter="wildcard" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
                                 Wildcard
                             </button>
-                            <button data-filter="secure" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+                            <button data-filter="secure" class="filter-btn px-3 py-1.5 text-xs font-medium rounded-md transition-all text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
                                 Secure
                             </button>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-12 px-6 py-3 bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider z-10 relative">
+                    <div class="grid grid-cols-12 px-6 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider z-10 relative">
                         <div class="col-span-3">Host / IP</div>
                         <div class="col-span-2">Port</div>
                         <div class="col-span-3">Algorithm</div>
@@ -397,8 +214,8 @@
                         <div class="col-span-2 text-right">Status</div>
                     </div>
 
-                    <div id="resultsContainer" class="overflow-y-auto custom-scrollbar flex-grow bg-white dark:bg-slate-800">
-                        <div class="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-500">
+                    <div id="resultsContainer" class="overflow-y-auto custom-scrollbar flex-grow bg-white dark:bg-gray-900">
+                        <div class="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-500">
                             <i data-lucide="search" class="w-12 h-12 mb-3 opacity-20"></i>
                             <p>No results found yet.</p>
                             <p class="text-sm">Enter Nmap output and click Analyze.</p>
@@ -409,7 +226,7 @@
         </div>
     </main>
 
-    <div id="rawTooltip" class="fixed z-50 hidden max-w-lg p-3 bg-slate-900 text-slate-200 text-[10px] font-mono rounded-lg shadow-xl border border-slate-700 pointer-events-none whitespace-pre-wrap leading-tight break-words opacity-95"></div>
+    <div id="rawTooltip" class="fixed z-50 hidden max-w-lg p-3 bg-gray-900 text-gray-200 text-[10px] font-mono rounded-lg shadow-xl border border-gray-800 pointer-events-none whitespace-pre-wrap leading-tight break-words opacity-95"></div>
 
     <script>
         const ALGO_DB = {
@@ -805,17 +622,17 @@ PORT    STATE SERVICE
 
             const toggleStyle = (count, card, label, stat, iconBg, colorClass) => {
                 if (count > 0) {
-                    card.classList.remove('border-slate-200', 'dark:border-slate-700');
+                    card.classList.remove('border-gray-200', 'dark:border-gray-800');
                     card.className = `p-4 rounded-xl border shadow-sm flex flex-col justify-between h-24 transition-colors ${colorClass.bg} ${colorClass.border}`;
                     
                     label.className = `text-[10px] font-bold uppercase tracking-wider ${colorClass.text}`;
                     stat.className = `text-2xl font-bold ${colorClass.textBold}`;
                     iconBg.className = `p-1.5 rounded-md ${colorClass.iconBg}`;
                 } else {
-                    card.className = "bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between h-24 transition-colors";
-                    label.className = "text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500";
-                    stat.className = "text-2xl font-bold text-slate-900 dark:text-white";
-                    iconBg.className = "p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300";
+                    card.className = "bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between h-24 transition-colors";
+                    label.className = "text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500";
+                    stat.className = "text-2xl font-bold text-gray-900 dark:text-white";
+                    iconBg.className = "p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-300";
                 }
             };
 
@@ -871,7 +688,7 @@ PORT    STATE SERVICE
             
             if (allResults.length === 0) {
                 resultsContainer.innerHTML = `
-                    <div class="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-500">
+                    <div class="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-500">
                         <i data-lucide="search" class="w-12 h-12 mb-3 opacity-20"></i>
                         <p>No results found yet.</p>
                         <p class="text-sm">Enter Nmap output and click Analyze.</p>
@@ -891,7 +708,7 @@ PORT    STATE SERVICE
 
             if (filtered.length === 0) {
                 resultsContainer.innerHTML = `
-                    <div class="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-500">
+                    <div class="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-500">
                         <p>No results match the current filter.</p>
                     </div>`;
                 lucide.createIcons();
@@ -907,7 +724,7 @@ PORT    STATE SERVICE
                 else if (result.issuerType !== null) rowBgClass = 'bg-yellow-50/30 dark:bg-yellow-900/5';
                 else if (result.isWildcard) rowBgClass = 'bg-indigo-50/30 dark:bg-indigo-900/5';
 
-                row.className = `grid grid-cols-12 px-6 py-4 border-b border-slate-100 dark:border-slate-700 items-start sm:items-center hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${rowBgClass} cursor-help`;
+                row.className = `grid grid-cols-12 px-6 py-4 border-b border-gray-200 dark:border-gray-800 items-start sm:items-center hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors ${rowBgClass} cursor-help`;
                 
                 row.addEventListener('mouseenter', (e) => {
                     // Build Issue Report
@@ -939,15 +756,15 @@ PORT    STATE SERVICE
                 });
 
                 const hostDisplay = (result.hostname !== 'Unknown' && result.hostname) ? result.hostname : result.ip;
-                const subDisplay = (result.hostname !== 'Unknown' && result.hostname) ? `<div class="text-xs text-slate-500 dark:text-slate-400">${result.ip}</div>` : '';
+                const subDisplay = (result.hostname !== 'Unknown' && result.hostname) ? `<div class="text-xs text-gray-500 dark:text-gray-400">${result.ip}</div>` : '';
 
                 const algoBadgeClass = result.isWeak 
                     ? 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/40 dark:text-orange-300 dark:border-orange-800' 
-                    : 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600';
+                    : 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700';
 
                 const expiryBadgeClass = result.isExpired
                      ? 'text-red-600 dark:text-red-400 font-bold'
-                     : 'text-slate-500 dark:text-slate-400';
+                     : 'text-gray-500 dark:text-gray-400';
 
                 let statusHtml = '';
                 if (result.isExpired) {
@@ -960,7 +777,7 @@ PORT    STATE SERVICE
                 if (result.issuerType === 'self-signed') {
                     statusHtml += `<div class="inline-flex items-center gap-1.5 text-yellow-600 dark:text-yellow-400 text-xs font-bold mb-1"><i data-lucide="user-check" class="w-3 h-3"></i> SELF-SIGNED</div><br>`;
                 } else if (result.issuerType === 'internal') {
-                    statusHtml += `<div class="inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400 text-xs font-bold mb-1"><i data-lucide="building" class="w-3 h-3"></i> INTERNAL CA</div><br>`;
+                    statusHtml += `<div class="inline-flex items-center gap-1.5 text-indigo-600 dark:text-indigo-300 text-xs font-bold mb-1"><i data-lucide="building" class="w-3 h-3"></i> INTERNAL CA</div><br>`;
                 }
 
                 if (result.isWildcard) {
@@ -973,11 +790,11 @@ PORT    STATE SERVICE
 
                 row.innerHTML = `
                     <div class="col-span-12 sm:col-span-3 pr-2 mb-2 sm:mb-0 pointer-events-none">
-                        <div class="font-medium text-slate-900 dark:text-slate-100 break-words text-sm">${hostDisplay}</div>
+                        <div class="font-medium text-gray-900 dark:text-gray-200 break-words text-sm">${hostDisplay}</div>
                         ${subDisplay}
                     </div>
                     <div class="col-span-4 sm:col-span-2 mb-2 sm:mb-0 pointer-events-none">
-                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
                             ${result.port}/${result.protocol}
                         </span>
                     </div>
@@ -986,10 +803,10 @@ PORT    STATE SERVICE
                             <code class="text-xs px-2 py-1 rounded border ${algoBadgeClass}">
                                 ${result.algorithm}
                             </code>
-                            <span class="text-[10px] text-slate-400 dark:text-slate-500 italic leading-tight">
+                            <span class="text-[10px] text-gray-400 dark:text-gray-500 italic leading-tight">
                                 ${result.description}
                             </span>
-                            ${result.commonName ? `<span class="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1 rounded border border-slate-200 dark:border-slate-700">CN: ${result.commonName}</span>` : ''}
+                            ${result.commonName ? `<span class="text-[10px] text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-900 px-1 rounded border border-gray-200 dark:border-gray-800">CN: ${result.commonName}</span>` : ''}
                         </div>
                     </div>
                     <div class="col-span-6 sm:col-span-2 mb-2 sm:mb-0 text-sm ${expiryBadgeClass} pointer-events-none">
@@ -1080,23 +897,23 @@ PORT    STATE SERVICE
         filterBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 filterBtns.forEach(b => {
-                    b.classList.remove('bg-white', 'dark:bg-slate-600', 'text-slate-900', 'dark:text-white', 'shadow-sm', 'text-red-600', 'dark:text-red-400', 'text-emerald-600', 'dark:text-emerald-400', 'text-orange-600', 'dark:text-orange-400', 'text-indigo-600', 'dark:text-indigo-400', 'text-yellow-600', 'dark:text-yellow-400');
-                    b.classList.add('text-slate-500', 'dark:text-slate-400', 'hover:text-slate-700', 'dark:hover:text-slate-200');
+                    b.classList.remove('bg-white', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'shadow-sm', 'text-red-600', 'dark:text-red-400', 'text-emerald-600', 'dark:text-emerald-400', 'text-orange-600', 'dark:text-orange-400', 'text-indigo-600', 'dark:text-indigo-400', 'text-yellow-600', 'dark:text-yellow-400');
+                    b.classList.add('text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-200');
                 });
 
                 const clicked = e.target;
                 const filterType = clicked.dataset.filter;
                 currentFilter = filterType;
 
-                clicked.classList.remove('text-slate-500', 'dark:text-slate-400', 'hover:text-slate-700', 'dark:hover:text-slate-200');
-                clicked.classList.add('bg-white', 'dark:bg-slate-600', 'shadow-sm');
+                clicked.classList.remove('text-gray-500', 'dark:text-gray-400', 'hover:text-gray-700', 'dark:hover:text-gray-200');
+                clicked.classList.add('bg-white', 'dark:bg-gray-700', 'shadow-sm');
                 
                 if (filterType === 'weak') clicked.classList.add('text-orange-600', 'dark:text-orange-400');
                 else if (filterType === 'expired') clicked.classList.add('text-red-600', 'dark:text-red-400');
                 else if (filterType === 'private') clicked.classList.add('text-yellow-600', 'dark:text-yellow-400');
                 else if (filterType === 'wildcard') clicked.classList.add('text-indigo-600', 'dark:text-indigo-400');
                 else if (filterType === 'secure') clicked.classList.add('text-emerald-600', 'dark:text-emerald-400');
-                else clicked.classList.add('text-slate-900', 'dark:text-white');
+                else clicked.classList.add('text-gray-900', 'dark:text-white');
 
                 renderTable();
             });
@@ -1104,7 +921,7 @@ PORT    STATE SERVICE
 
         lucide.createIcons();
     </script>
-<footer class="vc-footer w-full">
+<footer class="mt-auto py-8 text-center text-gray-500 dark:text-gray-600 text-xs font-medium">
   For authorized security testing only &nbsp;&middot;&nbsp; All processing runs client-side &nbsp;&middot;&nbsp; No data is stored
 </footer>
 </body>
