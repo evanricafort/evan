@@ -188,14 +188,20 @@
             <div id="resultsContainer" class="mt-8 hidden">
                 <div class="flex justify-between items-end mb-2">
                     <label class="block text-xs font-semibold uppercase text-indigo-600 dark:text-indigo-400">
-                        CDX query (opened in a new tab):
+                        Raw CDX output:
                     </label>
                     <button id="copyButton" class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold focus:outline-none transition-colors duration-200 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
                         <i class="far fa-copy mr-1"></i> Copy Content
                     </button>
                 </div>
                 <div class="relative group">
-                    <pre id="resultsOutput" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-lg p-4 text-xs font-mono text-gray-700 dark:text-gray-300 overflow-auto shadow-inner"></pre>
+                    <iframe id="resultsFrame"
+                            title="Raw CDX output from web.archive.org"
+                            class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl"
+                            style="height: 26rem;"
+                            referrerpolicy="no-referrer"
+                            sandbox="allow-same-origin"></iframe>
+                        <pre id="resultsOutput" class="mt-3 w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-3 text-[11px] font-mono text-gray-600 dark:text-gray-400"></pre>
                 </div>
             </div>
 
@@ -218,6 +224,7 @@
             const resultsContainer = document.getElementById("resultsContainer");
             const resultsOutput = document.getElementById("resultsOutput");
             let lastQueryUrl = "";
+            const resultsFrame = document.getElementById("resultsFrame");
             const copyButton = document.getElementById("copyButton");
             const subdomainToggle = document.getElementById("subdomainToggle");
             const extCheckboxes = document.querySelectorAll('.ext-checkbox');
@@ -367,8 +374,11 @@
                 lastQueryUrl = cdxQueryUrl;
                 resultsOutput.textContent = cdxQueryUrl;
                 resultsContainer.classList.remove('hidden');
-                showSuccess('Query built. Opening the raw CDX output in a new tab.');
-                window.open(cdxQueryUrl, '_blank', 'noopener');
+                /* The frame renders the raw CDX text in place. Script still cannot
+                   read it -- it is cross-origin -- but the browser can display it, which
+                   is what keeps this working without a proxy. */
+                resultsFrame.src = cdxQueryUrl;
+                showSuccess('Showing raw CDX output below. Filters applied: see the query beneath the preview.');
             });
 
             // UPDATED COPY LOGIC
