@@ -110,6 +110,20 @@
         .tk-anim-logo { display:inline-block; animation: tk-logo-float 4.5s ease-in-out infinite; transform-origin:center; }
         @keyframes tk-logo-float { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-5px) rotate(-6deg)} 75%{transform:translateY(-2px) rotate(6deg)} }
         @media (prefers-reduced-motion: reduce){ .tk-anim-logo{animation:none} }
+        /* Both panels start compact so an empty page is not mostly blank box,
+           and grow once there is input to work with. Heights are matched so
+           the two columns stay aligned in either state. */
+        .js-panel {
+            height: 11rem;
+            transition: height 0.25s ease;
+        }
+        body.has-input .js-panel {
+            height: 24rem;
+        }
+        @media (min-width: 1024px) {
+            .js-panel { height: 13rem; }
+            body.has-input .js-panel { height: calc(100vh - 250px); }
+        }
 </style>
     <link rel="stylesheet" href="/css/tool-shell.css">
     <script src="/js/geo-web.js" defer></script>
@@ -346,7 +360,27 @@ function loadTheme() {
   if (s === 'light') document.documentElement.classList.remove('dark');
   else document.documentElement.classList.add('dark');
 }
-loadTheme();</script>
+loadTheme();
+        /* Panels expand only once the textarea actually has content. */
+        /* This script block precedes the markup, so wait for the DOM. */
+        (function () {
+            function wire() {
+            var ta = document.getElementById('nmapInput');
+            if (!ta) return;
+            function sync() {
+                document.body.classList.toggle('has-input', ta.value.trim().length > 0);
+            }
+            ['input', 'change', 'paste', 'cut'].forEach(function (evt) {
+                ta.addEventListener(evt, function () { setTimeout(sync, 0); });
+            });
+            sync();
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', wire);
+            } else {
+                wire();
+            }
+        })();</script>
 
         <div class="absolute top-4 right-4 md:top-8 md:right-8 z-30">
         <button onclick="toggleTheme()" aria-label="Toggle theme" class="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-600 dark:text-yellow-400 shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-indigo-500">
@@ -381,7 +415,7 @@ loadTheme();</script>
                 <div class="!mt-0 hidden lg:block lg:h-[34px]" aria-hidden="true"></div>
 
                 <textarea id="nmapInput" 
-                    class="w-full h-96 lg:h-[calc(100vh-250px)] bg-gray-900 border border-gray-700 rounded-xl p-4 font-mono text-xs sm:text-sm text-green-400 focus:outline-none focus:ring-2 focus:ring-emerald-600 resize-none shadow-inner placeholder-gray-700"
+                    class="w-full js-panel bg-gray-900 border border-gray-700 rounded-xl p-4 font-mono text-xs sm:text-sm text-green-400 focus:outline-none focus:ring-2 focus:ring-emerald-600 resize-none shadow-inner placeholder-gray-700"
                     placeholder="Starting Nmap 7.80 ...
 Nmap scan report for 192.168.1.10
 Host is up (0.0020s latency).
@@ -419,7 +453,7 @@ PORT  STATE SERVICE VERSION
                     </button>
                 </div>
                 
-                <div class="relative w-full h-96 lg:h-[calc(100vh-250px)] bg-gray-900 border border-gray-700 rounded-xl overflow-hidden shadow-inner flex flex-col">
+                <div class="relative w-full js-panel bg-gray-900 border border-gray-700 rounded-xl overflow-hidden shadow-inner flex flex-col">
                     
                     <div class="grid grid-cols-12 bg-gray-800 text-gray-300 text-xs font-bold uppercase tracking-wider border-b border-gray-700 sticky top-0">
                         <div class="col-span-3 p-3 border-r border-gray-700">IP Address</div>

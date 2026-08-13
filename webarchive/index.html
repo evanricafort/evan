@@ -44,7 +44,7 @@
 
         #resultsOutput {
             height: auto; 
-            max-height: 200px; 
+            /* no cap: the full result list is shown inline */ max-height: none; 
             word-break: break-all;
             white-space: pre-wrap;
             scrollbar-color: #9ca3af #e5e7eb; 
@@ -188,7 +188,7 @@
             <div id="resultsContainer" class="mt-8 hidden">
                 <div class="flex justify-between items-end mb-2">
                     <label class="block text-xs font-semibold uppercase text-indigo-600 dark:text-indigo-400">
-                        Results:
+                        CDX query (opened in a new tab):
                     </label>
                     <button id="copyButton" class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold focus:outline-none transition-colors duration-200 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
                         <i class="far fa-copy mr-1"></i> Copy Content
@@ -217,14 +217,13 @@
             const statusMessage = document.getElementById("statusMessage");
             const resultsContainer = document.getElementById("resultsContainer");
             const resultsOutput = document.getElementById("resultsOutput");
+            let lastQueryUrl = "";
             const copyButton = document.getElementById("copyButton");
             const subdomainToggle = document.getElementById("subdomainToggle");
             const extCheckboxes = document.querySelectorAll('.ext-checkbox');
             const extAny = document.getElementById('ext-any');
             
-            const themeToggleInput = document.getElementById('themeToggle'); 
-
-            const PROXY_URL = 'https://corsproxy.io/?'; 
+            const themeToggleInput = document.getElementById('themeToggle');  
             const MAX_RETRIES = 3;
             
             const mimeMap = {
@@ -336,37 +335,6 @@
                 statusMessage.classList.add('hidden');
                 statusMessage.innerHTML = "";
             };
-
-            async function fetchWithRetry(url, maxAttempts) {
-                for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-                    setLoading(true, attempt); 
-                    const delay = Math.pow(2, attempt) * 100;
-                    
-                    try {
-                        const response = await fetch(url);
-
-                        if (response.ok) {
-                            return response;
-                        }
-
-                        if (response.status === 408) { 
-                            console.warn(`Attempt ${attempt} failed with status ${response.status} (Timeout). Retrying in ${delay}ms...`);
-                        } else {
-                            const errorText = await response.text();
-                            throw new Error(`Proxy returned error status: ${response.status}. Raw response: ${errorText.substring(0, 100)}...`);
-                        }
-
-                    } catch (error) {
-                        console.error(`Attempt ${attempt} failed:`, error.message);
-                    }
-
-                    if (attempt < maxAttempts) {
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                    }
-                }
-                throw new Error(`Failed to fetch after ${maxAttempts} attempts.`);
-            }
-
             insertButton.addEventListener("click", async function () {
                 const rawInput = urlInput.value.trim();
                 
@@ -376,6 +344,8 @@
                     return;
                 }
 
+                // The reference query always uses matchType=domain. The toggle narrows to
+                // the exact host only when explicitly unchecked.
                 const matchType = subdomainToggle.checked ? 'domain' : 'host';
                 const extensionFilterParams = getExtensionFilter();
                 
@@ -387,37 +357,18 @@
 
                 clearStatus();
                 urlInput.classList.remove('ring-2', 'ring-red-500');
-                resultsContainer.classList.add('hidden');
-                resultsOutput.textContent = "";
-                
-                
-                const finalFetchUrl = `${PROXY_URL}${encodeURIComponent(cdxQueryUrl)}`;
 
-                try {
-                    setLoading(true, 0);
-                    
-                    const response = await fetchWithRetry(finalFetchUrl, MAX_RETRIES);
-                    const textData = await response.text();
-                    
-                    if (!textData.trim()) {
-                        showError("No archive records found (Status 200) matching your filters.", cdxQueryUrl);
-                        resultsOutput.textContent = `No results found for the query:\n${cdxQueryUrl}`;
-                    } else {
-                        resultsOutput.textContent = textData;
-                        const lineCount = textData.trim().split('\n').filter(line => line.trim().length > 0).length;
-                        showSuccess(`Successfully fetched ${lineCount} archive URLs.`);
-                    }
-                    resultsContainer.classList.remove('hidden');
-
-                } catch (error) {
-                    console.error("Final Fetch Error:", error);
-                    showError(`Data retrieval failed after ${MAX_RETRIES} attempts. Error: ${error.message.substring(0, 80)}...`, cdxQueryUrl);
-                    resultsOutput.textContent = `The CORS proxy failed to retrieve data after multiple attempts. Use the button above to view the raw CDX output directly. Raw query URL:\n${cdxQueryUrl}`;
-                    resultsContainer.classList.remove('hidden');
-
-                } finally {
-                    setLoading(false);
-                }
+                /* No proxy. The CDX API sends no Access-Control-Allow-Origin, so a
+                   cross-origin fetch can never read the body from the browser -- the
+                   response comes back opaque. A top-level navigation is not subject
+                   to CORS, so the raw output is handed straight to archive.org
+                   instead. Nothing can fail in between, and what you see is the
+                   unmodified CDX text. */
+                lastQueryUrl = cdxQueryUrl;
+                resultsOutput.textContent = cdxQueryUrl;
+                resultsContainer.classList.remove('hidden');
+                showSuccess('Query built. Opening the raw CDX output in a new tab.');
+                window.open(cdxQueryUrl, '_blank', 'noopener');
             });
 
             // UPDATED COPY LOGIC
