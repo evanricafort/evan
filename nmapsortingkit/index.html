@@ -302,7 +302,31 @@
   .hero-sub { color: hsl(var(--muted-foreground)); font-size:.875rem; max-width:36rem; margin:.75rem auto 0; }
   @media(min-width:768px){ .hero-sub { font-size:1.125rem; } }
   footer { margin-top:auto; padding:2rem 1rem; text-align:center; font-size:.75rem;
-    font-weight:500; color: hsl(var(--muted-foreground)); width:100%; }</style>
+    font-weight:500; color: hsl(var(--muted-foreground)); width:100%; }
+  /* ── Theme toggle: matched to /weaksslcerts ── */
+  #themeToggle, .theme-toggle-btn {
+    box-sizing: border-box;
+    width: 46px; height: 46px; padding: 12px;
+    border-radius: 9999px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #4b5563;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  html.dark #themeToggle, html.dark .theme-toggle-btn {
+    border-color: #374151;
+    background: #1f2937;
+    color: #facc15;
+  }
+  #themeToggle:hover, .theme-toggle-btn:hover { transform: scale(1.05); }
+  #themeToggle:focus-visible, .theme-toggle-btn:focus-visible {
+    outline: none; box-shadow: 0 0 0 2px rgba(99,102,241,0.6);
+  }
+  #themeToggle svg, .theme-toggle-btn svg { width: 20px; height: 20px; }
+  .theme-toggle-btn span { font-size: 20px; line-height: 20px; display: block; }</style>
 </head>
 <body>
   <div class="container">
