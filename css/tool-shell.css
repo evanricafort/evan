@@ -1,0 +1,119 @@
+/* ======================================================================
+   Tool shell — geometric background + mobile behaviour
+   Loaded by every tool page alongside its own styles. Two jobs:
+   the canvas the shared background draws on, and the mobile rules that
+   the tools all need but none of them had.
+   ====================================================================== */
+
+/* ── Background canvas ─────────────────────────────────────────────────
+   Sits behind everything and never intercepts input. The tool pages set
+   an opaque background on <body>, so the canvas has to live above that
+   paint rather than at z-index:-1 like it does on the homepage. */
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.9;
+}
+/* Lift the page content above the canvas. Deliberately listed rather than
+   using body > *:not(#bg-canvas): the :not() would carry id specificity and
+   its position:relative would override the fixed/absolute theme toggles.
+   The toggles already sit above the canvas via their own z-index. */
+body > main,
+body > footer,
+body > nav,
+body > .container,
+body > .tk-main { position: relative; z-index: 1; }
+
+/* Palette for the web. Light values first, dark under html.dark, matching
+   the tokens the homepage feeds the same code. */
+:root {
+  --geo-line: 22, 44, 66;
+  --geo-accent: 79, 70, 229;
+}
+html.dark {
+  --geo-line: 200, 220, 240;
+  --geo-accent: 129, 140, 248;
+}
+
+/* ── Mobile ────────────────────────────────────────────────────────────
+   Phones and small tablets. Desktop layout above is untouched. */
+@media (max-width: 767px) {
+
+  /* Never let a wide child force sideways scrolling. */
+  html, body { max-width: 100%; overflow-x: hidden; }
+
+  /* Grid and flex children default to min-width:auto, which is what makes
+     wide tables and long tokens push the page sideways. */
+  main > *, .container > *, .tk-main > *, [class*="grid"] > * { min-width: 0; }
+
+  /* Headings: the desktop clamp bottoms out too large on a 360px screen. */
+  h1 { font-size: clamp(1.5rem, 7vw, 1.9rem) !important; line-height: 1.2; }
+  h2 { font-size: 1.15rem !important; }
+  h3 { font-size: 1.05rem !important; }
+
+  /* Hero icons scale with the heading rather than staying desktop-sized. */
+  h1 > i:first-child, h1 > svg:first-child,
+  h1 .tk-anim-logo, h1 .tk-anim-logo svg {
+    font-size: 1.5rem !important;
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+  }
+
+  /* Cards and panels: reclaim the horizontal padding phones can't spare. */
+  .tk-card, .tk-panel, .card, .panel,
+  [class*="rounded-2xl"], [class*="rounded-xl"] { border-radius: 0.85rem; }
+
+  /* Any table that can't fit gets its own scroll container rather than
+     dragging the whole page with it. */
+  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .table-wrap, .tk-table-wrap, .overflow-x-auto { -webkit-overflow-scrolling: touch; }
+
+  /* Long unbroken strings — tokens, base64, URLs, hashes — are the other
+     main cause of sideways scroll on these tools. */
+  pre, code, samp, kbd,
+  .tk-code, .json-view, .jwt-visual, #resultsOutput, #rawDnsJson {
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* Touch targets: 44px is the accessible minimum, and several tools ship
+     buttons well under it. */
+  button, .btn, [role="button"], select, input[type="submit"] { min-height: 44px; }
+  button.tk-btn-sm, .ex-btn { min-height: 36px; }
+
+  /* Inputs at 16px or larger stop iOS Safari zooming on focus. */
+  input, select, textarea { font-size: 16px !important; }
+
+  /* Control rows are laid out as non-wrapping flex on desktop, which pushes
+     the last control off-screen once the row is wider than the phone. */
+  .controls, .input-row, .btn-group, .load-example-row {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  /* A select paired with a button reads better stacked full-width than
+     squeezed onto one line. */
+  .controls > *, .input-row > * { flex: 1 1 100%; }
+
+  /* Keep the floating theme toggle clear of the heading and out of the
+     way of the thumb. */
+  .tk-theme-btn, .tk-toggle-wrap,
+  #themeToggle, #darkModeToggle, #btnThemeToggle, #themeToggleBtn { z-index: 200; }
+}
+
+/* Very narrow phones. */
+@media (max-width: 380px) {
+  h1 { font-size: 1.35rem !important; }
+  .tk-card, .card, .panel { padding: 1rem !important; }
+}
+
+/* Reduced motion: the background keeps drifting but the page stops
+   animating anything decorative. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+  #bg-canvas { animation: none !important; }
+}
