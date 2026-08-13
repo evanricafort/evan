@@ -1,0 +1,10 @@
+# Claude Code workspace settings (local dev server config, tool permissions)
+.claude/
+
+# Output of phmobilenumbergenerator.py
+philippine_mobile_numbers.txt
+
+# OS cruft
+.DS_Store
+Thumbs.db
+desktop.ini
