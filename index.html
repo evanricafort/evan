@@ -107,9 +107,13 @@
       </iframe>
     </div>
 
+    <!-- Filled in on first hover by initCvPreview so the PDF is not
+         fetched for visitors who never hover the link. -->
+    <div id="cv-preview" aria-hidden="true"></div>
+
     <div id="bio_right" data-aos="fade-left">
       Work Email: <a href="mailto:root@evanricafort.com" target="_blank" title="Hit me up!" class="container cool-link">root@evanricafort.com</a><br />
-      Download my CV: <a href="/Evan Ricafort - CV.pdf" target="_blank" title="Hire me!" class="container cool-link">Click Here!</a><br />
+      Download my CV: <a href="/Evan Ricafort - CV.pdf" id="cv-link" target="_blank" title="Hire me!" class="container cool-link">Click Here!</a><br />
       <a href="#" class="container cool-link">https://evanricafort.com</a>
     </div>
 

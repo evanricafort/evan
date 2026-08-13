@@ -170,6 +170,63 @@
   }
 
   /* ============================================================
+     CV hover preview
+     The same trick as the address map: a panel that trails the
+     cursor while the CV link is hovered, showing the first page
+     of the PDF itself so it can never fall out of date.
+     ============================================================ */
+  function initCvPreview() {
+    var panel = document.getElementById('cv-preview');
+    var link = document.getElementById('cv-link');
+    if (!panel || !link) return;
+
+    var OFFSET = 20;
+    var EDGE = 6;
+    var loaded = false;
+
+    /* Built on first hover rather than at page load - the CV is ~160KB
+       and most visitors never hover it. */
+    function ensureFrame() {
+      if (loaded) return;
+      loaded = true;
+
+      var frame = document.createElement('iframe');
+      /* Strip the viewer chrome so only the page shows. */
+      frame.src = link.href + '#toolbar=0&navpanes=0&scrollbar=0&view=FitH';
+      frame.title = 'Preview of the first page of the CV';
+      frame.tabIndex = -1;
+      panel.appendChild(frame);
+    }
+
+    /* The link sits near the right edge, so the panel flips to the other
+       side of the cursor instead of hanging off the viewport. */
+    function place(event) {
+      var width = panel.offsetWidth;
+      var height = panel.offsetHeight;
+      var x = event.clientX + OFFSET;
+      var y = event.clientY + OFFSET;
+
+      if (x + width > window.innerWidth - EDGE) x = event.clientX - OFFSET - width;
+      if (y + height > window.innerHeight - EDGE) y = event.clientY - OFFSET - height;
+
+      panel.style.left = Math.max(EDGE, x) + 'px';
+      panel.style.top = Math.max(EDGE, y) + 'px';
+    }
+
+    link.addEventListener('mouseenter', function (event) {
+      ensureFrame();
+      place(event);
+      panel.style.transform = 'scale(1)';
+    });
+
+    link.addEventListener('mouseleave', function () {
+      panel.style.transform = 'scale(0)';
+    });
+
+    link.addEventListener('mousemove', place);
+  }
+
+  /* ============================================================
      Name flicker
      ============================================================ */
   function initNameFlicker() {
@@ -585,6 +642,7 @@
   initLoadingBar();
   initScrollProgress();
   initAddressMap();
+  initCvPreview();
   initNameFlicker();
   initScrollToTop();
   initGeometricWeb();
