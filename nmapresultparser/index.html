@@ -113,16 +113,18 @@
         /* Both panels start compact so an empty page is not mostly blank box,
            and grow once there is input to work with. Heights are matched so
            the two columns stay aligned in either state. */
+        /* Compact while idle. Once there is input the height is set from the
+           content by the script below and capped, rather than stretching to the
+           viewport. Both panels share --panel-h so the columns stay aligned. */
         .js-panel {
             height: 11rem;
-            transition: height 0.25s ease;
+            transition: height 0.2s ease;
         }
         body.has-input .js-panel {
-            height: 24rem;
+            height: var(--panel-h, 18rem);
         }
         @media (min-width: 1024px) {
             .js-panel { height: 13rem; }
-            body.has-input .js-panel { height: calc(100vh - 250px); }
         }
 </style>
     <link rel="stylesheet" href="/css/tool-shell.css">
@@ -301,6 +303,7 @@
             container.innerHTML = html;
             resultCount.innerText = `${results.length} identified versions found across hosts`;
             copyButtons.forEach(id => document.getElementById(id).classList.remove('hidden'));
+            if (window.tkFitPanels) window.tkFitPanels();
         }
 
         function copyAll() {
@@ -367,9 +370,27 @@ loadTheme();
             function wire() {
             var ta = document.getElementById('nmapInput');
             if (!ta) return;
-            function sync() {
-                document.body.classList.toggle('has-input', ta.value.trim().length > 0);
+            var MIN_PX = 176;   /* 11rem - never smaller than the idle box */
+            var MAX_PX = 560;   /* stop well short of stretching down the page */
+
+            /* Fit to whichever side has more to show, so neither panel is a
+               mostly-empty box and the two columns stay the same height. */
+            function fit() {
+                var results = document.getElementById('resultsContainer');
+                var needed = ta.scrollHeight;
+                if (results) {
+                    needed = Math.max(needed, results.scrollHeight + 56);
+                }
+                var h = Math.min(Math.max(needed, MIN_PX), MAX_PX);
+                document.documentElement.style.setProperty('--panel-h', h + 'px');
             }
+
+            function sync() {
+                var hasInput = ta.value.trim().length > 0;
+                document.body.classList.toggle('has-input', hasInput);
+                if (hasInput) fit();
+            }
+            window.tkFitPanels = sync;
             ['input', 'change', 'paste', 'cut'].forEach(function (evt) {
                 ta.addEventListener(evt, function () { setTimeout(sync, 0); });
             });
