@@ -15,15 +15,26 @@
   --geo-accent: 0, 118, 168;
 }
 
+/* Dark mode matches the tool pages (see tools/spfrecordchecker): their
+   Tailwind config redefines gray-950 as #0b0f19, and the body there is
+   `dark:bg-gray-950 dark:text-gray-200` on an indigo accent. The tokens
+   that had no dark value were the real problem - a #ddd rule glares on
+   near-black, while the #080fad underline and the dark blue bars all but
+   vanish - so each one gets a dark counterpart here. */
 body.dark-mode {
-  --bg: #1e1e1e;
-  --fg: #f0f0f0;
-  --to-top: #cccccc;
+  --bg: #0b0f19;              /* gray-950, as the tools define it */
+  --fg: #e5e7eb;              /* gray-200, ~14.9:1 on the background */
+  --rule: #374151;            /* gray-700; #ddd was glaring here */
+  --underline: #818cf8;       /* indigo-400; #080fad is invisible on this */
+  --social-hover: #818cf8;
+  --loading-bar: #6366f1;     /* indigo-500 */
+  --progress-bar: #818cf8;    /* indigo-400 */
+  --to-top: #9ca3af;          /* gray-400, ~7.3:1 */
   --trail: rgba(255, 255, 255, 0.1);
   --map-border: rgba(255, 255, 255, 0.9);
   --glow: 255, 255, 255;
   --geo-line: 200, 220, 240;
-  --geo-accent: 96, 208, 255;
+  --geo-accent: 129, 140, 248; /* indigo-400, same as css/tool-shell.css */
 }
 
 /* --- Base --------------------------------------------------------- */
@@ -49,8 +60,10 @@ h2 { margin: 10px 0; padding: 0 0 5px; border-bottom: 1px solid var(--rule); }
 header { padding: 5px; }
 section { padding-top: 12px; }
 footer { padding-top: 30px; }
-body.dark-mode a { color: #4ea3ff; }
-body.dark-mode a:hover { color: #7ec8ff; }
+/* indigo-300 / indigo-200: the tools' accent family, and ~9.3:1 on the
+   dark background so long runs of link text stay comfortable to read. */
+body.dark-mode a { color: #a5b4fc; }
+body.dark-mode a:hover { color: #c7d2fe; }
 
 /* --- Lists -------------------------------------------------------- */
 ul > li { margin: 0 0 1px 20px; }
@@ -85,6 +98,9 @@ ul ul li::before {
 #bio_center a[href*="instagram.com"]:hover i { color: #e4405f; }
 #bio_center a[href*="twitter.com"]:hover i { color: #1da1f2; }
 #bio_center a[href*="github.com"]:hover i { color: #333333; }
+/* GitHub's mark is near-black, which disappears on the dark background;
+   use the light-on-dark version of the brand colour instead. */
+body.dark-mode #bio_center a[href*="github.com"]:hover i { color: #f0f6fc; }
 #bio_center a[href*="linkedin.com"]:hover i { color: #0077b5; }
 
 /* Profile photo (also the dark-mode trigger). */
