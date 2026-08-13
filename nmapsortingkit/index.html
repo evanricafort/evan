@@ -11,20 +11,17 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 <script>
-  if (localStorage.getItem("theme") === "dark" ||
-      (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-    document.documentElement.classList.add("dark");
-  }
+  if (localStorage.getItem("theme") !== "light") { document.documentElement.classList.add("dark"); }
 </script>
 <style>
   :root {
-    --background: 210 20% 98%;
-    --foreground: 215 28% 17%;
+    --background: 220 14% 96%;
+    --foreground: 221 39% 11%;
     --card: 0 0% 100%;
     --card-foreground: 215 28% 17%;
     --primary: 243 75% 59%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 96%;
+    --secondary: 210 20% 98%;
     --secondary-foreground: 215 28% 17%;
     --muted-foreground: 220 9% 46%;
     --accent: 220 14% 96%;
@@ -37,18 +34,18 @@
     --radius: 0.75rem;
   }
   html.dark {
-    --background: 221 39% 11%;
-    --foreground: 220 13% 91%;
-    --card: 215 28% 17%;
+    --background: 223 39% 7%;
+    --foreground: 0 0% 100%;
+    --card: 221 39% 11%;
     --card-foreground: 220 13% 91%;
-    --secondary: 217 19% 27%;
+    --secondary: 215 28% 17%;
     --secondary-foreground: 220 13% 91%;
     --muted-foreground: 218 11% 65%;
     --accent: 217 19% 27%;
     --accent-foreground: 220 13% 91%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 220 13% 91%;
-    --border: 217 19% 27%;
+    --border: 215 28% 17%;
     --input: 215 14% 34%;
   }
   * { box-sizing: border-box; }
@@ -282,24 +279,47 @@
   html body, body button { font-family: 'Inter', sans-serif; }
   body code, body pre, body kbd, body samp, body .font-mono,
   body textarea, body input, body select { font-family: 'JetBrains Mono', monospace; }
-</style>
+
+  /* ── Shared tool format ── */
+  body { display:flex; flex-direction:column; align-items:center; padding:2rem 1rem; min-height:100vh; }
+  @media(min-width:768px){ body { padding:3rem 1rem; } }
+  .container { max-width: 80rem; width:100%; margin: 2rem auto 0; }
+  .tk-toggle-wrap { position: fixed; top:1rem; right:1rem; z-index:200; }
+  @media(min-width:768px){ .tk-toggle-wrap { top:2rem; right:2rem; } }
+  #themeToggle { position:static; width:3rem; height:3rem; border-radius:9999px;
+    background: hsl(var(--card)); border:1px solid hsl(var(--border));
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.25); cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center; transition: transform .2s; }
+  #themeToggle:hover { transform: scale(1.08); }
+  .page-hero { text-align:center; margin-bottom:2rem; }
+  .page-hero h1 { font-size: clamp(1.875rem,5vw,3rem); font-weight:800; letter-spacing:-0.025em;
+    display:flex; align-items:center; justify-content:center; gap:.75rem; flex-wrap:wrap; }
+  .page-hero .tk-anim-logo { display:inline-flex; animation: tk-logo-float 4.5s ease-in-out infinite; transform-origin:center; }
+  .page-hero .tk-anim-logo svg { width:2.5rem !important; height:2.5rem !important; }
+  @keyframes tk-logo-float { 0%,100%{transform:translateY(0) rotate(0)}
+    25%{transform:translateY(-5px) rotate(-6deg)} 75%{transform:translateY(-2px) rotate(6deg)} }
+  @media (prefers-reduced-motion: reduce){ .page-hero .tk-anim-logo{animation:none} }
+  .hero-sub { color: hsl(var(--muted-foreground)); font-size:.875rem; max-width:36rem; margin:.75rem auto 0; }
+  @media(min-width:768px){ .hero-sub { font-size:1.125rem; } }
+  footer { margin-top:auto; padding:2rem 1rem; text-align:center; font-size:.75rem;
+    font-weight:500; color: hsl(var(--muted-foreground)); width:100%; }</style>
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>
-        <svg class="shield-icon icon" style="width:1.75rem;height:1.75rem;color:hsl(var(--primary))" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
-        Nmap Result <span class="gradient">Sorting</span> Kit
-      </h1>
-      <p>
-        Sort and search Nmap scan results by evan
-        <a href="https://x.com/evanricafort" target="_blank" rel="noreferrer">(@evanricafort)</a>
-      </p>
-      <button id="themeToggle" aria-label="Toggle dark mode" onclick="toggleTheme()">
-        <svg class="sun-icon icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.5-4.5l-1.591 1.591M3 12h2.25m.386-6.364l1.591 1.591M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z" /></svg>
-        <svg class="moon-icon icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.752 15.002A9.72 9.72 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 008.998-5.998z" /></svg>
-      </button>
-    </header>
+    <div class="tk-toggle-wrap">
+  <button id="themeToggle" aria-label="Toggle dark mode" onclick="toggleTheme()">
+    <svg class="sun-icon icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.5-4.5l-1.591 1.591M3 12h2.25m.386-6.364l1.591 1.591M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z" /></svg>
+    <svg class="moon-icon icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.752 15.002A9.72 9.72 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 008.998-5.998z" /></svg>
+  </button>
+</div>
+
+<div class="page-hero">
+  <h1>
+    <span class="tk-anim-logo"><svg class="shield-icon icon" style="width:1.75rem;height:1.75rem;color:hsl(var(--primary))" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
+    Nmap Result <span class="gradient">Sorting</span> Kit
+  </h1>
+  <p class="hero-sub">Sort and search Nmap scan results &mdash; by evan <a href="https://x.com/evanricafort" target="_blank" rel="noreferrer">(@evanricafort)</a></p>
+</div>
 
     <div class="panel">
       <h3>Input Data</h3>
@@ -799,5 +819,6 @@
   updateButtons();
 })();
 </script>
+<footer>For authorized security testing only &middot; All processing runs client-side &middot; No data is stored</footer>
 </body>
 </html>

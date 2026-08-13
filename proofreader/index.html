@@ -1,61 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Proofreader & Analyzer</title>
   <link href="/profile.jpg" type="image/jpeg" rel="shortcut icon" />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
   
   <style>
     :root {
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --border: #e2e8f0;
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --editor-bg: #ffffff;
-      --metric-bg: #f8fafc;
-      --dropzone-bg: #f1f5f9;
-      --tab-bg: #f1f5f9;
-      --tab-hover: #e2e8f0;
-      
-      --spelling-bg: #fef2f2;
-      --spelling-border: #ef4444;
-      --grammar-bg: #fefce8;
-      --grammar-border: #eab308;
-      --style-bg: #eff6ff;
-      --style-border: #3b82f6;
-      --punct-bg: #f3e8ff;
-      --punct-border: #a855f7;
+      --bg: #f3f4f6;         --card-bg: #ffffff;      --editor-bg: #ffffff;
+      --dropzone-bg: #f9fafb; --metric-bg: #f9fafb;   --tab-bg: #f9fafb;
+      --tab-hover: #f3f4f6;   --border: #e5e7eb;
+      --text: #111827;        --text-muted: #6b7280;
+      --primary: #4f46e5;     --primary-hover: #4338ca;
+      --grammar-bg: rgba(79,70,229,0.10);  --grammar-border: #4f46e5;
+      --punct-bg: rgba(217,119,6,0.10);    --punct-border: #d97706;
+      --spelling-bg: rgba(220,38,38,0.10); --spelling-border: #dc2626;
+      --style-bg: rgba(5,150,105,0.10);    --style-border: #059669;
     }
-
-    [data-theme="dark"] {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --primary: #3b82f6;
-      --primary-hover: #60a5fa;
-      --border: #334155;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --editor-bg: #0f172a;
-      --metric-bg: #0f172a;
-      --dropzone-bg: #111827;
-      --tab-bg: #334155;
-      --tab-hover: #475569;
-
-      --spelling-bg: #451a1a;
-      --spelling-border: #f87171;
-      --grammar-bg: #423b16;
-      --grammar-border: #facc15;
-      --style-bg: #1e3a5f;
-      --style-border: #60a5fa;
-      --punct-bg: #3b1d54;
-      --punct-border: #c084fc;
+    html.dark {
+      --bg: #0b0f19;         --card-bg: #111827;      --editor-bg: #111827;
+      --dropzone-bg: #1f2937; --metric-bg: #1f2937;   --tab-bg: #1f2937;
+      --tab-hover: #243041;   --border: #1f2937;
+      --text: #ffffff;        --text-muted: #9ca3af;
+      --primary: #6366f1;     --primary-hover: #4f46e5;
+      --grammar-bg: rgba(99,102,241,0.14); --grammar-border: #6366f1;
+      --punct-bg: rgba(251,191,36,0.14);   --punct-border: #fbbf24;
+      --spelling-bg: rgba(248,113,113,0.14);--spelling-border: #f87171;
+      --style-bg: rgba(52,211,153,0.14);   --style-border: #34d399;
     }
 
     * {
@@ -497,21 +473,46 @@
   body textarea, body input, body select { font-family: 'JetBrains Mono', monospace; }
   /* prose editor stays proportional, but on Inter like the rest */
   body #editor { font-family: 'Inter', sans-serif; }
-</style>
+
+  /* ── Shared tool format ── */
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif;
+         min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:2rem 1rem; }
+  @media(min-width:768px){ body { padding:3rem 1rem; } }
+  .container { max-width: 60rem; width:100%; margin: 2rem auto 0; }
+  .tk-toggle-wrap { position: fixed; top:1rem; right:1rem; z-index:200; }
+  @media(min-width:768px){ .tk-toggle-wrap { top:2rem; right:2rem; } }
+  .theme-toggle-btn { width:3rem; height:3rem; padding:0; border-radius:9999px;
+    background: var(--card-bg); border:1px solid var(--border); color:#fbbf24;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.25); font-size:1.15rem; cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center; transition: transform .2s; }
+  .theme-toggle-btn:hover { transform: scale(1.08); }
+  .page-hero { text-align:center; margin-bottom:2rem; }
+  .page-hero h1 { font-size: clamp(1.875rem,5vw,3rem); font-weight:800; letter-spacing:-0.025em;
+    color: var(--text); display:flex; align-items:center; justify-content:center; gap:.75rem; flex-wrap:wrap; }
+  .page-hero .tk-accent { color: var(--primary); }
+  .page-hero .tk-anim-logo { color: var(--primary); display:inline-block;
+    animation: tk-logo-float 4.5s ease-in-out infinite; transform-origin:center; }
+  @keyframes tk-logo-float { 0%,100%{transform:translateY(0) rotate(0)}
+    25%{transform:translateY(-5px) rotate(-6deg)} 75%{transform:translateY(-2px) rotate(6deg)} }
+  @media (prefers-reduced-motion: reduce){ .page-hero .tk-anim-logo{animation:none} }
+  .hero-sub { color: var(--text-muted); font-size:.875rem; max-width:36rem; margin:.75rem auto 0; }
+  @media(min-width:768px){ .hero-sub { font-size:1.125rem; } }
+  .card { border-radius: 1rem; }</style>
 </head>
 <body>
 
   <div class="container">
-    <header>
-      <div>
-        <h1>AI-Powered Proofreader & Analyzer</h1>
-        <p>Analyze text or uploaded documents (.pdf, .docx, .txt) with advanced NLP accuracy.</p>
-      </div>
-      <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle theme">
-        <span id="themeIcon">🌙</span>
-        <span id="themeText">Dark</span>
-      </button>
-    </header>
+    <div class="tk-toggle-wrap">
+  <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle theme" title="Toggle theme">
+    <span id="themeIcon">&#9728;&#65039;</span>
+    <span id="themeText" hidden>Light</span>
+  </button>
+</div>
+
+<div class="page-hero">
+  <h1><i class="fas fa-spell-check tk-anim-logo"></i> <span class="tk-accent">AI-Powered</span> Proofreader</h1>
+  <p class="hero-sub">Analyze text or uploaded documents (.pdf, .docx, .txt) with advanced NLP accuracy.</p>
+</div>
 
     <main class="card">
       <div class="file-dropzone" id="dropzone">
@@ -976,6 +977,27 @@
     function escapeAttr(text) {
       return text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
     }
-  </script>
+  
+/* theme: dark class on <html>, shared across all tools */
+function tkApplyTheme(dark) {
+  document.documentElement.classList.toggle('dark', dark);
+  try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
+  var i = document.getElementById('themeIcon');
+  if (i) i.innerHTML = dark ? '&#9728;&#65039;' : '&#127769;';
+  var x = document.getElementById('themeText');
+  if (x) x.textContent = dark ? 'Light' : 'Dark';
+}
+(function () {
+  var s = null; try { s = localStorage.getItem('theme'); } catch (e) {}
+  tkApplyTheme(s !== 'light');
+  var b = document.getElementById('themeToggleBtn');
+  if (b) {
+    var fresh = b.cloneNode(true);
+    b.parentNode.replaceChild(fresh, b);
+    fresh.addEventListener('click', function () {
+      tkApplyTheme(!document.documentElement.classList.contains('dark'));
+    });
+  }
+})();</script>
 </body>
 </html>

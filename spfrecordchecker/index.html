@@ -46,7 +46,10 @@
             background-position: right 1rem center;
             background-size: 1em;
         }
-    </style>
+            .tk-anim-logo { display:inline-block; animation: tk-logo-float 4.5s ease-in-out infinite; transform-origin:center; }
+        @keyframes tk-logo-float { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-5px) rotate(-6deg)} 75%{transform:translateY(-2px) rotate(6deg)} }
+        @media (prefers-reduced-motion: reduce){ .tk-anim-logo{animation:none} }
+</style>
 </head>
 <body class="bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200 min-h-screen flex flex-col items-center py-8 md:py-12 px-4 antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300">
 
@@ -60,7 +63,7 @@
         
         <div class="text-center space-y-3">
             <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center justify-center gap-3">
-                <i class="fas fa-shield-halved text-indigo-600 dark:text-indigo-500"></i>
+                <i class="fas fa-shield-halved tk-anim-logo text-indigo-600 dark:text-indigo-500"></i>
                 <span><span class="text-indigo-600 dark:text-indigo-500">SPF</span> Detector</span>
             </h1>
             <p class="text-gray-600 dark:text-gray-400 text-sm md:text-lg max-w-xl mx-auto">
