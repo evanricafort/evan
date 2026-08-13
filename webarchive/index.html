@@ -233,31 +233,52 @@
             const themeToggleInput = document.getElementById('themeToggle');  
             const MAX_RETRIES = 3;
             
-            const mimeMap = {
-                'pdf': 'application/pdf',
-                'xml': 'text/xml',
-                'html': 'text/html', 
-                'php': 'text/html', 
-                'txt': 'text/plain'
-            };
+            /* Extension filtering.
 
+               The previous version emitted one filter= per selected extension and
+               matched on mimetype. Both were wrong:
+
+                 - CDX ANDs repeated filter= parameters, so picking .pdf and .xml
+                   asked for a record that is both MIME types at once and matched
+                   nothing at all.
+                 - the UI offers extensions, but mimetype is a different thing.
+                   .php and .html both map to text/html, so choosing .php returned
+                   every HTML page on the domain rather than PHP files.
+
+               Both are fixed by emitting a single filter matching the end of the
+               original URL, with the selected extensions as one alternation.
+               Letters are expanded to character classes so an archived .PDF is
+               matched without relying on inline regex flags, which are not
+               guaranteed across CDX backends. */
+
+            /* pdf -> [pP][dD][fF] */
+            const anyCase = (word) => word
+                .split('')
+                .map((ch) => /[a-z]/i.test(ch)
+                    ? '[' + ch.toLowerCase() + ch.toUpperCase() + ']'
+                    : ch)
+                .join('');
 
             const getExtensionFilter = () => {
                 if (extAny.checked) {
-                    return ''; 
+                    return '';
                 }
 
-                const selectedMimeTypes = [];
-                extCheckboxes.forEach(checkbox => {
+                const exts = [];
+                extCheckboxes.forEach((checkbox) => {
                     if (checkbox.checked && checkbox.dataset.ext) {
-                        const mime = mimeMap[checkbox.dataset.ext];
-                        if (mime) {
-                            selectedMimeTypes.push(`filter=mimetype:${encodeURIComponent(mime)}`);
-                        }
+                        exts.push(checkbox.dataset.ext);
                     }
                 });
 
-                return selectedMimeTypes.join('&');
+                if (exts.length === 0) {
+                    return '';
+                }
+
+                /* Anything trailing the extension - a query string or fragment -
+                   still counts as that file type. */
+                const pattern = '.*\\.(?:' + exts.map(anyCase).join('|') + ')(?:[?#].*)?$';
+                return 'filter=original:' + encodeURIComponent(pattern);
             };
 
             extCheckboxes.forEach(checkbox => {
