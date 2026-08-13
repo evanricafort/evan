@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS SourceMap Unmapper</title>
+    <link href="/profile.jpg" type="image/jpeg" rel="shortcut icon" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: {
+                        gray: {
+                            850: '#1f2937',
+                            900: '#111827',
+                            950: '#0b0f19',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 4px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; }
+
+        .tk-anim-logo {
+            animation: tk-logo-float 4.5s ease-in-out infinite;
+            transform-origin: center;
+        }
+        @keyframes tk-logo-float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25%      { transform: translateY(-5px) rotate(-6deg); }
+            75%      { transform: translateY(-2px) rotate(6deg); }
+        }
+        @media (prefers-reduced-motion: reduce) { .tk-anim-logo { animation: none; } }
+
+        /* Drop target highlight while a file is dragged over the window. */
+        body.dragging #dropzone {
+            border-color: #4f46e5;
+            background-color: rgba(79, 70, 229, 0.06);
+        }
+
+        /* Long minified lines must wrap rather than drag the page sideways. */
+        #fileContent, .scan-hit code { overflow-wrap: anywhere; }
+
+        .file-row.active {
+            background-color: rgba(79, 70, 229, 0.10);
+            border-left-color: #4f46e5;
+        }
+    </style>
+    <link rel="stylesheet" href="/css/tool-shell.css">
+    <script src="/js/geo-web.js" defer></script>
+</head>
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200 font-sans min-h-screen flex flex-col items-center py-8 md:py-12 px-4 antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300">
+
+    <div class="absolute top-4 right-4 md:top-8 md:right-8 z-30">
+        <button id="btnThemeToggle" class="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-600 dark:text-yellow-400 shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-indigo-500" title="Toggle Dark Mode">
+            <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+            <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+        </button>
+    </div>
+
+    <main class="w-full max-w-7xl space-y-8 mt-8">
+
+        <div class="text-center space-y-3">
+            <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center justify-center gap-3">
+                <i data-lucide="file-search-2" class="tk-anim-logo w-9 h-9 md:w-12 md:h-12 text-indigo-600 dark:text-indigo-500"></i>
+                <span><span class="text-indigo-600 dark:text-indigo-500">JS SourceMap</span> Unmapper</span>
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 text-sm md:text-lg max-w-2xl mx-auto">
+                Recover the original source tree from a <code class="font-mono text-indigo-600 dark:text-indigo-300">.map</code> file, then scan it for leaked secrets and endpoints.
+            </p>
+        </div>
+
+        <!-- Input -->
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-6">
+
+            <div>
+                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">1. Upload .map file</label>
+                <div id="dropzone" class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-6 text-center cursor-pointer transition-colors hover:border-indigo-500">
+                    <i data-lucide="upload-cloud" class="w-8 h-8 mx-auto text-gray-400 dark:text-gray-500"></i>
+                    <p class="mt-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Drop a .map file anywhere, or click to browse</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">Best for large source maps. Nothing is uploaded &mdash; parsing happens in your browser.</p>
+                    <input type="file" id="fileInput" accept=".map,.json,application/json" class="hidden">
+                </div>
+                <p id="fileInfo" class="mt-2 text-xs font-mono text-gray-500 dark:text-gray-400 hidden"></p>
+            </div>
+
+            <div>
+                <label for="mapInput" class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">2. Or paste sourcemap JSON</label>
+                <textarea id="mapInput" rows="6" spellcheck="false"
+                          class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-700 rounded-xl p-4 font-mono text-xs text-gray-800 dark:text-gray-200 resize-y custom-scrollbar focus:ring-2 focus:ring-indigo-500 outline-none"
+                          placeholder='{"version":3,"file":"bundle.js","sources":["src/app.js"],"sourcesContent":["const apiKey = ..."],"mappings":"..."}'></textarea>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+                <button id="btnUnmap" class="flex items-center gap-2 py-4 px-6 rounded-xl shadow-lg text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 transition-all uppercase tracking-wide transform active:scale-[0.98]">
+                    <i data-lucide="unlock" class="w-4 h-4"></i> Unmap
+                </button>
+                <button id="btnSecrets" class="flex items-center gap-2 py-3 px-5 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-indigo-500 transition-colors">
+                    <i data-lucide="key-round" class="w-4 h-4"></i> Find Secrets
+                </button>
+                <button id="btnEndpoints" class="flex items-center gap-2 py-3 px-5 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-indigo-500 transition-colors">
+                    <i data-lucide="globe" class="w-4 h-4"></i> Find Endpoints
+                </button>
+                <button id="btnCopy" class="flex items-center gap-2 py-3 px-5 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-indigo-500 transition-colors">
+                    <i data-lucide="clipboard-copy" class="w-4 h-4"></i> Copy Output
+                </button>
+                <button id="btnClear" class="flex items-center gap-2 py-3 px-5 rounded-xl text-sm font-bold text-gray-500 dark:text-gray-400 bg-transparent border border-gray-200 dark:border-gray-700 hover:text-red-600 hover:border-red-500 transition-colors">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i> Clear
+                </button>
+            </div>
+
+            <div id="statusMessage" class="text-sm font-semibold hidden"></div>
+        </div>
+
+        <!-- Stats -->
+        <div id="statsGrid" class="hidden grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 text-center shadow-sm">
+                <div id="statFiles" class="text-2xl font-bold font-mono text-indigo-600 dark:text-indigo-400">0</div>
+                <div class="text-[11px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mt-1">Sources</div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 text-center shadow-sm">
+                <div id="statRecovered" class="text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400">0</div>
+                <div class="text-[11px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mt-1">Recovered</div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 text-center shadow-sm">
+                <div id="statSecrets" class="text-2xl font-bold font-mono text-red-600 dark:text-red-400">0</div>
+                <div class="text-[11px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mt-1">Secrets</div>
+            </div>
+            <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 text-center shadow-sm">
+                <div id="statEndpoints" class="text-2xl font-bold font-mono text-yellow-600 dark:text-yellow-400">0</div>
+                <div class="text-[11px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mt-1">Endpoints</div>
+            </div>
+        </div>
+
+        <!-- Recovered sources -->
+        <div id="sourcesCard" class="hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-xl dark:shadow-black/50">
+            <div class="bg-gray-50 dark:bg-gray-850 px-5 py-3 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center gap-3">
+                <span class="text-xs font-bold font-mono text-gray-500 dark:text-gray-400 uppercase tracking-wider">Recovered sources</span>
+                <input id="fileFilter" type="text" placeholder="Filter files…"
+                       class="text-xs font-mono px-3 py-1.5 rounded-lg bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-700 outline-none focus:ring-2 focus:ring-indigo-500 w-40 sm:w-64">
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3">
+                <div id="fileList" class="lg:col-span-1 max-h-[28rem] overflow-y-auto custom-scrollbar border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-800"></div>
+                <div class="lg:col-span-2 relative">
+                    <div class="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-850">
+                        <span id="fileTitle" class="text-xs font-mono text-gray-600 dark:text-gray-300 truncate">Select a file</span>
+                        <button id="btnCopyFile" class="text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-1.5">
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy file
+                        </button>
+                    </div>
+                    <pre id="fileContent" class="max-h-[25rem] overflow-auto custom-scrollbar p-4 text-xs font-mono text-gray-700 dark:text-gray-300 whitespace-pre-wrap bg-white dark:bg-[#0d1117]"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scan results -->
+        <div id="scanCard" class="hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-xl dark:shadow-black/50">
+            <div class="bg-gray-50 dark:bg-gray-850 px-5 py-3 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+                <span id="scanTitle" class="text-xs font-bold font-mono text-gray-500 dark:text-gray-400 uppercase tracking-wider">Scan results</span>
+                <span id="scanCount" class="text-xs font-mono font-bold text-gray-500 dark:text-gray-400"></span>
+            </div>
+            <div id="scanBody" class="max-h-[30rem] overflow-y-auto custom-scrollbar divide-y divide-gray-200 dark:divide-gray-800"></div>
+        </div>
+
+    </main>
+
+    <footer class="mt-auto py-8 text-center text-gray-500 dark:text-gray-600 text-xs font-medium">
+        For authorized security testing only &nbsp;&middot;&nbsp; All processing runs client-side &nbsp;&middot;&nbsp; No data is stored
+    </footer>
+
+<script>
+(function () {
+    'use strict';
+
+    /* ── Theme ─────────────────────────────────────────────────────────── */
+    const htmlEl = document.documentElement;
+    function applyTheme(dark) {
+        htmlEl.classList.toggle('dark', dark);
+        try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
+    }
+    (function initTheme() {
+        let saved = null;
+        try { saved = localStorage.getItem('theme'); } catch (e) {}
+        applyTheme(saved !== 'light');
+    })();
+    document.getElementById('btnThemeToggle').addEventListener('click', function () {
+        applyTheme(!htmlEl.classList.contains('dark'));
+    });
+
+    /* ── Elements ──────────────────────────────────────────────────────── */
+    const mapInput   = document.getElementById('mapInput');
+    const fileInput  = document.getElementById('fileInput');
+    const dropzone   = document.getElementById('dropzone');
+    const fileInfo   = document.getElementById('fileInfo');
+    const statusMsg  = document.getElementById('statusMessage');
+    const statsGrid  = document.getElementById('statsGrid');
+    const sourcesCard= document.getElementById('sourcesCard');
+    const scanCard   = document.getElementById('scanCard');
+    const fileList   = document.getElementById('fileList');
+    const fileTitle  = document.getElementById('fileTitle');
+    const fileContent= document.getElementById('fileContent');
+    const fileFilter = document.getElementById('fileFilter');
+    const scanTitle  = document.getElementById('scanTitle');
+    const scanCount  = document.getElementById('scanCount');
+    const scanBody   = document.getElementById('scanBody');
+
+    /* recovered = [{ path, code }] */
+    let recovered = [];
+    let activeIndex = -1;
+    let lastScan = { kind: null, hits: [] };
+
+    /* ── Status helpers ────────────────────────────────────────────────── */
+    function setStatus(text, kind) {
+        const tone = {
+            error: 'text-red-700 dark:text-red-300',
+            ok:    'text-emerald-700 dark:text-emerald-400',
+            info:  'text-gray-600 dark:text-gray-400'
+        }[kind] || 'text-gray-600 dark:text-gray-400';
+        statusMsg.className = 'text-sm font-semibold ' + tone;
+        statusMsg.textContent = text;
+        statusMsg.classList.remove('hidden');
+    }
+    function clearStatus() { statusMsg.classList.add('hidden'); statusMsg.textContent = ''; }
+
+    /* ── SourceMap parsing ─────────────────────────────────────────────
+       A source map is JSON with parallel `sources` and `sourcesContent`
+       arrays; index i of one corresponds to index i of the other. The
+       original code is simply sourcesContent, so "unmapping" is pairing
+       the two and cleaning up the webpack:// style paths. `mappings` is
+       only needed to map positions, which this tool does not do.
+       Indexed maps put the same structure inside a `sections` array. */
+
+    function normalisePath(path, sourceRoot) {
+        let p = String(path == null ? '' : path);
+        if (sourceRoot) {
+            p = String(sourceRoot).replace(/\/+$/, '') + '/' + p.replace(/^\/+/, '');
+        }
+        /* Bundlers prefix virtual schemes that are noise in a file tree. */
+        p = p.replace(/^webpack:\/{2,3}/, '')
+             .replace(/^(?:rollup|vite|ng|turbopack|metro):\/{2,3}/, '')
+             .replace(/^\.\//, '');
+        return p || '(anonymous)';
+    }
+
+    function collectFromMap(map, out) {
+        if (!map || typeof map !== 'object') return;
+
+        /* Indexed source map: recurse into each section's inner map. */
+        if (Array.isArray(map.sections)) {
+            map.sections.forEach(function (section) {
+                if (section && section.map) collectFromMap(section.map, out);
+            });
+            return;
+        }
+
+        const sources = Array.isArray(map.sources) ? map.sources : [];
+        const contents = Array.isArray(map.sourcesContent) ? map.sourcesContent : [];
+        const root = map.sourceRoot || '';
+
+        sources.forEach(function (src, i) {
+            out.push({
+                path: normalisePath(src, root),
+                code: typeof contents[i] === 'string' ? contents[i] : null
+            });
+        });
+    }
+
+    function unmap(rawText) {
+        const text = String(rawText || '').trim();
+        if (!text) { setStatus('Paste a sourcemap or choose a .map file first.', 'error'); return false; }
+
+        let map;
+        try {
+            map = JSON.parse(text);
+        } catch (e) {
+            setStatus('That is not valid JSON: ' + e.message, 'error');
+            return false;
+        }
+
+        if (!map || typeof map !== 'object' || Array.isArray(map)) {
+            setStatus('Valid JSON, but not a source map object.', 'error');
+            return false;
+        }
+        if (!Array.isArray(map.sources) && !Array.isArray(map.sections)) {
+            setStatus('No "sources" or "sections" key — this does not look like a source map.', 'error');
+            return false;
+        }
+
+        const collected = [];
+        collectFromMap(map, collected);
+
+        if (collected.length === 0) {
+            setStatus('The map parsed but lists no sources.', 'error');
+            return false;
+        }
+
+        recovered = collected;
+        const withCode = recovered.filter(function (f) { return f.code !== null; });
+
+        renderFileList();
+        if (withCode.length > 0) {
+            selectFile(recovered.indexOf(withCode[0]));
+        } else {
+            activeIndex = -1;
+            fileTitle.textContent = 'No embedded source content';
+            fileContent.textContent = '';
+        }
+
+        document.getElementById('statFiles').textContent = recovered.length;
+        document.getElementById('statRecovered').textContent = withCode.length;
+        document.getElementById('statSecrets').textContent = '0';
+        document.getElementById('statEndpoints').textContent = '0';
+        statsGrid.classList.remove('hidden');
+        sourcesCard.classList.remove('hidden');
+        scanCard.classList.add('hidden');
+        lastScan = { kind: null, hits: [] };
+
+        if (withCode.length === 0) {
+            /* A map without sourcesContent still reveals the file tree, which
+               is useful on its own, so this is a warning and not an error. */
+            setStatus('Listed ' + recovered.length + ' source paths, but the map has no sourcesContent, so no code could be recovered.', 'error');
+        } else if (withCode.length < recovered.length) {
+            setStatus('Recovered ' + withCode.length + ' of ' + recovered.length + ' sources. The rest have no embedded content.', 'ok');
+        } else {
+            setStatus('Recovered all ' + withCode.length + ' sources.', 'ok');
+        }
+        return true;
+    }
+
+    /* ── File list ─────────────────────────────────────────────────────── */
+    function renderFileList() {
+        const needle = fileFilter.value.trim().toLowerCase();
+        fileList.innerHTML = '';
+
+        const rows = recovered
+            .map(function (f, i) { return { f: f, i: i }; })
+            .filter(function (r) { return !needle || r.f.path.toLowerCase().indexOf(needle) !== -1; });
+
+        if (rows.length === 0) {
+            fileList.innerHTML = '<p class="p-4 text-xs text-gray-500 dark:text-gray-400">No files match that filter.</p>';
+            return;
+        }
+
+        rows.forEach(function (r) {
+            const hasCode = r.f.code !== null;
+            const row = document.createElement('button');
+            row.type = 'button';
+            row.className = 'file-row w-full text-left px-4 py-2.5 border-l-2 border-transparent hover:bg-gray-50 dark:hover:bg-gray-850 transition-colors flex items-start gap-2' +
+                            (r.i === activeIndex ? ' active' : '');
+            row.dataset.index = r.i;
+
+            const size = hasCode ? (r.f.code.length > 1024
+                ? (r.f.code.length / 1024).toFixed(1) + ' KB'
+                : r.f.code.length + ' B') : 'empty';
+
+            row.innerHTML =
+                '<span class="mt-0.5 shrink-0 ' + (hasCode ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-600') + '">' +
+                    '<i data-lucide="' + (hasCode ? 'file-code-2' : 'file-x-2') + '" class="w-3.5 h-3.5"></i>' +
+                '</span>' +
+                '<span class="min-w-0 flex-1">' +
+                    '<span class="block font-mono text-[11px] text-gray-700 dark:text-gray-300 break-all">' + escapeHtml(r.f.path) + '</span>' +
+                    '<span class="block text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">' + size + '</span>' +
+                '</span>';
+            row.addEventListener('click', function () { selectFile(r.i); });
+            fileList.appendChild(row);
+        });
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    function selectFile(index) {
+        const f = recovered[index];
+        if (!f) return;
+        activeIndex = index;
+        fileTitle.textContent = f.path;
+        fileContent.textContent = f.code === null ? '(this source has no embedded content in the map)' : f.code;
+        Array.prototype.forEach.call(fileList.querySelectorAll('.file-row'), function (el) {
+            el.classList.toggle('active', Number(el.dataset.index) === index);
+        });
+    }
+
+    fileFilter.addEventListener('input', renderFileList);
+
+    /* ── Scanners ──────────────────────────────────────────────────────
+       Patterns for credentials that are recognisable by shape. Findings
+       are reported with file and line so each can be checked by hand;
+       shape-based matching always produces some false positives. */
+    const SECRET_RULES = [
+        { name: 'AWS access key id',      re: /\bAKIA[0-9A-Z]{16}\b/g },
+        { name: 'AWS session/secret',     re: /\b(?:aws_secret_access_key|aws_session_token)\b\s*[:=]\s*['"][^'"]{16,}['"]/gi },
+        { name: 'Google API key',         re: /\bAIza[0-9A-Za-z\-_]{35}\b/g },
+        { name: 'Google OAuth client id', re: /\b[0-9]+-[0-9A-Za-z_]{32}\.apps\.googleusercontent\.com\b/g },
+        { name: 'GitHub token',           re: /\bgh[pousr]_[0-9A-Za-z]{36,}\b/g },
+        { name: 'Slack token',            re: /\bxox[baprs]-[0-9A-Za-z-]{10,}\b/g },
+        { name: 'Slack webhook',          re: /https:\/\/hooks\.slack\.com\/services\/[A-Za-z0-9\/]+/g },
+        { name: 'Stripe live key',        re: /\b(?:sk|rk)_live_[0-9A-Za-z]{20,}\b/g },
+        { name: 'SendGrid key',           re: /\bSG\.[0-9A-Za-z_-]{16,}\.[0-9A-Za-z_-]{16,}\b/g },
+        { name: 'Twilio key',            re: /\bSK[0-9a-fA-F]{32}\b/g },
+        { name: 'OpenAI key',             re: /\bsk-(?:proj-)?[0-9A-Za-z_-]{20,}\b/g },
+        { name: 'Private key block',      re: /-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY-----/g },
+        { name: 'JWT',                    re: /\beyJ[0-9A-Za-z_-]{8,}\.[0-9A-Za-z_-]{8,}\.[0-9A-Za-z_-]{8,}\b/g },
+        { name: 'Firebase database',      re: /\b[a-z0-9-]+\.firebaseio\.com\b/g },
+        { name: 'Basic auth in URL',      re: /\bhttps?:\/\/[^\/\s:@'"]+:[^\/\s:@'"]+@[^\s'"<>]+/g },
+        { name: 'Hardcoded credential',   re: /\b(?:api[_-]?key|apikey|secret|client[_-]?secret|password|passwd|access[_-]?token|auth[_-]?token|private[_-]?key)\b\s*[:=]\s*['"][^'"\s]{8,}['"]/gi }
+    ];
+
+    const ENDPOINT_RULES = [
+        { name: 'Absolute URL', re: /\bhttps?:\/\/[^\s'"`<>()\[\]{}\\]+/g },
+        { name: 'API path',     re: /['"`](\/(?:api|v[0-9]{1,2}|graphql|gql|rest|internal|admin|auth|oauth|user|users|account)\/[^'"`\s]*)['"`]/g },
+        { name: 'Server page',  re: /['"`](\/[A-Za-z0-9._~\/-]{2,}\.(?:json|php|aspx?|jsp|do|action|cgi))['"`]/g }
+    ];
+
+    function scan(kind) {
+        if (recovered.length === 0) { setStatus('Unmap a source map first.', 'error'); return; }
+        const withCode = recovered.filter(function (f) { return f.code !== null; });
+        if (withCode.length === 0) { setStatus('There is no recovered code to scan.', 'error'); return; }
+
+        const rules = kind === 'secrets' ? SECRET_RULES : ENDPOINT_RULES;
+        const hits = [];
+        const seen = Object.create(null);
+
+        withCode.forEach(function (f) {
+            const lines = f.code.split('\n');
+            rules.forEach(function (rule) {
+                lines.forEach(function (line, lineNo) {
+                    /* Minified bundles can carry enormous single lines; cap the
+                       slice that gets matched so one line cannot hang the tab. */
+                    const subject = line.length > 20000 ? line.slice(0, 20000) : line;
+                    rule.re.lastIndex = 0;
+                    let m;
+                    while ((m = rule.re.exec(subject)) !== null) {
+                        if (m[0].length === 0) { rule.re.lastIndex++; continue; }
+                        const value = (m[1] !== undefined ? m[1] : m[0]).trim();
+                        /* Endpoints are deduplicated globally, secrets per location,
+                           because the same endpoint repeated is noise while the same
+                           secret in two files is worth seeing twice. */
+                        const key = kind === 'endpoints' ? value : f.path + '|' + lineNo + '|' + value;
+                        if (seen[key]) continue;
+                        seen[key] = true;
+                        hits.push({ rule: rule.name, value: value, path: f.path, line: lineNo + 1 });
+                    }
+                });
+            });
+        });
+
+        hits.sort(function (a, b) {
+            return a.rule.localeCompare(b.rule) || a.path.localeCompare(b.path) || a.line - b.line;
+        });
+
+        lastScan = { kind: kind, hits: hits };
+        renderScan();
+
+        document.getElementById(kind === 'secrets' ? 'statSecrets' : 'statEndpoints').textContent = hits.length;
+        setStatus(hits.length === 0
+            ? 'No ' + kind + ' matched across ' + withCode.length + ' recovered file(s).'
+            : 'Found ' + hits.length + ' ' + kind + ' across ' + withCode.length + ' recovered file(s).',
+            hits.length === 0 ? 'info' : 'ok');
+    }
+
+    function renderScan() {
+        const kind = lastScan.kind;
+        const hits = lastScan.hits;
+        scanTitle.textContent = kind === 'secrets' ? 'Possible secrets' : 'Endpoints';
+        scanCount.textContent = hits.length + (hits.length === 1 ? ' match' : ' matches');
+        scanBody.innerHTML = '';
+        scanCard.classList.remove('hidden');
+
+        if (hits.length === 0) {
+            scanBody.innerHTML = '<p class="p-5 text-sm text-gray-500 dark:text-gray-400">Nothing matched.</p>';
+            return;
+        }
+
+        const badge = kind === 'secrets'
+            ? 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400'
+            : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400';
+
+        hits.forEach(function (h) {
+            const row = document.createElement('div');
+            row.className = 'scan-hit p-4 hover:bg-gray-50 dark:hover:bg-gray-850 transition-colors';
+            row.innerHTML =
+                '<div class="flex flex-wrap items-center gap-2 mb-1.5">' +
+                    '<span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ' + badge + '">' + escapeHtml(h.rule) + '</span>' +
+                    '<span class="text-[11px] font-mono text-gray-500 dark:text-gray-400 break-all">' + escapeHtml(h.path) + ':' + h.line + '</span>' +
+                '</div>' +
+                '<code class="block text-xs font-mono text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2">' + escapeHtml(h.value) + '</code>';
+            row.addEventListener('click', function () {
+                const idx = recovered.findIndex(function (f) { return f.path === h.path; });
+                if (idx !== -1) { selectFile(idx); sourcesCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+            });
+            scanBody.appendChild(row);
+        });
+    }
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+
+    /* ── Output ────────────────────────────────────────────────────────── */
+    function buildOutput() {
+        if (lastScan.kind && lastScan.hits.length) {
+            return lastScan.hits.map(function (h) {
+                return h.rule + '\t' + h.path + ':' + h.line + '\t' + h.value;
+            }).join('\n');
+        }
+        return recovered.map(function (f) {
+            return '/* ==== ' + f.path + ' ==== */\n' + (f.code === null ? '(no content)' : f.code);
+        }).join('\n\n');
+    }
+
+    async function copyText(text, label) {
+        if (!text) { setStatus('Nothing to copy yet.', 'error'); return; }
+        try {
+            await navigator.clipboard.writeText(text);
+            setStatus(label + ' copied to clipboard.', 'ok');
+        } catch (e) {
+            /* Clipboard API needs a secure context and can be refused. */
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            const ok = document.execCommand && document.execCommand('copy');
+            ta.remove();
+            setStatus(ok ? label + ' copied to clipboard.' : 'Copying was blocked by the browser.', ok ? 'ok' : 'error');
+        }
+    }
+
+    /* ── File intake ───────────────────────────────────────────────────── */
+    function readFile(file) {
+        if (!file) return;
+        fileInfo.textContent = file.name + ' — ' + (file.size / 1024).toFixed(1) + ' KB';
+        fileInfo.classList.remove('hidden');
+        setStatus('Reading ' + file.name + '…', 'info');
+
+        const reader = new FileReader();
+        reader.onload = function () {
+            mapInput.value = String(reader.result || '');
+            unmap(mapInput.value);
+        };
+        reader.onerror = function () { setStatus('Could not read that file.', 'error'); };
+        reader.readAsText(file);
+    }
+
+    dropzone.addEventListener('click', function () { fileInput.click(); });
+    fileInput.addEventListener('change', function (e) {
+        if (e.target.files && e.target.files.length) readFile(e.target.files[0]);
+    });
+
+    /* Drop anywhere on the window, not just on the dashed box. */
+    ['dragenter', 'dragover'].forEach(function (evt) {
+        window.addEventListener(evt, function (e) { e.preventDefault(); document.body.classList.add('dragging'); });
+    });
+    ['dragleave', 'drop'].forEach(function (evt) {
+        window.addEventListener(evt, function (e) {
+            e.preventDefault();
+            if (evt === 'dragleave' && e.relatedTarget) return;
+            document.body.classList.remove('dragging');
+        });
+    });
+    window.addEventListener('drop', function (e) {
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) readFile(e.dataTransfer.files[0]);
+    });
+
+    /* ── Buttons ───────────────────────────────────────────────────────── */
+    document.getElementById('btnUnmap').addEventListener('click', function () { clearStatus(); unmap(mapInput.value); });
+    document.getElementById('btnSecrets').addEventListener('click', function () { clearStatus(); scan('secrets'); });
+    document.getElementById('btnEndpoints').addEventListener('click', function () { clearStatus(); scan('endpoints'); });
+    document.getElementById('btnCopy').addEventListener('click', function () {
+        copyText(buildOutput(), lastScan.kind ? 'Scan results' : 'Recovered sources');
+    });
+    document.getElementById('btnCopyFile').addEventListener('click', function () {
+        const f = recovered[activeIndex];
+        copyText(f && f.code !== null ? f.code : '', 'File');
+    });
+    document.getElementById('btnClear').addEventListener('click', function () {
+        mapInput.value = '';
+        fileInput.value = '';
+        recovered = [];
+        activeIndex = -1;
+        lastScan = { kind: null, hits: [] };
+        fileList.innerHTML = '';
+        fileContent.textContent = '';
+        fileTitle.textContent = 'Select a file';
+        fileFilter.value = '';
+        statsGrid.classList.add('hidden');
+        sourcesCard.classList.add('hidden');
+        scanCard.classList.add('hidden');
+        fileInfo.classList.add('hidden');
+        clearStatus();
+    });
+
+    if (window.lucide) window.lucide.createIcons();
+})();
+</script>
+</body>
+</html>
