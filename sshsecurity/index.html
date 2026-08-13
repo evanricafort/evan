@@ -47,7 +47,7 @@
 <body class="bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200 font-sans min-h-screen flex flex-col items-center py-8 md:py-12 px-4 antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300">
 
     <div class="absolute top-4 right-4 md:top-8 md:right-8 z-30">
-        <button id="darkModeToggle" aria-label="Toggle theme" class="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-600 dark:text-yellow-400 shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <button id="darkModeToggle" onclick="toggleDarkMode()" aria-label="Toggle theme" class="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-600 dark:text-yellow-400 shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-indigo-500">
             <svg class="sun-icon w-5 h-5 block dark:hidden" data-theme="light" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.5-4.5l-1.591 1.591M3 12h2.25m.386-6.364l1.591 1.591M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z"/></svg>
             <svg class="moon-icon w-5 h-5 hidden dark:block" data-theme="dark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/></svg>
         </button>
@@ -296,7 +296,7 @@
         const savedTheme = localStorage.getItem('theme');
         const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         
-        let themeToSet = 'light';
+        let themeToSet = 'dark';
         if (savedTheme) {
             themeToSet = savedTheme;
         } else if (systemPrefersDark) {
@@ -305,7 +305,9 @@
 
         if (themeToSet === 'dark') {
             document.documentElement.classList.add('dark');
-        }
+        } else {
+                document.documentElement.classList.remove('dark');
+            }
         updateDarkModeIcon(themeToSet);
         renderDatabase(); 
     }
