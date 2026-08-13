@@ -7,13 +7,11 @@
   <link href="/profile.jpg" type="image/jpeg" rel="shortcut icon" />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
   
   <style>
     :root {
       --bg: #f3f4f6;         --card-bg: #ffffff;      --editor-bg: #ffffff;
-      --dropzone-bg: #f9fafb; --metric-bg: #f9fafb;   --tab-bg: #f9fafb;
+      --metric-bg: #f9fafb;   --tab-bg: #f9fafb;
       --tab-hover: #f3f4f6;   --border: #e5e7eb;
       --text: #111827;        --text-muted: #6b7280;
       --primary: #4f46e5;     --primary-hover: #4338ca;
@@ -24,7 +22,7 @@
     }
     html.dark {
       --bg: #0b0f19;         --card-bg: #111827;      --editor-bg: #111827;
-      --dropzone-bg: #1f2937; --metric-bg: #1f2937;   --tab-bg: #1f2937;
+      --metric-bg: #1f2937;   --tab-bg: #1f2937;
       --tab-hover: #243041;   --border: #1f2937;
       --text: #ffffff;        --text-muted: #9ca3af;
       --primary: #6366f1;     --primary-hover: #4f46e5;
@@ -102,26 +100,6 @@
       padding: 1.5rem;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
       transition: background-color 0.3s ease, border-color 0.3s ease;
-    }
-
-    .file-dropzone {
-      border: 2px dashed var(--border);
-      border-radius: 8px;
-      padding: 1.25rem;
-      text-align: center;
-      background: var(--dropzone-bg);
-      cursor: pointer;
-      transition: border-color 0.2s, background-color 0.2s;
-      margin-bottom: 1rem;
-    }
-
-    .file-dropzone:hover, .file-dropzone.dragover {
-      border-color: var(--primary);
-      background: var(--card-bg);
-    }
-
-    .file-dropzone input {
-      display: none;
     }
 
     .controls {
@@ -540,15 +518,10 @@
 
 <div class="page-hero">
   <h1><i class="fas fa-spell-check tk-anim-logo"></i> <span class="tk-accent">AI-Powered</span> Proofreader</h1>
-  <p class="hero-sub">Analyze text or uploaded documents (.pdf, .docx, .txt) with advanced NLP accuracy.</p>
+  <p class="hero-sub">Check grammar, spelling, punctuation and style with two independent engines.</p>
 </div>
 
     <main class="card">
-      <div class="file-dropzone" id="dropzone">
-        <p><strong>Drag & Drop your document here</strong> or click to browse</p>
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Supports PDF, Word (.docx), and Plain Text (.txt)</p>
-        <input type="file" id="fileInput" accept=".pdf,.docx,.doc,.txt">
-      </div>
 
       <div class="controls">
         <select id="languageSelect" class="lang-select">
@@ -644,17 +617,14 @@
       </div>
 
       <div class="issues-list" id="issuesList">
-        <p style="color: var(--text-muted); font-size: 0.875rem;">Click "Check Document" or upload a file to analyze.</p>
+        <p style="color: var(--text-muted); font-size: 0.875rem;">Paste or type text above, then click Check Document.</p>
       </div>
     </aside>
   </div>
 
   <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
     const editor = document.getElementById('editor');
-    const dropzone = document.getElementById('dropzone');
-    const fileInput = document.getElementById('fileInput');
     const analyzeBtn = document.getElementById('analyzeBtn');
     const btnText = document.getElementById('btnText');
     const languageSelect = document.getElementById('languageSelect');
@@ -724,52 +694,6 @@
         renderIssuesList(currentMatches);
       });
     });
-
-    dropzone.addEventListener('click', () => fileInput.click());
-    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
-    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
-    dropzone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropzone.classList.remove('dragover');
-      if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
-    });
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) handleFile(e.target.files[0]);
-    });
-
-    async function handleFile(file) {
-      const ext = file.name.split('.').pop().toLowerCase();
-      try {
-        let extractedText = '';
-        if (ext === 'txt') {
-          extractedText = await file.text();
-        } else if (ext === 'docx' || ext === 'doc') {
-          const buffer = await file.arrayBuffer();
-          const result = await mammoth.extractRawText({ arrayBuffer: buffer });
-          extractedText = result.value;
-        } else if (ext === 'pdf') {
-          const buffer = await file.arrayBuffer();
-          const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
-          let textParts = [];
-          for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const content = await page.getTextContent();
-            textParts.push(content.items.map(item => item.str).join(' '));
-          }
-          extractedText = textParts.join('\n\n');
-        } else {
-          alert('Unsupported file format. Please upload PDF, Word, or TXT.');
-          return;
-        }
-
-        editor.innerText = extractedText;
-        analyzeText();
-      } catch (err) {
-        console.error(err);
-        alert('Error parsing document file.');
-      }
-    }
-
     analyzeBtn.addEventListener('click', analyzeText);
 
     async function analyzeText() {
@@ -1045,7 +969,7 @@
       tabCountStyleEl.textContent = '0';
       tabCountPunctuationEl.textContent = '0';
 
-      issuesListEl.innerHTML = '<p style="color: var(--text-muted); font-size: 0.875rem;">Click "Check Document" or upload a file to analyze.</p>';
+      issuesListEl.innerHTML = '<p style="color: var(--text-muted); font-size: 0.875rem;">Paste or type text above, then click Check Document.</p>';
     }
 
     function escapeHtml(text) {
