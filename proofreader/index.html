@@ -800,7 +800,7 @@
         if (!response.ok) throw new Error('API Request failed');
 
         const data = await response.json();
-        currentMatches = data.matches || [];
+        currentMatches = mergeMatches(data.matches || [], secondOpinionMatches(text));
 
         const counts = { spelling: 0, grammar: 0, style: 0, punctuation: 0 };
         currentMatches.forEach(match => {
@@ -847,6 +847,58 @@
       } else {
         readabilityEl.textContent = '--';
       }
+    }
+
+    // ── Second-opinion style rules ───────────────────────────────────────
+    // LanguageTool is strong on grammar, spelling and punctuation but weak
+    // on passive voice, hedging and wordiness. These run locally and emit
+    // the same shape LanguageTool returns, so highlighting, filtering and
+    // counting all work unchanged. Implemented in-page rather than via
+    // write-good, whose published ESM build throws on load.
+    const SECOND_OPINION_RULES = [
+      { id: 'PASSIVE_VOICE',
+        re: /\b(?:am|is|are|was|were|be|been|being)\s+(?:\w+ed|born|done|known|seen|given|taken|made|found|used|written|held|shown|told|kept|sent|built|brought|caught|taught)\b/gi,
+        msg: 'Possible passive voice. Naming who performs the action usually reads more directly.' },
+      { id: 'HEDGING',
+        re: /\b(?:very|really|quite|fairly|rather|somewhat|relatively|virtually|basically|clearly|obviously|arguably|extremely|remarkably|surprisingly)\b/gi,
+        msg: 'Hedging or intensifying word that usually adds no information. Consider removing it.' },
+      { id: 'WORDY_PHRASE',
+        re: /\b(?:at the end of the day|it is what it is|in order to|due to the fact that|at this point in time|for all intents and purposes|in the event that|in spite of the fact that|a large number of|has the ability to|in the near future)\b/gi,
+        msg: 'Wordy phrase. A shorter equivalent is usually clearer.' },
+      { id: 'THERE_IS',
+        re: /\bthere\s+(?:is|are|was|were)\b/gi,
+        msg: 'Sentence opens with an empty subject. Leading with the real subject is stronger.' },
+      { id: 'REPEATED_WORD',
+        re: /\b(\w+)\s+\1\b/gi,
+        msg: 'Repeated word.' }
+    ];
+
+    function secondOpinionMatches(text) {
+      const out = [];
+      for (const rule of SECOND_OPINION_RULES) {
+        rule.re.lastIndex = 0;
+        let m;
+        while ((m = rule.re.exec(text)) !== null) {
+          if (m[0].length === 0) { rule.re.lastIndex++; continue; }
+          out.push({
+            offset: m.index,
+            length: m[0].length,
+            message: rule.msg,
+            shortMessage: 'Style',
+            replacements: [],
+            rule: { id: rule.id, category: { id: 'STYLE' }, issueType: 'style' }
+          });
+        }
+      }
+      return out;
+    }
+
+    // Drops second-opinion findings that overlap a LanguageTool match, so the
+    // same span is not reported twice by two engines.
+    function mergeMatches(primary, extra) {
+      const kept = extra.filter(e => !primary.some(p =>
+        e.offset < p.offset + p.length && p.offset < e.offset + e.length));
+      return primary.concat(kept).sort((a, b) => a.offset - b.offset);
     }
 
     function categorizeRule(match) {
