@@ -242,3 +242,69 @@ body.dark-mode .glow-text span:hover {
 
 /* --- Geometric web canvas (sits behind every other layer) ------------ */
 #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
+
+/* ======================================================================
+   Mobile
+   Everything above is the desktop layout and is left untouched. Phones
+   and small tablets get a single stacked column instead of the floated
+   two-up header, larger body text, and wrapping for the bare URLs in the
+   Achievements list, which are long enough to force sideways scrolling.
+   ====================================================================== */
+@media (max-width: 760px) {
+  body {
+    padding: 14px;
+    font-size: 100%;               /* 12.8px is too small to read on a phone */
+    -webkit-text-size-adjust: 100%; /* stop iOS inflating text on rotate */
+  }
+
+  /* The header columns are floated side by side on desktop and would
+     otherwise overlap once there is no room for both. */
+  #bio_left,
+  #bio_right {
+    float: none;
+    text-align: center;
+  }
+
+  #bio_right { margin-top: 14px; }
+  #bio_center { width: auto; }
+
+  /* AOS slides these in from 100px to the side. As narrow floated columns
+     that was invisible; as full-width blocks it hangs off the viewport and
+     forces a horizontal scrollbar, so fade them in on the spot instead.
+     This overrides aos.css, which is linked before site.css. */
+  [data-aos="fade-left"],
+  [data-aos="fade-right"] { transform: none; }
+  #bio_center a { margin: 0 10px; font-size: 1.15rem; }
+
+  /* Bare URLs in Achievements and News & Press are single unbroken
+     tokens; without this they push the page wider than the screen.
+     The link text also sits in an inline-block (.container), which sizes
+     to its longest token, so it needs `anywhere` - which shrinks
+     min-content - plus a cap, not just `break-word`. */
+  section, p, li, footer { overflow-wrap: break-word; }
+  a { overflow-wrap: anywhere; }
+  .container { max-width: 100%; }
+
+  /* Entries wrap to several lines here, so the desktop 10000px ceiling
+     can cut the list off. Reveal without a height animation instead. */
+  #more { transition: opacity 0.5s ease; }
+  #more.show { max-height: none; }
+
+  /* The map bubble follows the pointer - there is no hover on touch,
+     and a tap can otherwise leave it stuck open. */
+  #map-circle { display: none; }
+
+  /* Keep the flag counter and any other wide image inside the viewport. */
+  img { max-width: 100%; height: auto; }
+
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.2rem; }
+
+  #scrollToTopBtn { right: 18px; bottom: 18px; font-size: 1.7rem; }
+}
+
+@media (max-width: 420px) {
+  body { padding: 10px; }
+  h1 { font-size: 1.5rem; }
+  #bio_center a { margin: 0 7px; font-size: 1.05rem; }
+}
