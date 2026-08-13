@@ -277,7 +277,11 @@
 
                 /* Anything trailing the extension - a query string or fragment -
                    still counts as that file type. */
-                const pattern = '.*\\.(?:' + exts.map(anyCase).join('|') + ')(?:[?#].*)?$';
+                /* [^?#]* rather than .* before the dot: the extension has to sit in
+                   the path. With a greedy .* a URL such as
+                   /?url=/manual/en/function.unset.php satisfied the .php filter even
+                   though the resource is "/" with a query string, not a PHP file. */
+                const pattern = '[^?#]*\\.(?:' + exts.map(anyCase).join('|') + ')(?:[?#].*)?$';
                 return 'filter=original:' + encodeURIComponent(pattern);
             };
 
