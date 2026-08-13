@@ -191,8 +191,10 @@
       loaded = true;
 
       var frame = document.createElement('iframe');
-      /* Strip the viewer chrome so only the page shows. */
-      frame.src = link.href + '#toolbar=0&navpanes=0&scrollbar=0&view=FitH';
+      /* Strip what the viewer will let us strip and fit page one to the
+         width. Chrome ignores scrollbar=0, so the scrollbar is clipped in
+         CSS instead - see #cv-preview iframe. */
+      frame.src = link.href + '#page=1&toolbar=0&navpanes=0&scrollbar=0&view=FitH';
       frame.title = 'Preview of the first page of the CV';
       frame.tabIndex = -1;
       panel.appendChild(frame);
