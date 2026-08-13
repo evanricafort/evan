@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Tools</title>
+    <meta name="description" content="Browser-based security tools by Evan Ricafort — SPF, SSL, SSH, Nmap, JWT, source maps and more. Everything runs client-side." />
+    <link href="/profile.jpg" type="image/jpeg" rel="shortcut icon" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: {
+                        gray: {
+                            850: '#1f2937',
+                            900: '#111827',
+                            950: '#0b0f19',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body, div, p, span, h1, h2, h3, button, textarea, input, header {
+            transition-property: color, background-color, border-color;
+            transition-duration: 200ms;
+        }
+
+        .tk-anim-logo { display:inline-block; animation: tk-logo-float 4.5s ease-in-out infinite; transform-origin:center; }
+        @keyframes tk-logo-float { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-5px) rotate(-6deg)} 75%{transform:translateY(-2px) rotate(6deg)} }
+        @media (prefers-reduced-motion: reduce){ .tk-anim-logo{animation:none} }
+</style>
+    <link rel="stylesheet" href="/css/tool-shell.css">
+    <script src="/js/geo-web.js" defer></script>
+</head>
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200 font-sans min-h-screen flex flex-col items-center py-8 md:py-12 px-4 antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300">
+
+    <div class="absolute top-4 right-4 md:top-8 md:right-8 z-30">
+        <button id="btnThemeToggle" class="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-600 dark:text-yellow-400 shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-indigo-500" title="Toggle Dark Mode">
+            <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+            <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+        </button>
+    </div>
+
+    <main class="w-full max-w-7xl space-y-8 mt-8">
+
+        <div class="text-center space-y-3">
+            <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center justify-center gap-3">
+                <i data-lucide="wrench" class="tk-anim-logo w-9 h-9 md:w-12 md:h-12 text-indigo-600 dark:text-indigo-500"></i>
+                <span><span class="text-indigo-600 dark:text-indigo-500">Security</span> Tools</span>
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 text-sm md:text-lg max-w-xl mx-auto">
+                Eleven browser-based tools for offensive security work. Every one runs entirely client-side — nothing you paste in is uploaded or stored.
+            </p>
+        </div>
+
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+
+            <a href="/tools/spfrecordchecker/" class="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-xl dark:shadow-black/50 hover:border-indigo-400 dark:hover:border-indigo-500 hover:-translate-y-1 transition-all duration-200 flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex-shrink-0">
+                        <i data-lucide="mail-check" class="w-5 h-5"></i>
+                    </span>
+                    <h2 class="font-bold text-base md:text-lg text-gray-900 dark:text-white leading-tight">SPF Detector</h2>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Validate email security configurations and analyze Sender Policy Framework records.</p>
+                <span class="text-xs font-mono text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">/tools/spfrecordchecker/<i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i></span>
+            </a>
+
+            <a href="/tools/weaksslcerts/" class="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-xl dark:shadow-black/50 hover:border-indigo-400 dark:hover:border-indigo-500 hover:-translate-y-1 transition-all duration-200 flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex-shrink-0">
+                        <i data-lucide="shield-check" class="w-5 h-5"></i>
+                    </span>
+                    <h2 class="font-bold text-base md:text-lg text-gray-900 dark:text-white leading-tight">SSL Certificate Analyzer</h2>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Analyze weak hashes, expiry, wildcards and issuers from <span class="font-mono text-indigo-600 dark:text-indigo-300">nmap --script ssl-cert</span> output.</p>
+                <span class="text-xs font-mono text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">/tools/weaksslcerts/<i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i></span>
+            </a>
+
+            <a href="/tools/sshsecurity/" class="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-xl dark:shadow-black/50 hover:border-indigo-400 dark:hover:border-indigo-500 hover:-translate-y-1 transition-all duration-200 flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex-shrink-0">
+                        <i data-lucide="terminal" class="w-5 h-5"></i>
+                    </span>
+                    <h2 class="font-bold text-base md:text-lg text-gray-900 dark:text-white leading-tight">SSH Security Analyzer</h2>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Analyze SSH configurations or Nmap scans for cryptographic risks.</p>
+                <span class="text-xs font-mono text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">/tools/sshsecurity/<i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i></span>
+            </a>
+
+            <a href="/tools/weaksslciphers/" class="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-xl dark:shadow-black/50 hover:border-indigo-400 dark:hover:border-indigo-500 hover:-translate-y-1 transition-all duration-200 flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex-shrink-0">
+                        <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                    </span>
+                    <h2 class="font-bold text-base md:text-lg text-gray-900 dark:text-white leading-tight">Weak SSL Cipher Analyzer</h2>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Analyze weak SSL ciphers and protocols from Nmap scan results.</p>
+                <span class="text-xs font-mono text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">/tools/weaksslciphers/<i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i></span>
+            </a>
+
+            <a href="/tools/nmapresultparser/" class="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-xl dark:shadow-black/50 hover:border-indigo-400 dark:hover:border-indigo-500 hover:-translate-y-1 transition-all duration-200 flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex-shrink-0">
+                        <i data-lucide="network" class="w-5 h-5"></i>
+                    </span>
+                    <h2 class="font-bold text-base md:text-lg text-gray-900 dark:text-white leading-tight">Nmap Result Parser</h2>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Extract IP, port and service version from scan output to surface version disclosure.</p>
+                <span class="text-xs font-mono text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">/tools/nmapresultparser/<i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i></span>
+            </a>
+
+            <a href="/tools/nmapsortingkit/" class="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-xl dark:shadow-black/50 hover:border-indigo-400 dark:hover:border-indigo-500 hover:-translate-y-1 transition-all duration-200 flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex-shrink-0">
+                        <i data-lucide="list-ordered" class="w-5 h-5"></i>
+                    </span>
+                    <h2 class="font-bold text-base md:text-lg text-gray-900 dark:text-white leading-tight">Nmap Result Sorting Kit</h2>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Sort and search Nmap scan results to pull out the hosts and ports you care about.</p>
+                <span class="text-xs font-mono text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">/tools/nmapsortingkit/<i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i></span>
+            </a>
+
+            <a href="/tools/webarchive/" class="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-xl dark:shadow-black/50 hover:border-indigo-400 dark:hover:border-indigo-500 hover:-translate-y-1 transition-all duration-200 flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex-shrink-0">
+                        <i data-lucide="archive" class="w-5 h-5"></i>
+                    </span>
+                    <h2 class="font-bold text-base md:text-lg text-gray-900 dark:text-white leading-tight">Web Archive URL Fetcher</h2>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Fetch archived records with status 200 for a domain, straight from the Wayback Machine.</p>
+                <span class="text-xs font-mono text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">/tools/webarchive/<i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i></span>
+            </a>
+
+            <a href="/tools/jwtauditor/" class="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-xl dark:shadow-black/50 hover:border-indigo-400 dark:hover:border-indigo-500 hover:-translate-y-1 transition-all duration-200 flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex-shrink-0">
+                        <i data-lucide="key-round" class="w-5 h-5"></i>
+                    </span>
+                    <h2 class="font-bold text-base md:text-lg text-gray-900 dark:text-white leading-tight">JWT Analyzer</h2>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Decode, audit, forge and bruteforce JSON Web Tokens — six tools in one.</p>
+                <span class="text-xs font-mono text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">/tools/jwtauditor/<i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i></span>
+            </a>
+
+            <a href="/tools/googleapikeychecker/" class="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-xl dark:shadow-black/50 hover:border-indigo-400 dark:hover:border-indigo-500 hover:-translate-y-1 transition-all duration-200 flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex-shrink-0">
+                        <i data-lucide="key" class="w-5 h-5"></i>
+                    </span>
+                    <h2 class="font-bold text-base md:text-lg text-gray-900 dark:text-white leading-tight">Google / Gemini API Key Checker</h2>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Test a leaked API key against Gemini and Google services to determine its scope and enabled permissions.</p>
+                <span class="text-xs font-mono text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">/tools/googleapikeychecker/<i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i></span>
+            </a>
+
+            <a href="/tools/sourcemapunmapper/" class="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-xl dark:shadow-black/50 hover:border-indigo-400 dark:hover:border-indigo-500 hover:-translate-y-1 transition-all duration-200 flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex-shrink-0">
+                        <i data-lucide="file-search-2" class="w-5 h-5"></i>
+                    </span>
+                    <h2 class="font-bold text-base md:text-lg text-gray-900 dark:text-white leading-tight">JS SourceMap Unmapper</h2>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Recover the original source tree from a .map file, then scan it for leaked secrets and endpoints.</p>
+                <span class="text-xs font-mono text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">/tools/sourcemapunmapper/<i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i></span>
+            </a>
+
+            <a href="/tools/proofreader/" class="group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-xl dark:shadow-black/50 hover:border-indigo-400 dark:hover:border-indigo-500 hover:-translate-y-1 transition-all duration-200 flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex-shrink-0">
+                        <i data-lucide="spell-check" class="w-5 h-5"></i>
+                    </span>
+                    <h2 class="font-bold text-base md:text-lg text-gray-900 dark:text-white leading-tight">AI-Powered Proofreader</h2>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 flex-1">Check grammar, spelling, punctuation and style with two independent engines.</p>
+                <span class="text-xs font-mono text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">/tools/proofreader/<i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i></span>
+            </a>
+
+        </div>
+
+        <div class="text-center pt-2">
+            <a href="/" class="inline-flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Back to evanricafort.com
+            </a>
+        </div>
+
+    </main>
+
+    <footer class="mt-auto py-8 text-center text-gray-500 dark:text-gray-600 text-xs font-medium">
+        For authorized security testing only &nbsp;&middot;&nbsp; All processing runs client-side &nbsp;&middot;&nbsp; No data is stored
+    </footer>
+
+    <script>
+        const htmlElement = document.documentElement;
+        const btnThemeToggle = document.getElementById('btnThemeToggle');
+
+        function toggleTheme() {
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                htmlElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            htmlElement.classList.add('dark');
+        } else {
+            htmlElement.classList.remove('dark');
+        }
+
+        btnThemeToggle.addEventListener('click', toggleTheme);
+
+        lucide.createIcons();
+    </script>
+
+</body>
+</html>
