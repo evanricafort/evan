@@ -266,7 +266,6 @@ body.dark-mode .glow-text span:hover {
   }
 
   #bio_right { margin-top: 14px; }
-  #bio_center { width: auto; }
 
   /* AOS slides these in from 100px to the side. As narrow floated columns
      that was invisible; as full-width blocks it hangs off the viewport and
@@ -274,7 +273,37 @@ body.dark-mode .glow-text span:hover {
      This overrides aos.css, which is linked before site.css. */
   [data-aos="fade-left"],
   [data-aos="fade-right"] { transform: none; }
-  #bio_center a { margin: 0 10px; font-size: 1.15rem; }
+
+  /* Social icons. Each brand glyph has its own advance width (18.4px to
+     21px at this size), so evenly spaced margins still leave the icons
+     unevenly spaced to the eye. Giving every link the same square box and
+     centring the glyph inside makes the centres land at equal intervals.
+     The box doubles as a 44px touch target. Font Awesome's .fa-lg also
+     sets line-height:.05em, which collapses the glyph box to 1px tall, so
+     that is reset here too. */
+  #bio_center {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    width: auto;
+    gap: 4px;
+  }
+
+  #bio_center a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin: 0;
+    font-size: 1.15rem;
+  }
+
+  #bio_center a i {
+    line-height: 1;
+    vertical-align: middle;
+  }
 
   /* Bare URLs in Achievements and News & Press are single unbroken
      tokens; without this they push the page wider than the screen.
@@ -306,5 +335,8 @@ body.dark-mode .glow-text span:hover {
 @media (max-width: 420px) {
   body { padding: 10px; }
   h1 { font-size: 1.5rem; }
-  #bio_center a { margin: 0 7px; font-size: 1.05rem; }
+
+  /* Four 44px targets plus gaps still fit across a 320px screen, so only
+     the glyph shrinks here - the boxes stay equal, and so does the spacing. */
+  #bio_center a { font-size: 1.05rem; }
 }
