@@ -486,7 +486,11 @@
     box-shadow: 0 10px 15px -3px rgba(0,0,0,0.25); font-size:1.15rem; cursor:pointer;
     display:inline-flex; align-items:center; justify-content:center; transition: transform .2s; }
   .theme-toggle-btn:hover { transform: scale(1.08); }
-  .page-hero { text-align:center; margin-bottom:2rem; }
+  /* the container is a two-column grid, so the hero must span both
+     columns or it takes the first cell and squeezes the editor */
+  .page-hero { grid-column: 1 / -1; text-align:center; margin-bottom:0.5rem; }
+  .container > * { min-width: 0; }
+  .tk-toggle-wrap { grid-column: 1 / -1; }
   .page-hero h1 { font-size: clamp(1.875rem,5vw,3rem); font-weight:800; letter-spacing:-0.025em;
     color: var(--text); display:flex; align-items:center; justify-content:center; gap:.75rem; flex-wrap:wrap; }
   .page-hero .tk-accent { color: var(--primary); }
@@ -521,7 +525,8 @@
     outline: none; box-shadow: 0 0 0 2px rgba(99,102,241,0.6);
   }
   #themeToggle svg, .theme-toggle-btn svg { width: 20px; height: 20px; }
-  .theme-toggle-btn span { font-size: 20px; line-height: 20px; display: block; }</style>
+  .theme-toggle-btn #themeIcon { font-size: 20px; line-height: 20px; display: block; }
+  [hidden] { display: none !important; }</style>
 </head>
 <body>
 

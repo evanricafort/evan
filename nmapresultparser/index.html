@@ -368,7 +368,7 @@ loadTheme();</script>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
             
             <div class="flex flex-col space-y-4">
-                <div class="flex justify-between items-end">
+                <div class="flex justify-between items-center h-[52px]">
                     <div>
                         <h2 class="text-lg font-semibold text-white">Input Scan Result</h2>
                         <p class="text-sm text-gray-400">Paste raw nmap output here (e.g. <code>nmap -sV 192.168.1.1</code>)</p>
@@ -376,8 +376,10 @@ loadTheme();</script>
                     <button onclick="clearInput()" class="text-xs text-red-400 hover:text-red-300 underline">Clear</button>
                 </div>
                 
+                <div class="!mt-0 hidden lg:block lg:h-[34px]" aria-hidden="true"></div>
+
                 <textarea id="nmapInput" 
-                    class="w-full h-96 lg:h-[calc(100vh-250px)] bg-gray-900 border border-gray-700 rounded-lg p-4 font-mono text-xs sm:text-sm text-green-400 focus:outline-none focus:ring-2 focus:ring-emerald-600 resize-none shadow-inner placeholder-gray-700"
+                    class="w-full h-96 lg:h-[calc(100vh-250px)] bg-gray-900 border border-gray-700 rounded-xl p-4 font-mono text-xs sm:text-sm text-green-400 focus:outline-none focus:ring-2 focus:ring-emerald-600 resize-none shadow-inner placeholder-gray-700"
                     placeholder="Starting Nmap 7.80 ...
 Nmap scan report for 192.168.1.10
 Host is up (0.0020s latency).
@@ -389,7 +391,7 @@ PORT  STATE SERVICE VERSION
 ..."></textarea>
                 
                 <button onclick="parseNmap()" 
-                    class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg shadow-lg transition-all transform hover:scale-[1.01] active:scale-95 flex justify-center items-center gap-2">
+                    class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg transition-all transform hover:scale-[1.01] active:scale-95 flex justify-center items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
                     Extract & Sort Info
                 </button>
@@ -403,7 +405,7 @@ PORT  STATE SERVICE VERSION
                     </div>
                 </div>
 
-                <div class="flex space-x-2">
+                <div class="flex flex-wrap items-center gap-2 !mt-0 lg:h-[34px] lg:flex-nowrap lg:overflow-x-auto">
                     <button onclick="copyAll()" id="copyAllBtn" class="hidden px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-xs rounded border border-gray-600 transition-colors whitespace-nowrap">
                         Copy All (Table)
                     </button>
@@ -415,7 +417,7 @@ PORT  STATE SERVICE VERSION
                     </button>
                 </div>
                 
-                <div class="relative w-full h-96 lg:h-[calc(100vh-250px)] bg-gray-900 border border-gray-700 rounded-lg overflow-hidden shadow-inner flex flex-col">
+                <div class="relative w-full h-96 lg:h-[calc(100vh-250px)] bg-gray-900 border border-gray-700 rounded-xl overflow-hidden shadow-inner flex flex-col">
                     
                     <div class="grid grid-cols-12 bg-gray-800 text-gray-300 text-xs font-bold uppercase tracking-wider border-b border-gray-700 sticky top-0">
                         <div class="col-span-3 p-3 border-r border-gray-700">IP Address</div>
