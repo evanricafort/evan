@@ -54,6 +54,17 @@
     <script src="/js/geo-web.js" defer></script>
 </head>
 <body class="bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200 min-h-screen flex flex-col items-center py-8 md:py-12 px-4 antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300">
+    <nav class="tk-sitenav">
+        <a href="/tools/">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            Tools
+        </a>
+        <a href="/" class="tk-sitenav-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.8V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.8"/><path d="M10 21v-6h4v6"/></svg>
+            Home
+        </a>
+    </nav>
+
 
     <div class="absolute top-4 right-4 md:top-8 md:right-8">
         <button onclick="toggleTheme()" class="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-600 dark:text-yellow-400 shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-indigo-500">
@@ -179,11 +190,6 @@
             </details>
         </div>
     </main>
-
-    <nav class="tk-sitenav">
-        <a href="/tools/">Tools</a>
-        <a href="/" class="tk-sitenav-primary">Home</a>
-    </nav>
 
     <footer class="mt-auto py-8 text-center text-gray-500 dark:text-gray-600 text-xs font-medium">
         <p>For authorized security testing only · All analysis runs client-side · No data is stored</p>

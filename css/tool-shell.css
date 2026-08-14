@@ -40,22 +40,30 @@ html.dark {
 }
 
 /* ── Site nav ──────────────────────────────────────────────────────────
-   The Tools / Home pair that sits above the footer on every tool page.
-   Written in plain CSS rather than utility classes because four of the
-   tools (the API key checker, JWT analyzer, sorting kit and proofreader)
-   do not load Tailwind, and icon-free because they do not agree on an
-   icon library either. Centres in a flex column and in normal flow. */
+   The Tools / Home pair at the top of every tool page. Written in plain
+   CSS rather than utility classes because four of the tools (the API key
+   checker, JWT analyzer, sorting kit and proofreader) do not load
+   Tailwind, so utilities would come out unstyled there. Icons are inline
+   SVG in the markup for the same reason - the tools variously load
+   Lucide, Font Awesome or nothing, so neither can be relied on.
+
+   Centred, which also keeps it clear of the theme toggle every tool
+   floats in the top-right corner. Works in a flex column and in normal
+   flow, so it can sit directly after <body> on all of them. */
 .tk-sitenav {
   width: 100%;
-  padding: 1rem 0 0.25rem;
+  padding: 0.25rem 0 1.5rem;
   text-align: center;
+  line-height: 0;
 }
 
 .tk-sitenav a {
-  display: inline-block;
-  margin: 0 0.375rem;
-  padding: 0.625rem 1.25rem;
-  border-radius: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0.3rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
   border: 1px solid #e5e7eb;
   background: #ffffff;
   color: #374151;
@@ -64,28 +72,50 @@ html.dark {
   font-weight: 600;
   line-height: 1.25rem;
   text-decoration: none;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  transition: background-color 200ms, border-color 200ms, color 200ms;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: background-color 200ms, border-color 200ms, color 200ms, transform 200ms, box-shadow 200ms;
 }
 
-.tk-sitenav a:hover { background: #f9fafb; }
+.tk-sitenav a svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.tk-sitenav a:hover {
+  background: #f9fafb;
+  border-color: #c7d2fe;
+  color: #4f46e5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px -2px rgba(79, 70, 229, 0.18);
+}
 
 .tk-sitenav a.tk-sitenav-primary {
   background: #4f46e5;
   border-color: #4f46e5;
   color: #ffffff;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
 }
 
-.tk-sitenav a.tk-sitenav-primary:hover { background: #4338ca; border-color: #4338ca; }
+.tk-sitenav a.tk-sitenav-primary:hover {
+  background: #4338ca;
+  border-color: #4338ca;
+  color: #ffffff;
+  box-shadow: 0 6px 14px -3px rgba(79, 70, 229, 0.45);
+}
 
 html.dark .tk-sitenav a {
   background: #1f2937;
   border-color: #374151;
   color: #e5e7eb;
+  box-shadow: none;
 }
 
-html.dark .tk-sitenav a:hover { background: #374151; }
+html.dark .tk-sitenav a:hover {
+  background: #374151;
+  border-color: #6366f1;
+  color: #ffffff;
+}
 
 html.dark .tk-sitenav a.tk-sitenav-primary {
   background: #4f46e5;
@@ -95,9 +125,23 @@ html.dark .tk-sitenav a.tk-sitenav-primary {
 
 html.dark .tk-sitenav a.tk-sitenav-primary:hover { background: #4338ca; border-color: #4338ca; }
 
+@media (prefers-reduced-motion: reduce) {
+  .tk-sitenav a:hover { transform: none; }
+}
+
 /* ── Mobile ────────────────────────────────────────────────────────────
    Phones and small tablets. Desktop layout above is untouched. */
 @media (max-width: 767px) {
+
+  /* The site nav is centred on desktop, which on a phone runs it straight
+     into the theme toggle floating in the top-right corner. Shift it to the
+     left edge and reserve the corner, so the two sit side by side instead
+     of on top of each other. */
+  .tk-sitenav {
+    text-align: left;
+    padding-right: 4rem;
+  }
+  .tk-sitenav a:first-child { margin-left: 0; }
 
   /* Never let a wide child force sideways scrolling. */
   html, body { max-width: 100%; overflow-x: hidden; }
