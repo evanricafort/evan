@@ -135,7 +135,6 @@ body.dark-mode .circle-1 img {
     0 0 0 5px rgba(129, 140, 248, 0.1),
     0 0 22px rgba(129, 140, 248, 0.26),
     0 6px 18px rgba(0, 0, 0, 0.45);
-  transition: box-shadow 0.35s ease, border-color 0.35s ease, transform 0.2s linear;
 }
 
 body.dark-mode .circle-1:hover img {
@@ -147,9 +146,16 @@ body.dark-mode .circle-1:hover img {
   background: transparent;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  body.dark-mode .circle-1 img { transition: none; }
-}
+/* Deliberately no `transition` and no reduced-motion override above.
+
+   css/style.css already declares `transition: all 0.2s linear` on this photo,
+   and leaving that alone is what keeps the movement working. Restating it in
+   the dark rule made the two themes animate on different property lists and
+   different durations, so a switch was smooth one way and abrupt the other;
+   turning it off under reduced motion stopped the hover moving in dark mode
+   while light mode still moved, because that base declaration is
+   unconditional. With nothing overridden, both themes animate off the same
+   line, so the movement and the ring fade the same in either direction. */
 
 /* --- Underlined links --------------------------------------------- */
 .container { position: relative; display: inline-block; }
