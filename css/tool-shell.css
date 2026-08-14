@@ -216,4 +216,16 @@ html.dark .tk-sitenav a.tk-sitenav-primary:hover { background: #4338ca; border-c
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
   #bg-canvas { animation: none !important; }
+
+  /* Spinners are the exception. They report that something is still running,
+     so freezing one does not calm the page down - it just looks stalled, and
+     leaves no way to tell a slow request from a dead one. Windows reports
+     reduce-motion whenever animation effects are off, which is common, so
+     this fires far more often than the name suggests. */
+  .fa-spin,
+  .animate-spin,
+  .tk-spin {
+    animation-duration: 0.8s !important;
+    animation-iteration-count: infinite !important;
+  }
 }

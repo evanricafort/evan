@@ -81,40 +81,28 @@
         @keyframes tk-logo-float { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-5px) rotate(-6deg)} 75%{transform:translateY(-2px) rotate(6deg)} }
         @media (prefers-reduced-motion: reduce){ .tk-anim-logo{animation:none} }
 
-        /* The results frame shows web.archive.org's own text/plain response, so
-           it is a cross-origin document: no stylesheet of ours can reach inside
-           it, and the browser renders it with its default black-on-white. That
-           is what left the raw CDX output unreadable in dark mode.
-
-           A filter is the one thing that does apply, because it works on the
-           rendered box rather than the content. Inverting turns the white page
-           near-black and the black text near-white; the hue-rotate puts colour
-           back the right way round should archive.org ever return any. */
         /* Raw output panel.
 
-           The frame below shows web.archive.org's own text/plain response, so
-           it is a separate document the page cannot style: no stylesheet
-           reaches into it, and the browser paints it black-on-white. That is
-           what left the raw CDX output unreadable in dark mode.
+           The frame shows web.archive.org's own text/plain response. That is a
+           separate document: no stylesheet here reaches into it, and the browser
+           paints it black-on-white, which is what left the output unreadable in
+           dark mode.
 
-           Filtering the frame does not fix it either. A filter applies to the
-           frame's own box - its border inverts - but the embedded document is
-           composited separately and never repaints through it, so the text
-           stays black. Same result sandboxed or not.
+           Reading the response instead and painting it ourselves is not on the
+           table. The CDX endpoint sends no Access-Control-Allow-Origin, ignores
+           its own callback parameter so JSONP is out, and the one archive.org
+           endpoint that does send CORS only answers availability for a single
+           URL. Every remaining route needs a proxy.
 
-           So when the response can be read directly it is painted into the
-           element below instead, which is ours to style. The frame stays as
-           the fallback for when it cannot. */
-        #resultsText {
-            height: 26rem;
-            overflow: auto;
-            white-space: pre;
-            tab-size: 4;
+           So the frame stays, and a filter does the work. It applies to the
+           frame's box rather than its content, which is the only lever a page
+           has over a document it cannot touch. The frame's own dark background
+           has to be flipped to white first, otherwise it inverts to a bright
+           panel along with everything else. */
+        .dark #resultsFrame {
+            background: #ffffff;
+            filter: invert(1) hue-rotate(180deg);
         }
-        #resultsText::-webkit-scrollbar { width: 10px; height: 10px; }
-        #resultsText::-webkit-scrollbar-track { background: transparent; }
-        #resultsText::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
-        .dark #resultsText::-webkit-scrollbar-thumb { background: #475569; }
 </style>
     <link rel="stylesheet" href="/css/tool-shell.css">
     <script src="/js/geo-web.js" defer></script>
@@ -240,23 +228,26 @@
                         <i class="far fa-copy mr-1"></i> Copy Content
                     </button>
                 </div>
-                <div class="relative group">
-                    <iframe id="resultsFrame"
-                            title="Raw CDX output from web.archive.org"
-                            class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl"
-                            style="height: 26rem;"
-                            referrerpolicy="no-referrer"
-                            sandbox="allow-same-origin"></iframe>
+                <div class="group">
+                    <!-- The overlay is positioned against this wrapper alone, so it
+                         covers the frame and stops there. Anchored to the outer box
+                         it stretched over the query line below as well. -->
+                    <div class="relative">
+                        <iframe id="resultsFrame"
+                                title="Raw CDX output from web.archive.org"
+                                class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl"
+                                style="height: 26rem;"
+                                referrerpolicy="no-referrer"
+                                sandbox="allow-same-origin"></iframe>
 
-                    <pre id="resultsText"
-                         class="hidden w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-4 text-xs font-mono text-gray-800 dark:text-gray-300"></pre>
-
-                    <div id="frameOverlay" class="hidden absolute inset-0 rounded-xl flex flex-col items-center justify-center gap-3 bg-gray-50/90 dark:bg-gray-950/90 backdrop-blur-sm">
-                        <i class="fas fa-spinner fa-spin text-2xl text-indigo-600 dark:text-indigo-400"></i>
-                        <p class="text-xs font-semibold text-gray-600 dark:text-gray-400">Querying the Wayback Machine&hellip;</p>
-                        <p class="text-[11px] text-gray-500 dark:text-gray-500">Large domains can take a while.</p>
+                        <div id="frameOverlay" class="hidden absolute inset-0 rounded-xl flex flex-col items-center justify-center gap-3 bg-gray-50/95 dark:bg-gray-900/95">
+                            <i class="fas fa-spinner fa-spin text-3xl text-indigo-600 dark:text-indigo-400"></i>
+                            <p class="text-xs font-semibold text-gray-600 dark:text-gray-300">Querying the Wayback Machine&hellip;</p>
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400">Large domains can take a while.</p>
+                        </div>
                     </div>
-                        <pre id="resultsOutput" class="mt-3 w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-3 text-[11px] font-mono text-gray-600 dark:text-gray-400"></pre>
+
+                    <pre id="resultsOutput" class="mt-3 w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-3 text-[11px] font-mono text-gray-600 dark:text-gray-400"></pre>
                 </div>
             </div>
 
@@ -368,7 +359,6 @@
 
             /* Loading state for the results panel. */
             const frameOverlay = document.getElementById("frameOverlay");
-            const resultsText = document.getElementById("resultsText");
             const LOAD_TIMEOUT = 45000;
             let pendingLoad = false;
             let loadTimer = null;
@@ -419,7 +409,7 @@
                 if (cdxQueryUrl) {
                     html += `
                     <div class="mt-3 pt-3 border-t border-red-200 dark:border-red-800">
-                        <p class="text-xs mb-2 opacity-90">In-app fetch failed (likely due to size or proxy limits). You can access the raw data directly:</p>
+                        <p class="text-xs mb-2 opacity-90">The archive did not respond in time. You can open the raw output directly:</p>
                         <a href="${cdxQueryUrl}" target="_blank" class="inline-flex items-center px-4 py-2 border border-transparent text-xs font-bold rounded shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
                             <i class="fas fa-external-link-alt mr-2"></i> Open CDX Link Directly
                         </a>
@@ -459,22 +449,22 @@
                 clearStatus();
                 urlInput.classList.remove('ring-2', 'ring-red-500');
 
-                /* No proxy. The CDX API sends no Access-Control-Allow-Origin, so a
-                   cross-origin fetch can never read the body from the browser -- the
-                   response comes back opaque. A top-level navigation is not subject
-                   to CORS, so the raw output is handed straight to archive.org
-                   instead. Nothing can fail in between, and what you see is the
-                   unmodified CDX text. */
+                /* The CDX endpoint sends no Access-Control-Allow-Origin, and its
+                   callback parameter is ignored, so script cannot read this
+                   response by any route that does not involve a proxy. Loading it
+                   into the frame lets the browser fetch and render it directly:
+                   nothing sits in the middle, so there is no proxy to fail and
+                   what appears is the unmodified CDX text. */
                 lastQueryUrl = cdxQueryUrl;
                 resultsOutput.textContent = cdxQueryUrl;
                 resultsContainer.classList.remove('hidden');
 
-                /* Archive.org can take a while on a busy domain, so everything is
-                   held in a loading state until a response lands. */
+                /* Archive.org can take a while on a busy domain, so the panel is
+                   held in a loading state until the frame reports back. The frame
+                   keeps its box while it loads - hiding it would collapse the
+                   container and drop the overlay down the page. */
                 pendingLoad = true;
                 setLoading(true);
-                resultsText.classList.add('hidden');
-                resultsFrame.classList.add('hidden');
                 frameOverlay.classList.remove('hidden');
 
                 window.clearTimeout(loadTimer);
@@ -484,34 +474,6 @@
                     showError('The archive is taking longer than expected to respond.', lastQueryUrl);
                 }, LOAD_TIMEOUT);
 
-                /* Try to read the response outright. If the CDX endpoint allows it,
-                   the text is ours to paint, which is the only way the output can
-                   follow the page's theme -- a frame renders archive.org's own
-                   document, which no stylesheet here can reach.
-
-                   If it is blocked, nothing is lost: the frame below still displays
-                   the same text exactly as it did before, just in the browser's own
-                   black-on-white. */
-                let text = null;
-                try {
-                    const response = await fetch(cdxQueryUrl, { credentials: 'omit' });
-                    if (response.ok) text = await response.text();
-                } catch (err) {
-                    text = null;
-                }
-
-                if (!pendingLoad) return;
-
-                if (text !== null) {
-                    resultsText.textContent = text.trim() ? text : 'No archived records matched those filters.';
-                    resultsText.classList.remove('hidden');
-                    finishLoad();
-                    showSuccess('Showing raw CDX output below. Filters applied: see the query beneath the preview.');
-                    return;
-                }
-
-                /* Fallback: hand it to the frame, as before. */
-                resultsFrame.classList.remove('hidden');
                 resultsFrame.src = cdxQueryUrl;
             });
 
