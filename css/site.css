@@ -115,6 +115,42 @@ body.dark-mode #bio_center a[href*="github.com"]:hover i { color: #f0f6fc; }
 
 .center:hover { transform: scale(1.05); }
 
+/* Profile photo frame, dark mode only.
+
+   css/style.css gives the photo a 13px pure-black glow and a 5px near-white
+   border on hover. On a light page that reads as a soft shadow, but on
+   #0b0f19 the glow is invisible and the border lands as a hard bright ring.
+
+   This replaces it with a layered ring that stays lit the whole time dark mode
+   is on: a hairline edge, a tight halo, an indigo glow wide enough to read
+   against the background, and a drop shadow underneath for depth. Hover lifts
+   all four a step rather than switching to a different look, so the change
+   reads as a fade rather than a flash.
+
+   Only the frame is touched. The scale, the cursor and the mouseenter that
+   drives the theme toggle are all left as they are. */
+body.dark-mode .circle-1 img {
+  border: 1px solid rgba(165, 180, 252, 0.32);
+  box-shadow:
+    0 0 0 5px rgba(129, 140, 248, 0.1),
+    0 0 22px rgba(129, 140, 248, 0.26),
+    0 6px 18px rgba(0, 0, 0, 0.45);
+  transition: box-shadow 0.35s ease, border-color 0.35s ease, transform 0.2s linear;
+}
+
+body.dark-mode .circle-1:hover img {
+  border: 1px solid rgba(165, 180, 252, 0.55);
+  box-shadow:
+    0 0 0 7px rgba(129, 140, 248, 0.16),
+    0 0 32px rgba(129, 140, 248, 0.42),
+    0 10px 26px rgba(0, 0, 0, 0.55);
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.dark-mode .circle-1 img { transition: none; }
+}
+
 /* --- Underlined links --------------------------------------------- */
 .container { position: relative; display: inline-block; }
 
