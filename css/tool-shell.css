@@ -39,6 +39,62 @@ html.dark {
   --geo-accent: 129, 140, 248;
 }
 
+/* ── Site nav ──────────────────────────────────────────────────────────
+   The Tools / Home pair that sits above the footer on every tool page.
+   Written in plain CSS rather than utility classes because four of the
+   tools (the API key checker, JWT analyzer, sorting kit and proofreader)
+   do not load Tailwind, and icon-free because they do not agree on an
+   icon library either. Centres in a flex column and in normal flow. */
+.tk-sitenav {
+  width: 100%;
+  padding: 1rem 0 0.25rem;
+  text-align: center;
+}
+
+.tk-sitenav a {
+  display: inline-block;
+  margin: 0 0.375rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #374151;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  text-decoration: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: background-color 200ms, border-color 200ms, color 200ms;
+}
+
+.tk-sitenav a:hover { background: #f9fafb; }
+
+.tk-sitenav a.tk-sitenav-primary {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.tk-sitenav a.tk-sitenav-primary:hover { background: #4338ca; border-color: #4338ca; }
+
+html.dark .tk-sitenav a {
+  background: #1f2937;
+  border-color: #374151;
+  color: #e5e7eb;
+}
+
+html.dark .tk-sitenav a:hover { background: #374151; }
+
+html.dark .tk-sitenav a.tk-sitenav-primary {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: #ffffff;
+}
+
+html.dark .tk-sitenav a.tk-sitenav-primary:hover { background: #4338ca; border-color: #4338ca; }
+
 /* ── Mobile ────────────────────────────────────────────────────────────
    Phones and small tablets. Desktop layout above is untouched. */
 @media (max-width: 767px) {
