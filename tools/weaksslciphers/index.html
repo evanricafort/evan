@@ -200,8 +200,14 @@
                 localStorage.setItem('theme', 'dark');
             }
         }
+        /* The markup ships <html class="dark">, so this needs the else as much as
+           the if: adding a class that is already there does nothing, and without
+           the removal a stored light preference could never take effect - the page
+           came up dark every time however the toggle was left. */
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
         }
 
         const vulnerabilityDatabase = [
