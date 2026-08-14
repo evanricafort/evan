@@ -53,17 +53,22 @@ EEEEEEEEEEEEEEEEEEEEEE                 VVV                 AAAAAAA              
             }
         }
     </script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        .tk-anim-logo { display:inline-block; animation: tk-logo-float 4.5s ease-in-out infinite; transform-origin:center; }
-        @keyframes tk-logo-float { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-5px) rotate(-6deg)} 75%{transform:translateY(-2px) rotate(6deg)} }
-        @media (prefers-reduced-motion: reduce){ .tk-anim-logo{animation:none} }
-</style>
     <link rel="stylesheet" href="/css/tool-shell.css">
+    <style>
+        /* This page has a single fixed theme - no toggle, no dark: variants,
+           no stored preference. tool-shell.css only exposes the light values
+           of the background palette at :root and keeps the light-on-dark ones
+           behind html.dark, so they are set here directly. Loaded after that
+           stylesheet so it wins. Without it the web would draw in dark navy
+           on a near-black page and vanish. */
+        :root {
+            --geo-line: 200, 220, 240;
+            --geo-accent: 129, 140, 248;
+        }
+</style>
     <script src="/js/geo-web.js" defer></script>
 </head>
 
-<!-- Fixed dark palette: this page has no theme toggle. -->
 <body class="bg-gray-950 text-gray-200 font-sans min-h-screen flex flex-col items-center justify-center px-4 py-12 antialiased selection:bg-indigo-500 selection:text-white">
 
     <main class="w-full max-w-lg text-center space-y-6">
@@ -75,7 +80,7 @@ EEEEEEEEEEEEEEEEEEEEEE                 VVV                 AAAAAAA              
         </h1>
 
         <div class="flex justify-center">
-            <img src="/7VE.gif" alt="" class="max-w-full h-auto rounded-2xl border border-gray-800 shadow-xl shadow-black/50" />
+            <img src="/7VE.gif" alt="" class="max-w-full h-auto" />
         </div>
 
         <p class="text-gray-400 text-sm md:text-lg">
@@ -83,15 +88,9 @@ EEEEEEEEEEEEEEEEEEEEEE                 VVV                 AAAAAAA              
         </p>
 
         <div class="flex flex-wrap items-center justify-center gap-3 pt-1">
-            <a href="/" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-md transition-colors">
-                <i data-lucide="home" class="w-4 h-4"></i> Home
-            </a>
-            <a href="/tools/" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-semibold border border-gray-700 transition-colors">
-                <i data-lucide="wrench" class="w-4 h-4"></i> Tools
-            </a>
-            <a href="https://blog.evanricafort.com" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-semibold border border-gray-700 transition-colors">
-                <i data-lucide="book-open" class="w-4 h-4"></i> Blog
-            </a>
+            <a href="/" class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-md transition-colors">Home</a>
+            <a href="/tools/" class="px-5 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-semibold border border-gray-700 transition-colors">Tools</a>
+            <a href="https://blog.evanricafort.com" class="px-5 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-semibold border border-gray-700 transition-colors">Blog</a>
         </div>
 
     </main>
@@ -99,8 +98,6 @@ EEEEEEEEEEEEEEEEEEEEEE                 VVV                 AAAAAAA              
     <footer class="mt-10 text-center text-gray-600 text-xs font-medium">
         &copy; Evan Ricafort
     </footer>
-
-    <script>lucide.createIcons();</script>
 
 </body>
 </html>
