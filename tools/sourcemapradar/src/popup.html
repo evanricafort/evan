@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<link rel="stylesheet" href="popup.css" />
+<title>SourceMap Radar</title>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="dot"></span>
+      <h1>SourceMap Radar</h1>
+    </div>
+    <div class="page" id="page-url">—</div>
+  </header>
+
+  <div class="summary" id="summary">
+    <div class="stat exposed"><b id="n-exposed">0</b><span>exposed</span></div>
+    <div class="stat declared"><b id="n-declared">0</b><span>declared only</span></div>
+    <div class="stat clean"><b id="n-clean">0</b><span>clean</span></div>
+    <div class="stat total"><b id="n-total">0</b><span>assets</span></div>
+  </div>
+
+  <div class="bar">
+    <button id="rescan" class="primary">Rescan</button>
+    <button id="clear">Clear</button>
+    <button id="export" disabled>Export JSON</button>
+    <span class="status" id="status"></span>
+  </div>
+
+  <div class="filters">
+    <label><input type="checkbox" id="only-findings" checked /> Findings only</label>
+    <label><input type="checkbox" id="opt-auto" /> Auto-scan</label>
+    <label><input type="checkbox" id="opt-guess" /> Guess <code>.map</code></label>
+    <label><input type="checkbox" id="opt-css" /> Include CSS</label>
+  </div>
+
+  <div class="filters auth">
+    <label class="strong"><input type="checkbox" id="opt-auth" /> Authenticated scan</label>
+    <label id="scope-wrap" hidden><input type="checkbox" id="opt-auth-all" /> All origins</label>
+    <p class="note" id="auth-note" hidden></p>
+  </div>
+
+  <ul id="results"></ul>
+  <p class="empty" id="empty">No assets recorded yet. Reload the page, then hit Rescan.</p>
+
+  <footer>Authorized testing only — the extension reads assets the browser already fetched.</footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>

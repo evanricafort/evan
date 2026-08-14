@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SourceMap Radar — Browser Extension</title>
+    <meta name="description" content="Chrome/Edge extension that automatically scans every page for exposed JavaScript and CSS source maps and verifies which ones are actually retrievable.">
+    <link href="/profile.jpg" type="image/jpeg" rel="shortcut icon" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        gray: {
+                            850: '#1f2937',
+                            900: '#111827',
+                            950: '#0b0f19',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        body, div, nav, button, input, table, th, td {
+            transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 300ms;
+        }
+
+        .tk-anim-logo { display:inline-block; animation: tk-logo-float 4.5s ease-in-out infinite; transform-origin:center; }
+        @keyframes tk-logo-float { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-5px) rotate(-6deg)} 75%{transform:translateY(-2px) rotate(6deg)} }
+        @media (prefers-reduced-motion: reduce){ .tk-anim-logo{animation:none} }
+
+        /* Repo-style file rows */
+        .repo-row:hover { background-color: rgba(99, 102, 241, .06); }
+        .dark .repo-row:hover { background-color: rgba(99, 102, 241, .10); }
+        .repo-row.is-active { background-color: rgba(99, 102, 241, .10); }
+        .dark .repo-row.is-active { background-color: rgba(99, 102, 241, .16); }
+
+        .code-scroll::-webkit-scrollbar { width: 10px; height: 10px; }
+        .code-scroll::-webkit-scrollbar-track { background: transparent; }
+        .code-scroll::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 5px; }
+        .dark .code-scroll::-webkit-scrollbar-thumb { background: #374151; }
+
+        /* Line numbers for the file viewer */
+        .code-lines { counter-reset: ln; }
+        .code-lines .ln-row { display: grid; grid-template-columns: 3.5rem 1fr; }
+        .code-lines .ln-num {
+            text-align: right; padding-right: 1rem; user-select: none;
+            color: #9ca3af; border-right: 1px solid rgba(148,163,184,.25);
+        }
+        .dark .code-lines .ln-num { color: #4b5563; }
+        .code-lines .ln-txt { padding-left: 1rem; white-space: pre; }
+
+        .step-num {
+            display:inline-flex; align-items:center; justify-content:center;
+            width:1.75rem; height:1.75rem; border-radius:9999px; flex:none;
+            font-size:.75rem; font-weight:800; font-family:'JetBrains Mono',monospace;
+        }
+    </style>
+    <link rel="stylesheet" href="/css/tool-shell.css">
+    <script src="/js/geo-web.js" defer></script>
+</head>
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200 min-h-screen flex flex-col items-center py-8 md:py-12 px-4 antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300">
+    <nav class="tk-sitenav">
+        <a href="/tools/">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            Tools
+        </a>
+        <a href="/" class="tk-sitenav-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.8V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.8"/><path d="M10 21v-6h4v6"/></svg>
+            Home
+        </a>
+    </nav>
+
+    <div class="absolute top-4 right-4 md:top-8 md:right-8">
+        <button onclick="toggleTheme()" class="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-600 dark:text-yellow-400 shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <i id="themeIcon" class="fas fa-sun text-xl leading-5 w-5 h-5 text-center block"></i>
+        </button>
+    </div>
+
+    <main class="w-full max-w-5xl space-y-8 mt-8">
+
+        <div class="text-center space-y-3">
+            <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center justify-center gap-3">
+                <i class="fas fa-satellite-dish tk-anim-logo text-indigo-600 dark:text-indigo-500"></i>
+                <span><span class="text-indigo-600 dark:text-indigo-500">SourceMap</span> Radar</span>
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 text-sm md:text-lg max-w-2xl mx-auto">
+                A Chrome &amp; Edge extension that automatically scans every page you visit for exposed
+                JavaScript and CSS source maps — and verifies which ones are actually retrievable.
+            </p>
+            <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+                <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">Manifest V3</span>
+                <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-850 text-gray-600 dark:text-gray-400">v1.0.0</span>
+                <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-850 text-gray-600 dark:text-gray-400">Chrome · Edge · Brave</span>
+                <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400">No build step</span>
+            </div>
+        </div>
+
+        <!-- Section pills -->
+        <div class="flex flex-wrap items-center justify-center gap-2">
+            <a href="#repo" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-folder-tree"></i> Source</a>
+            <a href="#download" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-download"></i> Download</a>
+            <a href="#install" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-puzzle-piece"></i> Install</a>
+            <a href="#usage" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-book-open"></i> How to use</a>
+            <a href="#detect" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-magnifying-glass-chart"></i> Detection</a>
+        </div>
+
+        <!-- ============================ REPO BROWSER ============================ -->
+        <section id="repo" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-xl dark:shadow-black/50">
+
+            <div class="bg-gray-50 dark:bg-gray-850 px-5 py-4 border-b border-gray-200 dark:border-gray-800 flex flex-wrap items-center gap-3">
+                <i class="fas fa-book text-gray-400 dark:text-gray-500"></i>
+                <span class="font-mono text-sm font-bold">
+                    <span class="text-gray-500 dark:text-gray-400">evanricafort</span><span class="text-gray-400 dark:text-gray-600">/</span><span class="text-indigo-600 dark:text-indigo-400">sourcemap-radar</span>
+                </span>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400">Public</span>
+                <div class="ml-auto flex items-center gap-2">
+                    <span class="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono text-gray-500 dark:text-gray-400 px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <i class="fas fa-code-branch"></i> main
+                    </span>
+                    <a href="sourcemap-radar.zip" download class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wide px-3.5 py-2 rounded-lg text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 shadow transition-all transform active:scale-[0.98]">
+                        <i class="fas fa-file-zipper"></i> Code
+                    </a>
+                </div>
+            </div>
+
+            <!-- breadcrumb -->
+            <div class="px-5 py-2.5 border-b border-gray-200 dark:border-gray-800 flex items-center gap-2 text-xs font-mono">
+                <button id="crumbRoot" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">sourcemap-radar</button>
+                <span id="crumbSep" class="text-gray-400 dark:text-gray-600 hidden">/</span>
+                <span id="crumbDir" class="text-gray-500 dark:text-gray-400 hidden"></span>
+                <span id="repoMeta" class="ml-auto text-gray-400 dark:text-gray-600"></span>
+            </div>
+
+            <div id="fileList" class="divide-y divide-gray-100 dark:divide-gray-800"></div>
+
+            <!-- file viewer -->
+            <div id="viewer" class="hidden border-t border-gray-200 dark:border-gray-800">
+                <div class="bg-gray-50 dark:bg-gray-850 px-5 py-3 border-b border-gray-200 dark:border-gray-800 flex flex-wrap items-center gap-3">
+                    <i id="viewerIcon" class="fas fa-file-code text-indigo-500"></i>
+                    <span id="viewerName" class="font-mono text-sm font-bold text-gray-900 dark:text-white"></span>
+                    <span id="viewerMeta" class="text-xs font-mono text-gray-500 dark:text-gray-400"></span>
+                    <div class="ml-auto flex items-center gap-2">
+                        <button onclick="copyViewer()" id="copyBtn" class="text-gray-500 hover:text-indigo-600 dark:hover:text-white transition-colors text-xs uppercase font-bold tracking-wider flex items-center gap-2">
+                            <i class="far fa-copy"></i> Copy
+                        </button>
+                        <a id="rawLink" href="#" target="_blank" rel="noopener" class="text-gray-500 hover:text-indigo-600 dark:hover:text-white transition-colors text-xs uppercase font-bold tracking-wider flex items-center gap-2">
+                            <i class="fas fa-up-right-from-square"></i> Raw
+                        </a>
+                        <button onclick="closeViewer()" class="text-gray-500 hover:text-rose-500 transition-colors text-xs uppercase font-bold tracking-wider flex items-center gap-2">
+                            <i class="fas fa-xmark"></i> Close
+                        </button>
+                    </div>
+                </div>
+                <div id="viewerBody" class="bg-white dark:bg-[#0d1117] max-h-[32rem] overflow-auto code-scroll text-xs font-mono leading-relaxed py-3"></div>
+            </div>
+        </section>
+
+        <!-- ============================== DOWNLOAD ============================== -->
+        <section id="download" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-6">
+            <h2 class="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+                <i class="fas fa-download text-indigo-500"></i> Download
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+                <a href="sourcemap-radar.zip" download class="md:col-span-2 group flex items-center gap-4 p-5 rounded-xl border border-indigo-200 dark:border-indigo-800/60 bg-indigo-50/60 dark:bg-indigo-900/20 hover:border-indigo-400 dark:hover:border-indigo-500 transition-all">
+                    <span class="p-3.5 rounded-xl bg-white dark:bg-gray-900 text-indigo-600 dark:text-indigo-400 shadow-sm flex-shrink-0">
+                        <i class="fas fa-file-zipper text-2xl"></i>
+                    </span>
+                    <span class="min-w-0">
+                        <span class="block font-mono font-bold text-gray-900 dark:text-white">sourcemap-radar.zip</span>
+                        <span class="block text-sm text-gray-600 dark:text-gray-400 mt-0.5">Unpacked extension — 11 files, <span id="zipSize">21 KB</span>. Unzip, then load it in your browser.</span>
+                    </span>
+                    <i class="fas fa-arrow-right ml-auto text-indigo-500 group-hover:translate-x-1 transition-transform flex-shrink-0"></i>
+                </a>
+
+                <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 space-y-2">
+                    <span class="block text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Requirements</span>
+                    <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1.5">
+                        <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-500 mt-1 text-xs"></i> Chrome 110+, Edge, Brave, or any Chromium browser</li>
+                        <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-500 mt-1 text-xs"></i> Developer mode enabled</li>
+                        <li class="flex items-start gap-2"><i class="fas fa-xmark text-gray-400 mt-1 text-xs"></i> No Node, npm, or build step</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-900/20 p-4 flex items-start gap-3">
+                <i class="fas fa-triangle-exclamation text-amber-500 mt-0.5"></i>
+                <p class="text-sm text-amber-800 dark:text-amber-200">
+                    Not on the Chrome Web Store — it's loaded unpacked on purpose, so you can read every line before
+                    granting it <code class="font-mono text-xs">&lt;all_urls&gt;</code>. Browse the source above first.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================== INSTALL =============================== -->
+        <section id="install" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-6">
+            <h2 class="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+                <i class="fas fa-puzzle-piece text-indigo-500"></i> Install in your browser
+            </h2>
+
+            <ol class="space-y-5">
+                <li class="flex gap-4">
+                    <span class="step-num bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300">1</span>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-bold text-gray-900 dark:text-white">Download and unzip</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Unzip <code class="font-mono text-xs text-indigo-600 dark:text-indigo-300">sourcemap-radar.zip</code>
+                            anywhere you'll keep it — the browser loads the folder from disk every launch, so don't
+                            delete it afterwards.
+                        </p>
+                    </div>
+                </li>
+
+                <li class="flex gap-4">
+                    <span class="step-num bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300">2</span>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-bold text-gray-900 dark:text-white">Open the extensions page</p>
+                        <div class="mt-2 space-y-2">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 w-16">Chrome</span>
+                                <code class="font-mono text-xs px-2.5 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 text-indigo-600 dark:text-indigo-300">chrome://extensions</code>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 w-16">Edge</span>
+                                <code class="font-mono text-xs px-2.5 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 text-indigo-600 dark:text-indigo-300">edge://extensions</code>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 w-16">Brave</span>
+                                <code class="font-mono text-xs px-2.5 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 text-indigo-600 dark:text-indigo-300">brave://extensions</code>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-500 mt-2">Paste it into the address bar — these URLs can't be opened from a link.</p>
+                    </div>
+                </li>
+
+                <li class="flex gap-4">
+                    <span class="step-num bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300">3</span>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-bold text-gray-900 dark:text-white">Turn on Developer mode</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Toggle in the top-right of the extensions page (bottom-left sidebar on Edge).
+                        </p>
+                    </div>
+                </li>
+
+                <li class="flex gap-4">
+                    <span class="step-num bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300">4</span>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-bold text-gray-900 dark:text-white">Load unpacked</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Click <b>Load unpacked</b> and select the <code class="font-mono text-xs text-indigo-600 dark:text-indigo-300">sourcemap-radar</code>
+                            folder — the one containing <code class="font-mono text-xs">manifest.json</code>, not its parent.
+                        </p>
+                    </div>
+                </li>
+
+                <li class="flex gap-4">
+                    <span class="step-num bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">5</span>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-bold text-gray-900 dark:text-white">Pin it</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Open the puzzle-piece menu in the toolbar and pin <b>SourceMap Radar</b>, so the badge count
+                            stays visible while you browse.
+                        </p>
+                    </div>
+                </li>
+            </ol>
+
+            <details class="group bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+                <summary class="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-850 transition-colors">
+                    <span class="text-sm font-mono text-gray-500 dark:text-gray-400 uppercase font-bold flex items-center gap-2">
+                        <i class="fas fa-circle-question"></i> Troubleshooting
+                    </span>
+                    <i class="fas fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <div class="p-5 border-t border-gray-200 dark:border-gray-800 space-y-3 text-sm text-gray-600 dark:text-gray-400">
+                    <p><b class="text-gray-900 dark:text-white">"Manifest file is missing or unreadable"</b> — you selected the wrong folder. Pick the one with <code class="font-mono text-xs">manifest.json</code> directly inside it.</p>
+                    <p><b class="text-gray-900 dark:text-white">Badge never appears</b> — the extension only scans <code class="font-mono text-xs">http(s)</code> pages. It cannot read <code class="font-mono text-xs">chrome://</code> pages, the Web Store, or other extensions' pages.</p>
+                    <p><b class="text-gray-900 dark:text-white">Nothing found on a page you know has maps</b> — the assets were served from cache before the extension attached. Reload the tab, then press <b>Rescan</b>.</p>
+                    <p><b class="text-gray-900 dark:text-white">After editing the source</b> — hit the reload arrow on the extension's card, then reload the target page.</p>
+                    <p><b class="text-gray-900 dark:text-white">Firefox</b> — not supported as-is. It uses the Chromium <code class="font-mono text-xs">chrome.*</code> MV3 service-worker model.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- =============================== USAGE ================================ -->
+        <section id="usage" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-6">
+            <h2 class="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+                <i class="fas fa-book-open text-indigo-500"></i> How to use it
+            </h2>
+
+            <ol class="space-y-5">
+                <li class="flex gap-4">
+                    <span class="step-num bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300">1</span>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-bold text-gray-900 dark:text-white">Just browse the target</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Auto-scan is on by default. Every JS and CSS file the page loads gets probed as soon as the
+                            page settles. The toolbar badge shows how many retrievable maps were found — <span class="text-rose-500 font-bold">red</span>
+                            when it's more than zero.
+                        </p>
+                    </div>
+                </li>
+                <li class="flex gap-4">
+                    <span class="step-num bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300">2</span>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-bold text-gray-900 dark:text-white">Open the popup for the breakdown</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Four counters across the top — <b>exposed</b>, <b>declared only</b>, <b>clean</b>, and total
+                            assets seen. Each finding lists how many original sources the map contains and how many
+                            carry embedded content.
+                        </p>
+                    </div>
+                </li>
+                <li class="flex gap-4">
+                    <span class="step-num bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300">3</span>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-bold text-gray-900 dark:text-white">Pull the evidence</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Per finding: <b>Copy map URL</b>, <b>Open</b>, <b>Download .map</b>. Page-wide:
+                            <b>Export JSON</b> for your report. Then unpack the <code class="font-mono text-xs">.map</code>
+                            back into original source with the
+                            <a href="/tools/sourcemapunmapper/" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">JS SourceMap Unmapper</a>.
+                        </p>
+                    </div>
+                </li>
+                <li class="flex gap-4">
+                    <span class="step-num bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300">4</span>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-bold text-gray-900 dark:text-white">Behind a login? Turn on Authenticated scan</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Log into the target as normal, then enable <b>Authenticated scan</b> in the popup. Findings
+                            that needed the session get an <span class="font-mono text-xs font-bold px-1.5 py-0.5 rounded bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300">auth</span>
+                            chip, because "exposed to anyone" and "exposed to logged-in users" are different findings.
+                        </p>
+                    </div>
+                </li>
+            </ol>
+
+            <div>
+                <h3 class="text-gray-900 dark:text-white font-bold mb-4 flex items-center gap-2 text-lg">
+                    <i class="fas fa-tags text-indigo-500"></i> Reading the verdicts
+                </h3>
+                <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-50 dark:bg-gray-850 text-gray-500 dark:text-gray-400 font-mono uppercase text-xs tracking-wider">
+                            <tr>
+                                <th class="px-5 py-4 font-semibold">Tag</th>
+                                <th class="px-5 py-4 font-semibold">What it means</th>
+                                <th class="px-5 py-4 font-semibold">Impact</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300">
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                <td class="px-5 py-4"><span class="font-mono text-xs font-bold px-2 py-1 rounded bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400">exposed</span></td>
+                                <td class="px-5 py-4">Map fetched and parsed as a real source map.</td>
+                                <td class="px-5 py-4 text-gray-600 dark:text-gray-400 text-xs">Original source recoverable. Report it.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                <td class="px-5 py-4"><span class="font-mono text-xs font-bold px-2 py-1 rounded bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400">inline</span></td>
+                                <td class="px-5 py-4">Map is base64/URL-encoded inside the asset itself.</td>
+                                <td class="px-5 py-4 text-gray-600 dark:text-gray-400 text-xs">Same as exposed — nothing to fetch, it already shipped.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                <td class="px-5 py-4"><span class="font-mono text-xs font-bold px-2 py-1 rounded bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">declared</span></td>
+                                <td class="px-5 py-4">Comment points at a map, but it 404s or isn't valid JSON.</td>
+                                <td class="px-5 py-4 text-gray-600 dark:text-gray-400 text-xs">Low — leaks build paths and filenames only.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                <td class="px-5 py-4"><span class="font-mono text-xs font-bold px-2 py-1 rounded bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">clean</span></td>
+                                <td class="px-5 py-4">No comment, and nothing at the conventional <code class="font-mono text-xs">.map</code> path.</td>
+                                <td class="px-5 py-4 text-gray-600 dark:text-gray-400 text-xs">None.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                <td class="px-5 py-4"><span class="font-mono text-xs font-bold px-2 py-1 rounded bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">error</span></td>
+                                <td class="px-5 py-4">The asset itself couldn't be re-fetched.</td>
+                                <td class="px-5 py-4 text-gray-600 dark:text-gray-400 text-xs">Inconclusive — often auth. Try an authenticated scan.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-gray-900 dark:text-white font-bold mb-4 flex items-center gap-2 text-lg">
+                    <i class="fas fa-sliders text-indigo-500"></i> Settings
+                </h3>
+                <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-50 dark:bg-gray-850 text-gray-500 dark:text-gray-400 font-mono uppercase text-xs tracking-wider">
+                            <tr>
+                                <th class="px-5 py-4 font-semibold">Toggle</th>
+                                <th class="px-5 py-4 font-semibold">Default</th>
+                                <th class="px-5 py-4 font-semibold">Effect</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300">
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                <td class="px-5 py-4 font-bold font-mono text-xs text-indigo-700 dark:text-indigo-300">Findings only</td>
+                                <td class="px-5 py-4 text-emerald-600 dark:text-emerald-400 text-xs font-bold">ON</td>
+                                <td class="px-5 py-4 text-xs">Hides clean assets. Turn off to audit everything that was checked.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                <td class="px-5 py-4 font-bold font-mono text-xs text-indigo-700 dark:text-indigo-300">Auto-scan</td>
+                                <td class="px-5 py-4 text-emerald-600 dark:text-emerald-400 text-xs font-bold">ON</td>
+                                <td class="px-5 py-4 text-xs">Scans on page load. Off = only when you press Rescan, for quieter engagements.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                <td class="px-5 py-4 font-bold font-mono text-xs text-indigo-700 dark:text-indigo-300">Guess .map</td>
+                                <td class="px-5 py-4 text-emerald-600 dark:text-emerald-400 text-xs font-bold">ON</td>
+                                <td class="px-5 py-4 text-xs">Tries <code class="font-mono">&lt;asset&gt;.map</code> when no comment exists — pipelines often strip the comment but still deploy the file.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                <td class="px-5 py-4 font-bold font-mono text-xs text-indigo-700 dark:text-indigo-300">Include CSS</td>
+                                <td class="px-5 py-4 text-emerald-600 dark:text-emerald-400 text-xs font-bold">ON</td>
+                                <td class="px-5 py-4 text-xs">Also probes stylesheets. Sass/Less maps leak original selectors and structure.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                <td class="px-5 py-4 font-bold font-mono text-xs text-indigo-700 dark:text-indigo-300">Authenticated scan</td>
+                                <td class="px-5 py-4 text-gray-500 dark:text-gray-400 text-xs font-bold">OFF</td>
+                                <td class="px-5 py-4 text-xs">Re-fetches with your session cookies — but only to the page's own domain and its sub/parent domains.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                <td class="px-5 py-4 font-bold font-mono text-xs text-indigo-700 dark:text-indigo-300">All origins</td>
+                                <td class="px-5 py-4 text-gray-500 dark:text-gray-400 text-xs font-bold">OFF</td>
+                                <td class="px-5 py-4 text-xs">Lifts that restriction and sends cookies to every asset host. See the warning below.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-900/20 p-4 flex items-start gap-3">
+                <i class="fas fa-shield-halved text-rose-500 mt-0.5"></i>
+                <p class="text-sm text-rose-800 dark:text-rose-200">
+                    <b>On "All origins":</b> a page loads scripts from CDNs, tag managers and analytics hosts it doesn't
+                    control. That toggle sends your session cookies to all of them. Leave it off unless you own every
+                    asset host in scope — the default already covers the target's own domain and its subdomains.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================= DETECTION ============================== -->
+        <section id="detect" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-5">
+            <h2 class="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+                <i class="fas fa-magnifying-glass-chart text-indigo-500"></i> How the detection works
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950">
+                    <p class="font-bold text-gray-900 dark:text-white flex items-center gap-2"><span class="font-mono text-indigo-500">01</span> Collect</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Assets come from two sources: the live <code class="font-mono text-xs">webRequest</code> stream, and a DOM + Resource-Timing sweep in the content script. The second one catches cache hits, back/forward restores and late SPA chunks the first one misses.</p>
+                </div>
+                <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950">
+                    <p class="font-bold text-gray-900 dark:text-white flex items-center gap-2"><span class="font-mono text-indigo-500">02</span> Tail-read</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">A <code class="font-mono text-xs">Range: bytes=-4096</code> request pulls only the end of each bundle, where the comment lives — instead of downloading megabytes. Falls back to a size-capped full fetch when the server ignores <code class="font-mono text-xs">Range</code>.</p>
+                </div>
+                <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950">
+                    <p class="font-bold text-gray-900 dark:text-white flex items-center gap-2"><span class="font-mono text-indigo-500">03</span> Match</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Handles <code class="font-mono text-xs">//#</code>, <code class="font-mono text-xs">/*# … */</code> and legacy <code class="font-mono text-xs">//@</code> forms, plus <code class="font-mono text-xs">data:</code> URIs for inlined maps. Quoted occurrences inside code are skipped as false positives.</p>
+                </div>
+                <div class="p-5 rounded-xl border border-indigo-200 dark:border-indigo-800/60 bg-indigo-50/60 dark:bg-indigo-900/20">
+                    <p class="font-bold text-gray-900 dark:text-white flex items-center gap-2"><span class="font-mono text-indigo-500">04</span> Verify — the important part</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">A map only counts when the response parses as JSON <i>and</i> looks like a source map. This is what stops SPAs that answer every path with <code class="font-mono text-xs">index.html</code> from producing a page of false positives — the usual failure of naive <code class="font-mono text-xs">.map</code> scanners.</p>
+                </div>
+            </div>
+
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                Findings report the source count, how many entries carry <code class="font-mono text-xs">sourcesContent</code>
+                (meaning the full original file is recoverable, not just its name), map size, and a sample of source paths.
+                Concurrency is capped at 6 requests and 400 assets per tab, so a scan won't hammer a target. Results live
+                in session storage and clear on navigation.
+            </p>
+        </section>
+    </main>
+
+    <footer class="mt-auto py-8 text-center text-gray-500 dark:text-gray-600 text-xs font-medium">
+        <p>For authorized security testing only · The extension only reads assets the browser already fetched</p>
+        <p>&copy; <span id="year"></span> SourceMap Radar · Evan Ricafort</p>
+    </footer>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        /* ----------------------------- theme ----------------------------- */
+        const htmlEl = document.documentElement;
+        const themeIcon = document.getElementById('themeIcon');
+
+        if (localStorage.getItem('theme') === 'light') {
+            htmlEl.classList.remove('dark');
+            themeIcon.className = 'fas fa-moon text-xl leading-5 w-5 h-5 text-center block';
+        }
+
+        function toggleTheme() {
+            if (htmlEl.classList.contains('dark')) {
+                htmlEl.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                themeIcon.className = 'fas fa-moon text-xl leading-5 w-5 h-5 text-center block';
+            } else {
+                htmlEl.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.className = 'fas fa-sun text-xl leading-5 w-5 h-5 text-center block';
+            }
+        }
+
+        /* -------------------------- repo browser -------------------------- */
+        const TREE = {
+            '': [
+                { name: 'icons', type: 'dir', size: 5235, desc: 'Toolbar icons at 16/32/48/128px' },
+                { name: 'manifest.json', type: 'json', size: 941, desc: 'MV3 manifest — permissions, service worker, content script registration' },
+                { name: 'background.js', type: 'js', size: 16688, desc: 'Service worker: asset collection, tail-range probing, map verification, credential scoping, badge' },
+                { name: 'content.js', type: 'js', size: 2294, desc: 'DOM + Resource-Timing sweep — catches cached assets and late SPA chunks' },
+                { name: 'popup.html', type: 'html', size: 1802, desc: 'Popup markup — counters, controls, results list' },
+                { name: 'popup.css', type: 'css', size: 4698, desc: 'Popup styling, dark by default' },
+                { name: 'popup.js', type: 'js', size: 9462, desc: 'Popup logic: rendering, live polling, copy/download/export' },
+                { name: 'README.md', type: 'md', size: 4559, desc: 'Full documentation' }
+            ],
+            'icons': [
+                { name: 'icon16.png', type: 'img', size: 452, desc: 'Toolbar, 16px' },
+                { name: 'icon32.png', type: 'img', size: 819, desc: 'Toolbar, 32px' },
+                { name: 'icon48.png', type: 'img', size: 1148, desc: 'Extensions page, 48px' },
+                { name: 'icon128.png', type: 'img', size: 2816, desc: 'Install dialog, 128px' }
+            ]
+        };
+
+        const ICONS = {
+            dir:  { cls: 'fas fa-folder',      color: 'text-indigo-500' },
+            js:   { cls: 'fab fa-js',          color: 'text-amber-500' },
+            json: { cls: 'fas fa-file-code',   color: 'text-emerald-500' },
+            html: { cls: 'fab fa-html5',       color: 'text-orange-500' },
+            css:  { cls: 'fab fa-css3-alt',    color: 'text-sky-500' },
+            md:   { cls: 'fas fa-file-lines',  color: 'text-gray-400' },
+            img:  { cls: 'far fa-image',       color: 'text-fuchsia-500' }
+        };
+
+        let currentDir = '';
+
+        function fmtSize(n) {
+            if (n < 1024) return n + ' B';
+            if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+            return (n / 1048576).toFixed(2) + ' MB';
+        }
+
+        function renderDir(dir) {
+            currentDir = dir;
+            const entries = TREE[dir] || [];
+            const list = document.getElementById('fileList');
+            list.textContent = '';
+
+            document.getElementById('crumbSep').classList.toggle('hidden', !dir);
+            const crumbDir = document.getElementById('crumbDir');
+            crumbDir.classList.toggle('hidden', !dir);
+            crumbDir.textContent = dir;
+
+            const bytes = entries.reduce(function (a, e) { return a + e.size; }, 0);
+            document.getElementById('repoMeta').textContent =
+                entries.length + (entries.length === 1 ? ' item · ' : ' items · ') + fmtSize(bytes);
+
+            if (dir) {
+                const up = document.createElement('button');
+                up.className = 'repo-row w-full text-left px-5 py-3 flex items-center gap-3 transition-colors';
+                up.innerHTML = '<i class="fas fa-turn-up rotate-[-90deg] text-gray-400 w-4 text-center"></i>' +
+                               '<span class="font-mono text-sm text-indigo-600 dark:text-indigo-400 font-bold">..</span>';
+                up.onclick = function () { renderDir(''); closeViewer(); };
+                list.appendChild(up);
+            }
+
+            entries.forEach(function (e) {
+                const meta = ICONS[e.type] || ICONS.md;
+                const row = document.createElement('button');
+                row.className = 'repo-row w-full text-left px-5 py-3 flex items-center gap-3 transition-colors';
+                row.dataset.path = (dir ? dir + '/' : '') + e.name;
+
+                const icon = document.createElement('i');
+                icon.className = meta.cls + ' ' + meta.color + ' w-4 text-center flex-shrink-0';
+
+                const name = document.createElement('span');
+                name.className = 'font-mono text-sm font-medium text-gray-900 dark:text-gray-100 flex-shrink-0';
+                name.textContent = e.name;
+
+                const desc = document.createElement('span');
+                desc.className = 'text-xs text-gray-500 dark:text-gray-500 truncate hidden md:block flex-1 min-w-0';
+                desc.textContent = e.desc;
+
+                const size = document.createElement('span');
+                size.className = 'ml-auto text-xs font-mono text-gray-400 dark:text-gray-600 flex-shrink-0';
+                size.textContent = e.type === 'dir' ? '—' : fmtSize(e.size);
+
+                row.append(icon, name, desc, size);
+                row.onclick = function () {
+                    if (e.type === 'dir') { renderDir(e.name); closeViewer(); }
+                    else { openFile(row.dataset.path, e); }
+                };
+                list.appendChild(row);
+            });
+        }
+
+        document.getElementById('crumbRoot').onclick = function () { renderDir(''); closeViewer(); };
+
+        /* -------------------------- file viewer -------------------------- */
+        const viewer = document.getElementById('viewer');
+        const viewerBody = document.getElementById('viewerBody');
+        let viewerText = '';
+
+        function markActive(path) {
+            document.querySelectorAll('#fileList .repo-row').forEach(function (r) {
+                r.classList.toggle('is-active', r.dataset.path === path);
+            });
+        }
+
+        async function openFile(path, entry) {
+            const meta = ICONS[entry.type] || ICONS.md;
+            document.getElementById('viewerIcon').className = meta.cls + ' ' + meta.color;
+            document.getElementById('viewerName').textContent = path;
+            document.getElementById('viewerMeta').textContent = fmtSize(entry.size);
+            document.getElementById('rawLink').href = 'src/' + path;
+            viewer.classList.remove('hidden');
+            markActive(path);
+
+            if (entry.type === 'img') {
+                viewerText = '';
+                viewerBody.innerHTML =
+                    '<div class="p-8 flex flex-col items-center gap-4">' +
+                    '<img src="src/' + path + '" alt="' + path + '" class="border border-gray-200 dark:border-gray-800 rounded-lg bg-gray-50 dark:bg-gray-950 p-2" style="image-rendering:pixelated;width:128px;height:128px">' +
+                    '<span class="text-xs font-mono text-gray-500 dark:text-gray-500">' + path + '</span></div>';
+                viewer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                return;
+            }
+
+            viewerBody.innerHTML = '<div class="p-8 text-center text-gray-500 dark:text-gray-500 font-mono text-xs">Loading ' + path + ' …</div>';
+            viewer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            try {
+                const res = await fetch('src/' + path, { cache: 'no-store' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                viewerText = await res.text();
+                renderCode(viewerText);
+            } catch (err) {
+                viewerText = '';
+                viewerBody.innerHTML =
+                    '<div class="p-8 text-center text-rose-500 font-mono text-xs">Could not load src/' + path + ' (' + err.message + ')' +
+                    '<br><span class="text-gray-500">Open the Raw link, or use the ZIP download.</span></div>';
+            }
+        }
+
+        function renderCode(text) {
+            const lines = text.replace(/\t/g, '    ').split('\n');
+            const frag = document.createDocumentFragment();
+            const wrap = document.createElement('div');
+            wrap.className = 'code-lines';
+
+            lines.forEach(function (line, i) {
+                const row = document.createElement('div');
+                row.className = 'ln-row';
+                const num = document.createElement('span');
+                num.className = 'ln-num';
+                num.textContent = String(i + 1);
+                const txt = document.createElement('span');
+                txt.className = 'ln-txt text-gray-700 dark:text-gray-300';
+                txt.textContent = line || ' ';
+                row.append(num, txt);
+                wrap.appendChild(row);
+            });
+
+            frag.appendChild(wrap);
+            viewerBody.textContent = '';
+            viewerBody.appendChild(frag);
+        }
+
+        function closeViewer() {
+            viewer.classList.add('hidden');
+            viewerBody.textContent = '';
+            viewerText = '';
+            markActive(null);
+        }
+
+        function copyViewer() {
+            if (!viewerText) return;
+            navigator.clipboard.writeText(viewerText);
+            const btn = document.getElementById('copyBtn');
+            btn.innerHTML = '<i class="fas fa-check text-emerald-500"></i> Copied';
+            setTimeout(function () { btn.innerHTML = '<i class="far fa-copy"></i> Copy'; }, 1400);
+        }
+
+        renderDir('');
+    </script>
+</body>
+</html>
