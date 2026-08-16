@@ -9,7 +9,8 @@ telco_prefixes = [
     # DITO
     "991", "992", "993", "994", "995"
 ]
- 
+
+# Modify this value to change the number of test entries generated.
 num_numbers = 1000
 numbers = []
  
