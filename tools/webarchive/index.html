@@ -301,15 +301,16 @@
                the CDX API sends no Access-Control-Allow-Origin, ignores JSONP
                callbacks and cannot be read out of a cross-origin frame. A proxy is
                the only route, so one runs on demand for those two actions alone. */
-            /* Your own CDX proxy, if you have deployed one. See
-               workers/cdx-proxy in this repo. Set it to the worker URL with the
-               query parameter, e.g.
+            /* Deliberately empty. The worker in workers/cdx-proxy is deployed and
+               healthy, but it does not help here: archive.org rate-limits requests
+               coming from Cloudflare's egress addresses, so every call through it
+               returns 429 within a second while the same query fetched directly
+               returns 200. Routing through it only adds a hop that is certain to
+               fail, so the public proxies are used instead.
 
-                   'https://cdx-proxy.<subdomain>.workers.dev/?q='
-
-               While it is empty the tool ignores it and uses the public proxies
-               below exactly as before, so leaving it unset changes nothing. */
-            const CDX_PROXY_ENDPOINT = 'https://cdx-proxy.evanricafort.workers.dev/?q=';
+               Set this to the worker URL if that ever changes, or if you move the
+               worker to a host archive.org does not throttle. */
+            const CDX_PROXY_ENDPOINT = '';
 
             /* Yours first when configured, since it is the only hop you control.
                The public ones stay on as fallback. */
@@ -328,6 +329,8 @@
                 if (!lastQueryUrl) return null;
                 if (rawCache.url === lastQueryUrl && rawCache.text) return rawCache.text;
 
+                let sawRateLimit = false;
+
                 const original = button.innerHTML;
                 button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Fetching…';
                 button.disabled = true;
@@ -339,6 +342,7 @@
                             const timer = setTimeout(() => controller.abort(), 12000);
                             const res = await fetch(RAW_PROXIES[i](lastQueryUrl), { signal: controller.signal });
                             clearTimeout(timer);
+                            if (res.status === 429) { sawRateLimit = true; continue; }
                             if (!res.ok) continue;
                             const text = await res.text();
                             /* An HTML error page from the proxy is not CDX output. */
@@ -348,7 +352,10 @@
                         } catch (e) { /* next proxy */ }
                     }
                     showError('Could not retrieve the raw output for ' + label +
-                              '. The preview below is unaffected and still shows the full result.', lastQueryUrl);
+                              (sawRateLimit
+                                ? '. web.archive.org is rate-limiting right now, so try again in a minute.'
+                                : '. The preview below is unaffected and still shows the full result.'),
+                              lastQueryUrl);
                     return null;
                 } finally {
                     button.innerHTML = original;
