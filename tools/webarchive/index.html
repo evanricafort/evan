@@ -240,6 +240,9 @@
                     <button id="copyButton" class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold focus:outline-none transition-colors duration-200 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
                         <i class="far fa-copy mr-1"></i> Copy Content
                     </button>
+                    <button id="downloadButton" class="ml-3 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold">
+                        <i class="fas fa-download mr-1"></i> Download .txt
+                    </button>
                 </div>
                 <div class="group">
                     <!-- The overlay is positioned against this wrapper alone, so it
@@ -285,6 +288,56 @@
             let lastQueryUrl = "";
             const resultsFrame = document.getElementById("resultsFrame");
             const copyButton = document.getElementById("copyButton");
+            const downloadButton = document.getElementById("downloadButton");
+
+            /* Raw text cache, keyed by the query it came from. */
+            let rawCache = { url: "", text: "" };
+
+            /* The preview frame never touches these. It renders straight from
+               web.archive.org, so the page always shows results even when every
+               proxy below is down.
+
+               Copy and Download are different: they need the bytes inside JS, and
+               the CDX API sends no Access-Control-Allow-Origin, ignores JSONP
+               callbacks and cannot be read out of a cross-origin frame. A proxy is
+               the only route, so one runs on demand for those two actions alone. */
+            const RAW_PROXIES = [
+                u => 'https://corsproxy.io/?' + encodeURIComponent(u),
+                u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
+                u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u)
+            ];
+
+            async function getRawOutput(button, label) {
+                if (!lastQueryUrl) return null;
+                if (rawCache.url === lastQueryUrl && rawCache.text) return rawCache.text;
+
+                const original = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Fetching…';
+                button.disabled = true;
+
+                try {
+                    for (let i = 0; i < RAW_PROXIES.length; i++) {
+                        try {
+                            const controller = new AbortController();
+                            const timer = setTimeout(() => controller.abort(), 12000);
+                            const res = await fetch(RAW_PROXIES[i](lastQueryUrl), { signal: controller.signal });
+                            clearTimeout(timer);
+                            if (!res.ok) continue;
+                            const text = await res.text();
+                            /* An HTML error page from the proxy is not CDX output. */
+                            if (/^\s*</.test(text)) continue;
+                            rawCache = { url: lastQueryUrl, text: text };
+                            return text;
+                        } catch (e) { /* next proxy */ }
+                    }
+                    showError('Could not retrieve the raw output for ' + label +
+                              '. The preview below is unaffected and still shows the full result.', lastQueryUrl);
+                    return null;
+                } finally {
+                    button.innerHTML = original;
+                    button.disabled = false;
+                }
+            }
             const subdomainToggle = document.getElementById("subdomainToggle");
             const extCheckboxes = document.querySelectorAll('.ext-checkbox');
             const extAny = document.getElementById('ext-any');
@@ -486,6 +539,7 @@
                    nothing sits in the middle, so there is no proxy to fail and
                    what appears is the unmodified CDX text. */
                 lastQueryUrl = cdxQueryUrl;
+                rawCache = { url: "", text: "" };
                 resultsOutput.textContent = cdxQueryUrl;
                 resultsContainer.classList.remove('hidden');
 
@@ -519,8 +573,34 @@
             });
 
             // UPDATED COPY LOGIC
+            /* Saves the raw output as a file. The download attribute is ignored on
+               cross-origin URLs, so the text has to be in hand first and is written
+               out through a blob. */
+            downloadButton.addEventListener("click", async function () {
+                const text = await getRawOutput(downloadButton, 'downloading');
+                if (!text) return;
+
+                let host = 'cdx';
+                try { host = (new URL(lastQueryUrl)).searchParams.get('url') || 'cdx'; } catch (e) {}
+                host = host.replace(/^https?:\/\//, '').replace(/[^a-zA-Z0-9._-]/g, '_');
+
+                const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+                const href = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = href;
+                a.download = host + '-cdx.txt';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(function () { URL.revokeObjectURL(href); }, 1000);
+
+                const original = downloadButton.innerHTML;
+                downloadButton.innerHTML = '<i class="fas fa-check mr-1"></i> Saved!';
+                setTimeout(function () { downloadButton.innerHTML = original; }, 2000);
+            });
             copyButton.addEventListener("click", async function() {
-                const text = resultsOutput.textContent;
+                /* The raw CDX text, not the query URL. */
+                const text = await getRawOutput(copyButton, 'copying');
                 if (!text) return;
 
                 const originalText = "<i class=\"far fa-copy mr-1\"></i> Copy Content";
