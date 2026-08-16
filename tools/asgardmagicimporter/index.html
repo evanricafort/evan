@@ -97,9 +97,13 @@
         </a>
     </nav>
 
-    <div class="absolute top-4 right-4 md:top-8 md:right-8">
-        <button onclick="toggleTheme()" class="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-600 dark:text-yellow-400 shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <i id="themeIcon" class="fas fa-sun text-xl leading-5 w-5 h-5 text-center block"></i>
+    <div class="tk-toggle-wrap absolute top-4 right-4 md:top-8 md:right-8 z-30">
+        <button id="themeToggle" type="button" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle theme"
+                class="tk-theme-btn p-3 rounded-full bg-white dark:bg-gray-800 text-gray-600 dark:text-yellow-400 shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <!-- Driven by the dark class in CSS, so the icon can never fall out
+                 of step with the actual theme. -->
+            <i class="fas fa-sun text-xl leading-5 w-5 h-5 text-center hidden dark:block"></i>
+            <i class="fas fa-moon text-xl leading-5 w-5 h-5 text-center block dark:hidden"></i>
         </button>
     </div>
 
@@ -500,23 +504,21 @@
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        /* ----------------------------- theme ----------------------------- */
+        /* ----------------------------- theme -----------------------------
+           The icons are CSS-driven, so this only has to move the class and
+           remember the choice. Wrapped in try/catch because localStorage
+           throws in private mode on some browsers - the toggle must keep
+           working even when the preference cannot be saved. */
         const htmlEl = document.documentElement;
-        const themeIcon = document.getElementById('themeIcon');
-        if (localStorage.getItem('theme') === 'light') {
-            htmlEl.classList.remove('dark');
-            themeIcon.className = 'fas fa-moon text-xl leading-5 w-5 h-5 text-center block';
-        }
+        function storedTheme() { try { return localStorage.getItem('theme'); } catch { return null; } }
+        function rememberTheme(v) { try { localStorage.setItem('theme', v); } catch {} }
+
+        if (storedTheme() === 'light') htmlEl.classList.remove('dark');
+        else if (storedTheme() === 'dark') htmlEl.classList.add('dark');
+
         function toggleTheme() {
-            if (htmlEl.classList.contains('dark')) {
-                htmlEl.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-                themeIcon.className = 'fas fa-moon text-xl leading-5 w-5 h-5 text-center block';
-            } else {
-                htmlEl.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-                themeIcon.className = 'fas fa-sun text-xl leading-5 w-5 h-5 text-center block';
-            }
+            const nowLight = htmlEl.classList.toggle('dark') === false;
+            rememberTheme(nowLight ? 'light' : 'dark');
         }
 
         /* --------------------------- the gate ---------------------------
