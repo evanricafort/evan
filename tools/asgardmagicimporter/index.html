@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asgard Magic Importer — Browser Extension</title>
+    <meta name="description" content="Chrome/Edge extension that imports a drafted finding straight into the VikingCloud Asgard New Finding form — every field, every Evidence record, in one click.">
+    <meta name="robots" content="noindex, nofollow">
+    <link href="/profile.jpg" type="image/jpeg" rel="shortcut icon" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        gray: { 850: '#1f2937', 900: '#111827', 950: '#0b0f19' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        body, div, nav, button, input, table, th, td {
+            transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 300ms;
+        }
+        .tk-anim-logo { display:inline-block; animation: tk-logo-float 4.5s ease-in-out infinite; transform-origin:center; }
+        @keyframes tk-logo-float { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-5px) rotate(-6deg)} 75%{transform:translateY(-2px) rotate(6deg)} }
+        @media (prefers-reduced-motion: reduce){ .tk-anim-logo{animation:none} }
+
+        .step-num {
+            display:inline-flex; align-items:center; justify-content:center;
+            width:1.75rem; height:1.75rem; border-radius:9999px; flex:none;
+            font-size:.75rem; font-weight:800; font-family:'JetBrains Mono',monospace;
+        }
+
+        /* Redacted block */
+        .redacted {
+            background: repeating-linear-gradient(45deg,#111827,#111827 10px,#0b0f19 10px,#0b0f19 20px);
+            color: transparent; user-select: none; border-radius: .5rem;
+        }
+        html:not(.dark) .redacted {
+            background: repeating-linear-gradient(45deg,#374151,#374151 10px,#1f2937 10px,#1f2937 20px);
+        }
+        .lock-pulse { animation: lockpulse 2.4s ease-in-out infinite; }
+        @keyframes lockpulse { 0%,100%{opacity:.55} 50%{opacity:1} }
+        @media (prefers-reduced-motion: reduce){ .lock-pulse{animation:none} }
+        .shake { animation: shake .38s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%,90%{transform:translateX(-1px)} 20%,80%{transform:translateX(2px)}
+            30%,50%,70%{transform:translateX(-4px)} 40%,60%{transform:translateX(4px)} }
+        .unlock-in { animation: unlockin .45s cubic-bezier(.2,.9,.3,1) both; }
+        @keyframes unlockin { from{opacity:0;transform:translateY(10px) scale(.98)} to{opacity:1;transform:none} }
+    </style>
+    <link rel="stylesheet" href="/css/tool-shell.css">
+    <script src="/js/geo-web.js" defer></script>
+</head>
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200 min-h-screen flex flex-col items-center py-8 md:py-12 px-4 antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300">
+    <nav class="tk-sitenav">
+        <a href="/tools/">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            Tools
+        </a>
+        <a href="/" class="tk-sitenav-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.8V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.8"/><path d="M10 21v-6h4v6"/></svg>
+            Home
+        </a>
+    </nav>
+
+    <div class="absolute top-4 right-4 md:top-8 md:right-8">
+        <button onclick="toggleTheme()" class="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-600 dark:text-yellow-400 shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <i id="themeIcon" class="fas fa-sun text-xl leading-5 w-5 h-5 text-center block"></i>
+        </button>
+    </div>
+
+    <main class="w-full max-w-5xl space-y-8 mt-8">
+
+        <!-- ================================ HERO ================================ -->
+        <div class="text-center space-y-3">
+            <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center justify-center gap-3">
+                <i class="fas fa-wand-magic-sparkles tk-anim-logo text-indigo-600 dark:text-indigo-500"></i>
+                <span><span class="text-indigo-600 dark:text-indigo-500">Asgard</span> Magic Importer</span>
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 text-sm md:text-lg max-w-2xl mx-auto">
+                Make report writing great again. Copy a drafted finding, click once, and every field lands
+                in the VikingCloud Asgard <span class="font-semibold text-gray-800 dark:text-gray-200">New Finding</span>
+                form — Overview, Background, Recommendations, References, Affected Items, and each Evidence
+                record saved individually.
+            </p>
+            <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+                <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">Manifest V3</span>
+                <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-850 text-gray-600 dark:text-gray-400">v1.0.0</span>
+                <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-850 text-gray-600 dark:text-gray-400">Chrome · Edge · Brave</span>
+                <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400">Clipboard only</span>
+                <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">Internal</span>
+            </div>
+        </div>
+
+        <!-- ============================== JUMP LINKS ============================= -->
+        <div class="flex flex-wrap items-center justify-center gap-2">
+            <a href="#download" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-download"></i> Download</a>
+            <a href="#install" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-puzzle-piece"></i> Install</a>
+            <a href="#usage" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-book-open"></i> How to use</a>
+            <a href="#detect" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-magnifying-glass-chart"></i> Detection</a>
+        </div>
+
+        <!-- ============================== DOWNLOAD =============================== -->
+        <section id="download" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-6">
+            <h2 class="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+                <i class="fas fa-download text-indigo-500"></i> Download
+            </h2>
+
+            <!-- locked state -->
+            <div id="lockedBox">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+                    <div id="lockCard" class="md:col-span-2 flex items-center gap-4 p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950">
+                        <span class="p-3.5 rounded-xl bg-white dark:bg-gray-900 text-gray-400 dark:text-gray-600 shadow-sm flex-shrink-0">
+                            <i class="fas fa-lock text-2xl lock-pulse"></i>
+                        </span>
+                        <span class="min-w-0 flex-1">
+                            <span class="block redacted font-mono font-bold select-none">████████████████████████.zip</span>
+                            <span class="block redacted font-mono text-sm mt-1.5 select-none">███████ ██████████ — ██ █████, ██ ██. █████, ████ ████ ██ ██ ████ ███████.</span>
+                        </span>
+                    </div>
+
+                    <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 space-y-2">
+                        <span class="block text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Requirements</span>
+                        <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1.5">
+                            <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-500 mt-1 text-xs"></i> Chrome 110+, Edge, Brave, or any Chromium browser</li>
+                            <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-500 mt-1 text-xs"></i> Developer mode enabled</li>
+                            <li class="flex items-start gap-2"><i class="fas fa-xmark text-gray-400 mt-1 text-xs"></i> No Node, npm, or build step</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-4 rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-indigo-50 dark:bg-indigo-900/20 p-5 text-center space-y-1">
+                    <p class="text-base md:text-lg font-extrabold text-indigo-900 dark:text-indigo-200">
+                        Give me the password so I can give you the magic extension.
+                    </p>
+                    <p id="lockHint" class="text-xs font-mono text-indigo-700/70 dark:text-indigo-300/60">&nbsp;</p>
+                </div>
+            </div>
+
+            <!-- unlocked state -->
+            <div id="unlockedBox" class="hidden space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+                    <a id="dlLink" href="#" download="asgard-magic-importer.zip" class="md:col-span-2 group flex items-center gap-4 p-5 rounded-xl border border-indigo-200 dark:border-indigo-800/60 bg-indigo-50/60 dark:bg-indigo-900/20 hover:border-indigo-400 dark:hover:border-indigo-500 transition-all">
+                        <span class="p-3.5 rounded-xl bg-white dark:bg-gray-900 text-indigo-600 dark:text-indigo-400 shadow-sm flex-shrink-0">
+                            <i class="fas fa-file-zipper text-2xl"></i>
+                        </span>
+                        <span class="min-w-0">
+                            <span class="block font-mono font-bold text-gray-900 dark:text-white">asgard-magic-importer.zip</span>
+                            <span class="block text-sm text-gray-600 dark:text-gray-400 mt-0.5">Unpacked extension — 10 files, <span id="zipSize">41 KB</span>. Unzip, then load it in your browser.</span>
+                        </span>
+                        <i class="fas fa-arrow-right ml-auto text-indigo-500 group-hover:translate-x-1 transition-transform flex-shrink-0"></i>
+                    </a>
+
+                    <div class="p-5 rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-900/20 flex items-center gap-3">
+                        <i class="fas fa-lock-open text-emerald-500 text-xl"></i>
+                        <div>
+                            <span class="block text-sm font-bold text-emerald-800 dark:text-emerald-300">Unlocked</span>
+                            <span class="block text-xs text-emerald-700 dark:text-emerald-400/80">Decrypted in your browser. Nothing was sent anywhere.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-900/20 p-4 flex items-start gap-3">
+                    <i class="fas fa-triangle-exclamation text-amber-500 mt-0.5"></i>
+                    <p class="text-sm text-amber-800 dark:text-amber-200">
+                        Internal tooling — not on the Chrome Web Store. It is loaded unpacked on purpose so you can
+                        read every line before granting it access to
+                        <code class="font-mono text-xs">portal.vikingcloud.com</code>.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- =============================== INSTALL ============================== -->
+        <section id="install" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-6">
+            <h2 class="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+                <i class="fas fa-puzzle-piece text-indigo-500"></i> Install in your browser
+            </h2>
+
+            <ol class="space-y-5">
+                <li class="flex gap-4">
+                    <span class="step-num bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300">1</span>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-bold text-gray-900 dark:text-white">Download and unzip</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Unzip <code class="font-mono text-xs text-indigo-600 dark:text-indigo-300">asgard-magic-importer.zip</code>
+                            somewhere you'll keep it — the browser loads the folder from disk every launch, so don't
+                            delete it afterwards.
+                        </p>
+                    </div>
+                </li>
+
+                <li class="flex gap-4">
+                    <span class="step-num bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300">2</span>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-bold text-gray-900 dark:text-white">Open the extensions page</p>
+                        <div class="mt-2 space-y-2">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 w-16">Chrome</span>
+                                <code class="font-mono text-xs px-2.5 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 text-indigo-600 dark:text-indigo-300">chrome://extensions</code>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 w-16">Edge</span>
+                                <code class="font-mono text-xs px-2.5 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 text-indigo-600 dark:text-indigo-300">edge://extensions</code>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 w-16">Brave</span>
+                                <code class="font-mono text-xs px-2.5 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 text-indigo-600 dark:text-indigo-300">brave://extensions</code>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+                <li class="flex gap-4">
+                    <span class="step-num bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300">3</span>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-bold text-gray-900 dark:text-white">Turn on Developer mode</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Toggle it in the top-right corner of that page.</p>
+                    </div>
+                </li>
+
+                <li class="flex gap-4">
+                    <span class="step-num bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300">4</span>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-bold text-gray-900 dark:text-white">Load unpacked</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Click <span class="font-semibold">Load unpacked</span> and select the unzipped
+                            <code class="font-mono text-xs text-indigo-600 dark:text-indigo-300">asgard-magic-importer</code> folder
+                            — the one containing <code class="font-mono text-xs">manifest.json</code>, not its parent.
+                        </p>
+                    </div>
+                </li>
+
+                <li class="flex gap-4">
+                    <span class="step-num bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"><i class="fas fa-check text-[11px]"></i></span>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-bold text-gray-900 dark:text-white">Done</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            The wand icon appears in your toolbar. Pin it if you want the popup;
+                            the floating button shows up on its own once you open a finding form.
+                        </p>
+                    </div>
+                </li>
+            </ol>
+
+            <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 p-4 flex items-start gap-3">
+                <i class="fas fa-rotate text-gray-400 mt-0.5"></i>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Updating later? Replace the folder contents, then hit <span class="font-semibold">Reload</span>
+                    on the extension card. If you moved the folder, remove the entry and load unpacked again.
+                </p>
+            </div>
+        </section>
+
+        <!-- ================================ USAGE =============================== -->
+        <section id="usage" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-6">
+            <h2 class="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+                <i class="fas fa-book-open text-indigo-500"></i> How to use
+            </h2>
+
+            <ol class="space-y-5">
+                <li class="flex gap-4">
+                    <span class="step-num bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300">1</span>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-bold text-gray-900 dark:text-white">Copy your drafted finding</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Select the whole finding and press
+                            <code class="font-mono text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-950 border border-gray-200 dark:border-gray-800">Ctrl</code>
+                            +
+                            <code class="font-mono text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-950 border border-gray-200 dark:border-gray-800">C</code>.
+                            The extension only ever reads your clipboard — it never opens or touches your notes app.
+                        </p>
+                    </div>
+                </li>
+                <li class="flex gap-4">
+                    <span class="step-num bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300">2</span>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-bold text-gray-900 dark:text-white">Open the Asgard New Finding form</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Keep that tab active. A green <span class="font-semibold">Import Clipboard</span> button
+                            appears at the bottom-right by itself.
+                        </p>
+                    </div>
+                </li>
+                <li class="flex gap-4">
+                    <span class="step-num bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300">3</span>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-bold text-gray-900 dark:text-white">Click it and watch</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            A progress bar tracks the real position in the plan and names the record being written.
+                            The results log lists every field and record, then closes itself after 10 seconds —
+                            hover it to keep it open, or hit <span class="font-mono text-xs">copy</span> to grab the log.
+                        </p>
+                    </div>
+                </li>
+            </ol>
+
+            <div>
+                <h3 class="text-sm font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-3">What goes where</h3>
+                <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 dark:bg-gray-950 text-left">
+                            <tr>
+                                <th class="px-4 py-2.5 font-bold text-gray-700 dark:text-gray-300">Your draft</th>
+                                <th class="px-4 py-2.5 font-bold text-gray-700 dark:text-gray-300">Asgard</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-gray-600 dark:text-gray-400">
+                            <tr><td class="px-4 py-2.5 font-mono text-xs">Title · Category · CVE/CWE · Severity · CVSS4</td><td class="px-4 py-2.5">Overview fields</td></tr>
+                            <tr><td class="px-4 py-2.5 font-mono text-xs">Description</td><td class="px-4 py-2.5">Details → Background, one record per paragraph</td></tr>
+                            <tr><td class="px-4 py-2.5 font-mono text-xs">Recommendations</td><td class="px-4 py-2.5">Details → Recommendation, one record per item</td></tr>
+                            <tr><td class="px-4 py-2.5 font-mono text-xs">References</td><td class="px-4 py-2.5">Evidence tab → Reference, one record each</td></tr>
+                            <tr><td class="px-4 py-2.5 font-mono text-xs">Evidence</td><td class="px-4 py-2.5">Evidence, one record per paragraph</td></tr>
+                            <tr><td class="px-4 py-2.5 font-mono text-xs">Steps to Reproduce</td><td class="px-4 py-2.5">Evidence, one record, heading kept</td></tr>
+                            <tr><td class="px-4 py-2.5 font-mono text-xs">Request / Response / Result <span class="text-indigo-500">&lt;ID&gt;</span></td><td class="px-4 py-2.5">Evidence, one record <em>each</em>, in document order</td></tr>
+                            <tr><td class="px-4 py-2.5 font-mono text-xs">Note</td><td class="px-4 py-2.5">Evidence, one record</td></tr>
+                            <tr><td class="px-4 py-2.5 font-mono text-xs">Affected</td><td class="px-4 py-2.5">Additional → Affected Items</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-500 mt-3">
+                    Every Evidence record is saved individually with <span class="font-semibold">Type = Text</span>,
+                    and only the last one ends with a blank line. Repeated
+                    <code class="font-mono">Request 1 / Response 1 / Request 160 / Response 160</code> pairs each get
+                    their own record instead of collapsing into one.
+                </p>
+            </div>
+
+            <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 p-4 flex items-start gap-3">
+                <i class="fas fa-keyboard text-gray-400 mt-0.5"></i>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Prefer the keyboard? <code class="font-mono text-xs px-2 py-0.5 rounded bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">Alt</code>
+                    + <code class="font-mono text-xs px-2 py-0.5 rounded bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">Shift</code>
+                    + <code class="font-mono text-xs px-2 py-0.5 rounded bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800">N</code>
+                    runs the same import. If Chrome blocks clipboard access, the panel offers a box to paste into instead.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================== DETECTION ============================= -->
+        <section id="detect" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-5">
+            <h2 class="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+                <i class="fas fa-magnifying-glass-chart text-indigo-500"></i> How it detects things
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 space-y-2">
+                    <p class="font-bold text-gray-900 dark:text-white flex items-center gap-2"><i class="fas fa-location-crosshairs text-indigo-500"></i> The page</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        The content script runs only on <code class="font-mono text-xs">portal.vikingcloud.com</code> and
+                        mounts the floating button only while the URL is a
+                        <code class="font-mono text-xs">/finding/form/</code> route. Asgard is a single-page app, so the
+                        route is re-checked continuously and the button re-attaches if React removes it.
+                    </p>
+                </div>
+                <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 space-y-2">
+                    <p class="font-bold text-gray-900 dark:text-white flex items-center gap-2"><i class="fas fa-list-check text-indigo-500"></i> Your sections</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        Headings are matched by keyword plus an optional ID or annotation, so
+                        <code class="font-mono text-xs">Request 160 (Intruder Request #160) — … GMT:</code> is recognised.
+                        A heading must both start with a keyword and end with a colon, so
+                        <code class="font-mono text-xs">Host:</code> or <code class="font-mono text-xs">Content-Type:</code>
+                        inside a captured request are never mistaken for one.
+                    </p>
+                </div>
+                <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 space-y-2">
+                    <p class="font-bold text-gray-900 dark:text-white flex items-center gap-2"><i class="fas fa-square-check text-indigo-500"></i> The form controls</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        Each Evidence record opens its own <span class="font-semibold">+ Add</span>, selects
+                        <span class="font-semibold">Type = Text</span> from inside that dialog only, pastes, and saves
+                        before the next one starts. Severity is normalised too — <em>Informative</em> and
+                        <em>Informational</em> both select <span class="font-semibold">Info</span>.
+                    </p>
+                </div>
+                <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 space-y-2">
+                    <p class="font-bold text-gray-900 dark:text-white flex items-center gap-2"><i class="fas fa-shield-halved text-indigo-500"></i> Bounded by your clipboard</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        The whole plan is computed from the copied text before the page is touched, and the importer
+                        refuses to add more records than that plan — so it cannot keep going after your content has
+                        been imported. There is a time limit as a backstop.
+                    </p>
+                </div>
+            </div>
+
+            <div class="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-900/20 p-4 flex items-start gap-3">
+                <i class="fas fa-circle-info text-amber-500 mt-0.5"></i>
+                <p class="text-sm text-amber-800 dark:text-amber-200">
+                    Always review the finding before saving it in Asgard. The importer fills the form;
+                    it does not submit the finding for you.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="mt-auto py-8 text-center text-gray-500 dark:text-gray-600 text-xs font-medium">
+        <p>Internal tooling · Clipboard-only · Nothing leaves your browser</p>
+        <p>&copy; <span id="year"></span> Asgard Magic Importer · Evan Ricafort</p>
+    </footer>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        /* ----------------------------- theme ----------------------------- */
+        const htmlEl = document.documentElement;
+        const themeIcon = document.getElementById('themeIcon');
+        if (localStorage.getItem('theme') === 'light') {
+            htmlEl.classList.remove('dark');
+            themeIcon.className = 'fas fa-moon text-xl leading-5 w-5 h-5 text-center block';
+        }
+        function toggleTheme() {
+            if (htmlEl.classList.contains('dark')) {
+                htmlEl.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                themeIcon.className = 'fas fa-moon text-xl leading-5 w-5 h-5 text-center block';
+            } else {
+                htmlEl.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.className = 'fas fa-sun text-xl leading-5 w-5 h-5 text-center block';
+            }
+        }
+
+        /* --------------------------- the gate ---------------------------
+           The package on disk is AES-256-GCM ciphertext. The passphrase is
+           never stored here - it is fed to PBKDF2 to derive the key, and a
+           wrong one simply fails the GCM auth tag. Layout of ami.bin:
+             "AMI1" | salt(16) | iv(12) | ciphertext | tag(16)
+        ------------------------------------------------------------------ */
+        (function () {
+            const ITER = 250000;
+            const lockedBox   = document.getElementById('lockedBox');
+            const unlockedBox = document.getElementById('unlockedBox');
+            const lockCard    = document.getElementById('lockCard');
+            const lockHint    = document.getElementById('lockHint');
+            const dlLink      = document.getElementById('dlLink');
+            const zipSize     = document.getElementById('zipSize');
+
+            let buffer = '', busy = false, opened = false;
+
+            async function unlock(phrase) {
+                if (busy || opened) return false;
+                busy = true;
+                lockHint.textContent = 'checking…';
+                try {
+                    const raw = new Uint8Array(await (await fetch('ami.bin', { cache: 'no-store' })).arrayBuffer());
+                    if (String.fromCharCode(...raw.slice(0, 4)) !== 'AMI1') throw new Error('bad container');
+
+                    const salt = raw.slice(4, 20), iv = raw.slice(20, 32), body = raw.slice(32);
+                    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(phrase),
+                        'PBKDF2', false, ['deriveKey']);
+                    const key = await crypto.subtle.deriveKey(
+                        { name: 'PBKDF2', salt, iterations: ITER, hash: 'SHA-256' },
+                        base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+
+                    /* Throws if the passphrase is wrong - the tag will not verify. */
+                    const zip = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, body);
+
+                    const url = URL.createObjectURL(new Blob([zip], { type: 'application/zip' }));
+                    dlLink.href = url;
+                    zipSize.textContent = Math.round(zip.byteLength / 1024) + ' KB';
+                    lockedBox.classList.add('hidden');
+                    unlockedBox.classList.remove('hidden');
+                    unlockedBox.classList.add('unlock-in');
+                    document.getElementById('download').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    opened = true;
+                    return true;
+                } catch (e) {
+                    lockHint.innerHTML = '&nbsp;';
+                    lockCard.classList.remove('shake');
+                    void lockCard.offsetWidth;
+                    lockCard.classList.add('shake');
+                    return false;
+                } finally {
+                    busy = false;
+                }
+            }
+
+            /* Listen for the phrase being typed anywhere on the page. No field,
+               no prompt, no hint - you either know it or you don't.
+
+               Nothing derived from the phrase is stored here: no copy of it, no
+               hash of it, not even its length. The only test is whether the key
+               it derives actually decrypts the package, so the sole way to
+               attack this file is the PBKDF2 work factor itself.
+
+               A run of letters is collected and tried once you pause; any other
+               key, or a few seconds idle, clears it and starts over. */
+            let run = '', settle = 0, idle = 0;
+            addEventListener('keydown', (e) => {
+                if (opened || busy || e.ctrlKey || e.metaKey || e.altKey) return;
+
+                if (e.key === 'Backspace')        run = run.slice(0, -1);
+                else if (/^[a-zA-Z]$/.test(e.key)) run = (run + e.key.toLowerCase()).slice(-64);
+                else { run = ''; clearTimeout(settle); clearTimeout(idle); return; }
+
+                clearTimeout(idle);
+                idle = setTimeout(() => { run = ''; }, 4000);
+
+                clearTimeout(settle);
+                settle = setTimeout(() => { if (run.length >= 4) unlock(run); }, 420);
+            });
+        })();
+    </script>
+</body>
+</html>
