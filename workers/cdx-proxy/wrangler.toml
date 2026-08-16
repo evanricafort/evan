@@ -1,0 +1,10 @@
+name = "cdx-proxy"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# Optional: serve it from your own domain instead of the workers.dev URL.
+# Requires the zone to be on Cloudflare.
+#
+# [[routes]]
+# pattern = "cdx.evanricafort.com/*"
+# zone_name = "evanricafort.com"

@@ -301,11 +301,28 @@
                the CDX API sends no Access-Control-Allow-Origin, ignores JSONP
                callbacks and cannot be read out of a cross-origin frame. A proxy is
                the only route, so one runs on demand for those two actions alone. */
-            const RAW_PROXIES = [
-                u => 'https://corsproxy.io/?' + encodeURIComponent(u),
-                u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
-                u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u)
-            ];
+            /* Your own CDX proxy, if you have deployed one. See
+               workers/cdx-proxy in this repo. Set it to the worker URL with the
+               query parameter, e.g.
+
+                   'https://cdx-proxy.<subdomain>.workers.dev/?q='
+
+               While it is empty the tool ignores it and uses the public proxies
+               below exactly as before, so leaving it unset changes nothing. */
+            const CDX_PROXY_ENDPOINT = '';
+
+            /* Yours first when configured, since it is the only hop you control.
+               The public ones stay on as fallback. */
+            const RAW_PROXIES = [].concat(
+                CDX_PROXY_ENDPOINT
+                    ? [u => CDX_PROXY_ENDPOINT + encodeURIComponent(u)]
+                    : [],
+                [
+                    u => 'https://corsproxy.io/?' + encodeURIComponent(u),
+                    u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
+                    u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u)
+                ]
+            );
 
             async function getRawOutput(button, label) {
                 if (!lastQueryUrl) return null;
