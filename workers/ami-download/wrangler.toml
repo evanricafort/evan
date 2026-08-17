@@ -9,16 +9,11 @@ compatibility_date = "2024-11-01"
 # Any long random string. It signs the one-time download URLs; without it the
 # worker returns 500 rather than handing out unsigned links.
 
-# Optional: makes each minted URL work exactly ONCE instead of until it
-# expires. Without this binding a link stays usable for its full 120s.
-#
-#   wrangler kv namespace create TOKENS
-#
-# then paste the id it prints here and uncomment:
-#
-# [[kv_namespaces]]
-# binding = "TOKENS"
-# id = "<the id wrangler printed>"
+# Makes each minted URL work exactly ONCE instead of until it expires.
+# Created with: wrangler kv namespace create TOKENS
+[[kv_namespaces]]
+binding = "TOKENS"
+id = "6379f51fefdb4984b1cc2140dc16f5ea"
 
 # Optional: serve it from your own domain instead of the workers.dev URL.
 # Requires the zone to be on Cloudflare.
