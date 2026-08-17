@@ -65,6 +65,9 @@
         .dark .code-lines .ln-num { color: #4b5563; }
         .code-lines .ln-txt { padding-left: 1rem; white-space: pre; }
 
+        details[open] .tk-chev { transform: rotate(90deg); }
+        .tk-chev { transition: transform .18s ease; }
+
         /* Redacted block */
         .redacted {
             background: repeating-linear-gradient(45deg,#111827,#111827 10px,#0b0f19 10px,#0b0f19 20px);
@@ -420,6 +423,119 @@
                     and only the last one ends with a blank line. Repeated
                     <code class="font-mono">Request 1 / Response 1 / Request 160 / Response 160</code> pairs each get
                     their own record instead of collapsing into one.
+                </p>
+            </div>
+
+
+            <div>
+                <h3 class="text-sm font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-3">Format your finding like this</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    The importer reads your draft by its <span class="font-semibold text-gray-800 dark:text-gray-200">section labels</span>,
+                    so the closer your finding sticks to the shape below, the less it has to guess. Put each
+                    label on its own line ending in a colon, with its content underneath:
+                </p>
+
+                <div class="flex flex-wrap gap-1.5 mt-3">
+                    <span class="text-[11px] font-mono font-bold px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">Title</span>
+                    <span class="text-[11px] font-mono font-bold px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">Severity</span>
+                    <span class="text-[11px] font-mono font-bold px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">Category</span>
+                    <span class="text-[11px] font-mono font-bold px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">CVE/CWE</span>
+                    <span class="text-[11px] font-mono font-bold px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">CVSS4</span>
+                    <span class="text-[11px] font-mono font-bold px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">Affected</span>
+                    <span class="text-[11px] font-mono font-bold px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">Description</span>
+                    <span class="text-[11px] font-mono font-bold px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">References</span>
+                    <span class="text-[11px] font-mono font-bold px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">Recommendations</span>
+                    <span class="text-[11px] font-mono font-bold px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">Evidence</span>
+                    <span class="text-[11px] font-mono font-bold px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">Steps to Reproduce</span>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-500 mt-2.5">
+                    Optional, and each may repeat with an ID —
+                    <code class="font-mono">Request 1</code>, <code class="font-mono">Response 1</code>,
+                    <code class="font-mono">Request 160</code> — every one becoming its own Evidence record:
+                </p>
+                <div class="flex flex-wrap gap-1.5 mt-2">
+                    <span class="text-[11px] font-mono font-bold px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-850 text-gray-600 dark:text-gray-400">Request</span>
+                    <span class="text-[11px] font-mono font-bold px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-850 text-gray-600 dark:text-gray-400">Response</span>
+                    <span class="text-[11px] font-mono font-bold px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-850 text-gray-600 dark:text-gray-400">Result</span>
+                    <span class="text-[11px] font-mono font-bold px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-850 text-gray-600 dark:text-gray-400">Note</span>
+                </div>
+
+                <details class="mt-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 overflow-hidden">
+                    <summary class="px-4 py-3 cursor-pointer flex items-center gap-3 select-none hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors">
+                        <i class="fas fa-chevron-right text-xs text-indigo-500 tk-chev"></i>
+                        <span class="text-sm font-bold text-gray-900 dark:text-white">Example report</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-500 ml-auto">Stored XSS · click to expand</span>
+                    </summary>
+                    <div class="border-t border-gray-200 dark:border-gray-800 max-h-[28rem] overflow-auto code-scroll bg-white dark:bg-[#0d1117]">
+                        <pre class="text-xs font-mono leading-relaxed p-4 whitespace-pre-wrap break-words text-gray-700 dark:text-gray-300">Title:
+Stored Cross-Site Scripting (XSS) in User Profile Bio
+
+Severity:
+High
+
+Category:
+Input Validation / Cross-Site Scripting (XSS)
+
+CVE/CWE:
+N/A CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-Site Scripting')
+
+CVSS4:
+AV:N/AC:L/AT:N/PR:L/UI:R/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N/E:U - 4.6
+
+Affected:
+https://example.com/profile/edit
+
+Description:
+Stored Cross-Site Scripting (XSS) vulnerabilities occur when an application accepts untrusted user input without proper validation or sanitization and stores it permanently in a database or data store. This data is later retrieved and rendered to other users or administrators without appropriate contextual output encoding.
+
+In this instance, the application permits authenticated users to inject arbitrary JavaScript payloads into their profile biography field. When another user or administrative account views the affected profile, the malicious script executes within the context of their active browser session.
+
+Successful exploitation of this vulnerability can allow an attacker to hijack user sessions, steal session cookies, perform unauthorized actions on behalf of the victim, or deface application pages viewed by other users.
+
+References:
+https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html
+
+Recommendations:
+• Implement robust contextual output encoding for all user-supplied data prior to rendering it within the HTML document (e.g., HTML body encoding, attribute encoding).
+• Enforce strict input validation on the server side using allow-lists for expected input formats and character sets.
+• Deploy a secure Content Security Policy (CSP) headers configuration to restrict the execution of unauthorized inline scripts and limit script sources.
+
+Evidence:
+During testing, inserting a test script payload into the profile biography field was successfully accepted and stored by the backend. When navigating to the public-facing profile page, the payload executed automatically in the browser, demonstrating stored execution across user sessions.
+
+Steps to Reproduce:
+1. Log in to the application using a standard user account.
+2. Navigate to the profile settings page (/profile/edit).
+3. Input a test payload (e.g., &lt;script&gt;alert(document.cookie)&lt;/script&gt;) into the "Biography" field and click Save.
+4. Log in as a separate user or administrator and navigate to the modified user's public profile page.
+5. Observe that the script executes immediately, triggering an alert dialog containing session data.
+
+Request:
+POST /profile/edit HTTP/1.1
+Host: example.com
+Cookie: session_id=abc123xyz
+Content-Type: application/x-www-form-urlencoded
+
+bio=%3Cscript%3Ealert%28document.cookie%29%3C%2Fscript%3E&amp;submit=Save
+
+Response:
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=UTF-8
+
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;Profile Updated&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;div class="bio-section"&gt;
+&lt;script&gt;alert(document.cookie)&lt;/script&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+                    </div>
+                </details>
+
+                <p class="text-xs text-gray-500 dark:text-gray-500 mt-3">
+                    Labels are matched case-insensitively and a missing section is simply skipped, so a shorter
+                    finding still imports — you just get fewer records.
                 </p>
             </div>
 
