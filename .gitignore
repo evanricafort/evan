@@ -1,8 +1,10 @@
 # Claude Code workspace settings (local dev server config, tool permissions)
 .claude/
 
-# Output of tools/phmobilenumbergenerator.py
-philippine_mobile_numbers.txt
+# Output of tools/phmobilenumbergenerator/phmobilenumbergenerator.py.
+# The filename carries the count, e.g. 1000_philippine_mobile_numbers.txt,
+# so this has to be a glob rather than the bare name.
+*philippine_mobile_numbers.txt
 
 # OS cruft
 .DS_Store

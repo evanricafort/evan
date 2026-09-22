@@ -11,7 +11,9 @@ telco_prefixes = [
     "991", "992", "993", "994", "995"
 ]
 
-file_path = "philippine_mobile_numbers.txt"
+# The count goes in front of the name, so runs of different sizes land in
+# separate files instead of overwriting each other.
+file_name_template = "{}_philippine_mobile_numbers.txt"
 
 
 def parse_args():
@@ -50,7 +52,8 @@ def main():
 
     numbers = generate(args.gen, args.full)
 
-    # Save to TXT file
+    # Save to TXT file, named for how many it holds
+    file_path = file_name_template.format(len(numbers))
     with open(file_path, "w") as f:
         f.write("\n".join(numbers))
 

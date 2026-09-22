@@ -177,7 +177,7 @@
                     </span>
                     <span class="min-w-0">
                         <span class="block font-mono font-bold text-gray-900 dark:text-white">phmobilenumbergenerator.py</span>
-                        <span class="block text-sm text-gray-600 dark:text-gray-400 mt-0.5">One file, <span id="pySize">1767 B</span>. Save it anywhere and run it &mdash; there is nothing to install.</span>
+                        <span class="block text-sm text-gray-600 dark:text-gray-400 mt-0.5">One file, <span id="pySize">1990 B</span>. Save it anywhere and run it &mdash; there is nothing to install.</span>
                     </span>
                     <i class="fas fa-arrow-right ml-auto text-indigo-500 group-hover:translate-x-1 transition-transform flex-shrink-0"></i>
                 </a>
@@ -238,8 +238,8 @@
                     <span class="step-num bg-indigo-600 text-white">4</span>
                     <div class="min-w-0 flex-1 space-y-2">
                         <p class="font-bold text-gray-900 dark:text-white">Collect the output</p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">One number per line, ready to paste into a form or load as a dataset.</p>
-                        <pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">head philippine_mobile_numbers.txt</pre>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">One number per line, ready to paste into a form or load as a dataset. The count is part of the filename, so runs of different sizes sit side by side.</p>
+                        <pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">head 1000_philippine_mobile_numbers.txt</pre>
                     </div>
                 </div>
             </div>
@@ -297,9 +297,15 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="space-y-3">
                     <p class="text-sm text-gray-600 dark:text-gray-400">
-                        A plain text file, <span class="font-mono text-indigo-600 dark:text-indigo-300">philippine_mobile_numbers.txt</span>,
-                        with one number per line. Each is a three-digit network prefix followed by seven random digits, so it
-                        reads as a real local-format mobile number.
+                        A plain text file with one number per line. Each is a three-digit network prefix followed by seven
+                        random digits, so it reads as a real local-format mobile number.
+                    </p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        The filename carries the count &mdash;
+                        <span class="font-mono text-indigo-600 dark:text-indigo-300">1000_philippine_mobile_numbers.txt</span>
+                        by default, <span class="font-mono text-indigo-600 dark:text-indigo-300">250_philippine_mobile_numbers.txt</span>
+                        for <span class="font-mono text-indigo-600 dark:text-indigo-300">--gen 250</span> &mdash; so a second run at a
+                        different size does not overwrite the first.
                     </p>
                     <p class="text-sm text-gray-600 dark:text-gray-400">
                         By default that is the 10-digit <span class="font-mono text-indigo-600 dark:text-indigo-300">9XXXXXXXXX</span>.
@@ -330,8 +336,8 @@
                     <div class="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
                         <div class="bg-gray-50 dark:bg-gray-850 px-4 py-2.5 border-b border-gray-200 dark:border-gray-800 flex items-center gap-2">
                             <i class="fas fa-file-lines text-gray-400 dark:text-gray-500 text-xs"></i>
-                            <span class="font-mono text-xs text-gray-600 dark:text-gray-400">default &mdash; 10 digit</span>
-                            <span class="ml-auto font-mono text-[10px] text-gray-400 dark:text-gray-600">1000 lines</span>
+                            <span class="font-mono text-xs text-gray-600 dark:text-gray-400 truncate">1000_philippine_mobile_numbers.txt</span>
+                            <span class="ml-auto font-mono text-[10px] text-gray-400 dark:text-gray-600 flex-shrink-0">10 digit</span>
                         </div>
                         <pre class="bg-white dark:bg-[#0d1117] p-4 font-mono text-xs leading-relaxed text-gray-700 dark:text-gray-300 overflow-x-auto code-scroll">9387469568
 9311616030
@@ -343,14 +349,14 @@
                     <div class="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
                         <div class="bg-gray-50 dark:bg-gray-850 px-4 py-2.5 border-b border-gray-200 dark:border-gray-800 flex items-center gap-2">
                             <i class="fas fa-file-lines text-gray-400 dark:text-gray-500 text-xs"></i>
-                            <span class="font-mono text-xs text-gray-600 dark:text-gray-400">--full &mdash; 11 digit</span>
-                            <span class="ml-auto font-mono text-[10px] text-gray-400 dark:text-gray-600">leading 0</span>
+                            <span class="font-mono text-xs text-gray-600 dark:text-gray-400 truncate">250_philippine_mobile_numbers.txt</span>
+                            <span class="ml-auto font-mono text-[10px] text-gray-400 dark:text-gray-600 flex-shrink-0">11 digit, --full</span>
                         </div>
                         <pre class="bg-white dark:bg-[#0d1117] p-4 font-mono text-xs leading-relaxed text-gray-700 dark:text-gray-300 overflow-x-auto code-scroll">09635225326
 09688042797
 09365684124
 09687720714
-<span class="text-gray-400 dark:text-gray-600">&hellip;996 more</span></pre>
+<span class="text-gray-400 dark:text-gray-600">&hellip;246 more</span></pre>
                     </div>
                 </div>
             </div>
@@ -402,7 +408,7 @@
            use, and the size is read from the response rather than written
            into the markup where it would go stale. */
         const FILES = [
-            { name: 'phmobilenumbergenerator.py', type: 'py', size: 1767, desc: 'The whole tool - flags, prefix table, generator, file write' }
+            { name: 'phmobilenumbergenerator.py', type: 'py', size: 1990, desc: 'The whole tool - flags, prefix table, generator, file write' }
         ];
 
         const ICONS = {
