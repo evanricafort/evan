@@ -95,12 +95,12 @@
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-6">
 
             <div>
-                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">1. Upload .map file</label>
+                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">1. Upload .map file(s)</label>
                 <div id="dropzone" class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-6 text-center cursor-pointer transition-colors hover:border-indigo-500">
                     <i data-lucide="upload-cloud" class="w-8 h-8 mx-auto text-gray-400 dark:text-gray-500"></i>
-                    <p class="mt-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Drop a .map file anywhere, or click to browse</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">Best for large source maps. Nothing is uploaded &mdash; parsing happens in your browser.</p>
-                    <input type="file" id="fileInput" accept=".map,.json,application/json" class="hidden">
+                    <p class="mt-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Drop one or more .map files anywhere, or click to browse</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">Select several at once to unmap a whole bundle. Nothing is uploaded &mdash; parsing happens in your browser.</p>
+                    <input type="file" id="fileInput" accept=".map,.json,application/json" multiple class="hidden">
                 </div>
                 <p id="fileInfo" class="mt-2 text-xs font-mono text-gray-500 dark:text-gray-400 hidden"></p>
             </div>
@@ -134,7 +134,11 @@
         </div>
 
         <!-- Stats -->
-        <div id="statsGrid" class="hidden grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div id="statsGrid" class="hidden grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 text-center shadow-sm">
+                <div id="statMaps" class="text-2xl font-bold font-mono text-sky-600 dark:text-sky-400">0</div>
+                <div class="text-[11px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mt-1">Maps</div>
+            </div>
             <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5 text-center shadow-sm">
                 <div id="statFiles" class="text-2xl font-bold font-mono text-indigo-600 dark:text-indigo-400">0</div>
                 <div class="text-[11px] uppercase tracking-widest text-gray-500 dark:text-gray-400 mt-1">Sources</div>
@@ -225,8 +229,12 @@
     const scanCount  = document.getElementById('scanCount');
     const scanBody   = document.getElementById('scanBody');
 
-    /* recovered = [{ path, code }] */
+    /* recovered = [{ path, code, mapIndex }] and maps = [{ name, sources,
+       recovered }]. Every recovered source carries the index of the map it
+       came from, so the list, the viewer, the scan results and the export can
+       all say which .map produced it. */
     let recovered = [];
+    let maps = [];
     let activeIndex = -1;
     let lastScan = { kind: null, hits: [] };
 
@@ -286,36 +294,84 @@
         });
     }
 
-    function unmap(rawText) {
-        const text = String(rawText || '').trim();
-        if (!text) { setStatus('Paste a sourcemap or choose a .map file first.', 'error'); return false; }
+    /* Colour per map so a source can be traced back at a glance. Cycles
+       when there are more maps than colours, which is fine - the name is
+       always printed next to the chip. */
+    const MAP_COLOURS = [
+        'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300',
+        'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
+        'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
+        'bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300',
+        'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/15 dark:text-fuchsia-300',
+        'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300'
+    ];
+    function mapColour(i) { return MAP_COLOURS[i % MAP_COLOURS.length]; }
+    function mapName(i) { return (maps[i] && maps[i].name) || 'unknown map'; }
 
-        let map;
-        try {
-            map = JSON.parse(text);
-        } catch (e) {
-            setStatus('That is not valid JSON: ' + e.message, 'error');
+    function mapChip(i, extra) {
+        return '<span class="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded font-mono text-[10px] font-bold ' +
+               mapColour(i) + ' ' + (extra || '') + '">' + escapeHtml(mapName(i)) + '</span>';
+    }
+
+    /* Parses a batch of maps. One unreadable file does not abandon the rest -
+       it is collected into `failures` and reported alongside whatever did
+       work, because a dropped folder of maps usually has a stray file in it. */
+    function unmapAll(inputs) {
+        if (!inputs || inputs.length === 0) {
+            setStatus('Choose at least one .map file, or paste a source map.', 'error');
             return false;
         }
 
-        if (!map || typeof map !== 'object' || Array.isArray(map)) {
-            setStatus('Valid JSON, but not a source map object.', 'error');
-            return false;
-        }
-        if (!Array.isArray(map.sources) && !Array.isArray(map.sections)) {
-            setStatus('No "sources" or "sections" key — this does not look like a source map.', 'error');
+        const nextMaps = [];
+        const nextRecovered = [];
+        const failures = [];
+
+        inputs.forEach(function (input) {
+            const name = input.name || 'source map';
+            const text = String(input.text || '').trim();
+            if (!text) { failures.push(name + ' (empty)'); return; }
+
+            let map;
+            try {
+                map = JSON.parse(text);
+            } catch (e) {
+                failures.push(name + ' (not valid JSON)');
+                return;
+            }
+            if (!map || typeof map !== 'object' || Array.isArray(map)) {
+                failures.push(name + ' (not a source map object)');
+                return;
+            }
+            if (!Array.isArray(map.sources) && !Array.isArray(map.sections)) {
+                failures.push(name + ' (no "sources" or "sections")');
+                return;
+            }
+
+            const collected = [];
+            collectFromMap(map, collected);
+            if (collected.length === 0) { failures.push(name + ' (lists no sources)'); return; }
+
+            const mapIndex = nextMaps.length;
+            collected.forEach(function (f) {
+                f.mapIndex = mapIndex;
+                nextRecovered.push(f);
+            });
+            nextMaps.push({
+                name: name,
+                sources: collected.length,
+                recovered: collected.filter(function (f) { return f.code !== null; }).length
+            });
+        });
+
+        if (nextMaps.length === 0) {
+            setStatus(failures.length
+                ? 'Nothing could be unmapped — ' + failures.join('; ')
+                : 'Nothing could be unmapped.', 'error');
             return false;
         }
 
-        const collected = [];
-        collectFromMap(map, collected);
-
-        if (collected.length === 0) {
-            setStatus('The map parsed but lists no sources.', 'error');
-            return false;
-        }
-
-        recovered = collected;
+        maps = nextMaps;
+        recovered = nextRecovered;
         const withCode = recovered.filter(function (f) { return f.code !== null; });
 
         renderFileList();
@@ -327,6 +383,7 @@
             fileContent.textContent = '';
         }
 
+        document.getElementById('statMaps').textContent = maps.length;
         document.getElementById('statFiles').textContent = recovered.length;
         document.getElementById('statRecovered').textContent = withCode.length;
         document.getElementById('statSecrets').textContent = '0';
@@ -336,16 +393,29 @@
         scanCard.classList.add('hidden');
         lastScan = { kind: null, hits: [] };
 
+        const across = maps.length === 1 ? '' : ' across ' + maps.length + ' maps';
+        const tail = failures.length ? ' Skipped ' + failures.length + ': ' + failures.join('; ') + '.' : '';
+
         if (withCode.length === 0) {
             /* A map without sourcesContent still reveals the file tree, which
                is useful on its own, so this is a warning and not an error. */
-            setStatus('Listed ' + recovered.length + ' source paths, but the map has no sourcesContent, so no code could be recovered.', 'error');
+            setStatus('Listed ' + recovered.length + ' source paths' + across +
+                      ', but no sourcesContent, so no code could be recovered.' + tail, 'error');
         } else if (withCode.length < recovered.length) {
-            setStatus('Recovered ' + withCode.length + ' of ' + recovered.length + ' sources. The rest have no embedded content.', 'ok');
+            setStatus('Recovered ' + withCode.length + ' of ' + recovered.length + ' sources' + across +
+                      '. The rest have no embedded content.' + tail, failures.length ? 'error' : 'ok');
         } else {
-            setStatus('Recovered all ' + withCode.length + ' sources.', 'ok');
+            setStatus('Recovered all ' + withCode.length + (withCode.length === 1 ? ' source' : ' sources') + across + '.' + tail,
+                      failures.length ? 'error' : 'ok');
         }
         return true;
+    }
+
+    /* The paste box is just a one-map batch. */
+    function unmap(rawText) {
+        const text = String(rawText || '').trim();
+        if (!text) { setStatus('Paste a sourcemap or choose a .map file first.', 'error'); return false; }
+        return unmapAll([{ name: 'pasted JSON', text: text }]);
     }
 
     /* ── File list ─────────────────────────────────────────────────────── */
@@ -353,16 +423,39 @@
         const needle = fileFilter.value.trim().toLowerCase();
         fileList.innerHTML = '';
 
+        /* The filter matches the map name too, so typing part of a filename
+           narrows the list to that map. */
         const rows = recovered
             .map(function (f, i) { return { f: f, i: i }; })
-            .filter(function (r) { return !needle || r.f.path.toLowerCase().indexOf(needle) !== -1; });
+            .filter(function (r) {
+                if (!needle) return true;
+                return r.f.path.toLowerCase().indexOf(needle) !== -1 ||
+                       mapName(r.f.mapIndex).toLowerCase().indexOf(needle) !== -1;
+            });
 
         if (rows.length === 0) {
             fileList.innerHTML = '<p class="p-4 text-xs text-gray-500 dark:text-gray-400">No files match that filter.</p>';
             return;
         }
 
+        /* With a single map the grouping headers would be noise, so they only
+           appear once there is actually something to tell apart. */
+        const grouped = maps.length > 1;
+        let lastMap = -1;
+
         rows.forEach(function (r) {
+            if (grouped && r.f.mapIndex !== lastMap) {
+                lastMap = r.f.mapIndex;
+                const count = recovered.filter(function (x) { return x.mapIndex === lastMap; }).length;
+                const head = document.createElement('div');
+                head.className = 'sticky top-0 z-10 px-3 py-2 bg-gray-100 dark:bg-gray-850 border-y border-gray-200 dark:border-gray-800 flex items-center gap-2';
+                head.innerHTML =
+                    '<i data-lucide="file-json-2" class="w-3.5 h-3.5 shrink-0 text-gray-500 dark:text-gray-400"></i>' +
+                    mapChip(lastMap, 'truncate max-w-[11rem]') +
+                    '<span class="ml-auto shrink-0 text-[10px] text-gray-500 dark:text-gray-400">' + count + ' src</span>';
+                fileList.appendChild(head);
+            }
+
             const hasCode = r.f.code !== null;
             const row = document.createElement('button');
             row.type = 'button';
@@ -374,6 +467,12 @@
                 ? (r.f.code.length / 1024).toFixed(1) + ' KB'
                 : r.f.code.length + ' B') : 'empty';
 
+            /* When the list is filtered the grouping headers can be far from
+               the row, so each row also names its map. */
+            const origin = grouped
+                ? '<span class="block text-[10px] font-mono text-gray-400 dark:text-gray-500 mt-0.5 truncate">from ' + escapeHtml(mapName(r.f.mapIndex)) + '</span>'
+                : '';
+
             row.innerHTML =
                 '<span class="mt-0.5 shrink-0 ' + (hasCode ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-600') + '">' +
                     '<i data-lucide="' + (hasCode ? 'file-code-2' : 'file-x-2') + '" class="w-3.5 h-3.5"></i>' +
@@ -381,6 +480,7 @@
                 '<span class="min-w-0 flex-1">' +
                     '<span class="block font-mono text-[11px] text-gray-700 dark:text-gray-300 break-all">' + escapeHtml(r.f.path) + '</span>' +
                     '<span class="block text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">' + size + '</span>' +
+                    origin +
                 '</span>';
             row.addEventListener('click', function () { selectFile(r.i); });
             fileList.appendChild(row);
@@ -392,7 +492,11 @@
         const f = recovered[index];
         if (!f) return;
         activeIndex = index;
-        fileTitle.textContent = f.path;
+        /* textContent, not innerHTML: these paths come out of an untrusted map. */
+        fileTitle.textContent = maps.length > 1
+            ? mapName(f.mapIndex) + '  \u203a  ' + f.path
+            : f.path;
+        fileTitle.title = maps.length > 1 ? mapName(f.mapIndex) + ' > ' + f.path : f.path;
         fileContent.textContent = f.code === null ? '(this source has no embedded content in the map)' : f.code;
         Array.prototype.forEach.call(fileList.querySelectorAll('.file-row'), function (el) {
             el.classList.toggle('active', Number(el.dataset.index) === index);
@@ -804,13 +908,18 @@
 
                         /* Endpoints are deduplicated globally, secrets per location,
                            because the same endpoint repeated is noise while the same
-                           secret in two files is worth seeing twice. Rules run
-                           highest-confidence first, so a provider match claims the
-                           value before the keyword sweep can restate it. */
-                        const key = kind === 'endpoints' ? value : f.path + '|' + lineNo + '|' + value;
+                           secret in two files is worth seeing twice. The map index is
+                           part of the key so the same path in two different maps stays
+                           two findings. Rules run highest-confidence first, so a
+                           provider match claims the value before the keyword sweep can
+                           restate it. */
+                        const key = kind === 'endpoints'
+                            ? value
+                            : f.mapIndex + '|' + f.path + '|' + lineNo + '|' + value;
                         if (seen[key]) continue;
                         seen[key] = true;
-                        hits.push({ rule: rule.name, value: value, path: f.path, line: lineNo + 1, conf: rule.conf || 'medium' });
+                        hits.push({ rule: rule.name, value: value, path: f.path, line: lineNo + 1,
+                                    conf: rule.conf || 'medium', mapIndex: f.mapIndex });
                     }
                 });
             });
@@ -821,6 +930,7 @@
         const rank = { high: 0, medium: 1, low: 2 };
         hits.sort(function (a, b) {
             return (rank[a.conf] || 1) - (rank[b.conf] || 1) ||
+                   (a.mapIndex - b.mapIndex) ||
                    a.rule.localeCompare(b.rule) ||
                    a.path.localeCompare(b.path) || a.line - b.line;
         });
@@ -829,9 +939,11 @@
         renderScan();
 
         document.getElementById(kind === 'secrets' ? 'statSecrets' : 'statEndpoints').textContent = hits.length;
+        const scope = withCode.length + ' recovered file(s)' +
+                      (maps.length > 1 ? ' from ' + maps.length + ' maps' : '');
         setStatus(hits.length === 0
-            ? 'No ' + kind + ' matched across ' + withCode.length + ' recovered file(s).'
-            : 'Found ' + hits.length + ' ' + kind + ' across ' + withCode.length + ' recovered file(s).',
+            ? 'No ' + kind + ' matched across ' + scope + '.'
+            : 'Found ' + hits.length + ' ' + kind + ' across ' + scope + '.',
             hits.length === 0 ? 'info' : 'ok');
     }
 
@@ -874,11 +986,15 @@
                     (kind === 'secrets'
                         ? '<span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">' + escapeHtml(h.conf) + ' confidence</span>'
                         : '') +
+                    (maps.length > 1 ? mapChip(h.mapIndex) : '') +
                     '<span class="text-[11px] font-mono text-gray-500 dark:text-gray-400 break-all">' + escapeHtml(h.path) + ':' + h.line + '</span>' +
                 '</div>' +
                 '<code class="block text-xs font-mono text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg px-3 py-2">' + escapeHtml(h.value) + '</code>';
             row.addEventListener('click', function () {
-                const idx = recovered.findIndex(function (f) { return f.path === h.path; });
+                /* Match on map as well as path: two maps can hold the same path. */
+                const idx = recovered.findIndex(function (f) {
+                    return f.path === h.path && f.mapIndex === h.mapIndex;
+                });
                 if (idx !== -1) { selectFile(idx); sourcesCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
             });
             scanBody.appendChild(row);
@@ -895,13 +1011,14 @@
     function buildOutput() {
         if (lastScan.kind && lastScan.hits.length) {
             return lastScan.hits.map(function (h) {
-                /* Confidence rides along so the exported list can be sorted
-                   or filtered outside the tool. */
-                return (h.conf ? '[' + h.conf + ']\t' : '') + h.rule + '\t' + h.path + ':' + h.line + '\t' + h.value;
+                /* Confidence and the originating map ride along so the exported
+                   list can be sorted or filtered outside the tool. */
+                return (h.conf ? '[' + h.conf + ']\t' : '') + h.rule + '\t' +
+                       mapName(h.mapIndex) + '\t' + h.path + ':' + h.line + '\t' + h.value;
             }).join('\n');
         }
         return recovered.map(function (f) {
-            return '/* ==== ' + f.path + ' ==== */\n' + (f.code === null ? '(no content)' : f.code);
+            return '/* ==== ' + mapName(f.mapIndex) + ' :: ' + f.path + ' ==== */\n' + (f.code === null ? '(no content)' : f.code);
         }).join('\n\n');
     }
 
@@ -925,24 +1042,52 @@
     }
 
     /* ── File intake ───────────────────────────────────────────────────── */
-    function readFile(file) {
-        if (!file) return;
-        fileInfo.textContent = file.name + ' — ' + (file.size / 1024).toFixed(1) + ' KB';
-        fileInfo.classList.remove('hidden');
-        setStatus('Reading ' + file.name + '…', 'info');
+    /* Reads a whole selection at once. FileReader is callback-based, so the
+       batch is gathered before unmapping - otherwise the maps would land in
+       whatever order the reads happened to finish, and the numbering in the
+       UI would shuffle between runs. */
+    function readFiles(fileList) {
+        const files = Array.prototype.slice.call(fileList || []);
+        if (files.length === 0) return;
 
-        const reader = new FileReader();
-        reader.onload = function () {
-            mapInput.value = String(reader.result || '');
-            unmap(mapInput.value);
-        };
-        reader.onerror = function () { setStatus('Could not read that file.', 'error'); };
-        reader.readAsText(file);
+        const total = files.reduce(function (n, f) { return n + f.size; }, 0);
+        fileInfo.textContent = files.length === 1
+            ? files[0].name + ' — ' + (files[0].size / 1024).toFixed(1) + ' KB'
+            : files.length + ' files — ' + (total / 1024).toFixed(1) + ' KB total';
+        fileInfo.classList.remove('hidden');
+        setStatus('Reading ' + files.length + ' file' + (files.length === 1 ? '' : 's') + '…', 'info');
+
+        const results = new Array(files.length);
+        let done = 0;
+        let failed = 0;
+
+        files.forEach(function (file, i) {
+            const reader = new FileReader();
+            reader.onload = function () {
+                results[i] = { name: file.name, text: String(reader.result || '') };
+                if (++done + failed === files.length) finish();
+            };
+            reader.onerror = function () {
+                results[i] = null;
+                failed++;
+                if (done + failed === files.length) finish();
+            };
+            reader.readAsText(file);
+        });
+
+        function finish() {
+            const inputs = results.filter(function (r) { return r; });
+            if (inputs.length === 0) { setStatus('Could not read any of those files.', 'error'); return; }
+            /* The paste box mirrors a single upload so Unmap still re-runs it;
+               with a batch it would be misleading, so it is left alone. */
+            if (inputs.length === 1) mapInput.value = inputs[0].text;
+            unmapAll(inputs);
+        }
     }
 
     dropzone.addEventListener('click', function () { fileInput.click(); });
     fileInput.addEventListener('change', function (e) {
-        if (e.target.files && e.target.files.length) readFile(e.target.files[0]);
+        if (e.target.files && e.target.files.length) readFiles(e.target.files);
     });
 
     /* Drop anywhere on the window, not just on the dashed box. */
@@ -957,7 +1102,7 @@
         });
     });
     window.addEventListener('drop', function (e) {
-        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) readFile(e.dataTransfer.files[0]);
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) readFiles(e.dataTransfer.files);
     });
 
     /* ── Buttons ───────────────────────────────────────────────────────── */
@@ -975,6 +1120,7 @@
         mapInput.value = '';
         fileInput.value = '';
         recovered = [];
+        maps = [];
         activeIndex = -1;
         lastScan = { kind: null, hits: [] };
         fileList.innerHTML = '';
