@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lazymap</title>
-    <meta name="description" content="Bash script for network penetration testing that combines selected NMAP scripts, sslscan, ssh-audit, dig, ldapsearch, curl, rpcclient, selected metasploit modules, PRET and wget." />
+    <meta name="description" content="Command-line network penetration testing kit that combines selected nmap scripts, sslscan, ssh-audit, dig, ldapsearch, curl, rpcclient, selected metasploit modules, PRET and wget." />
     <link href="/profile.jpg" type="image/jpeg" rel="shortcut icon" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -42,15 +42,13 @@
         @media (prefers-reduced-motion: reduce){ .tk-anim-logo{animation:none} }
 
         /* Terminal. Line numbers come from a counter on each row rather than
-           a second column, so selecting the code copies the code alone. The
-           gutter is wider than the generator's because this script runs into
-           three digits. */
+           a second column, so selecting the code copies the code alone. */
         .tk-term-body { counter-reset: line; }
         .tk-term-body .row { counter-increment: line; display: block; }
         .tk-term-body .row::before {
             content: counter(line);
             display: inline-block;
-            width: 3.25rem;
+            width: 3rem;
             padding-right: 1rem;
             text-align: right;
             color: #4b5563;
@@ -89,17 +87,18 @@
                 <span><span class="text-indigo-600 dark:text-indigo-500">Lazy</span>map</span>
             </h1>
             <p class="text-gray-600 dark:text-gray-400 text-sm md:text-lg max-w-xl mx-auto">
-                Bash script for network penetration testing that combines multiple selected NMAP scripts, sslscan, ssh-audit, dig, ldapsearch, curl, rpcclient, selected metasploit modules, PRET and wget into one command.
+                A single command-line tool for network penetration testing. It combines multiple selected nmap scripts, sslscan, ssh-audit, dig, ldapsearch, curl, rpcclient, selected metasploit modules, PRET and wget.
             </p>
         </div>
 
         <div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-xl p-6 flex gap-3">
             <i class="fas fa-circle-info text-indigo-600 dark:text-indigo-300 mt-1"></i>
-            <div class="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+            <div class="text-sm text-gray-700 dark:text-gray-300 space-y-2">
                 <p class="font-bold text-gray-900 dark:text-white">How to run it</p>
-                <p>Save the file, then run <span class="font-mono text-indigo-600 dark:text-indigo-300">chmod +x lazymap.sh</span> and <span class="font-mono text-indigo-600 dark:text-indigo-300">./lazymap.sh -u host</span> for a single target, or <span class="font-mono text-indigo-600 dark:text-indigo-300">./lazymap.sh -t hosts</span> for a file of them. Use <span class="font-mono text-indigo-600 dark:text-indigo-300">-h</span> for the full option list.</p>
-                <p>Requires Bash 5.2 or higher. Run in sudo mode to execute the NMAP scripts related to the UDP scan.</p>
-                <p class="text-gray-500 dark:text-gray-400">NOTE: This tool was developed for use during Vulnerability Assessment and Penetration Testing (VAPT). Only point it at hosts you are authorized to test.</p>
+                <p>lazymap is a multi-file project, so clone the repository rather than saving the script on its own &mdash; the entry script below sources the rest of the tree.</p>
+                <pre class="bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto font-mono text-xs text-gray-800 dark:text-indigo-300">git clone https://github.com/evanricafort/lazymap.git &amp;&amp; cd lazymap &amp;&amp; sudo chmod +x lazymap.sh lib/*.sh extra/*.sh reports/*.sh scans/*.sh &amp;&amp; sudo ./lazymap.sh -h</pre>
+                <p>Then run <span class="font-mono text-indigo-600 dark:text-indigo-300">./lazymap.sh -u host</span> for a single target or <span class="font-mono text-indigo-600 dark:text-indigo-300">./lazymap.sh -t hosts</span> for a file of them. Missing dependencies can be pulled in with <span class="font-mono text-indigo-600 dark:text-indigo-300">sudo ./lazymap.sh --install-deps</span>.</p>
+                <p class="text-gray-500 dark:text-gray-400">Requires Bash 3.0 or higher, including the 3.2 that ships with macOS. Run in sudo mode for the nmap scripts that need raw sockets. Only point it at hosts you are authorized to test.</p>
             </div>
         </div>
 
@@ -117,1014 +116,315 @@
                     <button id="btnCopy" title="Copy to clipboard" class="px-2.5 py-1.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white text-xs font-bold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         <i class="fas fa-copy"></i> <span class="hidden sm:inline">Copy</span>
                     </button>
-                    <a id="btnDownload" href="lazymap.sh" download="lazymap.sh" title="Download the script" class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <i class="fas fa-download"></i> <span class="hidden sm:inline">Download</span>
+                    <a id="btnDownload" href="https://github.com/evanricafort/lazymap" title="Get Lazymap on GitHub" class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <i class="fab fa-github"></i> <span class="hidden sm:inline">GitHub</span>
                     </a>
                 </div>
             </div>
 
             <div class="bg-white dark:bg-[#0d1117] overflow-x-auto">
                 <pre class="tk-term-body p-4 md:p-5 font-mono text-xs md:text-sm leading-relaxed text-gray-800 dark:text-gray-300"><code id="scriptSource"><span class="row"><span class="text-gray-500 dark:text-gray-500">#!/usr/bin/env bash</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Title: lazymap</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Description: Lazymap is a single command-line tool made for network penetration testing.</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># It combines multiple selected NMAP scripts, sslscan, ssh-audit, dig, ldapsearch, curl, rpcclient, selected metasploit modules, PRET and wget.</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Author: Evan Ricafort - https://evanricafort.com | X: @evanricafort</span></span>
 <span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Color codes</span></span>
-<span class="row">GREEN=<span class="text-indigo-600 dark:text-indigo-300">'\033[0;32m'</span></span>
-<span class="row">RED=<span class="text-indigo-600 dark:text-indigo-300">'\033[0;31m'</span></span>
-<span class="row">YELLOW=<span class="text-indigo-600 dark:text-indigo-300">'\033[0;33m'</span></span>
-<span class="row">BLUE=<span class="text-indigo-600 dark:text-indigo-300">'\033[0;34m'</span></span>
-<span class="row">NC=<span class="text-indigo-600 dark:text-indigo-300">'\033[0m'</span> <span class="text-gray-500 dark:text-gray-500"># No Color</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Check for Bash version 4 or higher</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> ((BASH_VERSINFO[0] &lt; 5 || (BASH_VERSINFO[0] == 5 &amp;&amp; BASH_VERSINFO[1] &lt; 2))); <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: This script requires Bash version 5.2 or higher.${NC}"</span></span>
+<span class="row"><span class="text-gray-500 dark:text-gray-500"># lazymap runs on Bash 3.0 and newer, including the 3.2 shipped by macOS.</span></span>
+<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [ -z <span class="text-indigo-600 dark:text-indigo-300">"${BASH_VERSINFO[0]}"</span> ] || [ <span class="text-indigo-600 dark:text-indigo-300">"${BASH_VERSINFO[0]}"</span> -lt 3 ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"Error: lazymap requires Bash 3.0 or newer (found ${BASH_VERSION:-unknown})."</span> &gt;&amp;2</span>
 <span class="row">    <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
 <span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
 <span class="row"> </span>
-<span class="row">display_ascii_art() {</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"[..            [.       [....... [..[..      [..[..       [..      [.       [.......  "</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"[..           [. ..            [..   [..    [.. [. [..   [...     [. ..     [..    [.."</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"[..          [.  [..          [..     [.. [..   [.. [.. [ [..    [.  [..    [..    [.."</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"[..         [..   [..       [..         [..     [..  [..  [..   [..   [..   [.......  "</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"[..        [...... [..     [..          [..     [..   [.  [..  [...... [..  [..       "</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"[..       [..       [..  [..            [..     [..       [.. [..       [.. [..       "</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"[........[..         [..[...........    [..     [..       [..[..         [..[..${NC}  ${NC}v0.7${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"                         ${YELLOW}[lazykit for network penetration testing]${NC}                              "</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">""</span></span>
+<span class="row"><span class="text-gray-500 dark:text-gray-500"># Resolve the installation directory so lazymap can be launched from anywhere.</span></span>
+<span class="row">LAZYMAP_DIR=<span class="text-indigo-600 dark:text-indigo-300">"$(cd -- "</span>$(dirname -- <span class="text-indigo-600 dark:text-indigo-300">"${BASH_SOURCE[0]}"</span>)<span class="text-indigo-600 dark:text-indigo-300">" &amp;&amp; pwd)"</span></span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">export</span> LAZYMAP_DIR</span>
+<span class="row"> </span>
+<span class="row">start_time=$(date +%s)</span>
+<span class="row">start_date=$(date)</span>
+<span class="row">output_dir=<span class="text-indigo-600 dark:text-indigo-300">"results"</span></span>
+<span class="row">TARGETS=()</span>
+<span class="row">discord_webhook=<span class="text-indigo-600 dark:text-indigo-300">""</span></span>
+<span class="row">RESUME_HINT=<span class="text-indigo-600 dark:text-indigo-300">"sudo ./lazymap.sh --resume"</span></span>
+<span class="row"> </span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/lib/compat.sh"</span></span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/lib/colors.sh"</span></span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/lib/state.sh"</span></span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/lib/installer.sh"</span></span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/lib/help.sh"</span></span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/lib/checks.sh"</span></span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/nmap.sh"</span></span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/sslscan.sh"</span></span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/sshaudit.sh"</span></span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/metasploit.sh"</span></span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/smbv1.sh"</span></span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/unauthrpc.sh"</span></span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/ldap.sh"</span></span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/dns.sh"</span></span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/mitm6.sh"</span></span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/pret.sh"</span></span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/extra/responder.sh"</span></span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/reports/html_report.sh"</span></span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/reports/send_discord_webhook.sh"</span></span>
+<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/live_hosts.sh"</span></span>
+<span class="row"> </span>
+<span class="row">handle_discord_webhook() {</span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> opt_true send_to_discord; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Please enter the Discord webhook URL:${NC}"</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">read</span> -r discord_webhook</span>
+<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> [[ -z <span class="text-indigo-600 dark:text-indigo-300">"$discord_webhook"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: No Discord webhook URL provided. Aborting Discord report send.${NC}"</span></span>
+<span class="row">            opt_unset send_to_discord</span>
+<span class="row">        <span class="text-purple-600 dark:text-purple-400">fi</span></span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
 <span class="row">}</span>
 <span class="row"> </span>
-<span class="row">display_help() {</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Title: lazymap (Project0x01)${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Author: Evan Ricafort (X - @evanricafort | Portfolio - https://evanricafort.com)${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Description: Lazymap is a single command-line tool made for network penetration testing. It combines multiple selected NMAP scripts, sslscan, ssh-audit, dig, ldapsearch, curl, rpcclient, selected metasploit modules, PRET and wget.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">""</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}--Usage--${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">""</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}- ./lazymap.sh -u host &lt;options&gt;${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}- ./lazymap.sh -t hosts &lt;options&gt;${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">""</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}- Additional options:${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"  ${YELLOW}-1${NC} ${GREEN}for [vulners],${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"  ${YELLOW}-2${NC} ${GREEN}for [vuln],${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"  ${YELLOW}-3${NC} ${GREEN}for both [vulners &amp; vuln] NSE scripts,${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"  ${YELLOW}-4${NC} ${GREEN}for Firewall Evasion Scan,${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"  ${YELLOW}-a${NC} ${GREEN}to exclude the all ports scan and UDP scan.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"  ${YELLOW}-n${NC} ${GREEN}to add '-n' and '-T4' to nmap command for faster scanning.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"  ${YELLOW}-k${NC} ${GREEN}to exclude sslscan, ssh-audit, and CheckThatHeaders scans.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"  ${YELLOW}-b${NC} ${GREEN}to add '-A', '--min-rate 1000' and '--open' for add boost and open ports results only.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"  ${YELLOW}--pret${NC} ${GREEN}to perform printer security check using PRET (Credits to Jens Mueller).${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"  ${YELLOW}-h${NC} ${GREEN}to display this help message.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">""</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}- Example for additional options: ./lazymap.sh -t hosts -12bank --pret${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">""</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}- Reminder: Option -3 may take some time to finish if you have multiple targets.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">""</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}- Note: Run in sudo mode to execute NMAP scripts related to UDP scan.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">exit</span> 0</span>
+<span class="row"><span class="text-gray-500 dark:text-gray-500"># Produces the HTML report and sends it on if --discord was used. Called from</span></span>
+<span class="row"><span class="text-gray-500 dark:text-gray-500"># every exit path so a run always leaves a report behind.</span></span>
+<span class="row">finalise_reports() {</span>
+<span class="row">    end_date=$(date)</span>
+<span class="row">    generate_html_report <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span> <span class="text-indigo-600 dark:text-indigo-300">"$start_date"</span> <span class="text-indigo-600 dark:text-indigo-300">"$end_date"</span></span>
+<span class="row"> </span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> opt_true send_to_discord &amp;&amp; [ -n <span class="text-indigo-600 dark:text-indigo-300">"$discord_webhook"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">        send_discord_webhook <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span> <span class="text-indigo-600 dark:text-indigo-300">"$discord_webhook"</span> <span class="text-indigo-600 dark:text-indigo-300">"$start_date"</span></span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
 <span class="row">}</span>
 <span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Input validation and checks</span></span>
-<span class="row">check_command() {</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> ! command -v <span class="text-indigo-600 dark:text-indigo-300">"$1"</span> &amp;&gt;/dev/null; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: $1 is not installed. Please install it before running the script.${NC}"</span></span>
+<span class="row">check_for_live_hosts_and_exit() {</span>
+<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> live_hosts_file=<span class="text-indigo-600 dark:text-indigo-300">"$output_dir/live_hosts.txt"</span></span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ ! -s <span class="text-indigo-600 dark:text-indigo-300">"$live_hosts_file"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${BLUE}======================================================${NC}"</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}🚨 Scan Termination Notice 🚨${NC}"</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}======================================================${NC}"</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${CYAN}No live host IP/s were found in the defined target scope.${NC}"</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${CYAN}Scanning process has been successfully terminated.${NC}"</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${CYAN}Output directory: ${output_dir} (created)${NC}"</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}======================================================${NC}\n"</span></span>
+<span class="row"> </span>
+<span class="row">        <span class="text-gray-500 dark:text-gray-500"># A report is still produced, recording that the scope had no live hosts.</span></span>
+<span class="row">        finalise_reports</span>
+<span class="row"> </span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Scan finished in $(elapsed_runtime).${NC}\n"</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">exit</span> 0</span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
+<span class="row">}</span>
+<span class="row"> </span>
+<span class="row">print_completion_summary() {</span>
+<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}======================================================${NC}"</span></span>
+<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Scan Complete${NC}"</span></span>
+<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}======================================================${NC}"</span></span>
+<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${CYAN}Started  : ${start_date}${NC}"</span></span>
+<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${CYAN}Finished : $(date)${NC}"</span></span>
+<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${CYAN}Run time : $(elapsed_runtime)${NC}"</span></span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$RESUME_MODE"</span> == true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${CYAN}Resumed  : yes (${SKIPPED_STEPS} step(s) skipped)${NC}"</span></span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
+<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${CYAN}Output   : ${output_dir}${NC}"</span></span>
+<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}======================================================${NC}"</span></span>
+<span class="row">}</span>
+<span class="row"> </span>
+<span class="row">main() {</span>
+<span class="row">    display_ascii_art</span>
+<span class="row"> </span>
+<span class="row">    <span class="text-gray-500 dark:text-gray-500"># GNU getopt is required for the long options below.</span></span>
+<span class="row">    getopt --test &gt;/dev/null 2&gt;&amp;1</span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ $? -ne 4 ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: GNU getopt is required (install 'util-linux', or on macOS 'brew install gnu-getopt').${NC}"</span> &gt;&amp;2</span>
 <span class="row">        <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
 <span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">}</span>
 <span class="row"> </span>
-<span class="row">is_subnet() {</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> target=$1</span>
-<span class="row">    [[ <span class="text-indigo-600 dark:text-indigo-300">"$target"</span> == *<span class="text-indigo-600 dark:text-indigo-300">"/"</span>* ]]</span>
-<span class="row">}</span>
+<span class="row">    build_resume_hint <span class="text-indigo-600 dark:text-indigo-300">"$@"</span></span>
 <span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Scanning functions</span></span>
-<span class="row">run_sslscan() {</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> target=$1</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> output_file=<span class="text-indigo-600 dark:text-indigo-300">"results/sslscan/${target}_sslscan.txt"</span></span>
-<span class="row">    mkdir -p <span class="text-indigo-600 dark:text-indigo-300">"$(dirname "</span>$output_file<span class="text-indigo-600 dark:text-indigo-300">")"</span>  <span class="text-gray-500 dark:text-gray-500"># Create directory only when scan is performed</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Starting SSLScan on $target${NC}"</span></span>
-<span class="row">    sslscan --verbose <span class="text-indigo-600 dark:text-indigo-300">"$target"</span> | tee <span class="text-indigo-600 dark:text-indigo-300">"$output_file"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}SSLScan results saved to $output_file${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}SSLScan on $target completed.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row">}</span>
-<span class="row"> </span>
-<span class="row">run_ssh_audit() {</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> target=$1</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> output_file=<span class="text-indigo-600 dark:text-indigo-300">"results/sshaudit/${target}_sshaudit.txt"</span></span>
-<span class="row">    mkdir -p <span class="text-indigo-600 dark:text-indigo-300">"$(dirname "</span>$output_file<span class="text-indigo-600 dark:text-indigo-300">")"</span>  <span class="text-gray-500 dark:text-gray-500"># Create directory only when scan is performed</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Starting SSH-Audit on $target${NC}"</span></span>
-<span class="row">    ssh-audit -v <span class="text-indigo-600 dark:text-indigo-300">"$target"</span> | tee <span class="text-indigo-600 dark:text-indigo-300">"$output_file"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}SSH-audit results saved to $output_file${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}SSH-Audit on $target completed.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row">}</span>
-<span class="row"> </span>
-<span class="row">check_single_header() {</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> header=$1</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> headers=$2</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> url=$3</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> log_file=$4</span>
-<span class="row"> </span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"$headers"</span> | grep -i <span class="text-indigo-600 dark:text-indigo-300">"$header:"</span> &gt; /dev/null; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}${header} header found${NC}"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"$url: ${header} header found"</span> &gt;&gt; <span class="text-indigo-600 dark:text-indigo-300">"$log_file"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}${header} header missing${NC}"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"$url: ${header} header missing"</span> &gt;&gt; <span class="text-indigo-600 dark:text-indigo-300">"$log_file"</span></span>
+<span class="row">    TEMP=$(getopt -o t:u:1234ankhbo:y --long pret,interface:,help,exclude-udp,discord,resume,install-deps,yes,domain:,userlist:,mitm6,mitm6-interface:,mitm6-time:,ntp-dos,script-timeout:,host-timeout:,nmap-stall:,no-nmap-watchdog -n <span class="text-indigo-600 dark:text-indigo-300">"$0"</span> -- <span class="text-indigo-600 dark:text-indigo-300">"$@"</span>)</span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [ $? != 0 ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: Failed to parse options.${NC}"</span> &gt;&amp;2</span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
 <span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">}</span>
+<span class="row">    <span class="text-sky-600 dark:text-sky-400">eval</span> <span class="text-sky-600 dark:text-sky-400">set</span> -- <span class="text-indigo-600 dark:text-indigo-300">"$TEMP"</span></span>
 <span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Function to get the list of open ports on the host</span></span>
-<span class="row">get_open_ports() {</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> host=$1</span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Run nmap to get the list of open ports among 80,443,8080,8443</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> ports=$(nmap -Pn -p 80,443,8080,8443 --host-timeout 5s --max-retries 0 <span class="text-indigo-600 dark:text-indigo-300">"$host"</span> | awk <span class="text-indigo-600 dark:text-indigo-300">'/^[0-9]+\/tcp/ &amp;&amp; /open/ {split($1,a,"/"); print a[1]}'</span>)</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"$ports"</span></span>
-<span class="row">}</span>
-<span class="row"> </span>
-<span class="row">check_headers() {</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> url=$1</span>
-<span class="row"> </span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Starting CheckThatHeaders on $url${NC}"</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Get open ports from 'get_open_ports' function</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> open_ports=$(get_open_ports <span class="text-indigo-600 dark:text-indigo-300">"$url"</span>)</span>
-<span class="row"> </span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Check if there are open ports</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ -z <span class="text-indigo-600 dark:text-indigo-300">"$open_ports"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}No open ports found on $url. Skipping header checks.${NC}"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">return</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># For each open port, perform the header checks</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">for</span> port <span class="text-purple-600 dark:text-purple-400">in</span> $open_ports; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">local</span> log_file=<span class="text-indigo-600 dark:text-indigo-300">"results/checkthatheader/${url}_${port}_header_check.txt"</span></span>
-<span class="row">        mkdir -p <span class="text-indigo-600 dark:text-indigo-300">"$(dirname "</span>$log_file<span class="text-indigo-600 dark:text-indigo-300">")"</span>  <span class="text-gray-500 dark:text-gray-500"># Ensure the directory exists</span></span>
-<span class="row"> </span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Fetching headers from $url:$port${NC}"</span></span>
-<span class="row">        <span class="text-gray-500 dark:text-gray-500"># Fetch the headers and save to log file</span></span>
-<span class="row">        headers=$(wget -d --verbose --spider --server-response --timeout=10 --tries=1 <span class="text-indigo-600 dark:text-indigo-300">"$url:$port"</span> 2&gt;&amp;1 | tee <span class="text-indigo-600 dark:text-indigo-300">"$log_file"</span> | grep -i -E <span class="text-indigo-600 dark:text-indigo-300">"Content-Security-Policy|Permissions-Policy|Referrer-Policy|X-Content-Type-Options|Strict-Transport-Security|X-Frame-Options"</span>)</span>
-<span class="row"> </span>
-<span class="row">        <span class="text-gray-500 dark:text-gray-500"># Check for each header and log the result</span></span>
-<span class="row">        check_single_header <span class="text-indigo-600 dark:text-indigo-300">"Content-Security-Policy"</span> <span class="text-indigo-600 dark:text-indigo-300">"$headers"</span> <span class="text-indigo-600 dark:text-indigo-300">"$url:$port"</span> <span class="text-indigo-600 dark:text-indigo-300">"$log_file"</span></span>
-<span class="row">        check_single_header <span class="text-indigo-600 dark:text-indigo-300">"Permissions-Policy"</span> <span class="text-indigo-600 dark:text-indigo-300">"  $headers"</span> <span class="text-indigo-600 dark:text-indigo-300">"$url:$port"</span> <span class="text-indigo-600 dark:text-indigo-300">"$log_file"</span></span>
-<span class="row">        check_single_header <span class="text-indigo-600 dark:text-indigo-300">"Referrer-Policy"</span> <span class="text-indigo-600 dark:text-indigo-300">"$headers"</span> <span class="text-indigo-600 dark:text-indigo-300">"$url:$port"</span> <span class="text-indigo-600 dark:text-indigo-300">"$log_file"</span></span>
-<span class="row">        check_single_header <span class="text-indigo-600 dark:text-indigo-300">"X-Content-Type-Options"</span> <span class="text-indigo-600 dark:text-indigo-300">"$headers"</span> <span class="text-indigo-600 dark:text-indigo-300">"$url:$port"</span> <span class="text-indigo-600 dark:text-indigo-300">"$log_file"</span></span>
-<span class="row">        check_single_header <span class="text-indigo-600 dark:text-indigo-300">"Strict-Transport-Security"</span> <span class="text-indigo-600 dark:text-indigo-300">"$headers"</span> <span class="text-indigo-600 dark:text-indigo-300">"$url:$port"</span> <span class="text-indigo-600 dark:text-indigo-300">"$log_file"</span></span>
-<span class="row">        check_single_header <span class="text-indigo-600 dark:text-indigo-300">"X-Frame-Options"</span> <span class="text-indigo-600 dark:text-indigo-300">"$headers"</span> <span class="text-indigo-600 dark:text-indigo-300">"$url:$port"</span> <span class="text-indigo-600 dark:text-indigo-300">"$log_file"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">done</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Header checks for $url completed. Check the 'checkthatheader' folder for the output.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row">}</span>
-<span class="row"> </span>
-<span class="row">scan_target() {</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> target=$1</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> is_subnet <span class="text-indigo-600 dark:text-indigo-300">"$target"</span>; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        relay_from_tcp_scan <span class="text-indigo-600 dark:text-indigo-300">"$target"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> [[ -f <span class="text-indigo-600 dark:text-indigo-300">"results/live_hosts.txt"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">            cat results/live_hosts.txt &gt;&gt; results/all_targets.txt</span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">while</span> IFS= <span class="text-sky-600 dark:text-sky-400">read</span> -r live_host; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">                <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$exclude_sslscan"</span> != true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">                    run_sslscan <span class="text-indigo-600 dark:text-indigo-300">"$live_host"</span></span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">while</span> true; <span class="text-purple-600 dark:text-purple-400">do</span></span>
+<span class="row">        <span class="text-purple-600 dark:text-purple-400">case</span> <span class="text-indigo-600 dark:text-indigo-300">"$1"</span> <span class="text-purple-600 dark:text-purple-400">in</span></span>
+<span class="row">            -t ) targets_file=$2; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
+<span class="row">            -u )</span>
+<span class="row">                <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$2"</span> == *<span class="text-indigo-600 dark:text-indigo-300">","</span>* || <span class="text-indigo-600 dark:text-indigo-300">"$2"</span> == *<span class="text-indigo-600 dark:text-indigo-300">" "</span>* || <span class="text-indigo-600 dark:text-indigo-300">"$2"</span> == *<span class="text-indigo-600 dark:text-indigo-300">"/"</span>* ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">                    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: -u option accepts only a single IP address or hostname.${NC}"</span></span>
+<span class="row">                    <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
 <span class="row">                <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">                <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$exclude_sshaudit"</span> != true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">                    run_ssh_audit <span class="text-indigo-600 dark:text-indigo-300">"$live_host"</span></span>
-<span class="row">                <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">                <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$exclude_checkheaders"</span> != true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">                    check_headers <span class="text-indigo-600 dark:text-indigo-300">"$live_host"</span></span>
-<span class="row">                <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">done</span> &lt; results/live_hosts.txt</span>
-<span class="row">            rm results/live_hosts.txt</span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"$target"</span> &gt;&gt; results/all_targets.txt</span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$exclude_sslscan"</span> != true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">            run_sslscan <span class="text-indigo-600 dark:text-indigo-300">"$target"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$exclude_sshaudit"</span> != true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">            run_ssh_audit <span class="text-indigo-600 dark:text-indigo-300">"$target"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$exclude_checkheaders"</span> != true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">            check_headers <span class="text-indigo-600 dark:text-indigo-300">"$target"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">}</span>
-<span class="row"> </span>
-<span class="row">complete_all_scans() {</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$exclude_sslscan"</span> != true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}SSLScan, SSH-Audit, and CheckThatHeaders scans completed.${NC}"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">}</span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Metasploit scans</span></span>
-<span class="row">scan_rdp() {</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> targets_file=$1</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ -s <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        mkdir -p results/msfrdp  <span class="text-gray-500 dark:text-gray-500"># Ensure the directory exists</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Starting RDP (Remote Desktop Protocol) scan."</span></span>
-<span class="row"> </span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">while</span> IFS= <span class="text-sky-600 dark:text-sky-400">read</span> -r target_ip; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Scanning RDP on $target_ip${NC}"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">local</span> resource_script=<span class="text-indigo-600 dark:text-indigo-300">"results/msfrdp/rdp_scan_${target_ip}.rc"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">local</span> output_file=<span class="text-indigo-600 dark:text-indigo-300">"results/msfrdp/rdp_${target_ip}.txt"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"use auxiliary/scanner/rdp/rdp_scanner"</span> &gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"set RHOSTS $target_ip"</span> &gt;&gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"set THREADS 1"</span> &gt;&gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"spool $output_file"</span> &gt;&gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"run"</span> &gt;&gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"spool off"</span> &gt;&gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"exit"</span> &gt;&gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row"> </span>
-<span class="row">            <span class="text-gray-500 dark:text-gray-500"># Run msfconsole with resource script</span></span>
-<span class="row">            msfconsole -q -r <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}RDP scan for $target_ip completed, results saved to $output_file${NC}"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">done</span> &lt; <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}No RDP targets found. Skipping RDP Metasploit scan.${NC}"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">}</span>
-<span class="row"> </span>
-<span class="row">scan_rpc() {</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> targets_file=$1</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ -s <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        mkdir -p results/msfrpc  <span class="text-gray-500 dark:text-gray-500"># Ensure the directory exists</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Starting RPC (Remote Procedure Call) scan.${NC}"</span></span>
-<span class="row"> </span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">while</span> IFS= <span class="text-sky-600 dark:text-sky-400">read</span> -r target_ip; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Scanning RPC on $target_ip${NC}"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">local</span> resource_script=<span class="text-indigo-600 dark:text-indigo-300">"results/msfrpc/rpc_scan_${target_ip}.rc"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">local</span> output_file=<span class="text-indigo-600 dark:text-indigo-300">"results/msfrpc/rpc_${target_ip}.txt"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"use auxiliary/scanner/dcerpc/endpoint_mapper"</span> &gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"set RHOSTS $target_ip"</span> &gt;&gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"set THREADS 1"</span> &gt;&gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"spool $output_file"</span> &gt;&gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"run"</span> &gt;&gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"spool off"</span> &gt;&gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"exit"</span> &gt;&gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row"> </span>
-<span class="row">            <span class="text-gray-500 dark:text-gray-500"># Run msfconsole with resource script</span></span>
-<span class="row">            msfconsole -q -r <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}RPC scan for $target_ip completed, results saved to $output_file${NC}"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">done</span> &lt; <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}No RPC targets found. Skipping RPC Metasploit scan.${NC}"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">}</span>
-<span class="row"> </span>
-<span class="row">scan_oracle() {</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> targets_file=$1</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ -s <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        mkdir -p results/msforacletnscmd  <span class="text-gray-500 dark:text-gray-500"># Ensure the directory exists</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Starting Oracle TNS Listener SID Enumeration scan.${NC}"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">while</span> IFS= <span class="text-sky-600 dark:text-sky-400">read</span> -r target_ip; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Scanning Oracle TNS Listener on $target_ip${NC}"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">local</span> resource_script=<span class="text-indigo-600 dark:text-indigo-300">"results/msforacletnscmd/tnscmd_scan_${target_ip}.rc"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">local</span> output_file=<span class="text-indigo-600 dark:text-indigo-300">"results/msforacletnscmd/oracletnscmd_${target_ip}.txt"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"use auxiliary/admin/oracle/tnscmd"</span> &gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"set RHOSTS $target_ip"</span> &gt;&gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"set THREADS 1"</span> &gt;&gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"spool $output_file"</span> &gt;&gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"run"</span> &gt;&gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"spool off"</span> &gt;&gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"exit"</span> &gt;&gt; <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-gray-500 dark:text-gray-500"># Run msfconsole with resource script</span></span>
-<span class="row">            msfconsole -q -r <span class="text-indigo-600 dark:text-indigo-300">"$resource_script"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}Oracle TNS Listener SID Enumeration scan for $target_ip completed, results saved to $output_file${NC}\n"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">done</span> &lt; <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}No Oracle TNS Listener targets found. Skipping Oracle Metasploit scan.${NC}\n"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">}</span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Helper functions</span></span>
-<span class="row">relay_from_tcp_scan() {</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> subnet=$1</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${YELLOW}Target is a subnet, starting the live hosts check.${NC}\n"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Running Nmap to get live hosts in subnet $subnet${NC}"</span></span>
-<span class="row">    nmap -sn <span class="text-indigo-600 dark:text-indigo-300">"$subnet"</span> -oG - | awk <span class="text-indigo-600 dark:text-indigo-300">'/Up$/{print $2}'</span> &gt; results/live_hosts.txt</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"Found live hosts in $subnet:"</span></span>
-<span class="row">    cat results/live_hosts.txt</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${BLUE}Live hosts check completed.${NC}\n"</span></span>
-<span class="row">}</span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Display ASCII art on every run</span></span>
-<span class="row">display_ascii_art</span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Variables to check if options are set</span></span>
-<span class="row">a_option_set=false</span>
-<span class="row">add_vulners=false</span>
-<span class="row">add_vuln=false</span>
-<span class="row">exclude_sslscan=false</span>
-<span class="row">exclude_sshaudit=false</span>
-<span class="row">exclude_checkheaders=false</span>
-<span class="row">add_A_minrate_open=false  <span class="text-gray-500 dark:text-gray-500"># For the -b option</span></span>
-<span class="row">add_nT4=false  <span class="text-gray-500 dark:text-gray-500"># For the -n option</span></span>
-<span class="row">pret_option=false  <span class="text-gray-500 dark:text-gray-500"># For the --pret option</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Option parsing</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Fix getopt parsing for Bash 5.2 compatibility</span></span>
-<span class="row">TEMP=$(getopt -o t:u:1234ankhb --long pret -n <span class="text-indigo-600 dark:text-indigo-300">"$0"</span> -- <span class="text-indigo-600 dark:text-indigo-300">"$@"</span>)</span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [ $? != 0 ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error parsing options${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">eval</span> <span class="text-sky-600 dark:text-sky-400">set</span> -- <span class="text-indigo-600 dark:text-indigo-300">"$TEMP"</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">while</span> true; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">case</span> <span class="text-indigo-600 dark:text-indigo-300">"$1"</span> <span class="text-purple-600 dark:text-purple-400">in</span></span>
-<span class="row">        -t ) targets_file=$2; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
-<span class="row">        -u )</span>
-<span class="row">            OPTARG=$2</span>
-<span class="row">            <span class="text-gray-500 dark:text-gray-500"># Check for multiple hosts, spaces, commas, or subnets</span></span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$OPTARG"</span> == *<span class="text-indigo-600 dark:text-indigo-300">","</span>* || <span class="text-indigo-600 dark:text-indigo-300">"$OPTARG"</span> == *<span class="text-indigo-600 dark:text-indigo-300">" "</span>* || <span class="text-indigo-600 dark:text-indigo-300">"$OPTARG"</span> == *<span class="text-indigo-600 dark:text-indigo-300">"/"</span>* ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: -u option accepts only a single IP address or hostname without spaces, commas, or subnets.${NC}"</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">            single_target=<span class="text-indigo-600 dark:text-indigo-300">"$OPTARG"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">shift</span> 2</span>
-<span class="row">            ;;</span>
-<span class="row">        -1 ) add_vulners=true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">        -2 ) add_vuln=true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">        -3 )</span>
-<span class="row">            add_vuln=true</span>
-<span class="row">            add_vulners=true</span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">shift</span></span>
-<span class="row">            ;;</span>
-<span class="row">        -4 ) firewall_evasion=true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">        -a ) a_option_set=true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">        -n ) add_nT4=true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">        -k )</span>
-<span class="row">            exclude_sslscan=true</span>
-<span class="row">            exclude_sshaudit=true</span>
-<span class="row">            exclude_checkheaders=true</span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">shift</span></span>
-<span class="row">            ;;</span>
-<span class="row">        -b ) add_A_minrate_open=true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">        -h ) display_help; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">        --pret ) pret_option=true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">        -- ) <span class="text-sky-600 dark:text-sky-400">shift</span>; <span class="text-purple-600 dark:text-purple-400">break</span> ;;</span>
-<span class="row">        * ) <span class="text-purple-600 dark:text-purple-400">break</span> ;;</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">esac</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">done</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Set exclude_allports if -a is specified</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$a_option_set"</span> = true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    exclude_allports=true</span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Ensure only one target type is provided</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ -n <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span> &amp;&amp; -n <span class="text-indigo-600 dark:text-indigo-300">"$single_target"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: Cannot specify both a targets file (-t) and a single target (-u).${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Check if the targets file exists or the single target is specified</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ -n <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span> &amp;&amp; ! -f <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: Targets file '$targets_file' not found!${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">elif</span> [[ -z <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span> &amp;&amp; -z <span class="text-indigo-600 dark:text-indigo-300">"$single_target"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Use the -h option for help.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Check if required tools are installed</span></span>
-<span class="row">check_command <span class="text-indigo-600 dark:text-indigo-300">"nmap"</span></span>
-<span class="row">check_command <span class="text-indigo-600 dark:text-indigo-300">"crackmapexec"</span></span>
-<span class="row">check_command <span class="text-indigo-600 dark:text-indigo-300">"ssh-audit"</span></span>
-<span class="row">check_command <span class="text-indigo-600 dark:text-indigo-300">"sslscan"</span></span>
-<span class="row">check_command <span class="text-indigo-600 dark:text-indigo-300">"wget"</span></span>
-<span class="row">check_command <span class="text-indigo-600 dark:text-indigo-300">"dig"</span></span>
-<span class="row">check_command <span class="text-indigo-600 dark:text-indigo-300">"ldapsearch"</span></span>
-<span class="row">check_command <span class="text-indigo-600 dark:text-indigo-300">"msfconsole"</span></span>
-<span class="row">check_command <span class="text-indigo-600 dark:text-indigo-300">"curl"</span></span>
-<span class="row">check_command <span class="text-indigo-600 dark:text-indigo-300">"rpcclient"</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Directory setup</span></span>
-<span class="row">mkdir -p results  <span class="text-gray-500 dark:text-gray-500"># Ensure the 'results' directory exists</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Only create directories for LDAP and DNS if they will be used later</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Initially, skip creating 'results/ldap_anonymous_bind' and 'results/dnssec'</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Conditionally create firewallevasion directory based on -4 option</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$firewall_evasion"</span> = true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    mkdir -p results/firewallevasion</span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Removed pre-creation of sslscan, sshaudit, and checkthatheader directories</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># They will be created only when their respective scans are performed</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Define firewall evasion scripts</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">declare</span> -A firewall_evasion_scripts=(</span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"Fragment Packets Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -f -v --reason -oN results/firewallevasion/fragmentpacketsresult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"MTU Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -mtu 16 -v --reason -oN results/firewallevasion/mturesult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Apple Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -sT -PO --spoof-mac Apple -Pn -v --reason -oN results/firewallevasion/macspoofappleresult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Cisco Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -sT -PO --spoof-mac Cisco -Pn -v --reason -oN results/firewallevasion/macspoofciscoresult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Microsoft Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -sT -PO --spoof-mac Microsoft -Pn -v --reason -oN results/firewallevasion/macspoofmicrosoftresult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Intel Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -sT -PO --spoof-mac Intel -Pn -v --reason -oN results/firewallevasion/macspoofintelresult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Samsung Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -sT -PO --spoof-mac Samsung -Pn -v --reason -oN results/firewallevasion/macspoofsamsungresult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Dell Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -sT -PO --spoof-mac Dell -Pn -v --reason -oN results/firewallevasion/macspoofdellresult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof HP Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -sT -PO --spoof-mac HP -Pn -v --reason -oN results/firewallevasion/macspoofhpresult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Sony Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -sT -PO --spoof-mac Sony -Pn -v --reason -oN results/firewallevasion/macspoofsonyresult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Netgear Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -sT -PO --spoof-mac Netgear -Pn -v --reason -oN results/firewallevasion/macspoofnetgearresult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof TP-Link Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -sT -PO --spoof-mac TP-Link -Pn -v --reason -oN results/firewallevasion/macspooftplinkresult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof ASUS Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -sT -PO --spoof-mac ASUS -Pn -v --reason -oN results/firewallevasion/macspoofasusresult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Juniper Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -sT -PO --spoof-mac Juniper -Pn -v --reason -oN results/firewallevasion/macspoofjuniperresult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Broadcom Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -sT -PO --spoof-mac Broadcom -Pn -v --reason -oN results/firewallevasion/macspoofbroadcomresult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Qualcomm Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -sT -PO --spoof-mac Qualcomm -Pn -v --reason -oN results/firewallevasion/macspoofqualcommresult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"Bad Checksum Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap --badsum -v --reason -oN results/firewallevasion/badchecksumresult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"Exotic Flag Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -sF -p1-100 -T4 -v --reason -oN results/firewallevasion/exoticflagresult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"Source Port Check Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -sSUC --script source-port -Pn -v --reason -oN results/firewallevasion/sourceportcheckresult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"Source Port Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -g -Pn -v --reason -oN results/firewallevasion/sourceportresult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"ICMP Echo Request Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -n -sn -PE -T4 -v --reason -oN results/firewallevasion/icpmechorequestresult.txt'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"Packet Trace Result"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'nmap -vv -n -sn -PE -T4 --packet-trace -v --reason -oN results/firewallevasion/packettracceresult.txt'</span></span>
-<span class="row">)</span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Execute firewall evasion scans in order if selected</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$firewall_evasion"</span> = true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Starting Firewall Evasion Scans${NC}\n"</span></span>
-<span class="row">    ordered_firewall_evasion_scripts=(</span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"Fragment Packets Result"</span></span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"MTU Result"</span></span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Apple Result"</span></span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Cisco Result"</span></span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Microsoft Result"</span></span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Intel Result"</span></span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Samsung Result"</span></span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Dell Result"</span></span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof HP Result"</span></span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Sony Result"</span></span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Netgear Result"</span></span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof TP-Link Result"</span></span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof ASUS Result"</span></span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Juniper Result"</span></span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"MAC Spoof Broadcom Result"</span></span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"Bad Checksum Result"</span></span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"Exotic Flag Result"</span></span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"Source Port Check Result"</span></span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"Source Port Result"</span></span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"ICMP Echo Request Result"</span></span>
-<span class="row">        <span class="text-indigo-600 dark:text-indigo-300">"Packet Trace Result"</span></span>
-<span class="row">    )</span>
-<span class="row"> </span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">for</span> script_name <span class="text-purple-600 dark:text-purple-400">in</span> <span class="text-indigo-600 dark:text-indigo-300">"${ordered_firewall_evasion_scripts[@]}"</span>; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> [[ -n <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Starting scan for ${script_name}.${NC}"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">eval</span> <span class="text-indigo-600 dark:text-indigo-300">"${firewall_evasion_scripts[$script_name]} -iL \"$targets_file\""</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Completed ${script_name} scan.${NC}\n"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">elif</span> [[ -n <span class="text-indigo-600 dark:text-indigo-300">"$single_target"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Starting scan for ${script_name}.${NC}"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">eval</span> <span class="text-indigo-600 dark:text-indigo-300">"${firewall_evasion_scripts[$script_name]} \"$single_target\""</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Completed ${script_name} scan.${NC}\n"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">fi</span></span>
+<span class="row">                single_target=$2; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
+<span class="row">            -1 ) opt_set vulners true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
+<span class="row">            -2 ) opt_set vuln true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
+<span class="row">            -3 ) opt_set vulners true; opt_set vuln true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
+<span class="row">            -4 ) opt_set firewall_evasion true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
+<span class="row">            -a ) opt_set exclude_allports true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
+<span class="row">            -n ) opt_set add_nT4 true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
+<span class="row">            -k ) opt_set exclude_web_scans true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
+<span class="row">            -b ) opt_set add_A_minrate_open true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
+<span class="row">            -o ) output_dir=$2; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
+<span class="row">            --pret ) opt_set pret true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
+<span class="row">            --interface ) opt_set responder_interface <span class="text-indigo-600 dark:text-indigo-300">"$2"</span>; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
+<span class="row">            --exclude-udp ) opt_set exclude_udp true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
+<span class="row">            --discord ) opt_set send_to_discord true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
+<span class="row">            --resume ) RESUME_MODE=true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
+<span class="row">            --domain ) opt_set kerberos_domain <span class="text-indigo-600 dark:text-indigo-300">"$2"</span>; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
+<span class="row">            --ntp-dos ) opt_set ntp_dos true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
+<span class="row">            --script-timeout ) opt_set script_timeout <span class="text-indigo-600 dark:text-indigo-300">"$2"</span>; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
+<span class="row">            --nmap-stall ) opt_set nmap_stall <span class="text-indigo-600 dark:text-indigo-300">"$2"</span>; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
+<span class="row">            --no-nmap-watchdog ) opt_set nmap_watchdog_off true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
+<span class="row">            --host-timeout ) opt_set host_timeout <span class="text-indigo-600 dark:text-indigo-300">"$2"</span>; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
+<span class="row">            --mitm6 ) opt_set mitm6 true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
+<span class="row">            --mitm6-interface ) opt_set mitm6_interface <span class="text-indigo-600 dark:text-indigo-300">"$2"</span>; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
+<span class="row">            --mitm6-time ) opt_set mitm6_duration <span class="text-indigo-600 dark:text-indigo-300">"$2"</span>; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
+<span class="row">            --userlist ) opt_set kerberos_userlist <span class="text-indigo-600 dark:text-indigo-300">"$2"</span>; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
+<span class="row">            --install-deps ) AUTO_INSTALL=true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
+<span class="row">            -y | --yes ) ASSUME_YES=true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
+<span class="row">            -h | --help ) display_help; <span class="text-sky-600 dark:text-sky-400">exit</span> 0 ;;</span>
+<span class="row">            -- ) <span class="text-sky-600 dark:text-sky-400">shift</span>; <span class="text-purple-600 dark:text-purple-400">break</span> ;;</span>
+<span class="row">            * ) <span class="text-purple-600 dark:text-purple-400">break</span> ;;</span>
+<span class="row">        <span class="text-purple-600 dark:text-purple-400">esac</span></span>
 <span class="row">    <span class="text-purple-600 dark:text-purple-400">done</span></span>
 <span class="row"> </span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}Firewall evasion scans completed.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">exit</span> 0</span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Define Nmap scripts</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">declare</span> -A scripts=(</span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"SMB"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-p 139,445 --script smb-security-mode,smb2-security-mode,smb-enum-users.nse,smb-vuln-cve2009-3103,smb-vuln-ms06-025,smb-vuln-ms07-029,smb-vuln-ms08-067,smb-vuln-ms10-054,smb-vuln-ms10-061,smb-vuln-ms17-010 -oN results/smbsec.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"SSLCipher"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'--script ssl-enum-ciphers -p 443,1443,389,3389 -oN results/sslcipher.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"HTTPSVN"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'--script http-svn-enum,http-svn-info -p 443 -oN results/httpsvnenum.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"NetBIOS"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-sU -sV -T4 --script nbstat -p137 -Pn -n -oN results/netbiosinfodis.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"Oracle"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'--script oracle-tns-version,oracle-sid-brute -p 1521 -T4 -sV -oN results/oracle.txt -oG results/oracle.gnmap -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"NTP"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-sU -sV --script ntp-monlist,ntp-info -p 123 -oN results/ntpservice.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"SNMP"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-sV --script snmp*snmp-brute -p161 -vvv -oN results/snmpinfodis.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"LDAP"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-n -sV --script ldap*,ldap-search,ldap-novell-getpass -p 389,636,3268,3269 -oN results/ldap.txt -oG results/ldap.gnmap -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"HTTP"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-sV -p 80,81,443,8000,8080,8443 --script http-headers,http-iis-webdav-vuln,http-auth-finder,http-apache-server-status,http-traceroute,http-trace,http-vuln*,http-axis2-dir-traversal,http-cross-domain-policy --script-args http-cross-domain-policy.domain-lookup=true -oN results/http.txt -oG results/http.gnmap -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"Portmapper"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-sSUC --script nfs-showmount -p111 -oN results/portmapper111.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"MySQL"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-sV -p 3306 --script mysql-audit,mysql-databases,mysql-dump-hashes,mysql-empty-password,mysql-enum,mysql-info,mysql-query,mysql-users,mysql-variables,mysql-vuln-cve2012-2122 -oN results/mysql.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"MSSQL"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'--script ms-sql-info,ms-sql-empty-password,ms-sql-xp-cmdshell,ms-sql-config -sV -p 1433 -oN results/mssql.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"SSH"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-p22 --script ssh2-enum-algos,ssh-hostkey,ssh-auth-methods --script-args ssh_hostkey=full,ssh.user=root -oN results/ssh.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"Telnet"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-n -sV -Pn --script telnet-brute,telnet-encryption,lu-enum,cics-info --script-args cics-info.user=test,cics-info.pass=test,cics-info.cemt='</span><span class="text-indigo-600 dark:text-indigo-300">"'"</span><span class="text-indigo-600 dark:text-indigo-300">'ZEMT'</span><span class="text-indigo-600 dark:text-indigo-300">"'"</span><span class="text-indigo-600 dark:text-indigo-300">',cics-info.trans=CICA -p 23 -oN results/telnetservice.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"DNS"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-n --script default,dns-fuzz,dns-brute,dns-cache-snoop -p 53 -oN results/dnsvuln.txt -oG results/dnsvuln.gnmap -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"Pop3"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'--script pop3-capabilities,pop3-ntlm-info -sV -p 110 -oN results/pop3.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"NFS"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'--script nfs-ls,nfs-showmount,nfs-statfs -p 2049 -oN results/nfs.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"RDP"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'--script rdp-enum-encryption,rdp-vuln-ms12-020,rdp-ntlm-info -p 3389 -T4 -oN results/rdpscript.txt -oG results/rdp.gnmap -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"RPC"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-p 135 -T4 -oN results/rpc.txt -oG results/rpc.gnmap -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"ApacheAJP"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-sV --script ajp-auth,ajp-headers,ajp-methods,ajp-request -n -p 8009 -oN results/apacheajp.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"FTP"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'--script ftp-anon --script-args ftp-anon.maxlist=-1 -p 21 -oN results/ftp.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"TFTP"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-n -Pn -sU -p69 -sV --script tftp-enum -oN results/tftp.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"RTSP"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-sV --script rtsp-*,rtsp-url-brute -p 554 -oN results/rtsp.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"WildcardCertificate"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'--script ssl-cert -p443 -oN results/wildcardcert.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"SMTP"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'--script smtp-commands,smtp-open-relay,smtp-enum-users -p 25,465,587 -oN results/smtp.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"IPMI"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-sU --script ipmi-brute,ipmi-cipher-zero -p 623 -oN results/ipmi.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"IMAP"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'--script imap-brute,imap-ntlm-info -p 143,993 -oN results/imap.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"IKE"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-sU -sV --script ike-version -p 500 -oN results/ike.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"AFP"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-sS -sV --script afp-showmount,afp-ls -p 548 -oN results/afp.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"Gopher"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'--script gopher-ls --script-args gopher-ls.maxfiles=100 -p 70 -oN results/gopher.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"Kerberos"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'--script krb5-enum-users --script-args krb5-enum-users.realm='</span><span class="text-indigo-600 dark:text-indigo-300">"'"</span><span class="text-indigo-600 dark:text-indigo-300">'test'</span><span class="text-indigo-600 dark:text-indigo-300">"'"</span><span class="text-indigo-600 dark:text-indigo-300">' -p 88 -oN results/kerberos.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"PJL"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'--script pjl-ready-message.nse --script-args '</span><span class="text-indigo-600 dark:text-indigo-300">"'"</span><span class="text-indigo-600 dark:text-indigo-300">'pjl_ready_message="pwn3d!"'</span><span class="text-indigo-600 dark:text-indigo-300">"'"</span><span class="text-indigo-600 dark:text-indigo-300">' -oN results/pjl.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"Redis"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'--script redis-info,redis-brute -p 6379 -oN results/redis.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"RealVNC"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'--script realvnc-auth-bypass -p 5900 -oN results/realvnc.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"SIP"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-sU --script sip-brute,sip-call-spoof,sip-enum-users --script-args '</span><span class="text-indigo-600 dark:text-indigo-300">"'"</span><span class="text-indigo-600 dark:text-indigo-300">'sip-enum-users.padding=4,sip-enum-users.minext=1000,sip-enum-users.maxext=9999'</span><span class="text-indigo-600 dark:text-indigo-300">"'"</span><span class="text-indigo-600 dark:text-indigo-300">' -p 5060 -oN results/sip.txt -v'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"TCP"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-sC -sV -oN results/tcp.txt -oG results/tcp.gnmap -v --reason'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"UDP"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-sC -sU -T4 -oN results/udp.txt -v --reason'</span></span>
-<span class="row">    [<span class="text-indigo-600 dark:text-indigo-300">"AllPorts"</span>]=<span class="text-indigo-600 dark:text-indigo-300">'-p- -T4 -oN results/allports.txt -v --reason'</span></span>
-<span class="row">)</span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Specify the order in which the scripts should be executed</span></span>
-<span class="row">ordered_scripts=(</span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"SMB"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"SSLCipher"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"HTTPSVN"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"NetBIOS"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"Oracle"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"NTP"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"SNMP"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"LDAP"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"HTTP"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"Portmapper"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"MySQL"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"MSSQL"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"SSH"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"Telnet"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"DNS"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"Pop3"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"NFS"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"RDP"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"RPC"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"ApacheAJP"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"FTP"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"TFTP"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"RTSP"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"WildcardCertificate"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"SMTP"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"IPMI"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"IMAP"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"IKE"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"AFP"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"Gopher"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"Kerberos"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"PJL"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"Redis"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"RealVNC"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"SIP"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"TCP"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"UDP"</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"AllPorts"</span></span>
-<span class="row">)</span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Exclude UDP and All Ports scripts if -a is specified</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$exclude_allports"</span> = true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}• Starting scans without 'UDP' and 'AllPorts' scripts.${NC}\n"</span></span>
-<span class="row">    ordered_scripts=($(<span class="text-sky-600 dark:text-sky-400">printf</span> <span class="text-indigo-600 dark:text-indigo-300">"%s\n"</span> <span class="text-indigo-600 dark:text-indigo-300">"${ordered_scripts[@]}"</span> | grep -v -E <span class="text-indigo-600 dark:text-indigo-300">"^(UDP|AllPorts)$"</span>))</span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Accumulate additional Nmap scripts based on options</span></span>
-<span class="row">additional_nmap_scripts=()</span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Add vulners script if specified</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$add_vulners"</span> = true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}• Starting scans with option -1 (vulners).${NC}\n"</span></span>
-<span class="row">    additional_nmap_scripts+=(<span class="text-indigo-600 dark:text-indigo-300">"vulners"</span>)</span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Add vuln script if specified</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$add_vuln"</span> = true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}• Starting scans with option -2 (vuln).${NC}\n"</span></span>
-<span class="row">    additional_nmap_scripts+=(<span class="text-indigo-600 dark:text-indigo-300">"vuln"</span>)</span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Remove duplicate scripts</span></span>
-<span class="row">IFS=<span class="text-indigo-600 dark:text-indigo-300">','</span> <span class="text-sky-600 dark:text-sky-400">read</span> -r -a unique_scripts &lt;&lt;&lt; <span class="text-indigo-600 dark:text-indigo-300">"$(printf "</span>%s\n<span class="text-indigo-600 dark:text-indigo-300">" "</span>${additional_nmap_scripts[@]}<span class="text-indigo-600 dark:text-indigo-300">" | sort -u | paste -sd, -)"</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Add the accumulated scripts to each Nmap script entry</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ -n <span class="text-indigo-600 dark:text-indigo-300">"$unique_scripts"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">for</span> key <span class="text-purple-600 dark:text-purple-400">in</span> <span class="text-indigo-600 dark:text-indigo-300">"${!scripts[@]}"</span>; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"${scripts[$key]}"</span> == *<span class="text-indigo-600 dark:text-indigo-300">"--script "</span>* ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">            <span class="text-gray-500 dark:text-gray-500"># Extract existing scripts after --script</span></span>
-<span class="row">            existing_scripts=<span class="text-indigo-600 dark:text-indigo-300">"${scripts[$key]#*--script }"</span></span>
-<span class="row">            <span class="text-gray-500 dark:text-gray-500"># Prepend additional scripts</span></span>
-<span class="row">            scripts[$key]=<span class="text-indigo-600 dark:text-indigo-300">"--script $unique_scripts,$existing_scripts"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">done</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Add -n -T4 to Nmap scripts if -n is specified</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$add_nT4"</span> = true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}• Adding -n -T4 to accelerate associative array scans.${NC}\n"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">for</span> key <span class="text-purple-600 dark:text-purple-400">in</span> <span class="text-indigo-600 dark:text-indigo-300">"${!scripts[@]}"</span>; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">        scripts[$key]=<span class="text-indigo-600 dark:text-indigo-300">"-n -T4 ${scripts[$key]}"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">done</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Add --min-rate 1000 --open to Nmap scripts if -b is specified</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$add_A_minrate_open"</span> = true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}• Adding '--min-rate 1000 --open' for additional boost and open ports only results.${NC}\n"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">for</span> key <span class="text-purple-600 dark:text-purple-400">in</span> <span class="text-indigo-600 dark:text-indigo-300">"${!scripts[@]}"</span>; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">        scripts[$key]=<span class="text-indigo-600 dark:text-indigo-300">"--min-rate 1000 --open ${scripts[$key]}"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">done</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Display the appropriate message based on the -k flag</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$exclude_sslscan"</span> = true &amp;&amp; <span class="text-indigo-600 dark:text-indigo-300">"$exclude_sshaudit"</span> = true &amp;&amp; <span class="text-indigo-600 dark:text-indigo-300">"$exclude_checkheaders"</span> = true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}• Starting scans without sslscan, ssh-audit and checkthatheaders.${NC}\n"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># After options are parsed and validated</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$pret_option"</span> = true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}• PRET option selected. PRET scans will be performed.${NC}"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Main scanning loop</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">for</span> script_name <span class="text-purple-600 dark:text-purple-400">in</span> <span class="text-indigo-600 dark:text-indigo-300">"${ordered_scripts[@]}"</span>; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Skip if script_name is empty</span></span>
-<span class="row">    [[ -z <span class="text-indigo-600 dark:text-indigo-300">"$script_name"</span> ]] &amp;&amp; <span class="text-purple-600 dark:text-purple-400">continue</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Check if script_name exists in scripts array</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ -z <span class="text-indigo-600 dark:text-indigo-300">"${scripts[$script_name]}"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Warning: Script '$script_name' not found in scripts array.${NC}"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">continue</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row">    script_args=<span class="text-indigo-600 dark:text-indigo-300">"${scripts[$script_name]}"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ -z <span class="text-indigo-600 dark:text-indigo-300">"$script_args"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">continue</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Check if targets_file exists and is not empty before running nmap with -iL</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ -n <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span> &amp;&amp; -s <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Starting ${script_name} scan.${NC}"</span></span>
-<span class="row">        nmap $script_args -iL <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Completed ${script_name} scan.${NC}\n"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">elif</span> [[ -n <span class="text-indigo-600 dark:text-indigo-300">"$single_target"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Starting ${script_name} scan.${NC}"</span></span>
-<span class="row">        nmap $script_args <span class="text-indigo-600 dark:text-indigo-300">"$single_target"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Completed ${script_name} scan.${NC}\n\n"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}No valid targets found for ${script_name} scan. Skipping.${NC}\n"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">done</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}Associative scans completed, output files saved to results directory.${NC}"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># ------------------------------------------- #</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500">#         PRET PRINTER SECURITY CHECK         #</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># ------------------------------------------- #</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Run PRET scans if --pret option is set</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$pret_option"</span> = true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Starting PRET for Printer Security Check.${NC}\n"</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Set PRET_DIR and PRET_SCRIPT</span></span>
-<span class="row">    PRET_DIR=<span class="text-indigo-600 dark:text-indigo-300">"$(pwd)/pret_tool"</span></span>
-<span class="row">    PRET_SCRIPT=<span class="text-indigo-600 dark:text-indigo-300">"$PRET_DIR/pret.py"</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Check if PRET is installed</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ ! -x <span class="text-indigo-600 dark:text-indigo-300">"$PRET_SCRIPT"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}PRET not found. Installing PRET...${NC}"</span></span>
-<span class="row">        <span class="text-gray-500 dark:text-gray-500"># Clone the PRET repository</span></span>
-<span class="row">        git clone https://github.com/RUB-NDS/PRET.git <span class="text-indigo-600 dark:text-indigo-300">"$PRET_DIR"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> [ $? -ne 0 ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Failed to clone PRET repository. Please check your internet connection and git installation.${NC}"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">        <span class="text-gray-500 dark:text-gray-500"># Install dependencies</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> command -v pip &amp;&gt;/dev/null; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">            pip install colorama pysnmp</span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">elif</span> command -v pip3 &amp;&gt;/dev/null; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">            pip3 install colorama pysnmp</span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}pip not found. Cannot install PRET dependencies automatically. Please install pip and try again.${NC}"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">        <span class="text-gray-500 dark:text-gray-500"># Make pret.py executable</span></span>
-<span class="row">        chmod +x <span class="text-indigo-600 dark:text-indigo-300">"$PRET_SCRIPT"</span></span>
-<span class="row">        <span class="text-gray-500 dark:text-gray-500"># Check again if pret.py is executable</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> [[ ! -x <span class="text-indigo-600 dark:text-indigo-300">"$PRET_SCRIPT"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Failed to install PRET. Please install it manually.${NC}"</span></span>
+<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> nmap_stall_opt</span>
+<span class="row">    nmap_stall_opt=<span class="text-indigo-600 dark:text-indigo-300">"$(opt_get nmap_stall)"</span></span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [ -n <span class="text-indigo-600 dark:text-indigo-300">"$nmap_stall_opt"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">        <span class="text-purple-600 dark:text-purple-400">case</span> <span class="text-indigo-600 dark:text-indigo-300">"$nmap_stall_opt"</span> <span class="text-purple-600 dark:text-purple-400">in</span></span>
+<span class="row">            <span class="text-indigo-600 dark:text-indigo-300">''</span>|*[!0-9]*) <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: --nmap-stall expects a whole number of seconds.${NC}"</span>; <span class="text-sky-600 dark:text-sky-400">exit</span> 1 ;;</span>
+<span class="row">        <span class="text-purple-600 dark:text-purple-400">esac</span></span>
+<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> [ <span class="text-indigo-600 dark:text-indigo-300">"$nmap_stall_opt"</span> -lt 60 ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: --nmap-stall must be at least 60 seconds; a slow scan is not a stalled one.${NC}"</span></span>
 <span class="row">            <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
 <span class="row">        <span class="text-purple-600 dark:text-purple-400">fi</span></span>
 <span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
 <span class="row"> </span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Run PRET with the correct Python interpreter and display output/UI</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Starting local printers check.${NC}\n"</span></span>
-<span class="row">    python3 <span class="text-indigo-600 dark:text-indigo-300">"$PRET_SCRIPT"</span></span>
+<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> mitm6_time</span>
+<span class="row">    mitm6_time=<span class="text-indigo-600 dark:text-indigo-300">"$(opt_get mitm6_duration)"</span></span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [ -n <span class="text-indigo-600 dark:text-indigo-300">"$mitm6_time"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">        <span class="text-purple-600 dark:text-purple-400">case</span> <span class="text-indigo-600 dark:text-indigo-300">"$mitm6_time"</span> <span class="text-purple-600 dark:text-purple-400">in</span></span>
+<span class="row">            <span class="text-indigo-600 dark:text-indigo-300">''</span>|*[!0-9]*) <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: --mitm6-time expects a whole number of seconds.${NC}"</span>; <span class="text-sky-600 dark:text-sky-400">exit</span> 1 ;;</span>
+<span class="row">        <span class="text-purple-600 dark:text-purple-400">esac</span></span>
+<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> [ <span class="text-indigo-600 dark:text-indigo-300">"$mitm6_time"</span> -lt 30 ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: --mitm6-time must be at least 30 seconds to observe anything useful.${NC}"</span></span>
+<span class="row">            <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
+<span class="row">        <span class="text-purple-600 dark:text-purple-400">fi</span></span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
 <span class="row"> </span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}Printer security check completed.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
+<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Allow "--install-deps" on its own to set the machine up with no scan.</span></span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$AUTO_INSTALL"</span> == true &amp;&amp; -z <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span> &amp;&amp; -z <span class="text-indigo-600 dark:text-indigo-300">"$single_target"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">        run_install_deps_only</span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
 <span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Now process targets and run scanning functions</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$firewall_evasion"</span> != true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Display the message once before starting scans</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$exclude_sslscan"</span> != true || <span class="text-indigo-600 dark:text-indigo-300">"$exclude_sshaudit"</span> != true || <span class="text-indigo-600 dark:text-indigo-300">"$exclude_checkheaders"</span> != true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Starting SSLScan, SSH-Audit, and CheckThatHeaders.${NC}\n"</span></span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ -n <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span> &amp;&amp; -n <span class="text-indigo-600 dark:text-indigo-300">"$single_target"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: Cannot specify both a targets file (-t) and a single target (-u).${NC}"</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
 <span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
 <span class="row"> </span>
 <span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ -n <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">while</span> IFS= <span class="text-sky-600 dark:text-sky-400">read</span> -r target; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">            scan_target <span class="text-indigo-600 dark:text-indigo-300">"$target"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">done</span> &lt; <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span></span>
+<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> [[ ! -f <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: Targets file '$targets_file' not found!${NC}"</span></span>
+<span class="row">            <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
+<span class="row">        <span class="text-purple-600 dark:text-purple-400">fi</span></span>
+<span class="row">        read_lines_into TARGETS &lt; <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span></span>
+<span class="row">        <span class="text-gray-500 dark:text-gray-500"># Drop blank lines and comments so they never reach nmap.</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">local</span> cleaned=()</span>
+<span class="row">        <span class="text-purple-600 dark:text-purple-400">for</span> t <span class="text-purple-600 dark:text-purple-400">in</span> <span class="text-indigo-600 dark:text-indigo-300">"${TARGETS[@]}"</span>; <span class="text-purple-600 dark:text-purple-400">do</span></span>
+<span class="row">            t=<span class="text-indigo-600 dark:text-indigo-300">"${t//$'\r'/}"</span></span>
+<span class="row">            [[ -z <span class="text-indigo-600 dark:text-indigo-300">"${t// /}"</span> || <span class="text-indigo-600 dark:text-indigo-300">"$t"</span> == \#* ]] &amp;&amp; <span class="text-purple-600 dark:text-purple-400">continue</span></span>
+<span class="row">            arr_push cleaned <span class="text-indigo-600 dark:text-indigo-300">"$t"</span></span>
+<span class="row">        <span class="text-purple-600 dark:text-purple-400">done</span></span>
+<span class="row">        TARGETS=(<span class="text-indigo-600 dark:text-indigo-300">"${cleaned[@]}"</span>)</span>
+<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> [[ ${#TARGETS[@]} -eq 0 ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: Targets file '$targets_file' contains no usable targets.${NC}"</span></span>
+<span class="row">            <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
+<span class="row">        <span class="text-purple-600 dark:text-purple-400">fi</span></span>
 <span class="row">    <span class="text-purple-600 dark:text-purple-400">elif</span> [[ -n <span class="text-indigo-600 dark:text-indigo-300">"$single_target"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        scan_target <span class="text-indigo-600 dark:text-indigo-300">"$single_target"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Call the function to display the overall completion message</span></span>
-<span class="row">    complete_all_scans</span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># ----------------------------- #</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500">#       METASPLOIT SCANS        #</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># ----------------------------- #</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Extract RDP targets (port 3389) from rdp.gnmap</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ -f <span class="text-indigo-600 dark:text-indigo-300">"results/rdp.gnmap"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Starting Metasploit Scan.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${YELLOW}Extracting RDP (port 3389) open IPs from rdp.gnmap.${NC}"</span></span>
-<span class="row">    awk <span class="text-indigo-600 dark:text-indigo-300">'/^Host: / &amp;&amp; /Ports:.*3389\/open/ {print $2}'</span> results/rdp.gnmap &gt; results/rdp_targets.txt</span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${RED}rdp.gnmap not found. Skipping RDP target extraction.${NC}"</span></span>
-<span class="row">    touch results/rdp_targets.txt  <span class="text-gray-500 dark:text-gray-500"># Create empty file to handle later</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Extract RPC targets (port 135) from rpc.gnmap</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ -f <span class="text-indigo-600 dark:text-indigo-300">"results/rpc.gnmap"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Extracting RPC (port 135) open IPs from rpc.gnmap.${NC}"</span></span>
-<span class="row">    awk <span class="text-indigo-600 dark:text-indigo-300">'/^Host: / &amp;&amp; /Ports:.*135\/open/ {print $2}'</span> results/rpc.gnmap &gt; results/rpc_targets.txt</span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${RED}rpc.gnmap not found. Skipping RPC target extraction.${NC}"</span></span>
-<span class="row">    touch results/rpc_targets.txt  <span class="text-gray-500 dark:text-gray-500"># Create empty file to handle later</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Extract Oracle TNS Listener targets (port 1521) from oracle.gnmap</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ -f <span class="text-indigo-600 dark:text-indigo-300">"results/oracle.gnmap"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Extracting Oracle TNS Listener (port 1521) open IPs from oracle.gnmap.${NC}"</span></span>
-<span class="row">    awk <span class="text-indigo-600 dark:text-indigo-300">'/^Host: / &amp;&amp; /Ports:.*1521\/open/ {print $2}'</span> results/oracle.gnmap &gt; results/oracle_targets.txt</span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${RED}oracle.gnmap not found. Skipping Oracle target extraction.${NC}"</span></span>
-<span class="row">    touch results/oracle_targets.txt  <span class="text-gray-500 dark:text-gray-500"># Create empty file to handle later</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Perform Metasploit scans if targets are found</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${YELLOW}Starting Metasploit scans based on open RDP, RPC, and Oracle TNS Listener ports.${NC}\n"</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Scan RDP targets</span></span>
-<span class="row">scan_rdp <span class="text-indigo-600 dark:text-indigo-300">"results/rdp_targets.txt"</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Scan RPC targets</span></span>
-<span class="row">scan_rpc <span class="text-indigo-600 dark:text-indigo-300">"results/rpc_targets.txt"</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Scan Oracle TNS Listener targets</span></span>
-<span class="row">scan_oracle <span class="text-indigo-600 dark:text-indigo-300">"results/oracle_targets.txt"</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}Metasploit Scans Completed.${NC}"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># ------------------------------------------- #</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500">#       DEFAULT IIS WEBPAGE DETECTION         #</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># ------------------------------------------- #</span></span>
-<span class="row"> </span>
-<span class="row">found_iis=false</span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Parse results/http.gnmap to find hosts with Microsoft-IIS in service/version</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ -f <span class="text-indigo-600 dark:text-indigo-300">"results/http.gnmap"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Starting Default IIS Webpage scan.${NC}\n"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Parsing HTTP Result to find hosts with Microsoft-IIS in Service/Version.${NC}"</span></span>
-<span class="row">    grep -i <span class="text-indigo-600 dark:text-indigo-300">"Ports:"</span> results/http.gnmap | grep -i <span class="text-indigo-600 dark:text-indigo-300">"open"</span> | grep -i <span class="text-indigo-600 dark:text-indigo-300">"Microsoft-IIS"</span> | <span class="text-purple-600 dark:text-purple-400">while</span> <span class="text-sky-600 dark:text-sky-400">read</span> -r line; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">        <span class="text-gray-500 dark:text-gray-500"># Extract IP address</span></span>
-<span class="row">        ip=$(<span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"$line"</span> | awk <span class="text-indigo-600 dark:text-indigo-300">'{print $2}'</span>)</span>
-<span class="row">        <span class="text-gray-500 dark:text-gray-500"># Extract the Ports section</span></span>
-<span class="row">        ports_field=$(<span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"$line"</span> | sed <span class="text-indigo-600 dark:text-indigo-300">'s/.*Ports: //'</span>)</span>
-<span class="row">        <span class="text-gray-500 dark:text-gray-500"># Split the ports field by comma</span></span>
-<span class="row">        IFS=<span class="text-indigo-600 dark:text-indigo-300">','</span> <span class="text-sky-600 dark:text-sky-400">read</span> -ra ports_array &lt;&lt;&lt; <span class="text-indigo-600 dark:text-indigo-300">"$ports_field"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">for</span> port_info <span class="text-purple-600 dark:text-purple-400">in</span> <span class="text-indigo-600 dark:text-indigo-300">"${ports_array[@]}"</span>; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">            <span class="text-gray-500 dark:text-gray-500"># Trim leading/trailing whitespace</span></span>
-<span class="row">            port_info=$(<span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"$port_info"</span> | xargs)</span>
-<span class="row">            <span class="text-gray-500 dark:text-gray-500"># Split port_info by '/'</span></span>
-<span class="row">            IFS=<span class="text-indigo-600 dark:text-indigo-300">'/'</span> <span class="text-sky-600 dark:text-sky-400">read</span> -ra port_fields &lt;&lt;&lt; <span class="text-indigo-600 dark:text-indigo-300">"$port_info"</span></span>
-<span class="row">            port_number=<span class="text-indigo-600 dark:text-indigo-300">"${port_fields[0]}"</span></span>
-<span class="row">            state=<span class="text-indigo-600 dark:text-indigo-300">"${port_fields[1]}"</span></span>
-<span class="row">            protocol=<span class="text-indigo-600 dark:text-indigo-300">"${port_fields[2]}"</span></span>
-<span class="row">            owner=<span class="text-indigo-600 dark:text-indigo-300">"${port_fields[3]}"</span></span>
-<span class="row">            service=<span class="text-indigo-600 dark:text-indigo-300">"${port_fields[4]}"</span></span>
-<span class="row">            version=<span class="text-indigo-600 dark:text-indigo-300">"${port_fields[5]}"</span></span>
-<span class="row">            <span class="text-gray-500 dark:text-gray-500"># Combine service and version for matching</span></span>
-<span class="row">            service_version=<span class="text-indigo-600 dark:text-indigo-300">"$service $version"</span></span>
-<span class="row">            <span class="text-gray-500 dark:text-gray-500"># Check if state is 'open' and service_version contains 'Microsoft-IIS'</span></span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$state"</span> == <span class="text-indigo-600 dark:text-indigo-300">"open"</span> &amp;&amp; <span class="text-indigo-600 dark:text-indigo-300">"$service_version"</span> == *<span class="text-indigo-600 dark:text-indigo-300">"Microsoft-IIS"</span>* ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Found Microsoft-IIS on $ip:$port_number via service/version.${NC}"</span></span>
-<span class="row">                <span class="text-gray-500 dark:text-gray-500"># Create the directory if not already done</span></span>
-<span class="row">                <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$found_iis"</span> = false ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">                    mkdir -p results/defaultiis</span>
-<span class="row">                    found_iis=true</span>
-<span class="row">                <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">                output_file=<span class="text-indigo-600 dark:text-indigo-300">"results/defaultiis/defaultiis_${ip}_${port_number}.txt"</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Running curl on $ip:$port_number to get default IIS webpage.${NC}"</span></span>
-<span class="row">                curl -k -L <span class="text-indigo-600 dark:text-indigo-300">"$ip:$port_number"</span> -v 2&gt;&amp;1 | tee <span class="text-indigo-600 dark:text-indigo-300">"$output_file"</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">echo</span> -e</span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}Output saved to $output_file${NC}\n"</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">done</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">done</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}results/http.gnmap not found. Skipping Microsoft-IIS detection from gnmap.${NC}"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Parse results/http.txt to find hosts with Microsoft-IIS in Server header</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ -f <span class="text-indigo-600 dark:text-indigo-300">"results/http.txt"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Parsing HTTP Result to find hosts with Microsoft-IIS in Server Header.${NC}"</span></span>
-<span class="row">    current_ip=<span class="text-indigo-600 dark:text-indigo-300">""</span></span>
-<span class="row">    current_port=<span class="text-indigo-600 dark:text-indigo-300">""</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">while</span> IFS= <span class="text-sky-600 dark:text-sky-400">read</span> -r line; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$line"</span> == <span class="text-indigo-600 dark:text-indigo-300">"Nmap scan report for "</span>* ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">            current_ip=$(<span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"$line"</span> | awk <span class="text-indigo-600 dark:text-indigo-300">'{print $5}'</span>)</span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"Processing host $current_ip"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">elif</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$line"</span> =~ ^[0-9]+/[a-z]+[[:space:]]+open ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">            <span class="text-gray-500 dark:text-gray-500"># This is a port line</span></span>
-<span class="row">            current_port=$(<span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"$line"</span> | awk <span class="text-indigo-600 dark:text-indigo-300">'{print $1}'</span> | cut -d<span class="text-indigo-600 dark:text-indigo-300">'/'</span> -f1)</span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Processing port $current_port on $current_ip${NC}"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">elif</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$line"</span> =~ <span class="text-indigo-600 dark:text-indigo-300">"Server: Microsoft-IIS"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Found Microsoft-IIS on $current_ip:$current_port via Header${NC}"</span></span>
-<span class="row">            <span class="text-gray-500 dark:text-gray-500"># Create the directory if not already done</span></span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$found_iis"</span> = false ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">                mkdir -p results/defaultiis</span>
-<span class="row">                found_iis=true</span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">            output_file=<span class="text-indigo-600 dark:text-indigo-300">"results/defaultiis/defaultiis_${current_ip}_${current_port}.txt"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Running curl on $current_ip:$current_port to get default IIS webpage.${NC}"</span></span>
-<span class="row">            curl -k -L <span class="text-indigo-600 dark:text-indigo-300">"$current_ip:$current_port"</span> -v 2&gt;&amp;1 | tee <span class="text-indigo-600 dark:text-indigo-300">"$output_file"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e</span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}Output saved to $output_file${NC}\n"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">done</span> &lt; results/http.txt</span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}results/http.txt not found. Skipping Microsoft-IIS detection from http.txt.${NC}\n"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$found_iis"</span> = false ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}No hosts with Microsoft-IIS found.${NC}\n"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}Default IIS Webpage Detection completed.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># ----------------------------- #</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500">#    UNAUTHENTICATED RPC SCAN   #</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># ----------------------------- #</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ -s <span class="text-indigo-600 dark:text-indigo-300">"results/rpc_targets.txt"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Starting Unauthenticated RPC scan.${NC}\n"</span></span>
-<span class="row">    mkdir -p results/unauthrpc</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">while</span> IFS= <span class="text-sky-600 dark:text-sky-400">read</span> -r target_ip; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Attempting Unauthenticated RPC connection to $target_ip${NC}"</span></span>
-<span class="row">        output_file=<span class="text-indigo-600 dark:text-indigo-300">"results/unauthrpc/unauthrpc_${target_ip}.txt"</span></span>
-<span class="row">        <span class="text-gray-500 dark:text-gray-500"># Use rpcclient to attempt connection</span></span>
-<span class="row">        rpcclient -U <span class="text-indigo-600 dark:text-indigo-300">""</span> -N <span class="text-indigo-600 dark:text-indigo-300">"$target_ip"</span> -c <span class="text-indigo-600 dark:text-indigo-300">'enumprivs'</span> 2&gt;&amp;1 | tee <span class="text-indigo-600 dark:text-indigo-300">"$output_file"</span></span>
-<span class="row">        <span class="text-gray-500 dark:text-gray-500"># Check if connection was successful</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> grep -q -E <span class="text-indigo-600 dark:text-indigo-300">"Cannot connect|NT_STATUS|failed|Connection to host failed"</span> <span class="text-indigo-600 dark:text-indigo-300">"$output_file"</span>; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Connection to $target_ip failed or authentication required. Skipping scan.${NC}"</span></span>
-<span class="row">            rm <span class="text-indigo-600 dark:text-indigo-300">"$output_file"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}Unauthenticated RPC connection to $target_ip successful. Output saved to $output_file${NC}"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">done</span> &lt; results/rpc_targets.txt</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${BLUE}Unauthenticated RPC scan completed.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}No RPC targets found. Skipping Unauthenticated RPC scan.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># ----------------------------- #</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500">#       LDAP ANONYMOUS BIND     #</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># ----------------------------- #</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Starting LDAP Anonymous Bind scan.${NC}\n"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ -f <span class="text-indigo-600 dark:text-indigo-300">"results/ldap.gnmap"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Parse ldap.gnmap to extract IPs with LDAP ports open (389,636,3268,3269)</span></span>
-<span class="row">    ldap_ports=<span class="text-indigo-600 dark:text-indigo-300">"389|636|3268|3269"</span></span>
-<span class="row">    awk <span class="text-indigo-600 dark:text-indigo-300">'/^Host: / &amp;&amp; /Ports:.*('</span><span class="text-indigo-600 dark:text-indigo-300">"$ldap_ports"</span><span class="text-indigo-600 dark:text-indigo-300">')\/open/ {print $2}'</span> results/ldap.gnmap &gt; results/ldap_open_ports.txt</span>
-<span class="row"> </span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ -s <span class="text-indigo-600 dark:text-indigo-300">"results/ldap_open_ports.txt"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}LDAP ports open found, starting LDAP Anonymous Bind scan.${NC}\n"</span></span>
-<span class="row">        mkdir -p results/ldap_anonymous_bind</span>
-<span class="row"> </span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">while</span> <span class="text-sky-600 dark:text-sky-400">read</span> -r ip; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Running LDAP Anonymous Bind scan on $ip${NC}"</span></span>
-<span class="row">            output_file=<span class="text-indigo-600 dark:text-indigo-300">"results/ldap_anonymous_bind/${ip}_ldap_anonymous_bind.txt"</span></span>
-<span class="row">            ldapsearch -v -x -s base -b <span class="text-indigo-600 dark:text-indigo-300">''</span> <span class="text-indigo-600 dark:text-indigo-300">"(objectClass=*)"</span> <span class="text-indigo-600 dark:text-indigo-300">"*"</span> + -H ldap://$ip | tee <span class="text-indigo-600 dark:text-indigo-300">"$output_file"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}LDAP Anonymous Bind scan for $ip completed and saved to $output_file${NC}\n"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">done</span> &lt; results/ldap_open_ports.txt</span>
-<span class="row"> </span>
-<span class="row">        <span class="text-gray-500 dark:text-gray-500"># Added completed message</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}LDAP Anonymous Bind Scan Completed.${NC}"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
+<span class="row">        arr_push TARGETS <span class="text-indigo-600 dark:text-indigo-300">"$single_target"</span></span>
 <span class="row">    <span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}No LDAP ports open found. Skipping LDAP Anonymous Bind scan.${NC}"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: No targets specified. Use -h for help.${NC}"</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
 <span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">    rm -f results/ldap_open_ports.txt</span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}ldap.gnmap not found. Skipping LDAP Anonymous Bind scan.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
 <span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># ----------------------------- #</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500">#      DNS VULNERABILITIES      #</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># ----------------------------- #</span></span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$RESUME_MODE"</span> == true &amp;&amp; ! -d <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Warning: --resume was given but output directory '$output_dir' does not exist.${NC}"</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}A fresh scan will be started instead.${NC}\n"</span></span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
 <span class="row"> </span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Starting DNS Vulnerabilities scan using 'dig +dnssec'.${NC}\n"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ -f <span class="text-indigo-600 dark:text-indigo-300">"results/dnsvuln.gnmap"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Parse dnsvuln.gnmap to extract IPs with port 53 open</span></span>
-<span class="row">    ips_with_port_53_open=$(awk <span class="text-indigo-600 dark:text-indigo-300">'/^Host: / &amp;&amp; /Ports:.*53\/open/{print $2}'</span> results/dnsvuln.gnmap)</span>
+<span class="row">    check_dependencies</span>
 <span class="row"> </span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ -n <span class="text-indigo-600 dark:text-indigo-300">"$ips_with_port_53_open"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Port 53 found open on the following hosts:${NC}"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"$ips_with_port_53_open"</span></span>
+<span class="row">    mkdir -p <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
+<span class="row">    mkdir -p <span class="text-indigo-600 dark:text-indigo-300">"$output_dir/nmap"</span></span>
 <span class="row"> </span>
-<span class="row">        <span class="text-gray-500 dark:text-gray-500"># Create directory to save dig scans</span></span>
-<span class="row">        mkdir -p results/dnssec</span>
+<span class="row">    state_init <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
 <span class="row"> </span>
-<span class="row">        <span class="text-gray-500 dark:text-gray-500"># For each IP, run 'dig +dnssec &lt;IP&gt;' and save output</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">for</span> ip <span class="text-purple-600 dark:text-purple-400">in</span> $ips_with_port_53_open; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${GREEN}Running 'dig +dnssec' on $ip${NC}"</span></span>
-<span class="row">            <span class="text-gray-500 dark:text-gray-500"># Run dig and capture output</span></span>
-<span class="row">            dig_output=$(dig +dnssec <span class="text-indigo-600 dark:text-indigo-300">"$ip"</span>)</span>
-<span class="row">            <span class="text-gray-500 dark:text-gray-500"># Check for flags</span></span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">if</span> <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"$dig_output"</span> | grep -q <span class="text-indigo-600 dark:text-indigo-300">" flags:.*ra"</span>; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">                <span class="text-gray-500 dark:text-gray-500"># 'ra' flag found, target is vulnerable to DNS recursion enabled</span></span>
-<span class="row">                output_file=<span class="text-indigo-600 dark:text-indigo-300">"results/dnssec/${ip}_recursion_test.txt"</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"$dig_output"</span> | tee <span class="text-indigo-600 dark:text-indigo-300">"$output_file"</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}DNS Recursion vulnerability found for $ip. Output saved to $output_file${NC}"</span></span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">elif</span> ! <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"$dig_output"</span> | grep -q <span class="text-indigo-600 dark:text-indigo-300">" flags:.*ad"</span>; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">                <span class="text-gray-500 dark:text-gray-500"># 'ad' flag not found, target is vulnerable to DNSSec not configured</span></span>
-<span class="row">                output_file=<span class="text-indigo-600 dark:text-indigo-300">"results/dnssec/${ip}_dns_dnssec_test.txt"</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"$dig_output"</span> | tee <span class="text-indigo-600 dark:text-indigo-300">"$output_file"</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}DNSSec not configured vulnerability found for $ip. Output saved to $output_file${NC}"</span></span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">                <span class="text-gray-500 dark:text-gray-500"># No vulnerability found</span></span>
-<span class="row">                output_file=<span class="text-indigo-600 dark:text-indigo-300">"results/dnssec/${ip}_dnssec_scan.txt"</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"$dig_output"</span> | tee <span class="text-indigo-600 dark:text-indigo-300">"$output_file"</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}No DNS vulnerabilities found for $ip. Output saved to $output_file${NC}"</span></span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">done</span></span>
+<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Report run time and how to resume if the user aborts the scan.</span></span>
+<span class="row">    <span class="text-sky-600 dark:text-sky-400">trap</span> <span class="text-indigo-600 dark:text-indigo-300">'handle_interrupt INT'</span> INT</span>
+<span class="row">    <span class="text-sky-600 dark:text-sky-400">trap</span> <span class="text-indigo-600 dark:text-indigo-300">'handle_interrupt TERM'</span> TERM</span>
+<span class="row"> </span>
+<span class="row">    handle_discord_webhook</span>
+<span class="row"> </span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [ -n <span class="text-indigo-600 dark:text-indigo-300">"$(opt_get responder_interface)"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">        run_responder <span class="text-indigo-600 dark:text-indigo-300">"$(opt_get responder_interface)"</span> <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span> &amp;</span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
+<span class="row"> </span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"${#TARGETS[@]}"</span> -gt 1 ]] || [[ <span class="text-indigo-600 dark:text-indigo-300">"${TARGETS[0]}"</span> == *<span class="text-indigo-600 dark:text-indigo-300">"/"</span>* ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">      run_live_host_scans</span>
 <span class="row">    <span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}No hosts found with port 53 open. Skipping DNSSec scan.${NC}"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
+<span class="row">      <span class="text-sky-600 dark:text-sky-400">printf</span> <span class="text-indigo-600 dark:text-indigo-300">"%s\n"</span> <span class="text-indigo-600 dark:text-indigo-300">"${TARGETS[@]}"</span> &gt; <span class="text-indigo-600 dark:text-indigo-300">"$output_dir/live_hosts.txt"</span></span>
 <span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}dnsvuln.gnmap not found. Skipping DNSSec scan.${NC}\n"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
 <span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Add the completion message</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}DNS Vulnerabilities Scan Completed.${NC}\n"</span></span>
+<span class="row">    check_for_live_hosts_and_exit</span>
 <span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># ----------------------------- #</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500">#       CRACKMAPEXEC SCAN       #</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># ----------------------------- #</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Run CrackMapExec command</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Starting CrackMapExec for SMBv1 detection.${NC}\n"</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Determine target list</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ -n <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    target_list=<span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">elif</span> [[ -n <span class="text-indigo-600 dark:text-indigo-300">"$single_target"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    target_list=<span class="text-indigo-600 dark:text-indigo-300">"$single_target"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}No valid target specified for CrackMapExec.${NC}"</span></span>
-<span class="row">    target_list=<span class="text-indigo-600 dark:text-indigo-300">""</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [[ -n <span class="text-indigo-600 dark:text-indigo-300">"$target_list"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    crackmapexec smb -p 445 <span class="text-indigo-600 dark:text-indigo-300">"$target_list"</span> | grep SMBv1:True &gt; results/smbv1.txt</span>
-<span class="row"> </span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Check if smbv1.txt has any content</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ -s <span class="text-indigo-600 dark:text-indigo-300">"results/smbv1.txt"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}CrackMapExec found SMBv1 enabled on the following IPs:${NC}"</span></span>
-<span class="row">        cat results/smbv1.txt</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}No SMBv1 enabled hosts found.${NC}\n"</span></span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> opt_true firewall_evasion; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Starting Firewall Evasion Scans.${NC}\n"</span></span>
+<span class="row">        run_firewall_evasion_scans <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}Firewall evasion scans completed.${NC}"</span></span>
+<span class="row">        finalise_reports</span>
+<span class="row">        print_completion_summary</span>
+<span class="row">        <span class="text-sky-600 dark:text-sky-400">exit</span> 0</span>
 <span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}CrackMapExec SMBv1 detection completed.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}No targets provided for CrackMapExec. Skipping SMBv1 detection.${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n--------------------------------\n"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
 <span class="row"> </span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Overall scans completed. Check the 'results' directory for outputs. Happy Hacking!${NC}"</span></span></code></pre>
+<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Starting Network Penetration Scans.${NC}\n"</span></span>
+<span class="row"> </span>
+<span class="row">    run_nmap_scans <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
+<span class="row"> </span>
+<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Launched here, once every nmap scan is done, so the poisoning window does</span></span>
+<span class="row">    <span class="text-gray-500 dark:text-gray-500"># not overlap the port scans. It runs detached while the checks below go on.</span></span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> opt_true mitm6; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">        mitm6_start <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
+<span class="row"> </span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> ! opt_true exclude_web_scans; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">        run_sslscan_scans <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
+<span class="row"> </span>
+<span class="row">        run_sshaudit_scans <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
+<span class="row"> </span>
+<span class="row">    run_metasploit_scans <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
+<span class="row"> </span>
+<span class="row">    run_step <span class="text-indigo-600 dark:text-indigo-300">"smb:smbv1"</span> <span class="text-indigo-600 dark:text-indigo-300">"SMBv1 check"</span> run_smbv1_scan <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
+<span class="row"> </span>
+<span class="row">    run_step <span class="text-indigo-600 dark:text-indigo-300">"smb:unauthrpc"</span> <span class="text-indigo-600 dark:text-indigo-300">"Unauthenticated RPC check"</span> run_unauth_rpc_scan <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
+<span class="row"> </span>
+<span class="row">    run_ldap_scan <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span> <span class="text-indigo-600 dark:text-indigo-300">"${TARGETS[@]}"</span></span>
+<span class="row"> </span>
+<span class="row">    run_dns_scan <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
+<span class="row"> </span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> opt_true pret; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">        run_pret_scan <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
+<span class="row"> </span>
+<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Stop the background attack and fold its findings in before reporting.</span></span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> opt_true mitm6; <span class="text-purple-600 dark:text-purple-400">then</span></span>
+<span class="row">        mitm6_finish <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
+<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
+<span class="row"> </span>
+<span class="row">    finalise_reports</span>
+<span class="row"> </span>
+<span class="row">    mark_completed <span class="text-indigo-600 dark:text-indigo-300">"scan:finished"</span></span>
+<span class="row"> </span>
+<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}All scans completed. Check the '$output_dir' directory for outputs.${NC}\n"</span></span>
+<span class="row">    print_completion_summary</span>
+<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Happy Hacking! - evan (@evanricafort)${NC}"</span></span>
+<span class="row">}</span>
+<span class="row">main <span class="text-indigo-600 dark:text-indigo-300">"$@"</span></span></code></pre>
             </div>
 
             <div class="px-4 py-2.5 bg-gray-200 dark:bg-gray-850 border-t border-gray-300 dark:border-gray-800 flex items-center justify-between text-xs font-mono text-gray-500 dark:text-gray-500">
                 <span>Bash</span>
-                <span>996 lines</span>
+                <span>297 lines</span>
             </div>
         </div>
 
