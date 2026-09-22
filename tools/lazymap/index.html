@@ -626,7 +626,11 @@
             try {
                 const res = await fetch(RAW + path, { cache: 'no-store' });
                 if (!res.ok) throw new Error('HTTP ' + res.status);
-                viewerText = await res.text();
+                /* The viewer splits on \n, so CRLF would leave a carriage
+                   return on every rendered line and Copy would hand out
+                   CRLF. Normalised for display and copy; the file the
+                   Raw link points at is untouched. */
+                viewerText = (await res.text()).replace(/\r\n/g, '\n');
                 renderCode(viewerText);
             } catch (err) {
                 viewerText = '';
