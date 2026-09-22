@@ -174,3 +174,69 @@ footer {
   color: #4b5563;
   border-top: 1px solid var(--line);
 }
+
+/* ---- credentials found inside a recovered source map ---- */
+.tag.secret { background: rgba(248, 113, 113, .18); color: var(--red); }
+
+.secret-bar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 6px;
+}
+.secret-tally { font-size: 10.5px; color: var(--muted); }
+
+.secret-list {
+  margin-top: 5px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  overflow: hidden;
+  max-height: 190px;
+  overflow-y: auto;
+}
+.secret-item {
+  padding: 5px 8px;
+  background: var(--panel);
+  border-left: 3px solid var(--muted);
+}
+.secret-item + .secret-item { border-top: 1px solid var(--line); }
+.secret-item.conf-high   { border-left-color: var(--red); }
+.secret-item.conf-medium { border-left-color: var(--amber); }
+.secret-item.conf-low    { border-left-color: #4b5563; }
+
+.secret-head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  justify-content: space-between;
+}
+.secret-rule {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--text);
+  flex: none;
+}
+.secret-where {
+  font-family: "JetBrains Mono", Consolas, monospace;
+  font-size: 10px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.secret-value {
+  display: block;
+  margin-top: 3px;
+  font-family: "JetBrains Mono", Consolas, monospace;
+  font-size: 10.5px;
+  color: var(--accent);
+  word-break: break-all;
+}
+.secret-more {
+  padding: 5px 8px;
+  font-size: 10.5px;
+  color: var(--muted);
+  background: var(--panel-2);
+}

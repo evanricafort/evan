@@ -101,7 +101,8 @@
             </h1>
             <p class="text-gray-600 dark:text-gray-400 text-sm md:text-lg max-w-2xl mx-auto">
                 A Chrome &amp; Edge extension that automatically scans every page you visit for exposed
-                JavaScript and CSS source maps — and verifies which ones are actually retrievable.
+                JavaScript and CSS source maps, verifies which ones are actually retrievable,
+                then scans the recovered source for hardcoded keys and tokens.
             </p>
             <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
                 <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">Manifest V3</span>
@@ -184,7 +185,7 @@
                     </span>
                     <span class="min-w-0">
                         <span class="block font-mono font-bold text-gray-900 dark:text-white">sourcemap-radar.zip</span>
-                        <span class="block text-sm text-gray-600 dark:text-gray-400 mt-0.5">Unpacked extension — 11 files, <span id="zipSize">21 KB</span>. Unzip, then load it in your browser.</span>
+                        <span class="block text-sm text-gray-600 dark:text-gray-400 mt-0.5">Unpacked extension — 12 files, <span id="zipSize">30 KB</span>. Unzip, then load it in your browser.</span>
                     </span>
                     <i class="fas fa-arrow-right ml-auto text-indigo-500 group-hover:translate-x-1 transition-transform flex-shrink-0"></i>
                 </a>
@@ -432,6 +433,11 @@
                                 <td class="px-5 py-4 text-xs">Also probes stylesheets. Sass/Less maps leak original selectors and structure.</td>
                             </tr>
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                <td class="px-5 py-4 font-bold font-mono text-xs text-indigo-700 dark:text-indigo-300">Scan for secrets</td>
+                                <td class="px-5 py-4 text-emerald-600 dark:text-emerald-400 text-xs font-bold">ON</td>
+                                <td class="px-5 py-4 text-xs">Scans recovered <code class="font-mono">sourcesContent</code> for hardcoded credentials. Capped at 250 sources / 4&nbsp;MB per map.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                                 <td class="px-5 py-4 font-bold font-mono text-xs text-indigo-700 dark:text-indigo-300">Authenticated scan</td>
                                 <td class="px-5 py-4 text-gray-500 dark:text-gray-400 text-xs font-bold">OFF</td>
                                 <td class="px-5 py-4 text-xs">Re-fetches with your session cookies — but only to the page's own domain and its sub/parent domains.</td>
@@ -523,13 +529,14 @@
         const TREE = {
             '': [
                 { name: 'icons', type: 'dir', size: 5235, desc: 'Toolbar icons at 16/32/48/128px' },
-                { name: 'manifest.json', type: 'json', size: 941, desc: 'MV3 manifest — permissions, service worker, content script registration' },
-                { name: 'background.js', type: 'js', size: 16688, desc: 'Service worker: asset collection, tail-range probing, map verification, credential scoping, badge' },
+                { name: 'manifest.json', type: 'json', size: 1046, desc: 'MV3 manifest — permissions, service worker, content script registration' },
+                { name: 'background.js', type: 'js', size: 17601, desc: 'Service worker: asset collection, tail-range probing, map verification, credential scoping, badge' },
+                { name: 'secrets.js', type: 'js', size: 21174, desc: '49-rule credential scanner with the confidence gate — shared with the SourceMap Unmapper' },
                 { name: 'content.js', type: 'js', size: 2294, desc: 'DOM + Resource-Timing sweep — catches cached assets and late SPA chunks' },
-                { name: 'popup.html', type: 'html', size: 1802, desc: 'Popup markup — counters, controls, results list' },
-                { name: 'popup.css', type: 'css', size: 4698, desc: 'Popup styling, dark by default' },
-                { name: 'popup.js', type: 'js', size: 9462, desc: 'Popup logic: rendering, live polling, copy/download/export' },
-                { name: 'README.md', type: 'md', size: 4559, desc: 'Full documentation' }
+                { name: 'popup.html', type: 'html', size: 1881, desc: 'Popup markup — counters, controls, results list' },
+                { name: 'popup.css', type: 'css', size: 6210, desc: 'Popup styling, dark by default' },
+                { name: 'popup.js', type: 'js', size: 11889, desc: 'Popup logic: rendering, live polling, copy/download/export' },
+                { name: 'README.md', type: 'md', size: 5875, desc: 'Full documentation' }
             ],
             'icons': [
                 { name: 'icon16.png', type: 'img', size: 452, desc: 'Toolbar, 16px' },

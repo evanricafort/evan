@@ -2,16 +2,27 @@
   "manifest_version": 3,
   "name": "SourceMap Radar",
   "version": "1.0.0",
-  "description": "Automatically scans every page you visit for exposed JavaScript/CSS source maps and reports which ones are actually reachable.",
-  "permissions": ["webRequest", "storage", "tabs"],
-  "host_permissions": ["<all_urls>"],
+  "description": "Automatically scans every page for exposed JavaScript/CSS source maps, verifies which are actually reachable, and scans the recovered source for hardcoded credentials.",
+  "permissions": [
+    "webRequest",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["http://*/*", "https://*/*"],
-      "js": ["content.js"],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle",
       "all_frames": true
     }

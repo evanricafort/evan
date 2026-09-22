@@ -12,6 +12,10 @@
  *      plenty of build pipelines strip the comment but still ship the file.
  */
 
+/* The credential scanner shared with the JS SourceMap Unmapper. Classic
+   service worker, so this is importScripts rather than an import. */
+importScripts("secrets.js");
+
 const TAIL_BYTES = 4096; // sourceMappingURL comments live at the end of the file
 const MAX_ASSET_BYTES = 8 * 1024 * 1024; // give up on full-fetch fallback past this
 const MAX_MAP_BYTES = 48 * 1024 * 1024;
@@ -24,6 +28,7 @@ const DEFAULT_SETTINGS = {
   includeCss: true, // scan stylesheets as well as scripts
   authScan: false, // send the browser's cookies when re-fetching assets
   authAllOrigins: false, // ...to every origin, not just the page's own domain
+  scanSecrets: true, // scan recovered sourcesContent for hardcoded credentials
 };
 
 const ASSET_PATH_RE = /\.(?:js|mjs|cjs|jsx|ts|tsx|css)(?:$|[?#])/i;
@@ -186,21 +191,35 @@ function findMapComment(text) {
   return last;
 }
 
-function summarizeMap(json) {
+function summarizeMap(json, withSecrets) {
   const sources = Array.isArray(json.sources) ? json.sources : [];
   const contents = Array.isArray(json.sourcesContent) ? json.sourcesContent : [];
   const withContent = contents.filter(
     (c) => typeof c === "string" && c.length > 0
   ).length;
-  return {
+
+  const summary = {
     version: json.version ?? null,
     sourceCount: sources.length,
     embeddedSources: withContent,
     sampleSources: sources.slice(0, 12),
   };
+
+  /* An exposed map is a finding; a key inside it is a much bigger one. The
+     original source is already in hand at this point, so scan it here rather
+     than making the user recover it by hand somewhere else. */
+  if (withSecrets && withContent > 0) {
+    const scan = self.SecretScanner.scanSourceMap(json);
+    summary.secrets = scan.findings;
+    summary.secretsByConf = scan.byConf;
+    summary.secretCount = scan.findings.length;
+    summary.secretScanTruncated = scan.truncated;
+  }
+
+  return summary;
 }
 
-async function fetchMap(url, creds = "omit") {
+async function fetchMap(url, creds = "omit", withSecrets = false) {
   try {
     const res = await fetch(url, { credentials: creds, cache: "no-store" });
     if (!res.ok) return { ok: false, status: res.status, error: `HTTP ${res.status}` };
@@ -220,7 +239,7 @@ async function fetchMap(url, creds = "omit") {
     if (!json || (json.version === undefined && !Array.isArray(json.sources))) {
       return { ok: false, status: res.status, error: "JSON is not a source map" };
     }
-    return { ok: true, status: res.status, size, summary: summarizeMap(json) };
+    return { ok: true, status: res.status, size, summary: summarizeMap(json, withSecrets) };
   } catch (e) {
     return { ok: false, status: 0, error: String(e && e.message ? e.message : e) };
   }
@@ -268,7 +287,7 @@ async function probeAsset(asset, settings, pageUrl) {
   // An inline <script> pointed straight at this URL - there is no separate asset
   // file to tail-read, so go fetch the map directly.
   if (asset.type === "map") {
-    const map = await fetchMap(asset.url, assetCreds);
+    const map = await fetchMap(asset.url, assetCreds, settings.scanSecrets);
     if (map.ok) {
       return {
         ...base,
@@ -304,7 +323,7 @@ async function probeAsset(asset, settings, pageUrl) {
         state: "inline",
         mapUrl: "",
         detail: "source map inlined in the asset",
-        summary: summarizeMap(json),
+        summary: summarizeMap(json, settings.scanSecrets),
       };
     }
     return { ...base, state: "declared", detail: "inline map could not be decoded" };
@@ -319,7 +338,7 @@ async function probeAsset(asset, settings, pageUrl) {
     }
     // The map can sit on a different host than the asset - re-decide there.
     const mapCreds = credentialsFor(mapUrl, pageUrl, settings);
-    const map = await fetchMap(mapUrl, mapCreds);
+    const map = await fetchMap(mapUrl, mapCreds, settings.scanSecrets);
     if (map.ok) {
       return {
         ...base,
@@ -342,7 +361,7 @@ async function probeAsset(asset, settings, pageUrl) {
   if (settings.probeGuess) {
     const guess = guessMapUrl(asset.url);
     if (guess) {
-      const map = await fetchMap(guess, assetCreds);
+      const map = await fetchMap(guess, assetCreds, settings.scanSecrets);
       if (map.ok) {
         return {
           ...base,

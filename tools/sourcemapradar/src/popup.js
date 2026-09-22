@@ -124,6 +124,59 @@ function render() {
         pre.textContent = r.summary.sampleSources.join("\n");
         li.append(pre);
       }
+
+      /* Credentials found inside the recovered source. Everything below is
+         text taken from the scanned site, so it is written with textContent
+         only - putting page-controlled strings through innerHTML here would
+         be an injection into a privileged extension page. */
+      if (r.summary.secretCount > 0) {
+        const by = r.summary.secretsByConf || {};
+        const bar = document.createElement("div");
+        bar.className = "secret-bar";
+
+        const chip = document.createElement("span");
+        chip.className = "tag secret";
+        chip.textContent = r.summary.secretCount === 1 ? "1 secret" : r.summary.secretCount + " secrets";
+
+        const tally = document.createElement("span");
+        tally.className = "secret-tally";
+        tally.textContent = (by.high || 0) + " high · " + (by.medium || 0) + " medium · " + (by.low || 0) + " low" +
+          (r.summary.secretScanTruncated ? " · scan capped" : "");
+
+        bar.append(chip, tally);
+        li.append(bar);
+
+        const list = document.createElement("div");
+        list.className = "secret-list";
+        for (const f of r.summary.secrets.slice(0, 25)) {
+          const item = document.createElement("div");
+          item.className = "secret-item conf-" + f.conf;
+
+          const head = document.createElement("div");
+          head.className = "secret-head";
+          const name = document.createElement("span");
+          name.className = "secret-rule";
+          name.textContent = f.rule;
+          const where = document.createElement("span");
+          where.className = "secret-where";
+          where.textContent = f.source + ":" + f.line;
+          head.append(name, where);
+
+          const val = document.createElement("code");
+          val.className = "secret-value";
+          val.textContent = f.value;
+
+          item.append(head, val);
+          list.append(item);
+        }
+        if (r.summary.secrets.length > 25) {
+          const more = document.createElement("div");
+          more.className = "secret-more";
+          more.textContent = "+" + (r.summary.secrets.length - 25) + " more in the JSON export";
+          list.append(more);
+        }
+        li.append(list);
+      }
     }
 
     const actions = document.createElement("div");
@@ -218,6 +271,7 @@ async function refresh() {
   $("opt-auto").checked = res.settings.autoScan;
   $("opt-guess").checked = res.settings.probeGuess;
   $("opt-css").checked = res.settings.includeCss;
+  $("opt-secrets").checked = res.settings.scanSecrets;
   $("opt-auth").checked = res.settings.authScan;
   $("opt-auth-all").checked = res.settings.authAllOrigins;
   renderAuthNote(res.settings, res.state?.pageUrl);
@@ -258,6 +312,8 @@ async function init() {
           ? "all origins"
           : "page domain only"
         : false,
+      secretsFound: Object.values(current.state.results)
+        .reduce((n, r) => n + (r.summary?.secretCount || 0), 0),
       findings: Object.values(current.state.results).filter((r) => r.state !== "clean"),
       assetsScanned: Object.keys(current.state.results).length,
     };
@@ -270,6 +326,7 @@ async function init() {
     ["opt-auto", "autoScan"],
     ["opt-guess", "probeGuess"],
     ["opt-css", "includeCss"],
+    ["opt-secrets", "scanSecrets"],
   ]) {
     $(id).onchange = async (e) => {
       await send({ type: "setSettings", settings: { [key]: e.target.checked } });

@@ -33,6 +33,30 @@ Findings report the source count, how many entries have `sourcesContent` (meanin
 original source is fully recoverable, not just filenames), the map size, and a sample of
 source paths.
 
+## Hardcoded credential scanning
+
+When a map comes back with `sourcesContent`, the original source is already in
+hand — so it gets scanned for hardcoded keys and tokens right there, using the
+same 49-rule engine as the
+[JS SourceMap Unmapper](https://evanricafort.com/tools/sourcemapunmapper/)
+(`secrets.js` is a direct port, so both tools agree on what counts as a secret).
+
+Findings are reported per confidence tier:
+
+- **high** — provider formats with a fixed prefix and length (`AKIA…`, `ghp_…`,
+  `AIza…`, Stripe, Slack, Telegram, Sentry, connection strings). Near conclusive.
+- **medium** — a named credential assigned a quoted value, entropy gated.
+- **low** — the broad keyword sweep, behind the strictest gate. Triage these.
+
+Matches are dropped for `${TEMPLATE}` interpolation and `process.env` lookups,
+vendor documentation samples (`AKIAIOSFODNN7EXAMPLE`, Stripe's `sk_test_4eC39…`),
+filler values, paths, MIME types, locales, semvers, colours, dates and bare
+identifiers. Low-tier hits additionally have to clear a Shannon entropy floor.
+
+Scanning is capped at 250 sources / 4 MB / 200 findings per map so one enormous
+map cannot wedge the service worker; the popup says "scan capped" when a cap hit.
+Turn the whole thing off with the **Scan for secrets** toggle.
+
 ## Verdicts
 
 | Tag | Meaning |
@@ -78,7 +102,7 @@ The toolbar badge shows the count of exposed + inline maps for the current tab (
 non-zero). The popup lists findings with per-item **Copy map URL**, **Open**, and
 **Download .map**, plus **Export JSON** for the whole page.
 
-Toggles: **Auto-scan** (scan on page load), **Guess `.map`**, **Include CSS**,
+Toggles: **Auto-scan** (scan on page load), **Guess `.map`**, **Include CSS**, **Scan for secrets**,
 **Findings only**, **Authenticated scan** (+ **All origins**).
 
 ## Notes
