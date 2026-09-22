@@ -1,5 +1,6 @@
+import argparse
 import random
- 
+
 # Telco prefixes for Philippines
 telco_prefixes = [
     # Globe/TM
@@ -10,19 +11,52 @@ telco_prefixes = [
     "991", "992", "993", "994", "995"
 ]
 
-# Modify this value to change the number of test entries generated.
-num_numbers = 1000
-numbers = []
- 
-for _ in range(num_numbers):
-    prefix = random.choice(telco_prefixes)
-    suffix = "".join([str(random.randint(0, 9)) for _ in range(7)])
-    number = prefix + suffix  # Already starts with 9
-    numbers.append(number)
- 
-# Save to TXT file
 file_path = "philippine_mobile_numbers.txt"
-with open(file_path, "w") as f:
-    f.write("\n".join(numbers))
- 
-file_path
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Generate random Philippine mobile numbers for use as test data."
+    )
+    parser.add_argument(
+        "--gen", type=int, default=1000, metavar="N",
+        help="how many numbers to generate (default: 1000)"
+    )
+    parser.add_argument(
+        "--full", action="store_true",
+        help="write the full 11-digit format with a leading zero (09XXXXXXXXX) "
+             "instead of the 10-digit 9XXXXXXXXX"
+    )
+    return parser.parse_args()
+
+
+def generate(count, full):
+    numbers = []
+    for _ in range(count):
+        prefix = random.choice(telco_prefixes)
+        suffix = "".join([str(random.randint(0, 9)) for _ in range(7)])
+        number = prefix + suffix  # Already starts with 9
+        if full:
+            number = "0" + number  # 09XXXXXXXXX
+        numbers.append(number)
+    return numbers
+
+
+def main():
+    args = parse_args()
+
+    if args.gen < 1:
+        raise SystemExit("--gen needs a positive number, got {}.".format(args.gen))
+
+    numbers = generate(args.gen, args.full)
+
+    # Save to TXT file
+    with open(file_path, "w") as f:
+        f.write("\n".join(numbers))
+
+    print("Wrote {} numbers ({}-digit) to {}".format(
+        len(numbers), 11 if args.full else 10, file_path))
+
+
+if __name__ == "__main__":
+    main()

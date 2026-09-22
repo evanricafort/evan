@@ -105,6 +105,7 @@
                 <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">Python 3</span>
                 <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-850 text-gray-600 dark:text-gray-400">Single file</span>
                 <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-850 text-gray-600 dark:text-gray-400">36 prefixes</span>
+                <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-850 text-gray-600 dark:text-gray-400">10 or 11 digit</span>
                 <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400">Standard library only</span>
             </div>
         </div>
@@ -176,7 +177,7 @@
                     </span>
                     <span class="min-w-0">
                         <span class="block font-mono font-bold text-gray-900 dark:text-white">phmobilenumbergenerator.py</span>
-                        <span class="block text-sm text-gray-600 dark:text-gray-400 mt-0.5">One file, <span id="pySize">868 B</span>. Save it anywhere and run it &mdash; there is nothing to install.</span>
+                        <span class="block text-sm text-gray-600 dark:text-gray-400 mt-0.5">One file, <span id="pySize">1767 B</span>. Save it anywhere and run it &mdash; there is nothing to install.</span>
                     </span>
                     <i class="fas fa-arrow-right ml-auto text-indigo-500 group-hover:translate-x-1 transition-transform flex-shrink-0"></i>
                 </a>
@@ -221,9 +222,9 @@
                 <div class="flex gap-4">
                     <span class="step-num bg-indigo-600 text-white">2</span>
                     <div class="min-w-0 flex-1 space-y-2">
-                        <p class="font-bold text-gray-900 dark:text-white">Set how many you want</p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Optional. Edit <span class="font-mono text-indigo-600 dark:text-indigo-300">num_numbers</span> near the top &mdash; it defaults to 1000.</p>
-                        <pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">num_numbers = 5000</pre>
+                        <p class="font-bold text-gray-900 dark:text-white">Pick how many, and which format</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Both optional. <span class="font-mono text-indigo-600 dark:text-indigo-300">--gen</span> sets the count, <span class="font-mono text-indigo-600 dark:text-indigo-300">--full</span> switches to the 11-digit form. Run with <span class="font-mono text-indigo-600 dark:text-indigo-300">-h</span> to see them.</p>
+                        <pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">python3 phmobilenumbergenerator.py --gen 5000 --full</pre>
                     </div>
                 </div>
                 <div class="flex gap-4">
@@ -243,6 +244,49 @@
                     </div>
                 </div>
             </div>
+
+            <div class="pt-2 space-y-4">
+                <p class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Flags</p>
+                <div class="overflow-x-auto code-scroll">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs uppercase text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">
+                            <tr>
+                                <th scope="col" class="py-2 pr-4 font-semibold">Flag</th>
+                                <th scope="col" class="py-2 font-semibold">What it does</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-gray-700 dark:text-gray-300">
+                            <tr>
+                                <td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">--gen N</td>
+                                <td class="py-2">How many numbers to write. Defaults to 1000.</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">--full</td>
+                                <td class="py-2">Write the full 11-digit form with a leading zero, <span class="font-mono">09XXXXXXXXX</span>, instead of the 10-digit <span class="font-mono">9XXXXXXXXX</span>.</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">-h, --help</td>
+                                <td class="py-2">Show the flags and exit.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="space-y-1.5">
+                        <p class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Default</p>
+                        <pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">python3 phmobilenumbergenerator.py</pre>
+                    </div>
+                    <div class="space-y-1.5">
+                        <p class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">A different count</p>
+                        <pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">python3 phmobilenumbergenerator.py --gen 250</pre>
+                    </div>
+                    <div class="space-y-1.5">
+                        <p class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Full 11-digit</p>
+                        <pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">python3 phmobilenumbergenerator.py --gen 250 --full</pre>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- =============================== OUTPUT =============================== -->
@@ -255,8 +299,14 @@
                 <div class="space-y-3">
                     <p class="text-sm text-gray-600 dark:text-gray-400">
                         A plain text file, <span class="font-mono text-indigo-600 dark:text-indigo-300">philippine_mobile_numbers.txt</span>,
-                        with one 10-digit number per line. Each is a three-digit network prefix followed by seven random digits,
-                        so every line starts with a 9 and looks like a real local-format mobile number.
+                        with one number per line. Each is a three-digit network prefix followed by seven random digits, so it
+                        reads as a real local-format mobile number.
+                    </p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        By default that is the 10-digit <span class="font-mono text-indigo-600 dark:text-indigo-300">9XXXXXXXXX</span>.
+                        Pass <span class="font-mono text-indigo-600 dark:text-indigo-300">--full</span> and a leading zero is added
+                        for the 11-digit <span class="font-mono text-indigo-600 dark:text-indigo-300">09XXXXXXXXX</span> that most
+                        Philippine forms expect.
                     </p>
                     <div class="overflow-x-auto code-scroll">
                         <table class="w-full text-sm text-left">
@@ -277,19 +327,32 @@
                     </div>
                 </div>
 
-                <div class="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
-                    <div class="bg-gray-50 dark:bg-gray-850 px-4 py-2.5 border-b border-gray-200 dark:border-gray-800 flex items-center gap-2">
-                        <i class="fas fa-file-lines text-gray-400 dark:text-gray-500 text-xs"></i>
-                        <span class="font-mono text-xs text-gray-600 dark:text-gray-400">philippine_mobile_numbers.txt</span>
-                        <span class="ml-auto font-mono text-[10px] text-gray-400 dark:text-gray-600">1000 lines</span>
-                    </div>
-                    <pre class="bg-white dark:bg-[#0d1117] p-4 font-mono text-xs leading-relaxed text-gray-700 dark:text-gray-300 overflow-x-auto code-scroll">9387469568
+                <div class="space-y-4">
+                    <div class="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
+                        <div class="bg-gray-50 dark:bg-gray-850 px-4 py-2.5 border-b border-gray-200 dark:border-gray-800 flex items-center gap-2">
+                            <i class="fas fa-file-lines text-gray-400 dark:text-gray-500 text-xs"></i>
+                            <span class="font-mono text-xs text-gray-600 dark:text-gray-400">default &mdash; 10 digit</span>
+                            <span class="ml-auto font-mono text-[10px] text-gray-400 dark:text-gray-600">1000 lines</span>
+                        </div>
+                        <pre class="bg-white dark:bg-[#0d1117] p-4 font-mono text-xs leading-relaxed text-gray-700 dark:text-gray-300 overflow-x-auto code-scroll">9387469568
 9311616030
 9201121187
 9947009647
-9658771422
-9378286599
-<span class="text-gray-400 dark:text-gray-600">&hellip;994 more</span></pre>
+<span class="text-gray-400 dark:text-gray-600">&hellip;996 more</span></pre>
+                    </div>
+
+                    <div class="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
+                        <div class="bg-gray-50 dark:bg-gray-850 px-4 py-2.5 border-b border-gray-200 dark:border-gray-800 flex items-center gap-2">
+                            <i class="fas fa-file-lines text-gray-400 dark:text-gray-500 text-xs"></i>
+                            <span class="font-mono text-xs text-gray-600 dark:text-gray-400">--full &mdash; 11 digit</span>
+                            <span class="ml-auto font-mono text-[10px] text-gray-400 dark:text-gray-600">leading 0</span>
+                        </div>
+                        <pre class="bg-white dark:bg-[#0d1117] p-4 font-mono text-xs leading-relaxed text-gray-700 dark:text-gray-300 overflow-x-auto code-scroll">09635225326
+09688042797
+09365684124
+09687720714
+<span class="text-gray-400 dark:text-gray-600">&hellip;996 more</span></pre>
+                    </div>
                 </div>
             </div>
 
@@ -340,7 +403,7 @@
            use, and the size is read from the response rather than written
            into the markup where it would go stale. */
         const FILES = [
-            { name: 'phmobilenumbergenerator.py', type: 'py', size: 868, desc: 'The whole tool - prefix table, generator loop, file write' }
+            { name: 'phmobilenumbergenerator.py', type: 'py', size: 1767, desc: 'The whole tool - flags, prefix table, generator, file write' }
         ];
 
         const ICONS = {
