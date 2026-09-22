@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lazymap</title>
-    <meta name="description" content="Command-line network penetration testing kit that combines selected nmap scripts, sslscan, ssh-audit, dig, ldapsearch, curl, rpcclient, selected metasploit modules, PRET and wget." />
+    <title>lazymap</title>
+    <meta name="description" content="A single command-line tool for network penetration testing. It combines multiple selected nmap scripts, sslscan, ssh-audit, dig, ldapsearch, curl, rpcclient, selected metasploit mo" />
     <link href="/profile.jpg" type="image/jpeg" rel="shortcut icon" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -41,21 +41,32 @@
         @keyframes tk-logo-float { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-5px) rotate(-6deg)} 75%{transform:translateY(-2px) rotate(6deg)} }
         @media (prefers-reduced-motion: reduce){ .tk-anim-logo{animation:none} }
 
-        /* Terminal. Line numbers come from a counter on each row rather than
-           a second column, so selecting the code copies the code alone. */
-        .tk-term-body { counter-reset: line; }
-        .tk-term-body .row { counter-increment: line; display: block; }
-        .tk-term-body .row::before {
-            content: counter(line);
-            display: inline-block;
-            width: 3rem;
-            padding-right: 1rem;
-            text-align: right;
-            color: #4b5563;
-            user-select: none;
-            -webkit-user-select: none;
+        /* Repo-style file rows */
+        .repo-row:hover { background-color: rgba(99, 102, 241, .06); }
+        .dark .repo-row:hover { background-color: rgba(99, 102, 241, .10); }
+        .repo-row.is-active { background-color: rgba(99, 102, 241, .10); }
+        .dark .repo-row.is-active { background-color: rgba(99, 102, 241, .16); }
+
+        .code-scroll::-webkit-scrollbar { width: 10px; height: 10px; }
+        .code-scroll::-webkit-scrollbar-track { background: transparent; }
+        .code-scroll::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 5px; }
+        .dark .code-scroll::-webkit-scrollbar-thumb { background: #374151; }
+
+        /* Line numbers for the file viewer */
+        .code-lines { counter-reset: ln; }
+        .code-lines .ln-row { display: grid; grid-template-columns: 3.5rem 1fr; }
+        .code-lines .ln-num {
+            text-align: right; padding-right: 1rem; user-select: none;
+            color: #9ca3af; border-right: 1px solid rgba(148,163,184,.25);
         }
-        .tk-term-body .row:hover::before { color: #818cf8; }
+        .dark .code-lines .ln-num { color: #4b5563; }
+        .code-lines .ln-txt { padding-left: 1rem; white-space: pre; }
+
+        .step-num {
+            display:inline-flex; align-items:center; justify-content:center;
+            width:1.75rem; height:1.75rem; border-radius:9999px; flex:none;
+            font-size:.75rem; font-weight:800; font-family:'JetBrains Mono',monospace;
+        }
     </style>
     <link rel="stylesheet" href="/css/tool-shell.css">
     <script src="/js/geo-web.js" defer></script>
@@ -79,367 +90,208 @@
         </button>
     </div>
 
-    <main class="w-full max-w-3xl space-y-8 mt-8">
+    <main class="w-full max-w-5xl space-y-8 mt-8">
 
         <div class="text-center space-y-3">
             <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center justify-center gap-3">
                 <i class="fas fa-network-wired tk-anim-logo text-indigo-600 dark:text-indigo-500"></i>
-                <span><span class="text-indigo-600 dark:text-indigo-500">Lazy</span>map</span>
+                <span><span class="text-indigo-600 dark:text-indigo-500">lazy</span>map</span>
             </h1>
-            <p class="text-gray-600 dark:text-gray-400 text-sm md:text-lg max-w-xl mx-auto">
+            <p class="text-gray-600 dark:text-gray-400 text-sm md:text-lg max-w-2xl mx-auto">
                 A single command-line tool for network penetration testing. It combines multiple selected nmap scripts, sslscan, ssh-audit, dig, ldapsearch, curl, rpcclient, selected metasploit modules, PRET and wget.
             </p>
-        </div>
-
-        <div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-xl p-6 flex gap-3">
-            <i class="fas fa-circle-info text-indigo-600 dark:text-indigo-300 mt-1"></i>
-            <div class="text-sm text-gray-700 dark:text-gray-300 space-y-2">
-                <p class="font-bold text-gray-900 dark:text-white">How to run it</p>
-                <p>lazymap is a multi-file project, so clone the repository rather than saving the script on its own &mdash; the entry script below sources the rest of the tree.</p>
-                <pre class="bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto font-mono text-xs text-gray-800 dark:text-indigo-300">git clone https://github.com/evanricafort/lazymap.git &amp;&amp; cd lazymap &amp;&amp; sudo chmod +x lazymap.sh lib/*.sh extra/*.sh reports/*.sh scans/*.sh &amp;&amp; sudo ./lazymap.sh -h</pre>
-                <p>Then run <span class="font-mono text-indigo-600 dark:text-indigo-300">./lazymap.sh -u host</span> for a single target or <span class="font-mono text-indigo-600 dark:text-indigo-300">./lazymap.sh -t hosts</span> for a file of them. Missing dependencies can be pulled in with <span class="font-mono text-indigo-600 dark:text-indigo-300">sudo ./lazymap.sh --install-deps</span>.</p>
-                <p class="text-gray-500 dark:text-gray-400">Requires Bash 3.0 or higher, including the 3.2 that ships with macOS. Run in sudo mode for the nmap scripts that need raw sockets. Only point it at hosts you are authorized to test.</p>
+            <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+                <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">Bash</span>
+<span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-850 text-gray-600 dark:text-gray-400">v1.0</span>
+<span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-850 text-gray-600 dark:text-gray-400">Bash 3.0+ &middot; macOS ok</span>
+<span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400">Auto dependency install</span>
             </div>
         </div>
 
-        <!-- Terminal -->
-        <div class="rounded-2xl overflow-hidden border border-gray-300 dark:border-gray-800 shadow-xl dark:shadow-black/50">
+        <!-- Section pills -->
+        <div class="flex flex-wrap items-center justify-center gap-2">
+            <a href="#repo" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-folder-tree"></i> Source</a>
+<a href="#download" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-download"></i> Download</a>
+<a href="#install" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-terminal"></i> Install</a>
+<a href="#usage" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-book-open"></i> Usage</a>
+        </div>
 
-            <div class="flex items-center gap-3 px-4 py-3 bg-gray-200 dark:bg-gray-850 border-b border-gray-300 dark:border-gray-800">
-                <span class="flex gap-2 flex-shrink-0" aria-hidden="true">
-                    <span class="w-3 h-3 rounded-full bg-red-400 dark:bg-red-500/80"></span>
-                    <span class="w-3 h-3 rounded-full bg-yellow-400 dark:bg-yellow-500/80"></span>
-                    <span class="w-3 h-3 rounded-full bg-green-400 dark:bg-green-500/80"></span>
+        <!-- ============================ REPO BROWSER ============================ -->
+        <section id="repo" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-xl dark:shadow-black/50">
+
+            <div class="bg-gray-50 dark:bg-gray-850 px-5 py-4 border-b border-gray-200 dark:border-gray-800 flex flex-wrap items-center gap-3">
+                <i class="fas fa-book text-gray-400 dark:text-gray-500"></i>
+                <span class="font-mono text-sm font-bold">
+                    <span class="text-gray-500 dark:text-gray-400">evanricafort</span><span class="text-gray-400 dark:text-gray-600">/</span><span class="text-indigo-600 dark:text-indigo-400">lazymap</span>
                 </span>
-                <span class="flex-1 text-center font-mono text-xs text-gray-600 dark:text-gray-400 truncate">lazymap.sh</span>
-                <div class="flex items-center gap-2 flex-shrink-0">
-                    <button id="btnCopy" title="Copy to clipboard" class="px-2.5 py-1.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white text-xs font-bold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <i class="fas fa-copy"></i> <span class="hidden sm:inline">Copy</span>
-                    </button>
-                    <a id="btnDownload" href="https://github.com/evanricafort/lazymap" title="Get Lazymap on GitHub" class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <i class="fab fa-github"></i> <span class="hidden sm:inline">GitHub</span>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400">Public</span>
+                <div class="ml-auto flex items-center gap-2">
+                    <span class="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono text-gray-500 dark:text-gray-400 px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <i class="fas fa-code-branch"></i> main
+                    </span>
+                    <a href="https://github.com/evanricafort/lazymap" class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wide px-3.5 py-2 rounded-lg text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 shadow transition-all transform active:scale-[0.98]">
+                        <i class="fab fa-github"></i> Code
                     </a>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-[#0d1117] overflow-x-auto">
-                <pre class="tk-term-body p-4 md:p-5 font-mono text-xs md:text-sm leading-relaxed text-gray-800 dark:text-gray-300"><code id="scriptSource"><span class="row"><span class="text-gray-500 dark:text-gray-500">#!/usr/bin/env bash</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># lazymap runs on Bash 3.0 and newer, including the 3.2 shipped by macOS.</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [ -z <span class="text-indigo-600 dark:text-indigo-300">"${BASH_VERSINFO[0]}"</span> ] || [ <span class="text-indigo-600 dark:text-indigo-300">"${BASH_VERSINFO[0]}"</span> -lt 3 ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"Error: lazymap requires Bash 3.0 or newer (found ${BASH_VERSION:-unknown})."</span> &gt;&amp;2</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Resolve the installation directory so lazymap can be launched from anywhere.</span></span>
-<span class="row">LAZYMAP_DIR=<span class="text-indigo-600 dark:text-indigo-300">"$(cd -- "</span>$(dirname -- <span class="text-indigo-600 dark:text-indigo-300">"${BASH_SOURCE[0]}"</span>)<span class="text-indigo-600 dark:text-indigo-300">" &amp;&amp; pwd)"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">export</span> LAZYMAP_DIR</span>
-<span class="row"> </span>
-<span class="row">start_time=$(date +%s)</span>
-<span class="row">start_date=$(date)</span>
-<span class="row">output_dir=<span class="text-indigo-600 dark:text-indigo-300">"results"</span></span>
-<span class="row">TARGETS=()</span>
-<span class="row">discord_webhook=<span class="text-indigo-600 dark:text-indigo-300">""</span></span>
-<span class="row">RESUME_HINT=<span class="text-indigo-600 dark:text-indigo-300">"sudo ./lazymap.sh --resume"</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/lib/compat.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/lib/colors.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/lib/state.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/lib/installer.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/lib/help.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/lib/checks.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/nmap.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/sslscan.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/sshaudit.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/metasploit.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/smbv1.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/unauthrpc.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/ldap.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/dns.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/mitm6.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/pret.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/extra/responder.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/reports/html_report.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/reports/send_discord_webhook.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$LAZYMAP_DIR/scans/live_hosts.sh"</span></span>
-<span class="row"> </span>
-<span class="row">handle_discord_webhook() {</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> opt_true send_to_discord; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Please enter the Discord webhook URL:${NC}"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">read</span> -r discord_webhook</span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> [[ -z <span class="text-indigo-600 dark:text-indigo-300">"$discord_webhook"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: No Discord webhook URL provided. Aborting Discord report send.${NC}"</span></span>
-<span class="row">            opt_unset send_to_discord</span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">}</span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Produces the HTML report and sends it on if --discord was used. Called from</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># every exit path so a run always leaves a report behind.</span></span>
-<span class="row">finalise_reports() {</span>
-<span class="row">    end_date=$(date)</span>
-<span class="row">    generate_html_report <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span> <span class="text-indigo-600 dark:text-indigo-300">"$start_date"</span> <span class="text-indigo-600 dark:text-indigo-300">"$end_date"</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> opt_true send_to_discord &amp;&amp; [ -n <span class="text-indigo-600 dark:text-indigo-300">"$discord_webhook"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        send_discord_webhook <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span> <span class="text-indigo-600 dark:text-indigo-300">"$discord_webhook"</span> <span class="text-indigo-600 dark:text-indigo-300">"$start_date"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">}</span>
-<span class="row"> </span>
-<span class="row">check_for_live_hosts_and_exit() {</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> live_hosts_file=<span class="text-indigo-600 dark:text-indigo-300">"$output_dir/live_hosts.txt"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ ! -s <span class="text-indigo-600 dark:text-indigo-300">"$live_hosts_file"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${BLUE}======================================================${NC}"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}🚨 Scan Termination Notice 🚨${NC}"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}======================================================${NC}"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${CYAN}No live host IP/s were found in the defined target scope.${NC}"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${CYAN}Scanning process has been successfully terminated.${NC}"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${CYAN}Output directory: ${output_dir} (created)${NC}"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}======================================================${NC}\n"</span></span>
-<span class="row"> </span>
-<span class="row">        <span class="text-gray-500 dark:text-gray-500"># A report is still produced, recording that the scope had no live hosts.</span></span>
-<span class="row">        finalise_reports</span>
-<span class="row"> </span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Scan finished in $(elapsed_runtime).${NC}\n"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">exit</span> 0</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">}</span>
-<span class="row"> </span>
-<span class="row">print_completion_summary() {</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}======================================================${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Scan Complete${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}======================================================${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${CYAN}Started  : ${start_date}${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${CYAN}Finished : $(date)${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${CYAN}Run time : $(elapsed_runtime)${NC}"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$RESUME_MODE"</span> == true ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${CYAN}Resumed  : yes (${SKIPPED_STEPS} step(s) skipped)${NC}"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${CYAN}Output   : ${output_dir}${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}======================================================${NC}"</span></span>
-<span class="row">}</span>
-<span class="row"> </span>
-<span class="row">main() {</span>
-<span class="row">    display_ascii_art</span>
-<span class="row"> </span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># GNU getopt is required for the long options below.</span></span>
-<span class="row">    getopt --test &gt;/dev/null 2&gt;&amp;1</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ $? -ne 4 ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: GNU getopt is required (install 'util-linux', or on macOS 'brew install gnu-getopt').${NC}"</span> &gt;&amp;2</span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row">    build_resume_hint <span class="text-indigo-600 dark:text-indigo-300">"$@"</span></span>
-<span class="row"> </span>
-<span class="row">    TEMP=$(getopt -o t:u:1234ankhbo:y --long pret,interface:,help,exclude-udp,discord,resume,install-deps,yes,domain:,userlist:,mitm6,mitm6-interface:,mitm6-time:,ntp-dos,script-timeout:,host-timeout:,nmap-stall:,no-nmap-watchdog -n <span class="text-indigo-600 dark:text-indigo-300">"$0"</span> -- <span class="text-indigo-600 dark:text-indigo-300">"$@"</span>)</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [ $? != 0 ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: Failed to parse options.${NC}"</span> &gt;&amp;2</span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">eval</span> <span class="text-sky-600 dark:text-sky-400">set</span> -- <span class="text-indigo-600 dark:text-indigo-300">"$TEMP"</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">while</span> true; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">case</span> <span class="text-indigo-600 dark:text-indigo-300">"$1"</span> <span class="text-purple-600 dark:text-purple-400">in</span></span>
-<span class="row">            -t ) targets_file=$2; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
-<span class="row">            -u )</span>
-<span class="row">                <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$2"</span> == *<span class="text-indigo-600 dark:text-indigo-300">","</span>* || <span class="text-indigo-600 dark:text-indigo-300">"$2"</span> == *<span class="text-indigo-600 dark:text-indigo-300">" "</span>* || <span class="text-indigo-600 dark:text-indigo-300">"$2"</span> == *<span class="text-indigo-600 dark:text-indigo-300">"/"</span>* ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">                    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: -u option accepts only a single IP address or hostname.${NC}"</span></span>
-<span class="row">                    <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row">                <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">                single_target=$2; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
-<span class="row">            -1 ) opt_set vulners true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">            -2 ) opt_set vuln true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">            -3 ) opt_set vulners true; opt_set vuln true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">            -4 ) opt_set firewall_evasion true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">            -a ) opt_set exclude_allports true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">            -n ) opt_set add_nT4 true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">            -k ) opt_set exclude_web_scans true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">            -b ) opt_set add_A_minrate_open true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">            -o ) output_dir=$2; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
-<span class="row">            --pret ) opt_set pret true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">            --interface ) opt_set responder_interface <span class="text-indigo-600 dark:text-indigo-300">"$2"</span>; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
-<span class="row">            --exclude-udp ) opt_set exclude_udp true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">            --discord ) opt_set send_to_discord true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">            --resume ) RESUME_MODE=true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">            --domain ) opt_set kerberos_domain <span class="text-indigo-600 dark:text-indigo-300">"$2"</span>; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
-<span class="row">            --ntp-dos ) opt_set ntp_dos true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">            --script-timeout ) opt_set script_timeout <span class="text-indigo-600 dark:text-indigo-300">"$2"</span>; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
-<span class="row">            --nmap-stall ) opt_set nmap_stall <span class="text-indigo-600 dark:text-indigo-300">"$2"</span>; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
-<span class="row">            --no-nmap-watchdog ) opt_set nmap_watchdog_off true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">            --host-timeout ) opt_set host_timeout <span class="text-indigo-600 dark:text-indigo-300">"$2"</span>; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
-<span class="row">            --mitm6 ) opt_set mitm6 true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">            --mitm6-interface ) opt_set mitm6_interface <span class="text-indigo-600 dark:text-indigo-300">"$2"</span>; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
-<span class="row">            --mitm6-time ) opt_set mitm6_duration <span class="text-indigo-600 dark:text-indigo-300">"$2"</span>; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
-<span class="row">            --userlist ) opt_set kerberos_userlist <span class="text-indigo-600 dark:text-indigo-300">"$2"</span>; <span class="text-sky-600 dark:text-sky-400">shift</span> 2 ;;</span>
-<span class="row">            --install-deps ) AUTO_INSTALL=true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">            -y | --yes ) ASSUME_YES=true; <span class="text-sky-600 dark:text-sky-400">shift</span> ;;</span>
-<span class="row">            -h | --help ) display_help; <span class="text-sky-600 dark:text-sky-400">exit</span> 0 ;;</span>
-<span class="row">            -- ) <span class="text-sky-600 dark:text-sky-400">shift</span>; <span class="text-purple-600 dark:text-purple-400">break</span> ;;</span>
-<span class="row">            * ) <span class="text-purple-600 dark:text-purple-400">break</span> ;;</span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">esac</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">done</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> nmap_stall_opt</span>
-<span class="row">    nmap_stall_opt=<span class="text-indigo-600 dark:text-indigo-300">"$(opt_get nmap_stall)"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [ -n <span class="text-indigo-600 dark:text-indigo-300">"$nmap_stall_opt"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">case</span> <span class="text-indigo-600 dark:text-indigo-300">"$nmap_stall_opt"</span> <span class="text-purple-600 dark:text-purple-400">in</span></span>
-<span class="row">            <span class="text-indigo-600 dark:text-indigo-300">''</span>|*[!0-9]*) <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: --nmap-stall expects a whole number of seconds.${NC}"</span>; <span class="text-sky-600 dark:text-sky-400">exit</span> 1 ;;</span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">esac</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> [ <span class="text-indigo-600 dark:text-indigo-300">"$nmap_stall_opt"</span> -lt 60 ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: --nmap-stall must be at least 60 seconds; a slow scan is not a stalled one.${NC}"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">local</span> mitm6_time</span>
-<span class="row">    mitm6_time=<span class="text-indigo-600 dark:text-indigo-300">"$(opt_get mitm6_duration)"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [ -n <span class="text-indigo-600 dark:text-indigo-300">"$mitm6_time"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">case</span> <span class="text-indigo-600 dark:text-indigo-300">"$mitm6_time"</span> <span class="text-purple-600 dark:text-purple-400">in</span></span>
-<span class="row">            <span class="text-indigo-600 dark:text-indigo-300">''</span>|*[!0-9]*) <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: --mitm6-time expects a whole number of seconds.${NC}"</span>; <span class="text-sky-600 dark:text-sky-400">exit</span> 1 ;;</span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">esac</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> [ <span class="text-indigo-600 dark:text-indigo-300">"$mitm6_time"</span> -lt 30 ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: --mitm6-time must be at least 30 seconds to observe anything useful.${NC}"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Allow "--install-deps" on its own to set the machine up with no scan.</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$AUTO_INSTALL"</span> == true &amp;&amp; -z <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span> &amp;&amp; -z <span class="text-indigo-600 dark:text-indigo-300">"$single_target"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        run_install_deps_only</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ -n <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span> &amp;&amp; -n <span class="text-indigo-600 dark:text-indigo-300">"$single_target"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: Cannot specify both a targets file (-t) and a single target (-u).${NC}"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ -n <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> [[ ! -f <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: Targets file '$targets_file' not found!${NC}"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">        read_lines_into TARGETS &lt; <span class="text-indigo-600 dark:text-indigo-300">"$targets_file"</span></span>
-<span class="row">        <span class="text-gray-500 dark:text-gray-500"># Drop blank lines and comments so they never reach nmap.</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">local</span> cleaned=()</span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">for</span> t <span class="text-purple-600 dark:text-purple-400">in</span> <span class="text-indigo-600 dark:text-indigo-300">"${TARGETS[@]}"</span>; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">            t=<span class="text-indigo-600 dark:text-indigo-300">"${t//$'\r'/}"</span></span>
-<span class="row">            [[ -z <span class="text-indigo-600 dark:text-indigo-300">"${t// /}"</span> || <span class="text-indigo-600 dark:text-indigo-300">"$t"</span> == \#* ]] &amp;&amp; <span class="text-purple-600 dark:text-purple-400">continue</span></span>
-<span class="row">            arr_push cleaned <span class="text-indigo-600 dark:text-indigo-300">"$t"</span></span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">done</span></span>
-<span class="row">        TARGETS=(<span class="text-indigo-600 dark:text-indigo-300">"${cleaned[@]}"</span>)</span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">if</span> [[ ${#TARGETS[@]} -eq 0 ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: Targets file '$targets_file' contains no usable targets.${NC}"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row">        <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">elif</span> [[ -n <span class="text-indigo-600 dark:text-indigo-300">"$single_target"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        arr_push TARGETS <span class="text-indigo-600 dark:text-indigo-300">"$single_target"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error: No targets specified. Use -h for help.${NC}"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$RESUME_MODE"</span> == true &amp;&amp; ! -d <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span> ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Warning: --resume was given but output directory '$output_dir' does not exist.${NC}"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}A fresh scan will be started instead.${NC}\n"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row">    check_dependencies</span>
-<span class="row"> </span>
-<span class="row">    mkdir -p <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
-<span class="row">    mkdir -p <span class="text-indigo-600 dark:text-indigo-300">"$output_dir/nmap"</span></span>
-<span class="row"> </span>
-<span class="row">    state_init <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Report run time and how to resume if the user aborts the scan.</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">trap</span> <span class="text-indigo-600 dark:text-indigo-300">'handle_interrupt INT'</span> INT</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">trap</span> <span class="text-indigo-600 dark:text-indigo-300">'handle_interrupt TERM'</span> TERM</span>
-<span class="row"> </span>
-<span class="row">    handle_discord_webhook</span>
-<span class="row"> </span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [ -n <span class="text-indigo-600 dark:text-indigo-300">"$(opt_get responder_interface)"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        run_responder <span class="text-indigo-600 dark:text-indigo-300">"$(opt_get responder_interface)"</span> <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span> &amp;</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"${#TARGETS[@]}"</span> -gt 1 ]] || [[ <span class="text-indigo-600 dark:text-indigo-300">"${TARGETS[0]}"</span> == *<span class="text-indigo-600 dark:text-indigo-300">"/"</span>* ]]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">      run_live_host_scans</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">      <span class="text-sky-600 dark:text-sky-400">printf</span> <span class="text-indigo-600 dark:text-indigo-300">"%s\n"</span> <span class="text-indigo-600 dark:text-indigo-300">"${TARGETS[@]}"</span> &gt; <span class="text-indigo-600 dark:text-indigo-300">"$output_dir/live_hosts.txt"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row">    check_for_live_hosts_and_exit</span>
-<span class="row"> </span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> opt_true firewall_evasion; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Starting Firewall Evasion Scans.${NC}\n"</span></span>
-<span class="row">        run_firewall_evasion_scans <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${BLUE}Firewall evasion scans completed.${NC}"</span></span>
-<span class="row">        finalise_reports</span>
-<span class="row">        print_completion_summary</span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">exit</span> 0</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}Starting Network Penetration Scans.${NC}\n"</span></span>
-<span class="row"> </span>
-<span class="row">    run_nmap_scans <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Launched here, once every nmap scan is done, so the poisoning window does</span></span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># not overlap the port scans. It runs detached while the checks below go on.</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> opt_true mitm6; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        mitm6_start <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> ! opt_true exclude_web_scans; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        run_sslscan_scans <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
-<span class="row"> </span>
-<span class="row">        run_sshaudit_scans <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row">    run_metasploit_scans <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
-<span class="row"> </span>
-<span class="row">    run_step <span class="text-indigo-600 dark:text-indigo-300">"smb:smbv1"</span> <span class="text-indigo-600 dark:text-indigo-300">"SMBv1 check"</span> run_smbv1_scan <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
-<span class="row"> </span>
-<span class="row">    run_step <span class="text-indigo-600 dark:text-indigo-300">"smb:unauthrpc"</span> <span class="text-indigo-600 dark:text-indigo-300">"Unauthenticated RPC check"</span> run_unauth_rpc_scan <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
-<span class="row"> </span>
-<span class="row">    run_ldap_scan <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span> <span class="text-indigo-600 dark:text-indigo-300">"${TARGETS[@]}"</span></span>
-<span class="row"> </span>
-<span class="row">    run_dns_scan <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> opt_true pret; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        run_pret_scan <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Stop the background attack and fold its findings in before reporting.</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> opt_true mitm6; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        mitm6_finish <span class="text-indigo-600 dark:text-indigo-300">"$output_dir"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row">    finalise_reports</span>
-<span class="row"> </span>
-<span class="row">    mark_completed <span class="text-indigo-600 dark:text-indigo-300">"scan:finished"</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}All scans completed. Check the '$output_dir' directory for outputs.${NC}\n"</span></span>
-<span class="row">    print_completion_summary</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Happy Hacking! - evan (@evanricafort)${NC}"</span></span>
-<span class="row">}</span>
-<span class="row">main <span class="text-indigo-600 dark:text-indigo-300">"$@"</span></span></code></pre>
+            <!-- breadcrumb -->
+            <div class="px-5 py-2.5 border-b border-gray-200 dark:border-gray-800 flex items-center gap-2 text-xs font-mono">
+                <button id="crumbRoot" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">lazymap</button>
+                <span id="crumbSep" class="text-gray-400 dark:text-gray-600 hidden">/</span>
+                <span id="crumbDir" class="text-gray-500 dark:text-gray-400 hidden"></span>
+                <span id="repoMeta" class="ml-auto text-gray-400 dark:text-gray-600"></span>
             </div>
 
-            <div class="px-4 py-2.5 bg-gray-200 dark:bg-gray-850 border-t border-gray-300 dark:border-gray-800 flex items-center justify-between text-xs font-mono text-gray-500 dark:text-gray-500">
-                <span>Bash</span>
-                <span>297 lines</span>
+            <div id="fileList" class="divide-y divide-gray-100 dark:divide-gray-800"></div>
+
+            <!-- file viewer -->
+            <div id="viewer" class="hidden border-t border-gray-200 dark:border-gray-800">
+                <div class="bg-gray-50 dark:bg-gray-850 px-5 py-3 border-b border-gray-200 dark:border-gray-800 flex flex-wrap items-center gap-3">
+                    <i id="viewerIcon" class="fas fa-file-code text-indigo-500"></i>
+                    <span id="viewerName" class="font-mono text-sm font-bold text-gray-900 dark:text-white"></span>
+                    <span id="viewerMeta" class="text-xs font-mono text-gray-500 dark:text-gray-400"></span>
+                    <div class="ml-auto flex items-center gap-2">
+                        <button onclick="copyViewer()" id="copyBtn" class="text-gray-500 hover:text-indigo-600 dark:hover:text-white transition-colors text-xs uppercase font-bold tracking-wider flex items-center gap-2">
+                            <i class="far fa-copy"></i> Copy
+                        </button>
+                        <a id="rawLink" href="#" rel="noopener" class="text-gray-500 hover:text-indigo-600 dark:hover:text-white transition-colors text-xs uppercase font-bold tracking-wider flex items-center gap-2">
+                            <i class="fas fa-up-right-from-square"></i> Raw
+                        </a>
+                        <button onclick="closeViewer()" class="text-gray-500 hover:text-rose-500 transition-colors text-xs uppercase font-bold tracking-wider flex items-center gap-2">
+                            <i class="fas fa-xmark"></i> Close
+                        </button>
+                    </div>
+                </div>
+                <div id="viewerBody" class="bg-white dark:bg-[#0d1117] max-h-[32rem] overflow-auto code-scroll text-xs font-mono leading-relaxed py-3"></div>
             </div>
-        </div>
+        </section>
+
+        <!-- ============================== DOWNLOAD ============================== -->
+        <section id="download" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-6">
+            <h2 class="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+                <i class="fas fa-download text-indigo-500"></i> Download
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+                <a href="https://github.com/evanricafort/lazymap" class="md:col-span-2 group flex items-center gap-4 p-5 rounded-xl border border-indigo-200 dark:border-indigo-800/60 bg-indigo-50/60 dark:bg-indigo-900/20 hover:border-indigo-400 dark:hover:border-indigo-500 transition-all">
+                    <span class="p-3.5 rounded-xl bg-white dark:bg-gray-900 text-indigo-600 dark:text-indigo-400 shadow-sm flex-shrink-0">
+                        <i class="fab fa-github text-2xl"></i>
+                    </span>
+                    <span class="min-w-0">
+                        <span class="block font-mono font-bold text-gray-900 dark:text-white">evanricafort/lazymap</span>
+                        <span class="block text-sm text-gray-600 dark:text-gray-400 mt-0.5">28 files, 172 KB. Clone it, or grab a ZIP from the green Code button.</span>
+                    </span>
+                    <i class="fas fa-arrow-right ml-auto text-indigo-500 group-hover:translate-x-1 transition-transform flex-shrink-0"></i>
+                </a>
+
+                <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 space-y-2">
+                    <span class="block text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Requirements</span>
+                    <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1.5">
+                        <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-500 mt-1 text-xs"></i> Bash 3.0 or newer, including the 3.2 that ships with macOS</li>
+<li class="flex items-start gap-2"><i class="fas fa-check text-emerald-500 mt-1 text-xs"></i> nmap, curl, dig, ldapsearch, rpcclient, metasploit</li>
+<li class="flex items-start gap-2"><i class="fas fa-check text-emerald-500 mt-1 text-xs"></i> sslscan, ssh-audit, screen</li>
+<li class="flex items-start gap-2"><i class="fas fa-check text-emerald-500 mt-1 text-xs"></i> crackmapexec <em>or</em> its successor nxc - either satisfies the check</li>
+<li class="flex items-start gap-2"><i class="fas fa-xmark text-gray-400 mt-1 text-xs"></i> No compilation, no build step</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-900/20 p-4 flex items-start gap-3">
+                <i class="fas fa-triangle-exclamation text-amber-500 mt-0.5"></i>
+                <p class="text-sm text-amber-800 dark:text-amber-200">
+                    lazymap is a multi-file project &mdash; <code class="font-mono text-xs">lazymap.sh</code> sources the rest of the
+                    tree at runtime, so saving that one file on its own will not work. Clone the repository, or download it as a
+                    ZIP and keep the directory intact. Browse every file above before you run it.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================== INSTALL =============================== -->
+        <section id="install" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-6">
+            <h2 class="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+                <i class="fas fa-terminal text-indigo-500"></i> Install
+            </h2>
+
+            <div class="space-y-5">
+                <div class="flex gap-4"><span class="step-num bg-indigo-600 text-white">1</span><div class="min-w-0 flex-1 space-y-2"><p class="font-bold text-gray-900 dark:text-white">Clone the repository</p><p class="text-sm text-gray-600 dark:text-gray-400">Everything is sourced relative to the script, so keep the tree intact.</p><pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">git clone https://github.com/evanricafort/lazymap.git<br>cd lazymap</pre></div></div>
+<div class="flex gap-4"><span class="step-num bg-indigo-600 text-white">2</span><div class="min-w-0 flex-1 space-y-2"><p class="font-bold text-gray-900 dark:text-white">Make the scripts executable</p><p class="text-sm text-gray-600 dark:text-gray-400">The entry point plus every module it sources.</p><pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">sudo chmod +x lazymap.sh lib/*.sh extra/*.sh reports/*.sh scans/*.sh</pre></div></div>
+<div class="flex gap-4"><span class="step-num bg-indigo-600 text-white">3</span><div class="min-w-0 flex-1 space-y-2"><p class="font-bold text-gray-900 dark:text-white">Install whatever is missing</p><p class="text-sm text-gray-600 dark:text-gray-400">Checks every required tool, installs the missing ones, and exits. Supports apt, dnf, yum, pacman, zypper and Homebrew.</p><pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">sudo ./lazymap.sh --install-deps</pre></div></div>
+<div class="flex gap-4"><span class="step-num bg-indigo-600 text-white">4</span><div class="min-w-0 flex-1 space-y-2"><p class="font-bold text-gray-900 dark:text-white">Run a scan</p><p class="text-sm text-gray-600 dark:text-gray-400">A single host, or a file with one target per line.</p><pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">sudo ./lazymap.sh -u 192.0.2.10<br>sudo ./lazymap.sh -t hosts</pre></div></div>
+            </div>
+
+            <div class="pt-2">
+                <p class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">All of it in one line</p>
+                <pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">git clone https://github.com/evanricafort/lazymap.git &amp;&amp; cd lazymap &amp;&amp; sudo chmod +x lazymap.sh lib/*.sh extra/*.sh reports/*.sh scans/*.sh &amp;&amp; sudo ./lazymap.sh -h</pre>
+            </div>
+        </section>
+
+        <!-- =============================== USAGE ================================ -->
+        <section id="usage" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-6">
+            <h2 class="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+                <i class="fas fa-book-open text-indigo-500"></i> Usage
+            </h2>
+
+            <div class="overflow-x-auto code-scroll">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs uppercase text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">
+                        <tr>
+                            <th scope="col" class="py-2 pr-4 font-semibold">Flag</th>
+                            <th scope="col" class="py-2 font-semibold">What it does</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                        <tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">-u &lt;host&gt;</td><td class="py-2 text-gray-700 dark:text-gray-300">Scan a single host.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">-t &lt;file&gt;</td><td class="py-2 text-gray-700 dark:text-gray-300">Scan every host or subnet listed in a file.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">-1 / -2 / -3</td><td class="py-2 text-gray-700 dark:text-gray-300">Add the <span class="font-mono">vulners</span> NSE script, <span class="font-mono">vuln</span>, or both. <span class="font-mono">-3</span> is slow across many targets.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">-4</td><td class="py-2 text-gray-700 dark:text-gray-300">Firewall evasion scan.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">-a</td><td class="py-2 text-gray-700 dark:text-gray-300">Skip the all-ports and UDP scans.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">-n</td><td class="py-2 text-gray-700 dark:text-gray-300">Add <span class="font-mono">-n -T4</span> for a faster run.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">-k</td><td class="py-2 text-gray-700 dark:text-gray-300">Skip sslscan, ssh-audit and the header check.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">-b</td><td class="py-2 text-gray-700 dark:text-gray-300">Add <span class="font-mono">-A --min-rate 1000 --open</span>.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">--pret</td><td class="py-2 text-gray-700 dark:text-gray-300">Printer security checks via PRET.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">--mitm6</td><td class="py-2 text-gray-700 dark:text-gray-300">IPv6 takeover run via mitm6.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">--domain / --userlist</td><td class="py-2 text-gray-700 dark:text-gray-300">Domain and user list for authenticated checks.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">--interface &lt;if&gt;</td><td class="py-2 text-gray-700 dark:text-gray-300">Pin the scan to one interface.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">-o &lt;dir&gt;</td><td class="py-2 text-gray-700 dark:text-gray-300">Custom output directory.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">--resume</td><td class="py-2 text-gray-700 dark:text-gray-300">Pick a previous run back up where it stopped.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">--install-deps</td><td class="py-2 text-gray-700 dark:text-gray-300">Install missing dependencies, then exit.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">-y / --yes</td><td class="py-2 text-gray-700 dark:text-gray-300">Skip the install prompt in scripted runs.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">-h</td><td class="py-2 text-gray-700 dark:text-gray-300">Show the full help text.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="space-y-1.5"><p class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Everything, with printer checks</p><pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">sudo ./lazymap.sh -t hosts -12bank --pret --exclude-udp --interface eth0 -o my_scan</pre></div>
+<div class="space-y-1.5"><p class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Authenticated domain checks</p><pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">./lazymap.sh -t hosts --domain CORP.EXAMPLE.COM --userlist users.txt</pre></div>
+<div class="space-y-1.5"><p class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Resume an interrupted run</p><pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">sudo ./lazymap.sh -t hosts -12bank -o my_scan --resume</pre></div>
+            </div>
+
+            <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 p-5 space-y-2">
+                <p class="font-bold text-gray-900 dark:text-white flex items-center gap-2"><i class="fas fa-shield-halved text-indigo-500"></i> Before you run it</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">lazymap is loud by design - it is a full scan sweep, not a quiet one. Run it only against hosts you are authorized to test, and expect it to show up in the target’s monitoring. Run under <span class="font-mono">sudo</span> for the nmap scripts that need raw sockets.</p>
+            </div>
+        </section>
 
     </main>
 
     <footer class="mt-auto py-8 text-center text-gray-500 dark:text-gray-600 text-xs font-medium">
         <p>For authorized security testing only &middot; All processing runs client-side &middot; No data is stored</p>
-        <p>&copy; <span id="year"></span> Lazymap.</p>
+        <p>&copy; <span id="year"></span> lazymap.</p>
     </footer>
 
     <script>
+        /* ----------------------------- theme ----------------------------- */
         const htmlEl = document.documentElement;
         const themeIcon = document.getElementById('themeIcon');
 
         document.getElementById('year').textContent = new Date().getFullYear();
+
+        if (localStorage.getItem('theme') === 'light') {
+            htmlEl.classList.remove('dark');
+            themeIcon.className = 'fas fa-moon text-xl leading-5 w-5 h-5 text-center block';
+        }
 
         function toggleTheme() {
             if (htmlEl.classList.contains('dark')) {
@@ -453,29 +305,375 @@
             }
         }
 
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            htmlEl.classList.add('dark');
-            themeIcon.className = 'fas fa-sun text-xl leading-5 w-5 h-5 text-center block';
-        } else {
-            htmlEl.classList.remove('dark');
-            themeIcon.className = 'fas fa-moon text-xl leading-5 w-5 h-5 text-center block';
+        /* -------------------------- repo browser --------------------------
+           The tree is baked in so the listing renders without a round trip,
+           but file contents come from raw.githubusercontent.com, which sends
+           Access-Control-Allow-Origin: *. That way what you read here is the
+           repository itself rather than a copy that can quietly fall behind. */
+        const REPO = 'lazymap';
+        const RAW = 'https://raw.githubusercontent.com/evanricafort/' + REPO + '/main/';
+        const BLOB = 'https://github.com/evanricafort/' + REPO + '/blob/main/';
+
+        const TREE = {
+            "": [
+                        {
+                                    "desc": "Extras that sit outside the main scan flow",
+                                    "name": "extra",
+                                    "size": 0,
+                                    "type": "dir"
+                        },
+                        {
+                                    "desc": "Shared helpers - compatibility, colours, state, installer, help",
+                                    "name": "lib",
+                                    "size": 0,
+                                    "type": "dir"
+                        },
+                        {
+                                    "desc": "Report rendering and notifications",
+                                    "name": "reports",
+                                    "size": 0,
+                                    "type": "dir"
+                        },
+                        {
+                                    "desc": "One module per scan type",
+                                    "name": "scans",
+                                    "size": 0,
+                                    "type": "dir"
+                        },
+                        {
+                                    "desc": "Ignored scan output and state files",
+                                    "name": ".gitignore",
+                                    "size": 287,
+                                    "type": "txt"
+                        },
+                        {
+                                    "desc": "Map of the repository layout",
+                                    "name": "directory_structure",
+                                    "size": 2025,
+                                    "type": "txt"
+                        },
+                        {
+                                    "desc": "Entry point - argument parsing, dependency gate, scan orchestration",
+                                    "name": "lazymap.sh",
+                                    "size": 11045,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "License text",
+                                    "name": "LICENSE",
+                                    "size": 35149,
+                                    "type": "md"
+                        },
+                        {
+                                    "desc": "Full documentation: requirements, options, examples",
+                                    "name": "README.md",
+                                    "size": 10313,
+                                    "type": "md"
+                        }
+            ],
+            "extra": [
+                        {
+                                    "desc": "Bundled wordlists",
+                                    "name": "wordlists",
+                                    "size": 0,
+                                    "type": "dir"
+                        },
+                        {
+                                    "desc": "Responder helper",
+                                    "name": "responder.sh",
+                                    "size": 1455,
+                                    "type": "sh"
+                        }
+            ],
+            "extra/wordlists": [
+                        {
+                                    "desc": "Kerberos user list for enumeration",
+                                    "name": "kerberos_users.txt",
+                                    "size": 565,
+                                    "type": "txt"
+                        }
+            ],
+            "lib": [
+                        {
+                                    "desc": "Dependency detection, including the crackmapexec / nxc fallback",
+                                    "name": "checks.sh",
+                                    "size": 5188,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "ANSI colour codes",
+                                    "name": "colors.sh",
+                                    "size": 126,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "Bash 3.2 compatibility shims, so macOS works",
+                                    "name": "compat.sh",
+                                    "size": 3206,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "Domain and credential handling for authenticated checks",
+                                    "name": "domain.sh",
+                                    "size": 1828,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "The -h help text",
+                                    "name": "help.sh",
+                                    "size": 6495,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "Automatic dependency install across apt, dnf, yum, pacman, zypper, brew",
+                                    "name": "installer.sh",
+                                    "size": 12589,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "Resume support - tracks which targets and scans finished",
+                                    "name": "state.sh",
+                                    "size": 7021,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "Target parsing for -u, -t and subnets",
+                                    "name": "targets.sh",
+                                    "size": 1257,
+                                    "type": "sh"
+                        }
+            ],
+            "reports": [
+                        {
+                                    "desc": "Builds the HTML report from scan output",
+                                    "name": "html_report.sh",
+                                    "size": 11571,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "Optional Discord notification",
+                                    "name": "send_discord_webhook.sh",
+                                    "size": 1272,
+                                    "type": "sh"
+                        }
+            ],
+            "scans": [
+                        {
+                                    "desc": "dig lookups and zone transfer attempts",
+                                    "name": "dns.sh",
+                                    "size": 1918,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "ldapsearch enumeration",
+                                    "name": "ldap.sh",
+                                    "size": 1452,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "Host discovery before the heavier scans",
+                                    "name": "live_hosts.sh",
+                                    "size": 2829,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "Selected auxiliary modules",
+                                    "name": "metasploit.sh",
+                                    "size": 14813,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "mitm6 IPv6 takeover run",
+                                    "name": "mitm6.sh",
+                                    "size": 13793,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "The nmap script selection - the bulk of the tool",
+                                    "name": "nmap.sh",
+                                    "size": 20437,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "Printer checks via PRET",
+                                    "name": "pret.sh",
+                                    "size": 3111,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "SMBv1 exposure check",
+                                    "name": "smbv1.sh",
+                                    "size": 1166,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "ssh-audit wrapper",
+                                    "name": "sshaudit.sh",
+                                    "size": 1743,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "sslscan wrapper",
+                                    "name": "sslscan.sh",
+                                    "size": 1755,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "Unauthenticated rpcclient enumeration",
+                                    "name": "unauthrpc.sh",
+                                    "size": 2142,
+                                    "type": "sh"
+                        }
+            ]
+};
+
+        const ICONS = {
+            dir:  { cls: 'fas fa-folder',     color: 'text-indigo-500' },
+            sh:   { cls: 'fas fa-terminal',   color: 'text-emerald-500' },
+            md:   { cls: 'fas fa-file-lines', color: 'text-gray-400' },
+            json: { cls: 'fas fa-file-code',  color: 'text-amber-500' },
+            txt:  { cls: 'fas fa-file-lines', color: 'text-sky-500' }
+        };
+
+        let currentDir = '';
+
+        function fmtSize(n) {
+            if (n < 1024) return n + ' B';
+            if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+            return (n / 1048576).toFixed(2) + ' MB';
         }
 
-        /* textContent of the <code> is the script verbatim - the highlighting
-           spans carry no text of their own, and the line numbers are CSS
-           counters rather than characters, so this copies cleanly. */
-        document.getElementById('btnCopy').addEventListener('click', function () {
-            const source = document.getElementById('scriptSource').textContent;
-            const button = this;
-            navigator.clipboard.writeText(source).then(function () {
-                button.innerHTML = '<i class="fas fa-check"></i> <span class="hidden sm:inline">Copied</span>';
-                setTimeout(function () {
-                    button.innerHTML = '<i class="fas fa-copy"></i> <span class="hidden sm:inline">Copy</span>';
-                }, 1800);
-            });
-        });
-    </script>
+        function renderDir(dir) {
+            currentDir = dir;
+            const entries = TREE[dir] || [];
+            const list = document.getElementById('fileList');
+            list.textContent = '';
 
+            document.getElementById('crumbSep').classList.toggle('hidden', !dir);
+            const crumbDir = document.getElementById('crumbDir');
+            crumbDir.classList.toggle('hidden', !dir);
+            crumbDir.textContent = dir;
+
+            const bytes = entries.reduce(function (a, e) { return a + e.size; }, 0);
+            document.getElementById('repoMeta').textContent =
+                entries.length + (entries.length === 1 ? ' item' : ' items') + (bytes ? ' · ' + fmtSize(bytes) : '');
+
+            if (dir) {
+                const up = document.createElement('button');
+                up.className = 'repo-row w-full text-left px-5 py-3 flex items-center gap-3 transition-colors';
+                up.innerHTML = '<i class="fas fa-turn-up rotate-[-90deg] text-gray-400 w-4 text-center"></i>' +
+                               '<span class="font-mono text-sm text-indigo-600 dark:text-indigo-400 font-bold">..</span>';
+                up.onclick = function () { renderDir(dir.indexOf('/') > -1 ? dir.slice(0, dir.lastIndexOf('/')) : ''); closeViewer(); };
+                list.appendChild(up);
+            }
+
+            entries.forEach(function (e) {
+                const meta = ICONS[e.type] || ICONS.txt;
+                const path = (dir ? dir + '/' : '') + e.name;
+                const row = document.createElement('button');
+                row.className = 'repo-row w-full text-left px-5 py-3 flex items-center gap-3 transition-colors';
+                row.dataset.path = path;
+
+                const icon = document.createElement('i');
+                icon.className = meta.cls + ' ' + meta.color + ' w-4 text-center flex-shrink-0';
+
+                const name = document.createElement('span');
+                name.className = 'font-mono text-sm font-medium text-gray-900 dark:text-gray-100 flex-shrink-0';
+                name.textContent = e.name;
+
+                const desc = document.createElement('span');
+                desc.className = 'text-xs text-gray-500 dark:text-gray-500 truncate hidden md:block flex-1 min-w-0';
+                desc.textContent = e.desc;
+
+                const size = document.createElement('span');
+                size.className = 'ml-auto text-xs font-mono text-gray-400 dark:text-gray-600 flex-shrink-0';
+                size.textContent = e.type === 'dir' ? '—' : fmtSize(e.size);
+
+                row.append(icon, name, desc, size);
+                row.onclick = function () {
+                    if (e.type === 'dir') { renderDir(path); closeViewer(); }
+                    else { openFile(path, e); }
+                };
+                list.appendChild(row);
+            });
+        }
+
+        document.getElementById('crumbRoot').onclick = function () { renderDir(''); closeViewer(); };
+
+        /* -------------------------- file viewer -------------------------- */
+        const viewer = document.getElementById('viewer');
+        const viewerBody = document.getElementById('viewerBody');
+        let viewerText = '';
+
+        function markActive(path) {
+            document.querySelectorAll('#fileList .repo-row').forEach(function (r) {
+                r.classList.toggle('is-active', r.dataset.path === path);
+            });
+        }
+
+        async function openFile(path, entry) {
+            const meta = ICONS[entry.type] || ICONS.txt;
+            document.getElementById('viewerIcon').className = meta.cls + ' ' + meta.color;
+            document.getElementById('viewerName').textContent = path;
+            document.getElementById('viewerMeta').textContent = fmtSize(entry.size);
+            document.getElementById('rawLink').href = BLOB + path;
+            viewer.classList.remove('hidden');
+            markActive(path);
+
+            viewerBody.innerHTML = '<div class="p-8 text-center text-gray-500 dark:text-gray-500 font-mono text-xs">Loading ' + path + ' …</div>';
+            viewer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            try {
+                const res = await fetch(RAW + path, { cache: 'no-store' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                viewerText = await res.text();
+                renderCode(viewerText);
+            } catch (err) {
+                viewerText = '';
+                viewerBody.innerHTML =
+                    '<div class="p-8 text-center text-rose-500 font-mono text-xs">Could not load ' + path + ' (' + err.message + ')' +
+                    '<br><span class="text-gray-500">Open it on GitHub with the Raw link above.</span></div>';
+            }
+        }
+
+        function renderCode(text) {
+            const lines = text.replace(/\t/g, '    ').replace(/\n$/, '').split('\n');
+            const wrap = document.createElement('div');
+            wrap.className = 'code-lines';
+
+            lines.forEach(function (line, i) {
+                const row = document.createElement('div');
+                row.className = 'ln-row';
+                const num = document.createElement('span');
+                num.className = 'ln-num';
+                num.textContent = String(i + 1);
+                const txt = document.createElement('span');
+                txt.className = 'ln-txt text-gray-700 dark:text-gray-300';
+                txt.textContent = line || ' ';
+                row.append(num, txt);
+                wrap.appendChild(row);
+            });
+
+            viewerBody.textContent = '';
+            viewerBody.appendChild(wrap);
+        }
+
+        function closeViewer() {
+            viewer.classList.add('hidden');
+            viewerBody.textContent = '';
+            viewerText = '';
+            markActive(null);
+        }
+
+        function copyViewer() {
+            if (!viewerText) return;
+            navigator.clipboard.writeText(viewerText);
+            const btn = document.getElementById('copyBtn');
+            btn.innerHTML = '<i class="fas fa-check text-emerald-500"></i> Copied';
+            setTimeout(function () { btn.innerHTML = '<i class="far fa-copy"></i> Copy'; }, 1400);
+        }
+
+        renderDir('');
+    </script>
 </body>
 </html>

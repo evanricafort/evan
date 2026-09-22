@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SegIt!</title>
-    <meta name="description" content="Shell script that automates network segmentation testing, scanning declared out-of-scope ranges and reporting anything that answers back." />
+    <meta name="description" content="A shell script for automating network segmentation tests. It scans the ranges that are supposed to be unreachable, verifies whatever answered back, and writes the result up as a re" />
     <link href="/profile.jpg" type="image/jpeg" rel="shortcut icon" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -41,21 +41,32 @@
         @keyframes tk-logo-float { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-5px) rotate(-6deg)} 75%{transform:translateY(-2px) rotate(6deg)} }
         @media (prefers-reduced-motion: reduce){ .tk-anim-logo{animation:none} }
 
-        /* Terminal. Line numbers come from a counter on each row rather than
-           a second column, so selecting the code copies the code alone. */
-        .tk-term-body { counter-reset: line; }
-        .tk-term-body .row { counter-increment: line; display: block; }
-        .tk-term-body .row::before {
-            content: counter(line);
-            display: inline-block;
-            width: 3rem;
-            padding-right: 1rem;
-            text-align: right;
-            color: #4b5563;
-            user-select: none;
-            -webkit-user-select: none;
+        /* Repo-style file rows */
+        .repo-row:hover { background-color: rgba(99, 102, 241, .06); }
+        .dark .repo-row:hover { background-color: rgba(99, 102, 241, .10); }
+        .repo-row.is-active { background-color: rgba(99, 102, 241, .10); }
+        .dark .repo-row.is-active { background-color: rgba(99, 102, 241, .16); }
+
+        .code-scroll::-webkit-scrollbar { width: 10px; height: 10px; }
+        .code-scroll::-webkit-scrollbar-track { background: transparent; }
+        .code-scroll::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 5px; }
+        .dark .code-scroll::-webkit-scrollbar-thumb { background: #374151; }
+
+        /* Line numbers for the file viewer */
+        .code-lines { counter-reset: ln; }
+        .code-lines .ln-row { display: grid; grid-template-columns: 3.5rem 1fr; }
+        .code-lines .ln-num {
+            text-align: right; padding-right: 1rem; user-select: none;
+            color: #9ca3af; border-right: 1px solid rgba(148,163,184,.25);
         }
-        .tk-term-body .row:hover::before { color: #818cf8; }
+        .dark .code-lines .ln-num { color: #4b5563; }
+        .code-lines .ln-txt { padding-left: 1rem; white-space: pre; }
+
+        .step-num {
+            display:inline-flex; align-items:center; justify-content:center;
+            width:1.75rem; height:1.75rem; border-radius:9999px; flex:none;
+            font-size:.75rem; font-weight:800; font-family:'JetBrains Mono',monospace;
+        }
     </style>
     <link rel="stylesheet" href="/css/tool-shell.css">
     <script src="/js/geo-web.js" defer></script>
@@ -79,295 +90,183 @@
         </button>
     </div>
 
-    <main class="w-full max-w-3xl space-y-8 mt-8">
+    <main class="w-full max-w-5xl space-y-8 mt-8">
 
         <div class="text-center space-y-3">
             <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center justify-center gap-3">
                 <i class="fas fa-network-wired tk-anim-logo text-indigo-600 dark:text-indigo-500"></i>
                 <span><span class="text-indigo-600 dark:text-indigo-500">Seg</span>It!</span>
             </h1>
-            <p class="text-gray-600 dark:text-gray-400 text-sm md:text-lg max-w-xl mx-auto">
-                A shell script for automating network segmentation tests. It scans the ranges that are supposed to be unreachable and reports whatever answers back.
+            <p class="text-gray-600 dark:text-gray-400 text-sm md:text-lg max-w-2xl mx-auto">
+                A shell script for automating network segmentation tests. It scans the ranges that are supposed to be unreachable, verifies whatever answered back, and writes the result up as a report.
             </p>
-        </div>
-
-        <div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-xl p-6 flex gap-3">
-            <i class="fas fa-circle-info text-indigo-600 dark:text-indigo-300 mt-1"></i>
-            <div class="text-sm text-gray-700 dark:text-gray-300 space-y-2">
-                <p class="font-bold text-gray-900 dark:text-white">How to run it</p>
-                <p>SegIt! is a multi-file project, so clone the repository rather than saving the script on its own &mdash; the entry script below sources the rest of the tree.</p>
-                <pre class="bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto font-mono text-xs text-gray-800 dark:text-indigo-300">git clone https://github.com/evanricafort/segit.git &amp;&amp; cd segit &amp;&amp; sudo chmod +x segit.sh config/* lib/* &amp;&amp; sudo ./segit.sh -h</pre>
-                <p>Then run it against the range you expect to be segmented off, for example <span class="font-mono text-indigo-600 dark:text-indigo-300">sudo ./segit.sh -T4 --open 192.0.2.0/24</span>.</p>
-                <p class="text-gray-500 dark:text-gray-400">NOTE: This tool was developed for use during Vulnerability Assessment and Penetration Testing (VAPT). Only point it at networks you are authorized to test.</p>
+            <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+                <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">Bash</span>
+<span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-850 text-gray-600 dark:text-gray-400">Nmap</span>
+<span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-850 text-gray-600 dark:text-gray-400">PCI segmentation testing</span>
+<span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400">Two-pass verification</span>
             </div>
         </div>
 
-        <!-- Terminal -->
-        <div class="rounded-2xl overflow-hidden border border-gray-300 dark:border-gray-800 shadow-xl dark:shadow-black/50">
+        <!-- Section pills -->
+        <div class="flex flex-wrap items-center justify-center gap-2">
+            <a href="#repo" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-folder-tree"></i> Source</a>
+<a href="#download" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-download"></i> Download</a>
+<a href="#install" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-terminal"></i> Install</a>
+<a href="#usage" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-book-open"></i> Usage</a>
+        </div>
 
-            <div class="flex items-center gap-3 px-4 py-3 bg-gray-200 dark:bg-gray-850 border-b border-gray-300 dark:border-gray-800">
-                <span class="flex gap-2 flex-shrink-0" aria-hidden="true">
-                    <span class="w-3 h-3 rounded-full bg-red-400 dark:bg-red-500/80"></span>
-                    <span class="w-3 h-3 rounded-full bg-yellow-400 dark:bg-yellow-500/80"></span>
-                    <span class="w-3 h-3 rounded-full bg-green-400 dark:bg-green-500/80"></span>
+        <!-- ============================ REPO BROWSER ============================ -->
+        <section id="repo" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-xl dark:shadow-black/50">
+
+            <div class="bg-gray-50 dark:bg-gray-850 px-5 py-4 border-b border-gray-200 dark:border-gray-800 flex flex-wrap items-center gap-3">
+                <i class="fas fa-book text-gray-400 dark:text-gray-500"></i>
+                <span class="font-mono text-sm font-bold">
+                    <span class="text-gray-500 dark:text-gray-400">evanricafort</span><span class="text-gray-400 dark:text-gray-600">/</span><span class="text-indigo-600 dark:text-indigo-400">segit</span>
                 </span>
-                <span class="flex-1 text-center font-mono text-xs text-gray-600 dark:text-gray-400 truncate">segit.sh</span>
-                <div class="flex items-center gap-2 flex-shrink-0">
-                    <button id="btnCopy" title="Copy to clipboard" class="px-2.5 py-1.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white text-xs font-bold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <i class="fas fa-copy"></i> <span class="hidden sm:inline">Copy</span>
-                    </button>
-                    <a id="btnDownload" href="https://github.com/evanricafort/segit" title="Get SegIt! on GitHub" class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <i class="fab fa-github"></i> <span class="hidden sm:inline">GitHub</span>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400">Public</span>
+                <div class="ml-auto flex items-center gap-2">
+                    <span class="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono text-gray-500 dark:text-gray-400 px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <i class="fas fa-code-branch"></i> main
+                    </span>
+                    <a href="https://github.com/evanricafort/segit" class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wide px-3.5 py-2 rounded-lg text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 shadow transition-all transform active:scale-[0.98]">
+                        <i class="fab fa-github"></i> Code
                     </a>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-[#0d1117] overflow-x-auto">
-                <pre class="tk-term-body p-4 md:p-5 font-mono text-xs md:text-sm leading-relaxed text-gray-800 dark:text-gray-300"><code id="scriptSource"><span class="row"><span class="text-gray-500 dark:text-gray-500">#!/bin/bash</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Title: SegIt! - Automated Network Segmentation Testing Toolkit</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Author: Evan Ricafort (Portfolio - https://evanricafort.com | X - @evanricafort)</span></span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Description: SegIt! is a shell script for automating network segmentation tests.</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Source the configuration and utility files</span></span>
-<span class="row">SCRIPT_DIR=<span class="text-indigo-600 dark:text-indigo-300">"$( cd "</span>$( dirname <span class="text-indigo-600 dark:text-indigo-300">"${BASH_SOURCE[0]}"</span> )<span class="text-indigo-600 dark:text-indigo-300">" &amp;&gt; /dev/null &amp;&amp; pwd )"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$SCRIPT_DIR/config/colors.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$SCRIPT_DIR/lib/utils.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$SCRIPT_DIR/lib/scan.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$SCRIPT_DIR/lib/verify.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$SCRIPT_DIR/lib/report.sh"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">source</span> <span class="text-indigo-600 dark:text-indigo-300">"$SCRIPT_DIR/lib/discord.sh"</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Global variables</span></span>
-<span class="row">TARGETS=<span class="text-indigo-600 dark:text-indigo-300">""</span></span>
-<span class="row">TARGETS_FILE=<span class="text-indigo-600 dark:text-indigo-300">""</span></span>
-<span class="row">TRAFFIC_FROM=<span class="text-indigo-600 dark:text-indigo-300">""</span> </span>
-<span class="row">CUSTOM_OUTPUT_DIR=<span class="text-indigo-600 dark:text-indigo-300">""</span></span>
-<span class="row">COMPARE_MODE=0</span>
-<span class="row">NMAP_OPTS=<span class="text-indigo-600 dark:text-indigo-300">"-vv"</span></span>
-<span class="row">LIVE_HOSTS_FILE=<span class="text-indigo-600 dark:text-indigo-300">"live_hosts.txt"</span></span>
-<span class="row">SCAN_RESULTS_DIR=<span class="text-indigo-600 dark:text-indigo-300">"scan_results_$(date +%Y%m%d_%H%M%S)"</span></span>
-<span class="row">KEEP_FILES=0</span>
-<span class="row">DISCORD_WEBHOOK=<span class="text-indigo-600 dark:text-indigo-300">""</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Record the start time</span></span>
-<span class="row">START_TIME=$(date +<span class="text-indigo-600 dark:text-indigo-300">"%Y-%m-%d %H:%M:%S %Z"</span>)</span>
-<span class="row">START_SEC=$(date +%s)</span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Display the ASCII art banner at the start</span></span>
-<span class="row">display_banner</span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Function to display usage information</span></span>
-<span class="row">usage() {</span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${CYAN}Usage: $0 [options] &lt;target(s) | -f &lt;file&gt;&gt;${NC}"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"  --from &lt;subnet&gt;    Define the source subnet (e.g., 10.1.42.0/24). [Optional: Auto-detected if omitted]"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"  --o &lt;dir&gt;          Specify a custom output directory name"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"  --cp               Run scan twice (Nmap + Verify) and compare results in the report"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"  -f, --file &lt;file&gt;  Specify a file containing targets (one per line)"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"  -T&lt;0-5&gt;            Set Nmap timing template (e.g., -T4)"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"  --open             Only show open ports in Nmap output"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"  --fast             Only scan the 1000 most common ports"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"  --keep             Do not remove temporary files after scan completion"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"  --discord          Send scan results to a Discord server"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> <span class="text-indigo-600 dark:text-indigo-300">"  -h, --help         Display this help message"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row">}</span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Check for prerequisites and root access</span></span>
-<span class="row">check_prerequisites</span>
-<span class="row">check_root</span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Parse command-line arguments</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">while</span> [[ <span class="text-indigo-600 dark:text-indigo-300">"$#"</span> -gt 0 ]]; <span class="text-purple-600 dark:text-purple-400">do</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">case</span> <span class="text-indigo-600 dark:text-indigo-300">"$1"</span> <span class="text-purple-600 dark:text-purple-400">in</span></span>
-<span class="row">        --from)</span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">if</span> [ -n <span class="text-indigo-600 dark:text-indigo-300">"$2"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">                TRAFFIC_FROM=<span class="text-indigo-600 dark:text-indigo-300">"$2"</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">shift</span> 2</span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error:${NC} --from requires a subnet."</span></span>
-<span class="row">                usage</span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">            ;;</span>
-<span class="row">        --o)</span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">if</span> [ -n <span class="text-indigo-600 dark:text-indigo-300">"$2"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">                CUSTOM_OUTPUT_DIR=<span class="text-indigo-600 dark:text-indigo-300">"$2"</span></span>
-<span class="row">                SCAN_RESULTS_DIR=<span class="text-indigo-600 dark:text-indigo-300">"$CUSTOM_OUTPUT_DIR"</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">shift</span> 2</span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error:${NC} --o requires a directory name."</span></span>
-<span class="row">                usage</span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">            ;;</span>
-<span class="row">        --cp)</span>
-<span class="row">            COMPARE_MODE=1</span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">shift</span></span>
-<span class="row">            ;;</span>
-<span class="row">        -f|--file)</span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">if</span> [ -n <span class="text-indigo-600 dark:text-indigo-300">"$2"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">                INPUT_FILE=<span class="text-indigo-600 dark:text-indigo-300">"$2"</span></span>
-<span class="row">                <span class="text-purple-600 dark:text-purple-400">if</span> [ -f <span class="text-indigo-600 dark:text-indigo-300">"$INPUT_FILE"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">                    TARGETS_FILE=<span class="text-indigo-600 dark:text-indigo-300">"$(realpath "</span>$INPUT_FILE<span class="text-indigo-600 dark:text-indigo-300">")"</span></span>
-<span class="row">                <span class="text-purple-600 dark:text-purple-400">elif</span> [ -f <span class="text-indigo-600 dark:text-indigo-300">"$(pwd)/$INPUT_FILE"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">                    TARGETS_FILE=<span class="text-indigo-600 dark:text-indigo-300">"$(pwd)/$INPUT_FILE"</span></span>
-<span class="row">                <span class="text-purple-600 dark:text-purple-400">elif</span> [ -f <span class="text-indigo-600 dark:text-indigo-300">"$SCRIPT_DIR/$INPUT_FILE"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">                    TARGETS_FILE=<span class="text-indigo-600 dark:text-indigo-300">"$SCRIPT_DIR/$INPUT_FILE"</span></span>
-<span class="row">                <span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">                    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error:${NC} Target file '$INPUT_FILE' not found."</span></span>
-<span class="row">                    <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row">                <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Targets file loaded: ${YELLOW}$TARGETS_FILE${NC}"</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">shift</span> 2</span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error:${NC} -f requires a filename."</span></span>
-<span class="row">                usage</span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">            ;;</span>
-<span class="row">        -T*)</span>
-<span class="row">            NMAP_OPTS+=<span class="text-indigo-600 dark:text-indigo-300">" $1"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">shift</span></span>
-<span class="row">            ;;</span>
-<span class="row">        --open)</span>
-<span class="row">            NMAP_OPTS+=<span class="text-indigo-600 dark:text-indigo-300">" --open"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">shift</span></span>
-<span class="row">            ;;</span>
-<span class="row">        --fast)</span>
-<span class="row">            NMAP_OPTS+=<span class="text-indigo-600 dark:text-indigo-300">" --top-ports 1000"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">shift</span></span>
-<span class="row">            ;;</span>
-<span class="row">        --keep)</span>
-<span class="row">            KEEP_FILES=1</span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">shift</span></span>
-<span class="row">            ;;</span>
-<span class="row">        --discord)</span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">if</span> ! command -v curl &amp;&gt; /dev/null; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error:${NC} 'curl' is not installed."</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${CYAN}Enter Discord Webhook URL:${NC}"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">read</span> -r DISCORD_WEBHOOK</span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">if</span> [ -z <span class="text-indigo-600 dark:text-indigo-300">"$DISCORD_WEBHOOK"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error:${NC} Webhook URL cannot be empty."</span></span>
-<span class="row">                <span class="text-sky-600 dark:text-sky-400">exit</span> 1</span>
-<span class="row">            <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">shift</span></span>
-<span class="row">            ;;</span>
-<span class="row">        -h|--help)</span>
-<span class="row">            usage</span>
-<span class="row">            ;;</span>
-<span class="row">        -*)</span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Unknown option:${NC} $1"</span></span>
-<span class="row">            usage</span>
-<span class="row">            ;;</span>
-<span class="row">        *)</span>
-<span class="row">            TARGETS+=<span class="text-indigo-600 dark:text-indigo-300">" $1"</span></span>
-<span class="row">            <span class="text-sky-600 dark:text-sky-400">shift</span></span>
-<span class="row">            ;;</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">esac</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">done</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Auto-detect TRAFFIC_FROM if not set</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [ -z <span class="text-indigo-600 dark:text-indigo-300">"$TRAFFIC_FROM"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}No --from specified. Attempting to detect source subnet...${NC}"</span></span>
-<span class="row">    DEFAULT_IFACE=$(ip route show default | awk <span class="text-indigo-600 dark:text-indigo-300">'/default/ {print $5}'</span> | head -n1)</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [ -n <span class="text-indigo-600 dark:text-indigo-300">"$DEFAULT_IFACE"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        TRAFFIC_FROM=$(ip -o -f inet addr show dev <span class="text-indigo-600 dark:text-indigo-300">"$DEFAULT_IFACE"</span> | awk <span class="text-indigo-600 dark:text-indigo-300">'{print $4}'</span> | head -n1)</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [ -z <span class="text-indigo-600 dark:text-indigo-300">"$TRAFFIC_FROM"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        TRAFFIC_FROM=$(ip -o -f inet addr show | awk <span class="text-indigo-600 dark:text-indigo-300">'!/127.0.0.1/ {print $4}'</span> | head -n1)</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">if</span> [ -n <span class="text-indigo-600 dark:text-indigo-300">"$TRAFFIC_FROM"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Detected Traffic From: ${YELLOW}$TRAFFIC_FROM${NC}"</span></span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">        <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${RED}Error:${NC} Could not auto-detect source subnet. Specify with --from."</span></span>
-<span class="row">        usage</span>
-<span class="row">    <span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [ -z <span class="text-indigo-600 dark:text-indigo-300">"$TARGETS"</span> ] &amp;&amp; [ -z <span class="text-indigo-600 dark:text-indigo-300">"$TARGETS_FILE"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    usage</span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Create output directory</span></span>
-<span class="row">mkdir -p <span class="text-indigo-600 dark:text-indigo-300">"$SCAN_RESULTS_DIR"</span></span>
-<span class="row">cd <span class="text-indigo-600 dark:text-indigo-300">"$SCAN_RESULTS_DIR"</span> || <span class="text-sky-600 dark:text-sky-400">exit</span></span>
-<span class="row"> </span>
-<span class="row">get_ip_addresses</span>
-<span class="row">consolidate_targets <span class="text-indigo-600 dark:text-indigo-300">"$TARGETS"</span> <span class="text-indigo-600 dark:text-indigo-300">"$TARGETS_FILE"</span></span>
-<span class="row">SCAN_INPUT=<span class="text-indigo-600 dark:text-indigo-300">"all_targets.txt"</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Step 1: Discover live hosts (Done once to define scope)</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${CYAN}Scanning for live hosts...${NC}"</span></span>
-<span class="row">scan_live_hosts <span class="text-indigo-600 dark:text-indigo-300">"$SCAN_INPUT"</span> <span class="text-indigo-600 dark:text-indigo-300">"$LIVE_HOSTS_FILE"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [ -s <span class="text-indigo-600 dark:text-indigo-300">"$LIVE_HOSTS_FILE"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    SCAN_INPUT=<span class="text-indigo-600 dark:text-indigo-300">"$LIVE_HOSTS_FILE"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Live hosts found. Focusing scans on these hosts.${NC}"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${YELLOW}No live hosts found. Scanning all specified targets.${NC}"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Step 2 &amp; 3: Run Scans and Verification (Conditional for Compare Mode)</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [ <span class="text-indigo-600 dark:text-indigo-300">"$COMPARE_MODE"</span> -eq 1 ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${MAGENTA}=== Comparison Mode Enabled (2 Iterations) ===${NC}"</span></span>
-<span class="row">    </span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Run 1</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${CYAN}[Run 1/2] Starting Nmap Scans...${NC}"</span></span>
-<span class="row">    run_nmap_scans <span class="text-indigo-600 dark:text-indigo-300">"$SCAN_INPUT"</span> <span class="text-indigo-600 dark:text-indigo-300">"$NMAP_OPTS"</span> <span class="text-indigo-600 dark:text-indigo-300">"_run1"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${CYAN}[Run 1/2] Starting Verification...${NC}"</span></span>
-<span class="row">    verify_services <span class="text-indigo-600 dark:text-indigo-300">"$TRAFFIC_FROM"</span> <span class="text-indigo-600 dark:text-indigo-300">"$SCAN_INPUT"</span> <span class="text-indigo-600 dark:text-indigo-300">"_run1"</span></span>
-<span class="row"> </span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Run 2</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${CYAN}[Run 2/2] Starting Nmap Scans...${NC}"</span></span>
-<span class="row">    run_nmap_scans <span class="text-indigo-600 dark:text-indigo-300">"$SCAN_INPUT"</span> <span class="text-indigo-600 dark:text-indigo-300">"$NMAP_OPTS"</span> <span class="text-indigo-600 dark:text-indigo-300">"_run2"</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${CYAN}[Run 2/2] Starting Verification...${NC}"</span></span>
-<span class="row">    verify_services <span class="text-indigo-600 dark:text-indigo-300">"$TRAFFIC_FROM"</span> <span class="text-indigo-600 dark:text-indigo-300">"$SCAN_INPUT"</span> <span class="text-indigo-600 dark:text-indigo-300">"_run2"</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Standard Mode</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${CYAN}Starting detailed port and service scans...${NC}"</span></span>
-<span class="row">    run_nmap_scans <span class="text-indigo-600 dark:text-indigo-300">"$SCAN_INPUT"</span> <span class="text-indigo-600 dark:text-indigo-300">"$NMAP_OPTS"</span> <span class="text-indigo-600 dark:text-indigo-300">""</span></span>
-<span class="row">    </span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${CYAN}Starting segmentation verification via netcat...${NC}"</span></span>
-<span class="row">    verify_services <span class="text-indigo-600 dark:text-indigo-300">"$TRAFFIC_FROM"</span> <span class="text-indigo-600 dark:text-indigo-300">"$SCAN_INPUT"</span> <span class="text-indigo-600 dark:text-indigo-300">""</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Step 4: Generate HTML report</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${CYAN}Generating HTML report...${NC}"</span></span>
-<span class="row"> </span>
-<span class="row">END_TIME=$(date +<span class="text-indigo-600 dark:text-indigo-300">"%Y-%m-%d %H:%M:%S %Z"</span>)</span>
-<span class="row">END_SEC=$(date +%s)</span>
-<span class="row">DURATION_SEC=$((END_SEC - START_SEC))</span>
-<span class="row">DURATION_HOURS=$((DURATION_SEC / 3600))</span>
-<span class="row">DURATION_MINUTES=$(((DURATION_SEC % 3600) / 60))</span>
-<span class="row">DURATION_SECONDS=$((DURATION_SEC % 60))</span>
-<span class="row">DURATION=<span class="text-indigo-600 dark:text-indigo-300">"${DURATION_HOURS}h ${DURATION_MINUTES}m ${DURATION_SECONDS}s"</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Pass all variables to report function</span></span>
-<span class="row">generate_html_report <span class="text-indigo-600 dark:text-indigo-300">"$TARGETS"</span> <span class="text-indigo-600 dark:text-indigo-300">"$TARGETS_FILE"</span> <span class="text-indigo-600 dark:text-indigo-300">"$START_TIME"</span> <span class="text-indigo-600 dark:text-indigo-300">"$END_TIME"</span> <span class="text-indigo-600 dark:text-indigo-300">"$DURATION"</span> <span class="text-indigo-600 dark:text-indigo-300">"$TRAFFIC_FROM"</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Report generated successfully! Check: $(pwd)/SegIt_Report.html${NC}"</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Step 5: Discord</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [ -n <span class="text-indigo-600 dark:text-indigo-300">"$DISCORD_WEBHOOK"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${CYAN}Archiving and sending to Discord...${NC}"</span></span>
-<span class="row">    send_to_discord <span class="text-indigo-600 dark:text-indigo-300">"$DISCORD_WEBHOOK"</span> <span class="text-indigo-600 dark:text-indigo-300">"$SCAN_RESULTS_DIR"</span> <span class="text-indigo-600 dark:text-indigo-300">"$TARGETS"</span> <span class="text-indigo-600 dark:text-indigo-300">"$TARGETS_FILE"</span> <span class="text-indigo-600 dark:text-indigo-300">"$START_TIME"</span> <span class="text-indigo-600 dark:text-indigo-300">"$END_TIME"</span> <span class="text-indigo-600 dark:text-indigo-300">"$DURATION"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Step 6: Cleanup</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">if</span> [ <span class="text-indigo-600 dark:text-indigo-300">"$KEEP_FILES"</span> -eq 0 ] &amp;&amp; [ -z <span class="text-indigo-600 dark:text-indigo-300">"$DISCORD_WEBHOOK"</span> ]; <span class="text-purple-600 dark:text-purple-400">then</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${CYAN}Cleaning up temporary files...${NC}"</span></span>
-<span class="row">    cleanup</span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">else</span></span>
-<span class="row">    <span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"\n${YELLOW}Temporary files kept.${NC}"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">fi</span></span>
-<span class="row"><span class="text-sky-600 dark:text-sky-400">echo</span> -e <span class="text-indigo-600 dark:text-indigo-300">"${GREEN}Scan completed. Output in: $(pwd)${NC}"</span></span></code></pre>
+            <!-- breadcrumb -->
+            <div class="px-5 py-2.5 border-b border-gray-200 dark:border-gray-800 flex items-center gap-2 text-xs font-mono">
+                <button id="crumbRoot" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">segit</button>
+                <span id="crumbSep" class="text-gray-400 dark:text-gray-600 hidden">/</span>
+                <span id="crumbDir" class="text-gray-500 dark:text-gray-400 hidden"></span>
+                <span id="repoMeta" class="ml-auto text-gray-400 dark:text-gray-600"></span>
             </div>
 
-            <div class="px-4 py-2.5 bg-gray-200 dark:bg-gray-850 border-t border-gray-300 dark:border-gray-800 flex items-center justify-between text-xs font-mono text-gray-500 dark:text-gray-500">
-                <span>Bash</span>
-                <span>238 lines</span>
+            <div id="fileList" class="divide-y divide-gray-100 dark:divide-gray-800"></div>
+
+            <!-- file viewer -->
+            <div id="viewer" class="hidden border-t border-gray-200 dark:border-gray-800">
+                <div class="bg-gray-50 dark:bg-gray-850 px-5 py-3 border-b border-gray-200 dark:border-gray-800 flex flex-wrap items-center gap-3">
+                    <i id="viewerIcon" class="fas fa-file-code text-indigo-500"></i>
+                    <span id="viewerName" class="font-mono text-sm font-bold text-gray-900 dark:text-white"></span>
+                    <span id="viewerMeta" class="text-xs font-mono text-gray-500 dark:text-gray-400"></span>
+                    <div class="ml-auto flex items-center gap-2">
+                        <button onclick="copyViewer()" id="copyBtn" class="text-gray-500 hover:text-indigo-600 dark:hover:text-white transition-colors text-xs uppercase font-bold tracking-wider flex items-center gap-2">
+                            <i class="far fa-copy"></i> Copy
+                        </button>
+                        <a id="rawLink" href="#" rel="noopener" class="text-gray-500 hover:text-indigo-600 dark:hover:text-white transition-colors text-xs uppercase font-bold tracking-wider flex items-center gap-2">
+                            <i class="fas fa-up-right-from-square"></i> Raw
+                        </a>
+                        <button onclick="closeViewer()" class="text-gray-500 hover:text-rose-500 transition-colors text-xs uppercase font-bold tracking-wider flex items-center gap-2">
+                            <i class="fas fa-xmark"></i> Close
+                        </button>
+                    </div>
+                </div>
+                <div id="viewerBody" class="bg-white dark:bg-[#0d1117] max-h-[32rem] overflow-auto code-scroll text-xs font-mono leading-relaxed py-3"></div>
             </div>
-        </div>
+        </section>
+
+        <!-- ============================== DOWNLOAD ============================== -->
+        <section id="download" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-6">
+            <h2 class="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+                <i class="fas fa-download text-indigo-500"></i> Download
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+                <a href="https://github.com/evanricafort/segit" class="md:col-span-2 group flex items-center gap-4 p-5 rounded-xl border border-indigo-200 dark:border-indigo-800/60 bg-indigo-50/60 dark:bg-indigo-900/20 hover:border-indigo-400 dark:hover:border-indigo-500 transition-all">
+                    <span class="p-3.5 rounded-xl bg-white dark:bg-gray-900 text-indigo-600 dark:text-indigo-400 shadow-sm flex-shrink-0">
+                        <i class="fab fa-github text-2xl"></i>
+                    </span>
+                    <span class="min-w-0">
+                        <span class="block font-mono font-bold text-gray-900 dark:text-white">evanricafort/segit</span>
+                        <span class="block text-sm text-gray-600 dark:text-gray-400 mt-0.5">9 files, 64 KB. Clone it, or grab a ZIP from the green Code button.</span>
+                    </span>
+                    <i class="fas fa-arrow-right ml-auto text-indigo-500 group-hover:translate-x-1 transition-transform flex-shrink-0"></i>
+                </a>
+
+                <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 space-y-2">
+                    <span class="block text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Requirements</span>
+                    <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1.5">
+                        <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-500 mt-1 text-xs"></i> Bash and a Linux or macOS shell</li>
+<li class="flex items-start gap-2"><i class="fas fa-check text-emerald-500 mt-1 text-xs"></i> nmap</li>
+<li class="flex items-start gap-2"><i class="fas fa-check text-emerald-500 mt-1 text-xs"></i> Root, for the scan types that need raw sockets</li>
+<li class="flex items-start gap-2"><i class="fas fa-check text-emerald-500 mt-1 text-xs"></i> A source host inside the segment you are testing from</li>
+<li class="flex items-start gap-2"><i class="fas fa-xmark text-gray-400 mt-1 text-xs"></i> No compilation, no build step</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-900/20 p-4 flex items-start gap-3">
+                <i class="fas fa-triangle-exclamation text-amber-500 mt-0.5"></i>
+                <p class="text-sm text-amber-800 dark:text-amber-200">
+                    SegIt! is a multi-file project &mdash; <code class="font-mono text-xs">segit.sh</code> sources the rest of the
+                    tree at runtime, so saving that one file on its own will not work. Clone the repository, or download it as a
+                    ZIP and keep the directory intact. Browse every file above before you run it.
+                </p>
+            </div>
+        </section>
+
+        <!-- ============================== INSTALL =============================== -->
+        <section id="install" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-6">
+            <h2 class="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+                <i class="fas fa-terminal text-indigo-500"></i> Install
+            </h2>
+
+            <div class="space-y-5">
+                <div class="flex gap-4"><span class="step-num bg-indigo-600 text-white">1</span><div class="min-w-0 flex-1 space-y-2"><p class="font-bold text-gray-900 dark:text-white">Clone the repository</p><p class="text-sm text-gray-600 dark:text-gray-400">The entry script sources config/ and lib/, so keep the tree intact.</p><pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">git clone https://github.com/evanricafort/segit.git<br>cd segit</pre></div></div>
+<div class="flex gap-4"><span class="step-num bg-indigo-600 text-white">2</span><div class="min-w-0 flex-1 space-y-2"><p class="font-bold text-gray-900 dark:text-white">Make the scripts executable</p><p class="text-sm text-gray-600 dark:text-gray-400">The entry point plus the modules it sources.</p><pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">sudo chmod +x segit.sh config/* lib/*</pre></div></div>
+<div class="flex gap-4"><span class="step-num bg-indigo-600 text-white">3</span><div class="min-w-0 flex-1 space-y-2"><p class="font-bold text-gray-900 dark:text-white">Check the options</p><p class="text-sm text-gray-600 dark:text-gray-400">Confirms it runs and prints the full flag list.</p><pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">sudo ./segit.sh -h</pre></div></div>
+<div class="flex gap-4"><span class="step-num bg-indigo-600 text-white">4</span><div class="min-w-0 flex-1 space-y-2"><p class="font-bold text-gray-900 dark:text-white">Run the test</p><p class="text-sm text-gray-600 dark:text-gray-400">Point it at the range that is supposed to be out of reach.</p><pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">sudo ./segit.sh -T4 --open 192.0.2.0/24</pre></div></div>
+            </div>
+
+            <div class="pt-2">
+                <p class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">All of it in one line</p>
+                <pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">git clone https://github.com/evanricafort/segit.git &amp;&amp; cd segit &amp;&amp; sudo chmod +x segit.sh config/* lib/* &amp;&amp; sudo ./segit.sh -h</pre>
+            </div>
+        </section>
+
+        <!-- =============================== USAGE ================================ -->
+        <section id="usage" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-6">
+            <h2 class="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+                <i class="fas fa-book-open text-indigo-500"></i> Usage
+            </h2>
+
+            <div class="overflow-x-auto code-scroll">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs uppercase text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">
+                        <tr>
+                            <th scope="col" class="py-2 pr-4 font-semibold">Flag</th>
+                            <th scope="col" class="py-2 font-semibold">What it does</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                        <tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">&lt;target(s)&gt;</td><td class="py-2 text-gray-700 dark:text-gray-300">One or more targets or CIDR ranges to test against.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">-f, --file &lt;file&gt;</td><td class="py-2 text-gray-700 dark:text-gray-300">Read targets from a file, one per line.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">--from &lt;subnet&gt;</td><td class="py-2 text-gray-700 dark:text-gray-300">Declare the source subnet. Auto-detected when omitted.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">--o &lt;dir&gt;</td><td class="py-2 text-gray-700 dark:text-gray-300">Custom output directory name.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">--cp</td><td class="py-2 text-gray-700 dark:text-gray-300">Run the scan twice - nmap then verify - and compare both in the report.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">-T&lt;0-5&gt;</td><td class="py-2 text-gray-700 dark:text-gray-300">Nmap timing template, for example <span class="font-mono">-T4</span>.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">--open</td><td class="py-2 text-gray-700 dark:text-gray-300">Show only open ports in the nmap output.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">--fast</td><td class="py-2 text-gray-700 dark:text-gray-300">Scan the 1000 most common ports only.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">--keep</td><td class="py-2 text-gray-700 dark:text-gray-300">Keep the temporary files after the scan finishes.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">--discord</td><td class="py-2 text-gray-700 dark:text-gray-300">Send the results to a Discord webhook.</td></tr>
+<tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top whitespace-nowrap">-h, --help</td><td class="py-2 text-gray-700 dark:text-gray-300">Show the help text.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="space-y-1.5"><p class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Standard segmentation check</p><pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">sudo ./segit.sh -T4 --open 192.0.2.0/24</pre></div>
+<div class="space-y-1.5"><p class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Targets from a file, custom output</p><pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">sudo ./segit.sh -f targets.txt --o client_segtest</pre></div>
+<div class="space-y-1.5"><p class="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Scan twice and compare</p><pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">sudo ./segit.sh --cp -T4 --open 10.0.0.0/24</pre></div>
+            </div>
+
+            <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 p-5 space-y-2">
+                <p class="font-bold text-gray-900 dark:text-white flex items-center gap-2"><i class="fas fa-shield-halved text-indigo-500"></i> What a pass looks like</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">A segment that is correctly isolated returns nothing - no open ports, no responses from the ranges under test. Anything SegIt! reports is a host that answered across a boundary it should not have crossed, which is the finding. Run it only against networks you are authorized to test.</p>
+            </div>
+        </section>
 
     </main>
 
@@ -377,10 +276,16 @@
     </footer>
 
     <script>
+        /* ----------------------------- theme ----------------------------- */
         const htmlEl = document.documentElement;
         const themeIcon = document.getElementById('themeIcon');
 
         document.getElementById('year').textContent = new Date().getFullYear();
+
+        if (localStorage.getItem('theme') === 'light') {
+            htmlEl.classList.remove('dark');
+            themeIcon.className = 'fas fa-moon text-xl leading-5 w-5 h-5 text-center block';
+        }
 
         function toggleTheme() {
             if (htmlEl.classList.contains('dark')) {
@@ -394,29 +299,237 @@
             }
         }
 
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            htmlEl.classList.add('dark');
-            themeIcon.className = 'fas fa-sun text-xl leading-5 w-5 h-5 text-center block';
-        } else {
-            htmlEl.classList.remove('dark');
-            themeIcon.className = 'fas fa-moon text-xl leading-5 w-5 h-5 text-center block';
+        /* -------------------------- repo browser --------------------------
+           The tree is baked in so the listing renders without a round trip,
+           but file contents come from raw.githubusercontent.com, which sends
+           Access-Control-Allow-Origin: *. That way what you read here is the
+           repository itself rather than a copy that can quietly fall behind. */
+        const REPO = 'segit';
+        const RAW = 'https://raw.githubusercontent.com/evanricafort/' + REPO + '/main/';
+        const BLOB = 'https://github.com/evanricafort/' + REPO + '/blob/main/';
+
+        const TREE = {
+            "": [
+                        {
+                                    "desc": "Configuration",
+                                    "name": "config",
+                                    "size": 0,
+                                    "type": "dir"
+                        },
+                        {
+                                    "desc": "Scan, verification and reporting modules",
+                                    "name": "lib",
+                                    "size": 0,
+                                    "type": "dir"
+                        },
+                        {
+                                    "desc": "License text",
+                                    "name": "LICENSE",
+                                    "size": 35149,
+                                    "type": "md"
+                        },
+                        {
+                                    "desc": "Install and usage",
+                                    "name": "README.md",
+                                    "size": 1965,
+                                    "type": "md"
+                        },
+                        {
+                                    "desc": "Entry point - argument parsing, scan orchestration, reporting",
+                                    "name": "segit.sh",
+                                    "size": 7994,
+                                    "type": "sh"
+                        }
+            ],
+            "config": [
+                        {
+                                    "desc": "ANSI colour codes",
+                                    "name": "colors.sh",
+                                    "size": 176,
+                                    "type": "sh"
+                        }
+            ],
+            "lib": [
+                        {
+                                    "desc": "Optional Discord notification",
+                                    "name": "discord.sh",
+                                    "size": 1854,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "Builds the segmentation test report",
+                                    "name": "report.sh",
+                                    "size": 8985,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "Runs the nmap sweep against the target range",
+                                    "name": "scan.sh",
+                                    "size": 1570,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "Shared helpers - validation, source subnet detection",
+                                    "name": "utils.sh",
+                                    "size": 4310,
+                                    "type": "sh"
+                        },
+                        {
+                                    "desc": "Second-pass verification of anything that answered",
+                                    "name": "verify.sh",
+                                    "size": 3655,
+                                    "type": "sh"
+                        }
+            ]
+};
+
+        const ICONS = {
+            dir:  { cls: 'fas fa-folder',     color: 'text-indigo-500' },
+            sh:   { cls: 'fas fa-terminal',   color: 'text-emerald-500' },
+            md:   { cls: 'fas fa-file-lines', color: 'text-gray-400' },
+            json: { cls: 'fas fa-file-code',  color: 'text-amber-500' },
+            txt:  { cls: 'fas fa-file-lines', color: 'text-sky-500' }
+        };
+
+        let currentDir = '';
+
+        function fmtSize(n) {
+            if (n < 1024) return n + ' B';
+            if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+            return (n / 1048576).toFixed(2) + ' MB';
         }
 
-        /* textContent of the <code> is the script verbatim - the highlighting
-           spans carry no text of their own, and the line numbers are CSS
-           counters rather than characters, so this copies cleanly. */
-        document.getElementById('btnCopy').addEventListener('click', function () {
-            const source = document.getElementById('scriptSource').textContent;
-            const button = this;
-            navigator.clipboard.writeText(source).then(function () {
-                button.innerHTML = '<i class="fas fa-check"></i> <span class="hidden sm:inline">Copied</span>';
-                setTimeout(function () {
-                    button.innerHTML = '<i class="fas fa-copy"></i> <span class="hidden sm:inline">Copy</span>';
-                }, 1800);
-            });
-        });
-    </script>
+        function renderDir(dir) {
+            currentDir = dir;
+            const entries = TREE[dir] || [];
+            const list = document.getElementById('fileList');
+            list.textContent = '';
 
+            document.getElementById('crumbSep').classList.toggle('hidden', !dir);
+            const crumbDir = document.getElementById('crumbDir');
+            crumbDir.classList.toggle('hidden', !dir);
+            crumbDir.textContent = dir;
+
+            const bytes = entries.reduce(function (a, e) { return a + e.size; }, 0);
+            document.getElementById('repoMeta').textContent =
+                entries.length + (entries.length === 1 ? ' item' : ' items') + (bytes ? ' · ' + fmtSize(bytes) : '');
+
+            if (dir) {
+                const up = document.createElement('button');
+                up.className = 'repo-row w-full text-left px-5 py-3 flex items-center gap-3 transition-colors';
+                up.innerHTML = '<i class="fas fa-turn-up rotate-[-90deg] text-gray-400 w-4 text-center"></i>' +
+                               '<span class="font-mono text-sm text-indigo-600 dark:text-indigo-400 font-bold">..</span>';
+                up.onclick = function () { renderDir(dir.indexOf('/') > -1 ? dir.slice(0, dir.lastIndexOf('/')) : ''); closeViewer(); };
+                list.appendChild(up);
+            }
+
+            entries.forEach(function (e) {
+                const meta = ICONS[e.type] || ICONS.txt;
+                const path = (dir ? dir + '/' : '') + e.name;
+                const row = document.createElement('button');
+                row.className = 'repo-row w-full text-left px-5 py-3 flex items-center gap-3 transition-colors';
+                row.dataset.path = path;
+
+                const icon = document.createElement('i');
+                icon.className = meta.cls + ' ' + meta.color + ' w-4 text-center flex-shrink-0';
+
+                const name = document.createElement('span');
+                name.className = 'font-mono text-sm font-medium text-gray-900 dark:text-gray-100 flex-shrink-0';
+                name.textContent = e.name;
+
+                const desc = document.createElement('span');
+                desc.className = 'text-xs text-gray-500 dark:text-gray-500 truncate hidden md:block flex-1 min-w-0';
+                desc.textContent = e.desc;
+
+                const size = document.createElement('span');
+                size.className = 'ml-auto text-xs font-mono text-gray-400 dark:text-gray-600 flex-shrink-0';
+                size.textContent = e.type === 'dir' ? '—' : fmtSize(e.size);
+
+                row.append(icon, name, desc, size);
+                row.onclick = function () {
+                    if (e.type === 'dir') { renderDir(path); closeViewer(); }
+                    else { openFile(path, e); }
+                };
+                list.appendChild(row);
+            });
+        }
+
+        document.getElementById('crumbRoot').onclick = function () { renderDir(''); closeViewer(); };
+
+        /* -------------------------- file viewer -------------------------- */
+        const viewer = document.getElementById('viewer');
+        const viewerBody = document.getElementById('viewerBody');
+        let viewerText = '';
+
+        function markActive(path) {
+            document.querySelectorAll('#fileList .repo-row').forEach(function (r) {
+                r.classList.toggle('is-active', r.dataset.path === path);
+            });
+        }
+
+        async function openFile(path, entry) {
+            const meta = ICONS[entry.type] || ICONS.txt;
+            document.getElementById('viewerIcon').className = meta.cls + ' ' + meta.color;
+            document.getElementById('viewerName').textContent = path;
+            document.getElementById('viewerMeta').textContent = fmtSize(entry.size);
+            document.getElementById('rawLink').href = BLOB + path;
+            viewer.classList.remove('hidden');
+            markActive(path);
+
+            viewerBody.innerHTML = '<div class="p-8 text-center text-gray-500 dark:text-gray-500 font-mono text-xs">Loading ' + path + ' …</div>';
+            viewer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            try {
+                const res = await fetch(RAW + path, { cache: 'no-store' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                viewerText = await res.text();
+                renderCode(viewerText);
+            } catch (err) {
+                viewerText = '';
+                viewerBody.innerHTML =
+                    '<div class="p-8 text-center text-rose-500 font-mono text-xs">Could not load ' + path + ' (' + err.message + ')' +
+                    '<br><span class="text-gray-500">Open it on GitHub with the Raw link above.</span></div>';
+            }
+        }
+
+        function renderCode(text) {
+            const lines = text.replace(/\t/g, '    ').replace(/\n$/, '').split('\n');
+            const wrap = document.createElement('div');
+            wrap.className = 'code-lines';
+
+            lines.forEach(function (line, i) {
+                const row = document.createElement('div');
+                row.className = 'ln-row';
+                const num = document.createElement('span');
+                num.className = 'ln-num';
+                num.textContent = String(i + 1);
+                const txt = document.createElement('span');
+                txt.className = 'ln-txt text-gray-700 dark:text-gray-300';
+                txt.textContent = line || ' ';
+                row.append(num, txt);
+                wrap.appendChild(row);
+            });
+
+            viewerBody.textContent = '';
+            viewerBody.appendChild(wrap);
+        }
+
+        function closeViewer() {
+            viewer.classList.add('hidden');
+            viewerBody.textContent = '';
+            viewerText = '';
+            markActive(null);
+        }
+
+        function copyViewer() {
+            if (!viewerText) return;
+            navigator.clipboard.writeText(viewerText);
+            const btn = document.getElementById('copyBtn');
+            btn.innerHTML = '<i class="fas fa-check text-emerald-500"></i> Copied';
+            setTimeout(function () { btn.innerHTML = '<i class="far fa-copy"></i> Copy'; }, 1400);
+        }
+
+        renderDir('');
+    </script>
 </body>
 </html>
