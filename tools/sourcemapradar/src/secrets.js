@@ -49,8 +49,13 @@ const PLACEHOLDER_HINTS = [
     'yourapi', 'your_api', 'your_token', 'your-token', 'dummy', 'redacted',
     'notset', 'not_set', 'nosecret', 'lorem ', 'qwerty', 'asdfgh',
     'foobar', 'testtest', 'password123', 'secretsecret', 'replace_me',
-    'replaceme', 'insert_key', 'insertkey'
+    'replaceme', 'insert_key', 'insertkey', 'your_secret', 'your-secret',
+    'yourtoken', 'your_client', 'clientidhere', 'tokenhere', 'keyhere'
 ];
+
+/* Stand-ins written in the shouty style config templates use:
+   YOUR_TOKEN_HERE, REPLACE_WITH_KEY, SET_ME. */
+const TEMPLATE_WORD_RE = /^(?:your|my|the|some|a)[_-]|[_-]here$|^(?:set|replace|insert|add)[_-]/i;
 
 /* Filler that only counts when it is the entire value. */
 const FILLER_VALUE_RE = new RegExp(
@@ -69,19 +74,33 @@ const FILLER_VALUE_RE = new RegExp(
 const TEMPLATE_RE = /\$\{|\{\{|<%|%>|#\{|\$\(|%[sdv]\b|process\.env|import\.meta|os\.environ|getenv|Deno\.env/i;
 
 /* A value that is entirely a path, a URL, a MIME type, a locale, a
-   semver, a colour, a date or a bare identifier is not a credential. */
-const NOT_A_SECRET_RE = new RegExp(
+   semver, a colour, a date or a bare identifier is not a credential.
+
+   Split in two because case matters for some of these and not others.
+   Matching camelCase is the whole point of the identifier pattern, so
+   running it case-insensitively would collapse it into "any run of
+   letters" and throw away real all-lowercase passphrases. The format
+   patterns below it have no such constraint and should catch PRODUCTION
+   and EN-US as readily as their lowercase forms. */
+const NOT_A_SECRET_CI = new RegExp(
     '^(?:' +
-        '(?:\\.{0,2}\\/|[A-Za-z]:\\\\)[^\\s]*' +                    // path
-        '|[a-z]+\\/[a-z0-9.+-]+' +                                  // mime type
-        '|[a-z]{2}([-_][A-Za-z]{2,4})?' +                           // locale
-        '|v?\\d+(\\.\\d+){1,3}([-+][0-9A-Za-z.]+)?' +               // semver
-        '|#[0-9A-Fa-f]{3,8}' +                                      // colour
-        '|\\d{4}-\\d{2}-\\d{2}(T[0-9:.Z+-]*)?' +                    // date
+        '(?:\\.{0,2}\\/|[A-Za-z]:\\\\)[^\\s]*' +            // path
+        '|[a-z]+\\/[a-z0-9.+-]+' +                          // mime type
+        '|[a-z]{2}([-_][A-Za-z]{2,4})?' +                   // locale
+        '|v?\\d+(\\.\\d+){1,3}([-+][0-9A-Za-z.]+)?' +       // semver
+        '|#[0-9A-Fa-f]{3,8}' +                              // colour
+        '|\\d{4}-\\d{2}-\\d{2}(T[0-9:.Z+-]*)?' +            // date
         '|(?:true|false|null|undefined|none|nan|nil|void)' +
-        '|[A-Za-z_$][A-Za-z0-9_$]*(?:\\.[A-Za-z_$][A-Za-z0-9_$]*)+' + // a.b.c ref
-        '|[a-z]+(?:[A-Z][a-z]+)+' +                                 // camelCase word
-        '|[a-z]+(?:[_-][a-z]+)+' +                                  // snake/kebab word
+    ')$', 'i'
+);
+
+/* Case-sensitive: these describe identifier *shapes*, which only mean
+   anything with the original casing intact. */
+const NOT_A_SECRET_CS = new RegExp(
+    '^(?:' +
+        '[A-Za-z_$][A-Za-z0-9_$]*(?:\\.[A-Za-z_$][A-Za-z0-9_$]*)+' + // a.b.c ref
+        '|[a-z]+(?:[A-Z][a-z]+)+' +                                 // camelCase
+        '|[a-z]+(?:[_-][a-z]+)+' +                                  // snake / kebab
     ')$'
 );
 
@@ -116,6 +135,7 @@ function isPlaceholder(v) {
         if (low.indexOf(PLACEHOLDER_HINTS[i]) !== -1) return true;
     }
     if (/(?:^|[^a-z])(?:example|sample|mysecret|testkey|faketoken)(?:[^a-z]|$)/.test(low)) return true;
+    if (TEMPLATE_WORD_RE.test(v)) return true;
     return false;
 }
 
@@ -140,9 +160,12 @@ function passesGate(value, conf, structural) {
     if (conf === 'high') return true;            // shape is already conclusive
 
     if (TEMPLATE_RE.test(value)) return false;
-    if (NOT_A_SECRET_RE.test(value)) return false;
+    if (NOT_A_SECRET_CI.test(value) || NOT_A_SECRET_CS.test(value)) return false;
 
     if (conf === 'medium') {
+        /* All digits is an identifier - an app id, a numeric account
+           reference - not a credential. */
+        if (/^[0-9]+$/.test(value)) return false;
         return value.length >= 8 && shannonEntropy(value) >= 3.0;
     }
 
@@ -193,7 +216,17 @@ const KEYWORDS_STRONG = [
     'spotify_secret', 'ssh_key', 'sshpass', 'stripe_secret_key', 'surge_token',
     'telegram_token', 'twilio_auth_token', 'twilio_sid', 'twitter_consumer_secret',
     'vault_token', 'vip_github_deploy_key', 'yt_api_key', 'zendesk_api_token',
-    'zopim_account_key'
+    'zopim_account_key',
+    /* The separator-insensitive matching below means one spelling covers
+       snake_case, kebab-case, camelCase and runtogether, so these are the
+       shapes JS code actually uses rather than extra spellings. */
+    'auth_key', 'access_key_id', 'secret_key_id', 'api_token', 'auth_secret',
+    'bearer_token', 'id_token', 'session_token', 'session_secret', 'csrf_secret',
+    'webhook_secret', 'signing_secret', 'hmac_secret', 'shared_secret',
+    'totp_secret', 'otp_secret', 'recovery_code', 'license_key', 'activation_key',
+    'x_api_key', 'x_auth_token', 'x_access_token', 'x_secret_key', 'x_auth_key',
+    'private_token', 'registry_token', 'upload_token', 'publish_token',
+    'service_key', 'integration_token', 'webhook_url', 'connection_string'
 ];
 
 /* Context keywords that occasionally sit next to a secret but usually
@@ -208,14 +241,40 @@ const KEYWORDS_WEAK = [
 
 /* Assembled from the lists above rather than written as one unreadable
    literal, so a noisy keyword can be moved between tiers in one edit.
-   Mirrors the classic secret-grep one-liner: <keyword><filler>
-   <assignment><quoted value>. */
+
+   Three things the classic one-liner gets wrong, which cost real findings:
+
+     1. It anchors the operator directly to the keyword, so the commonest
+        shape in a minified bundle - {"api_key":"..."} - never matches,
+        because the closing quote sits between them.
+     2. Its keywords are snake_case literals, so access_token misses
+        accessToken. JavaScript is overwhelmingly camelCase.
+     3. It requires a quoted value, missing .env (API_KEY=...), YAML
+        (api_key: ...) and URL query strings (?api_key=...).
+
+   So each keyword is expanded to tolerate any separator, quotes are
+   optional on both sides, and the value may be quoted or bare. */
 function keywordRule(words, flags) {
-    const escaped = words.map(function (w) { return w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); });
+    const alts = words.map(function (w) {
+        /* access_token -> access[_-]?token, which under /i also matches
+           accessToken, access-token and accesstoken. */
+        return w.split(/[_-]/).map(function (part) {
+            return part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }).join('[_-]?');
+    });
+
+    const KEY = '[\'"`]?' + '(?:' + alts.join('|') + ')' + '[A-Za-z0-9_.-]{0,20}' + '[\'"`]?';
+    /* Bracket and paren are allowed before the operator so that
+       headers['X-API-Key'] = '...' reaches its value. */
+    const OP = '[\\s\\])]{0,6}(?:=>|:=|\\|\\|:|<=|[=:>])\\s{0,4}';
+    const VAL = '[0-9A-Za-z\\-_=+/.~]{8,128}';
+
     return new RegExp(
-        '\\b(?:' + escaped.join('|') + ')[a-z0-9_ .\\-,]{0,25}' +
-        '\\s{0,6}(?:=|>|:=|\\|\\|:|<=|=>|:)\\s{0,6}' +
-        '[\'"`]([0-9A-Za-z\\-_=+/.~]{8,64})[\'"`]',
+        '(?<![A-Za-z0-9])' + KEY + OP +
+        '(?:' +
+            '[\'"`](' + VAL + ')[\'"`]' +          // quoted value
+            '|(' + VAL + ')(?=[\\s,;)\\]}&\'"`]|$)' +   // bare value
+        ')',
         flags
     );
 }
@@ -283,8 +342,10 @@ const SECRET_RULES = [
     { name: 'Authorization header',   conf: 'medium', re: /\b(?:authorization|proxy-authorization)\b\s*[:=]\s*['"](?:Basic|Bearer|Token)\s+([0-9A-Za-z+/=._-]{16,})['"]/gi, group: 1 },
 
     /* ── Keyword sweep, lowest precision, widest net ───────────── */
-    { name: 'Named credential',       conf: 'medium', re: keywordRule(KEYWORDS_STRONG, 'gi'), group: 1 },
-    { name: 'Config keyword',         conf: 'low',    re: keywordRule(KEYWORDS_WEAK, 'gi'),   group: 1 }
+    { name: 'Bearer token',           conf: 'medium', re: /\bBearer\s+([0-9A-Za-z\-_=+/.~]{16,})/g, group: 1 },
+    { name: 'Basic auth credentials', conf: 'medium', re: /\bBasic\s+([0-9A-Za-z+/]{16,}={0,2})/g, group: 1 },
+    { name: 'Named credential',       conf: 'medium', re: keywordRule(KEYWORDS_STRONG, 'gi'), group: [1, 2] },
+    { name: 'Config keyword',         conf: 'low',    re: keywordRule(KEYWORDS_WEAK, 'gi'),   group: [1, 2] }
 ];
 
 /* Scanning budget. A source map can carry tens of megabytes of original
@@ -308,8 +369,11 @@ function scanText(text, sourcePath, out, seen) {
       let m;
       while ((m = rule.re.exec(line)) !== null) {
         if (m[0].length === 0) { rule.re.lastIndex++; continue; }
-        const raw = rule.group !== undefined ? m[rule.group]
-                  : (m[1] !== undefined ? m[1] : m[0]);
+        const raw = Array.isArray(rule.group)
+          ? rule.group.map(function (g) { return m[g]; })
+                      .filter(function (v) { return v !== undefined; })[0]
+          : (rule.group !== undefined ? m[rule.group]
+            : (m[1] !== undefined ? m[1] : m[0]));
         if (raw === undefined) continue;
         const value = raw.trim();
         if (!passesGate(value, rule.conf || "medium", rule.structural)) continue;

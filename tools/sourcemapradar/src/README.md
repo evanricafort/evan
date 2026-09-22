@@ -37,7 +37,7 @@ source paths.
 
 When a map comes back with `sourcesContent`, the original source is already in
 hand — so it gets scanned for hardcoded keys and tokens right there, using the
-same 49-rule engine as the
+same 51-rule engine as the
 [JS SourceMap Unmapper](https://evanricafort.com/tools/sourcemapunmapper/)
 (`secrets.js` is a direct port, so both tools agree on what counts as a secret).
 
@@ -47,6 +47,12 @@ Findings are reported per confidence tier:
   `AIza…`, Stripe, Slack, Telegram, Sentry, connection strings). Near conclusive.
 - **medium** — a named credential assigned a quoted value, entropy gated.
 - **low** — the broad keyword sweep, behind the strictest gate. Triage these.
+
+The keyword sweep matches the shapes code actually uses, not just
+`keyword = "value"`: quoted keys (`{"api_key":"..."}`), camelCase
+(`accessToken`, `clientSecret`), kebab and header forms (`X-API-Key`),
+leading underscores (`__API_KEY__`), and bare unquoted values from `.env`
+files, YAML and URL query strings.
 
 Matches are dropped for `${TEMPLATE}` interpolation and `process.env` lookups,
 vendor documentation samples (`AKIAIOSFODNN7EXAMPLE`, Stripe's `sk_test_4eC39…`),
