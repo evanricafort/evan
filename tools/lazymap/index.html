@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lazymap</title>
+    <meta name="description" content="Bash tool for network penetration testing that chains selected Nmap NSE scripts, sslscan, ssh-audit, dig, ldapsearch, curl, rpcclient, Metasploit modules, PRET and wget into one command." />
+    <link href="/profile.jpg" type="image/jpeg" rel="shortcut icon" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        gray: {
+                            850: '#1f2937',
+                            900: '#111827',
+                            950: '#0b0f19',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body, div, nav, button, input, table, th, td {
+            transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 300ms;
+        }
+
+        .tk-anim-logo { display:inline-block; animation: tk-logo-float 4.5s ease-in-out infinite; transform-origin:center; }
+        @keyframes tk-logo-float { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-5px) rotate(-6deg)} 75%{transform:translateY(-2px) rotate(6deg)} }
+        @media (prefers-reduced-motion: reduce){ .tk-anim-logo{animation:none} }
+
+        /* Terminal. Line numbers come from a counter on each row rather than
+           a second column, so selecting the code copies the code alone. */
+        .tk-term-body { counter-reset: line; }
+        .tk-term-body .row { counter-increment: line; display: block; }
+        .tk-term-body .row::before {
+            content: counter(line);
+            display: inline-block;
+            width: 3rem;
+            padding-right: 1rem;
+            text-align: right;
+            color: #4b5563;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .tk-term-body .row:hover::before { color: #818cf8; }
+
+        /* The script is nearly a thousand lines, so the terminal scrolls
+           instead of running the page off the bottom. */
+        .tk-term-scroll { max-height: 34rem; overflow: auto; }
+    </style>
+    <link rel="stylesheet" href="/css/tool-shell.css">
+    <script src="/js/geo-web.js" defer></script>
+</head>
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200 font-sans min-h-screen flex flex-col items-center py-8 md:py-12 px-4 antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300">
+    <nav class="tk-sitenav">
+        <a href="/tools/">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            Tools
+        </a>
+        <a href="/" class="tk-sitenav-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.8V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.8"/><path d="M10 21v-6h4v6"/></svg>
+            Home
+        </a>
+    </nav>
+
+    <div class="absolute top-4 right-4 md:top-8 md:right-8">
+        <button onclick="toggleTheme()" class="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-600 dark:text-yellow-400 shadow-lg border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <i id="themeIcon" class="fas fa-sun text-xl leading-5 w-5 h-5 text-center block"></i>
+        </button>
+    </div>
+
+    <main class="w-full max-w-3xl space-y-8 mt-8">
+
+        <div class="text-center space-y-3">
+            <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center justify-center gap-3">
+                <i class="fas fa-network-wired tk-anim-logo text-indigo-600 dark:text-indigo-500"></i>
+                <span><span class="text-indigo-600 dark:text-indigo-500">Lazy</span>map</span>
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 text-sm md:text-lg max-w-xl mx-auto">
+                A single command for network penetration testing. It chains selected Nmap NSE scripts, sslscan, ssh-audit, dig, ldapsearch, curl, rpcclient, selected Metasploit modules, PRET and wget against one host or a list of them.
+            </p>
+        </div>
+
+        <div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-xl p-6 flex gap-3">
+            <i class="fas fa-circle-info text-indigo-600 dark:text-indigo-300 mt-1"></i>
+            <div class="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                <p class="font-bold text-gray-900 dark:text-white">How to run it</p>
+                <p>Make it executable with <span class="font-mono text-indigo-600 dark:text-indigo-300">chmod +x lazymap.sh</span>, then run <span class="font-mono text-indigo-600 dark:text-indigo-300">./lazymap.sh -u host</span> for a single target or <span class="font-mono text-indigo-600 dark:text-indigo-300">./lazymap.sh -t hosts</span> for a file of them.</p>
+                <p>Needs Bash 5.2 or newer. Run under <span class="font-mono text-indigo-600 dark:text-indigo-300">sudo</span> for the UDP scan, since the Nmap scripts behind it require raw sockets.</p>
+                <p class="text-gray-500 dark:text-gray-400">Only point it at hosts you are authorised to test. It is noisy by design and makes no attempt to be subtle.</p>
+            </div>
+        </div>
+
+        <!-- Options -->
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-4">
+            <h2 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                <i class="fas fa-sliders mr-1"></i> Options
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs uppercase text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">
+                        <tr>
+                            <th scope="col" class="py-2 pr-4 font-semibold">Flag</th>
+                            <th scope="col" class="py-2 font-semibold">What it does</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-gray-700 dark:text-gray-300">
+                        <tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top">-u</td><td class="py-2">Scan a single host.</td></tr>
+                        <tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top">-t</td><td class="py-2">Scan every host in a file.</td></tr>
+                        <tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top">-1</td><td class="py-2">Add the <span class="font-mono">vulners</span> NSE script.</td></tr>
+                        <tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top">-2</td><td class="py-2">Add the <span class="font-mono">vuln</span> NSE script.</td></tr>
+                        <tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top">-3</td><td class="py-2">Add both. Slow across many targets.</td></tr>
+                        <tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top">-4</td><td class="py-2">Firewall evasion scan.</td></tr>
+                        <tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top">-a</td><td class="py-2">Skip the all-ports and UDP scans.</td></tr>
+                        <tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top">-n</td><td class="py-2">Add <span class="font-mono">-n -T4</span> for a faster run.</td></tr>
+                        <tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top">-k</td><td class="py-2">Skip sslscan, ssh-audit and the header check.</td></tr>
+                        <tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top">-b</td><td class="py-2">Add <span class="font-mono">-A --min-rate 1000 --open</span> for speed and open ports only.</td></tr>
+                        <tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top">--pret</td><td class="py-2">Printer security check via PRET (credit: Jens Mueller).</td></tr>
+                        <tr><td class="py-2 pr-4 font-mono text-indigo-600 dark:text-indigo-300 align-top">-h</td><td class="py-2">Show the help text.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                Flags combine, so a full run reads like
+                <span class="font-mono text-indigo-600 dark:text-indigo-300">./lazymap.sh -t hosts -12bank --pret</span>.
+            </p>
+        </div>
+
+        <!-- Terminal -->
+        <div class="rounded-2xl overflow-hidden border border-gray-300 dark:border-gray-800 shadow-xl dark:shadow-black/50">
+
+            <div class="flex items-center gap-3 px-4 py-3 bg-gray-200 dark:bg-gray-850 border-b border-gray-300 dark:border-gray-800">
+                <span class="flex gap-2 flex-shrink-0" aria-hidden="true">
+                    <span class="w-3 h-3 rounded-full bg-red-400 dark:bg-red-500/80"></span>
+                    <span class="w-3 h-3 rounded-full bg-yellow-400 dark:bg-yellow-500/80"></span>
+                    <span class="w-3 h-3 rounded-full bg-green-400 dark:bg-green-500/80"></span>
+                </span>
+                <span class="flex-1 text-center font-mono text-xs text-gray-600 dark:text-gray-400 truncate">lazymap.sh</span>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <button id="btnCopy" title="Copy to clipboard" class="px-2.5 py-1.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white text-xs font-bold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <i class="fas fa-copy"></i> <span class="hidden sm:inline">Copy</span>
+                    </button>
+                    <a id="btnDownload" href="lazymap.sh" download="lazymap.sh" title="Download the script" class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <i class="fas fa-download"></i> <span class="hidden sm:inline">Download</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-[#0d1117] tk-term-scroll">
+                <pre class="tk-term-body p-4 md:p-5 font-mono text-xs md:text-sm leading-relaxed text-gray-800 dark:text-gray-300"><code id="scriptSource"><span class="row">Loading lazymap.sh&hellip;</span></code></pre>
+            </div>
+
+            <div class="px-4 py-2.5 bg-gray-200 dark:bg-gray-850 border-t border-gray-300 dark:border-gray-800 flex items-center justify-between text-xs font-mono text-gray-500 dark:text-gray-500">
+                <span>Bash</span>
+                <span id="lineCount">&nbsp;</span>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="mt-auto py-8 text-center text-gray-500 dark:text-gray-600 text-xs font-medium">
+        <p>For authorized security testing only &middot; All processing runs client-side &middot; No data is stored</p>
+        <p>&copy; <span id="year"></span> Lazymap.</p>
+    </footer>
+
+    <script>
+        const htmlEl = document.documentElement;
+        const themeIcon = document.getElementById('themeIcon');
+
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        function toggleTheme() {
+            if (htmlEl.classList.contains('dark')) {
+                htmlEl.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                themeIcon.className = 'fas fa-moon text-xl leading-5 w-5 h-5 text-center block';
+            } else {
+                htmlEl.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.className = 'fas fa-sun text-xl leading-5 w-5 h-5 text-center block';
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            htmlEl.classList.add('dark');
+            themeIcon.className = 'fas fa-sun text-xl leading-5 w-5 h-5 text-center block';
+        } else {
+            htmlEl.classList.remove('dark');
+            themeIcon.className = 'fas fa-moon text-xl leading-5 w-5 h-5 text-center block';
+        }
+
+        const scriptSource = document.getElementById('scriptSource');
+        const lineCount = document.getElementById('lineCount');
+
+        /* The script is fetched rather than pasted into this file: it stays a
+           real .sh that the download button serves byte for byte, and there is
+           only one copy of it to keep up to date. */
+        const escapeHtml = (value) => value
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+
+        /* Comments and quoted strings only. Anything more ambitious needs a real
+           parser, and getting it wrong would misrepresent the code. */
+        const highlight = (line) => {
+            const escaped = escapeHtml(line);
+            const comment = escaped.match(/^(\s*)(#.*)$/);
+            if (comment) {
+                return comment[1] + '<span class="text-gray-500 dark:text-gray-500">' + comment[2] + '</span>';
+            }
+            return escaped.replace(/(&quot;|&#39;|"|')(?:(?!\1).)*\1/g,
+                (match) => '<span class="text-indigo-600 dark:text-indigo-300">' + match + '</span>');
+        };
+
+        const renderScript = (text) => {
+            /* A trailing newline would otherwise render as a numbered empty row. */
+            const lines = text.replace(/\n$/, '').split('\n');
+            scriptSource.innerHTML = lines
+                .map((line) => '<span class="row">' + (highlight(line) || ' ') + '</span>')
+                .join('\n');
+            lineCount.textContent = lines.length.toLocaleString() + ' lines';
+        };
+
+        fetch('lazymap.sh')
+            .then((response) => {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.text();
+            })
+            .then(renderScript)
+            .catch(() => {
+                /* Never leave the panel stuck on "Loading". The download button
+                   is a plain link, so it still works when this does not. */
+                scriptSource.innerHTML = '<span class="row">The script could not be loaded here. Use the download button above to get lazymap.sh.</span>';
+                lineCount.textContent = '—';
+            });
+
+        document.getElementById('btnCopy').addEventListener('click', function () {
+            const source = scriptSource.textContent;
+            const button = this;
+            navigator.clipboard.writeText(source).then(function () {
+                button.innerHTML = '<i class="fas fa-check"></i> <span class="hidden sm:inline">Copied</span>';
+                setTimeout(function () {
+                    button.innerHTML = '<i class="fas fa-copy"></i> <span class="hidden sm:inline">Copy</span>';
+                }, 1800);
+            });
+        });
+    </script>
+
+</body>
+</html>
