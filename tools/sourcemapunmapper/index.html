@@ -99,7 +99,7 @@
                 <div id="dropzone" class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-6 text-center cursor-pointer transition-colors hover:border-indigo-500">
                     <i data-lucide="upload-cloud" class="w-8 h-8 mx-auto text-gray-400 dark:text-gray-500"></i>
                     <p class="mt-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Drop one or more .map files anywhere, or click to browse</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">Select several at once to unmap a whole bundle. Nothing is uploaded &mdash; parsing happens in your browser.</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">Select several at once, or keep dropping &mdash; maps add to the workspace. Nothing is uploaded, parsing happens in your browser.</p>
                     <input type="file" id="fileInput" accept=".map,.json,application/json" multiple class="hidden">
                 </div>
                 <p id="fileInfo" class="mt-2 text-xs font-mono text-gray-500 dark:text-gray-400 hidden"></p>
@@ -306,6 +306,27 @@
         'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300'
     ];
     function mapColour(i) { return MAP_COLOURS[i % MAP_COLOURS.length]; }
+
+    /* Cheap content signature (FNV-1a plus length) so the same map dropped
+       twice is recognised without keeping a second copy of the text. */
+    function hashText(t) {
+        let h = 2166136261;
+        for (let i = 0; i < t.length; i++) {
+            h ^= t.charCodeAt(i);
+            h = Math.imul(h, 16777619);
+        }
+        return (h >>> 0).toString(36) + ':' + t.length;
+    }
+
+    /* Two different files can share a basename - app.js.map out of two build
+       folders - and with everything loaded at once an ambiguous label would
+       make the attribution useless. */
+    function uniqueName(name, taken) {
+        if (taken.indexOf(name) === -1) return name;
+        let n = 2;
+        while (taken.indexOf(name + ' (' + n + ')') !== -1) n++;
+        return name + ' (' + n + ')';
+    }
     function mapName(i) { return (maps[i] && maps[i].name) || 'unknown map'; }
 
     function mapChip(i, extra) {
@@ -325,6 +346,13 @@
         const nextMaps = [];
         const nextRecovered = [];
         const failures = [];
+        const duplicates = [];
+
+        /* Batches accumulate rather than replace, so maps pulled from a target
+           a few at a time end up in one workspace. Clear starts over, and each
+           group header has its own remove. */
+        const existingSigs = maps.map(function (m) { return m.sig; });
+        const takenNames = maps.map(function (m) { return m.name; });
 
         inputs.forEach(function (input) {
             const name = input.name || 'source map';
@@ -347,39 +375,91 @@
                 return;
             }
 
+            const sig = hashText(text);
+            if (existingSigs.indexOf(sig) !== -1) { duplicates.push(name); return; }
+
             const collected = [];
             collectFromMap(map, collected);
             if (collected.length === 0) { failures.push(name + ' (lists no sources)'); return; }
 
-            const mapIndex = nextMaps.length;
+            const label = uniqueName(name, takenNames);
+            takenNames.push(label);
+            existingSigs.push(sig);
+
+            const mapIndex = maps.length + nextMaps.length;
             collected.forEach(function (f) {
                 f.mapIndex = mapIndex;
                 nextRecovered.push(f);
             });
             nextMaps.push({
-                name: name,
+                name: label,
+                sig: sig,
                 sources: collected.length,
                 recovered: collected.filter(function (f) { return f.code !== null; }).length
             });
         });
 
+        const notes = [];
+        if (duplicates.length) notes.push('Already loaded: ' + duplicates.join('; ') + '.');
+        if (failures.length) notes.push('Skipped ' + failures.length + ': ' + failures.join('; ') + '.');
+
         if (nextMaps.length === 0) {
-            setStatus(failures.length
-                ? 'Nothing could be unmapped — ' + failures.join('; ')
-                : 'Nothing could be unmapped.', 'error');
+            /* Nothing new, but what was already loaded is still on screen, so
+               this is only an error when there was nothing to begin with. */
+            setStatus(notes.length ? notes.join(' ') : 'Nothing could be unmapped.',
+                      maps.length ? 'info' : 'error');
             return false;
         }
 
-        maps = nextMaps;
-        recovered = nextRecovered;
+        maps = maps.concat(nextMaps);
+        recovered = recovered.concat(nextRecovered);
+        syncUI();
+
+        const addedSources = nextRecovered.length;
+        const addedCode = nextRecovered.filter(function (f) { return f.code !== null; }).length;
+        const withCode = recovered.filter(function (f) { return f.code !== null; });
+        const added = nextMaps.length === 1
+            ? 'Added ' + nextMaps[nextMaps.length - 1].name
+            : 'Added ' + nextMaps.length + ' maps';
+        const total = maps.length === 1
+            ? ''
+            : ' Workspace now holds ' + withCode.length + ' recovered source' +
+              (withCode.length === 1 ? '' : 's') + ' from ' + maps.length + ' maps.';
+
+        let head;
+        if (addedCode === 0) {
+            /* A map without sourcesContent still reveals the file tree, which
+               is useful on its own, so this is a warning and not an error. */
+            head = added + ': ' + addedSources + ' source path' + (addedSources === 1 ? '' : 's') +
+                   ', but no sourcesContent, so no code could be recovered.';
+        } else if (addedCode < addedSources) {
+            head = added + ': recovered ' + addedCode + ' of ' + addedSources +
+                   ' sources. The rest have no embedded content.';
+        } else {
+            head = added + ': recovered all ' + addedCode +
+                   (addedCode === 1 ? ' source' : ' sources') + '.';
+        }
+
+        setStatus(head + total + (notes.length ? ' ' + notes.join(' ') : ''),
+                  (failures.length || addedCode === 0) ? 'error' : 'ok');
+        return true;
+    }
+
+    /* Re-renders everything that depends on the loaded set: the list, the
+       selection, the stat tiles. Any change to the workspace invalidates the
+       scan, because results from a smaller or larger set would misreport. */
+    function syncUI() {
         const withCode = recovered.filter(function (f) { return f.code !== null; });
 
         renderFileList();
-        if (withCode.length > 0) {
+        const stillValid = activeIndex >= 0 && activeIndex < recovered.length;
+        if (stillValid) {
+            selectFile(activeIndex);
+        } else if (withCode.length > 0) {
             selectFile(recovered.indexOf(withCode[0]));
         } else {
             activeIndex = -1;
-            fileTitle.textContent = 'No embedded source content';
+            fileTitle.textContent = recovered.length ? 'No embedded source content' : 'Select a file';
             fileContent.textContent = '';
         }
 
@@ -388,34 +468,50 @@
         document.getElementById('statRecovered').textContent = withCode.length;
         document.getElementById('statSecrets').textContent = '0';
         document.getElementById('statEndpoints').textContent = '0';
-        statsGrid.classList.remove('hidden');
-        sourcesCard.classList.remove('hidden');
+        statsGrid.classList.toggle('hidden', maps.length === 0);
+        sourcesCard.classList.toggle('hidden', maps.length === 0);
         scanCard.classList.add('hidden');
         lastScan = { kind: null, hits: [] };
-
-        const across = maps.length === 1 ? '' : ' across ' + maps.length + ' maps';
-        const tail = failures.length ? ' Skipped ' + failures.length + ': ' + failures.join('; ') + '.' : '';
-
-        if (withCode.length === 0) {
-            /* A map without sourcesContent still reveals the file tree, which
-               is useful on its own, so this is a warning and not an error. */
-            setStatus('Listed ' + recovered.length + ' source paths' + across +
-                      ', but no sourcesContent, so no code could be recovered.' + tail, 'error');
-        } else if (withCode.length < recovered.length) {
-            setStatus('Recovered ' + withCode.length + ' of ' + recovered.length + ' sources' + across +
-                      '. The rest have no embedded content.' + tail, failures.length ? 'error' : 'ok');
-        } else {
-            setStatus('Recovered all ' + withCode.length + (withCode.length === 1 ? ' source' : ' sources') + across + '.' + tail,
-                      failures.length ? 'error' : 'ok');
-        }
-        return true;
     }
 
-    /* The paste box is just a one-map batch. */
+    /* Append would be a one-way ratchet without this. Removing a map drops its
+       sources and shifts every higher index down, since mapIndex is positional. */
+    function removeMap(index) {
+        if (!maps[index]) return;
+        const name = maps[index].name;
+        maps.splice(index, 1);
+        recovered = recovered.filter(function (f) { return f.mapIndex !== index; });
+        recovered.forEach(function (f) { if (f.mapIndex > index) f.mapIndex--; });
+        activeIndex = -1;
+        syncUI();
+        setStatus(maps.length
+            ? 'Removed ' + name + '. ' + maps.length + ' map' + (maps.length === 1 ? '' : 's') + ' left.'
+            : 'Removed ' + name + '. Workspace is empty.', 'info');
+    }
+
+    /* The paste box is one map's worth of input, so it owns a single slot:
+       editing the textarea and pressing Unmap again updates that entry rather
+       than stacking near-identical copies next to it. */
+    const PASTE_LABEL = 'pasted JSON';
+
     function unmap(rawText) {
         const text = String(rawText || '').trim();
         if (!text) { setStatus('Paste a sourcemap or choose a .map file first.', 'error'); return false; }
-        return unmapAll([{ name: 'pasted JSON', text: text }]);
+
+        const existing = maps.findIndex(function (m) { return m.name === PASTE_LABEL; });
+        if (existing !== -1) {
+            /* Unchanged text is a no-op rather than a remove-and-readd, so the
+               selection survives pressing Unmap twice. */
+            if (maps[existing].sig === hashText(text)) {
+                setStatus('That pasted map is already loaded.', 'info');
+                return false;
+            }
+            maps.splice(existing, 1);
+            recovered = recovered.filter(function (f) { return f.mapIndex !== existing; });
+            recovered.forEach(function (f) { if (f.mapIndex > existing) f.mapIndex--; });
+            activeIndex = -1;
+        }
+        return unmapAll([{ name: PASTE_LABEL, text: text }]);
     }
 
     /* ── File list ─────────────────────────────────────────────────────── */
@@ -451,8 +547,15 @@
                 head.className = 'sticky top-0 z-10 px-3 py-2 bg-gray-100 dark:bg-gray-850 border-y border-gray-200 dark:border-gray-800 flex items-center gap-2';
                 head.innerHTML =
                     '<i data-lucide="file-json-2" class="w-3.5 h-3.5 shrink-0 text-gray-500 dark:text-gray-400"></i>' +
-                    mapChip(lastMap, 'truncate max-w-[11rem]') +
-                    '<span class="ml-auto shrink-0 text-[10px] text-gray-500 dark:text-gray-400">' + count + ' src</span>';
+                    mapChip(lastMap, 'truncate max-w-[9rem]') +
+                    '<span class="ml-auto shrink-0 text-[10px] text-gray-500 dark:text-gray-400">' + count + ' src</span>' +
+                    '<button type="button" data-remove-map="' + lastMap + '" title="Remove this map" ' +
+                      'class="shrink-0 p-0.5 rounded text-gray-400 hover:text-rose-500 dark:text-gray-500 dark:hover:text-rose-400 transition-colors">' +
+                      '<i data-lucide="x" class="w-3.5 h-3.5"></i></button>';
+                head.querySelector('[data-remove-map]').addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    removeMap(Number(this.dataset.removeMap));
+                });
                 fileList.appendChild(head);
             }
 
@@ -928,8 +1031,10 @@
         /* Highest confidence first, so the things worth checking are at the
            top rather than wherever the alphabet put them. */
         const rank = { high: 0, medium: 1, low: 2 };
-        hits.sort(function (a, b) {
-            return (rank[a.conf] || 1) - (rank[b.conf] || 1) ||
+            /* `in` rather than ||: high is rank 0, and 0 is falsy, so || 1
+           quietly demoted every high-confidence finding to medium. */
+    hits.sort(function (a, b) {
+            return (a.conf in rank ? rank[a.conf] : 1) - (b.conf in rank ? rank[b.conf] : 1) ||
                    (a.mapIndex - b.mapIndex) ||
                    a.rule.localeCompare(b.rule) ||
                    a.path.localeCompare(b.path) || a.line - b.line;
@@ -1088,6 +1193,10 @@
     dropzone.addEventListener('click', function () { fileInput.click(); });
     fileInput.addEventListener('change', function (e) {
         if (e.target.files && e.target.files.length) readFiles(e.target.files);
+        /* Reset so picking the same file again still fires change. Without
+           this, removing a map and re-adding that exact file does nothing,
+           because the input's value never changed. */
+        e.target.value = '';
     });
 
     /* Drop anywhere on the window, not just on the dashed box. */

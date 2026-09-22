@@ -421,8 +421,10 @@ function scanSourceMap(json) {
   for (const f of out) byConf[f.conf] = (byConf[f.conf] || 0) + 1;
 
   const rank = { high: 0, medium: 1, low: 2 };
+  /* `in` rather than ||: high is rank 0, and 0 is falsy, so || 1
+     quietly demoted every high-confidence finding to medium. */
   out.sort(function (a, b) {
-    return (rank[a.conf] || 1) - (rank[b.conf] || 1) ||
+    return (a.conf in rank ? rank[a.conf] : 1) - (b.conf in rank ? rank[b.conf] : 1) ||
            a.rule.localeCompare(b.rule) ||
            a.source.localeCompare(b.source) || a.line - b.line;
   });

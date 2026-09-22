@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SourceMap Radar",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Automatically scans every page for exposed JavaScript/CSS source maps, verifies which are actually reachable, and scans the recovered source for hardcoded credentials.",
   "permissions": [
     "webRequest",
