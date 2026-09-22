@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PH Mobile Number Generator</title>
-    <meta name="description" content="Python script that generates random Philippine mobile numbers across Globe, Smart and DITO prefixes for use as test data." />
+    <meta name="description" content="Python script that generates random Philippine mobile numbers across Globe, TM, Smart, TNT and DITO prefixes for use as test data during VAPT." />
     <link href="/profile.jpg" type="image/jpeg" rel="shortcut icon" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -41,21 +41,32 @@
         @keyframes tk-logo-float { 0%,100%{transform:translateY(0) rotate(0)} 25%{transform:translateY(-5px) rotate(-6deg)} 75%{transform:translateY(-2px) rotate(6deg)} }
         @media (prefers-reduced-motion: reduce){ .tk-anim-logo{animation:none} }
 
-        /* Terminal. Line numbers come from a counter on each row rather than
-           a second column, so selecting the code copies the code alone. */
-        .tk-term-body { counter-reset: line; }
-        .tk-term-body .row { counter-increment: line; display: block; }
-        .tk-term-body .row::before {
-            content: counter(line);
-            display: inline-block;
-            width: 2.5rem;
-            padding-right: 1rem;
-            text-align: right;
-            color: #4b5563;
-            user-select: none;
-            -webkit-user-select: none;
+        /* Repo-style file rows */
+        .repo-row:hover { background-color: rgba(99, 102, 241, .06); }
+        .dark .repo-row:hover { background-color: rgba(99, 102, 241, .10); }
+        .repo-row.is-active { background-color: rgba(99, 102, 241, .10); }
+        .dark .repo-row.is-active { background-color: rgba(99, 102, 241, .16); }
+
+        .code-scroll::-webkit-scrollbar { width: 10px; height: 10px; }
+        .code-scroll::-webkit-scrollbar-track { background: transparent; }
+        .code-scroll::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 5px; }
+        .dark .code-scroll::-webkit-scrollbar-thumb { background: #374151; }
+
+        /* Line numbers for the file viewer */
+        .code-lines { counter-reset: ln; }
+        .code-lines .ln-row { display: grid; grid-template-columns: 3.5rem 1fr; }
+        .code-lines .ln-num {
+            text-align: right; padding-right: 1rem; user-select: none;
+            color: #9ca3af; border-right: 1px solid rgba(148,163,184,.25);
         }
-        .tk-term-body .row:hover::before { color: #818cf8; }
+        .dark .code-lines .ln-num { color: #4b5563; }
+        .code-lines .ln-txt { padding-left: 1rem; white-space: pre; }
+
+        .step-num {
+            display:inline-flex; align-items:center; justify-content:center;
+            width:1.75rem; height:1.75rem; border-radius:9999px; flex:none;
+            font-size:.75rem; font-weight:800; font-family:'JetBrains Mono',monospace;
+        }
     </style>
     <link rel="stylesheet" href="/css/tool-shell.css">
     <script src="/js/geo-web.js" defer></script>
@@ -79,83 +90,218 @@
         </button>
     </div>
 
-    <main class="w-full max-w-3xl space-y-8 mt-8">
+    <main class="w-full max-w-5xl space-y-8 mt-8">
 
         <div class="text-center space-y-3">
             <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center justify-center gap-3">
                 <i class="fas fa-mobile-screen-button tk-anim-logo text-indigo-600 dark:text-indigo-500"></i>
                 <span><span class="text-indigo-600 dark:text-indigo-500">PH Mobile Number</span> Generator</span>
             </h1>
-            <p class="text-gray-600 dark:text-gray-400 text-sm md:text-lg max-w-xl mx-auto">
-                Python script that writes a list of random Philippine mobile numbers across Globe, TM, Smart, TNT and DITO prefixes, for use as test data.
+            <p class="text-gray-600 dark:text-gray-400 text-sm md:text-lg max-w-2xl mx-auto">
+                A Python script that writes a list of random Philippine mobile numbers across Globe, TM, Smart,
+                TNT and DITO prefixes &mdash; filler for forms and datasets during testing, not real subscribers.
             </p>
-        </div>
-
-        <div class="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-xl p-6 flex gap-3">
-            <i class="fas fa-circle-info text-indigo-600 dark:text-indigo-300 mt-1"></i>
-            <div class="text-sm text-gray-700 dark:text-gray-300 space-y-1">
-                <p class="font-bold text-gray-900 dark:text-white">How to run it</p>
-                <p>Save the file and run <span class="font-mono text-indigo-600 dark:text-indigo-300">python3 phmobilenumbergenerator.py</span>. It writes <span class="font-mono text-indigo-600 dark:text-indigo-300">philippine_mobile_numbers.txt</span> next to itself with one number per line.</p>
-                <p class="text-gray-500 dark:text-gray-400">Numbers are random and unassigned by construction — they are filler for forms and datasets, not real subscribers.</p>
-                <p class="text-gray-500 dark:text-gray-400">NOTE: This tool was developed for use during Vulnerability Assessment and Penetration Testing (VAPT).</p>
+            <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+                <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">Python 3</span>
+                <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-850 text-gray-600 dark:text-gray-400">Single file</span>
+                <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-850 text-gray-600 dark:text-gray-400">36 prefixes</span>
+                <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400">Standard library only</span>
             </div>
         </div>
 
-        <!-- Terminal -->
-        <div class="rounded-2xl overflow-hidden border border-gray-300 dark:border-gray-800 shadow-xl dark:shadow-black/50">
+        <!-- Section pills -->
+        <div class="flex flex-wrap items-center justify-center gap-2">
+            <a href="#source" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-folder-tree"></i> Source</a>
+            <a href="#download" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-download"></i> Download</a>
+            <a href="#run" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-terminal"></i> Run</a>
+            <a href="#output" class="text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"><i class="fas fa-list-ol"></i> Output</a>
+        </div>
 
-            <div class="flex items-center gap-3 px-4 py-3 bg-gray-200 dark:bg-gray-850 border-b border-gray-300 dark:border-gray-800">
-                <span class="flex gap-2 flex-shrink-0" aria-hidden="true">
-                    <span class="w-3 h-3 rounded-full bg-red-400 dark:bg-red-500/80"></span>
-                    <span class="w-3 h-3 rounded-full bg-yellow-400 dark:bg-yellow-500/80"></span>
-                    <span class="w-3 h-3 rounded-full bg-green-400 dark:bg-green-500/80"></span>
+        <!-- ============================== SOURCE ================================ -->
+        <section id="source" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-xl dark:shadow-black/50">
+
+            <div class="bg-gray-50 dark:bg-gray-850 px-5 py-4 border-b border-gray-200 dark:border-gray-800 flex flex-wrap items-center gap-3">
+                <i class="fas fa-book text-gray-400 dark:text-gray-500"></i>
+                <span class="font-mono text-sm font-bold">
+                    <span class="text-gray-500 dark:text-gray-400">evanricafort</span><span class="text-gray-400 dark:text-gray-600">/</span><span class="text-indigo-600 dark:text-indigo-400">phmobilenumbergenerator</span>
                 </span>
-                <span class="flex-1 text-center font-mono text-xs text-gray-600 dark:text-gray-400 truncate">phmobilenumbergenerator.py</span>
-                <div class="flex items-center gap-2 flex-shrink-0">
-                    <button id="btnCopy" title="Copy to clipboard" class="px-2.5 py-1.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white text-xs font-bold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <i class="fas fa-copy"></i> <span class="hidden sm:inline">Copy</span>
-                    </button>
-                    <a id="btnDownload" href="phmobilenumbergenerator.py" download="phmobilenumbergenerator.py" title="Download the script" class="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold uppercase tracking-wider transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <i class="fas fa-download"></i> <span class="hidden sm:inline">Download</span>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400">Public</span>
+                <div class="ml-auto flex items-center gap-2">
+                    <a href="phmobilenumbergenerator.py" download class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wide px-3.5 py-2 rounded-lg text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 shadow transition-all transform active:scale-[0.98]">
+                        <i class="fas fa-download"></i> Code
                     </a>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-[#0d1117] overflow-x-auto">
-                <pre class="tk-term-body p-4 md:p-5 font-mono text-xs md:text-sm leading-relaxed text-gray-800 dark:text-gray-300"><code id="scriptSource"><span class="row">import random</span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Telco prefixes for Philippines</span></span>
-<span class="row">telco_prefixes = [</span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Globe/TM</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"917"</span>, <span class="text-indigo-600 dark:text-indigo-300">"926"</span>, <span class="text-indigo-600 dark:text-indigo-300">"927"</span>, <span class="text-indigo-600 dark:text-indigo-300">"936"</span>, <span class="text-indigo-600 dark:text-indigo-300">"937"</span>, <span class="text-indigo-600 dark:text-indigo-300">"939"</span>, <span class="text-indigo-600 dark:text-indigo-300">"978"</span>, <span class="text-indigo-600 dark:text-indigo-300">"979"</span>,</span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># Smart/TNT</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"918"</span>, <span class="text-indigo-600 dark:text-indigo-300">"919"</span>, <span class="text-indigo-600 dark:text-indigo-300">"920"</span>, <span class="text-indigo-600 dark:text-indigo-300">"922"</span>, <span class="text-indigo-600 dark:text-indigo-300">"923"</span>, <span class="text-indigo-600 dark:text-indigo-300">"924"</span>, <span class="text-indigo-600 dark:text-indigo-300">"925"</span>, <span class="text-indigo-600 dark:text-indigo-300">"930"</span>, <span class="text-indigo-600 dark:text-indigo-300">"931"</span>, <span class="text-indigo-600 dark:text-indigo-300">"932"</span>, <span class="text-indigo-600 dark:text-indigo-300">"933"</span>, <span class="text-indigo-600 dark:text-indigo-300">"934"</span>, <span class="text-indigo-600 dark:text-indigo-300">"935"</span>, <span class="text-indigo-600 dark:text-indigo-300">"938"</span>, <span class="text-indigo-600 dark:text-indigo-300">"948"</span>, <span class="text-indigo-600 dark:text-indigo-300">"949"</span>, <span class="text-indigo-600 dark:text-indigo-300">"963"</span>, <span class="text-indigo-600 dark:text-indigo-300">"964"</span>, <span class="text-indigo-600 dark:text-indigo-300">"965"</span>, <span class="text-indigo-600 dark:text-indigo-300">"966"</span>, <span class="text-indigo-600 dark:text-indigo-300">"967"</span>, <span class="text-indigo-600 dark:text-indigo-300">"968"</span>, <span class="text-indigo-600 dark:text-indigo-300">"969"</span>,</span>
-<span class="row">    <span class="text-gray-500 dark:text-gray-500"># DITO</span></span>
-<span class="row">    <span class="text-indigo-600 dark:text-indigo-300">"991"</span>, <span class="text-indigo-600 dark:text-indigo-300">"992"</span>, <span class="text-indigo-600 dark:text-indigo-300">"993"</span>, <span class="text-indigo-600 dark:text-indigo-300">"994"</span>, <span class="text-indigo-600 dark:text-indigo-300">"995"</span></span>
-<span class="row">]</span>
-<span class="row"> </span>
-<span class="row">num_numbers = <span class="text-indigo-600 dark:text-indigo-300">1000</span></span>
-<span class="row">numbers = []</span>
-<span class="row"> </span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">for</span> _ <span class="text-purple-600 dark:text-purple-400">in</span> <span class="text-sky-600 dark:text-sky-400">range</span>(num_numbers):</span>
-<span class="row">    prefix = random.choice(telco_prefixes)</span>
-<span class="row">    suffix = <span class="text-indigo-600 dark:text-indigo-300">""</span>.join([<span class="text-sky-600 dark:text-sky-400">str</span>(random.randint(<span class="text-indigo-600 dark:text-indigo-300">0</span>, <span class="text-indigo-600 dark:text-indigo-300">9</span>)) <span class="text-purple-600 dark:text-purple-400">for</span> _ <span class="text-purple-600 dark:text-purple-400">in</span> <span class="text-sky-600 dark:text-sky-400">range</span>(<span class="text-indigo-600 dark:text-indigo-300">7</span>)])</span>
-<span class="row">    number = prefix + suffix  <span class="text-gray-500 dark:text-gray-500"># Already starts with 9</span></span>
-<span class="row">    numbers.append(number)</span>
-<span class="row"> </span>
-<span class="row"><span class="text-gray-500 dark:text-gray-500"># Save to TXT file</span></span>
-<span class="row">file_path = <span class="text-indigo-600 dark:text-indigo-300">"philippine_mobile_numbers.txt"</span></span>
-<span class="row"><span class="text-purple-600 dark:text-purple-400">with</span> <span class="text-sky-600 dark:text-sky-400">open</span>(file_path, <span class="text-indigo-600 dark:text-indigo-300">"w"</span>) <span class="text-purple-600 dark:text-purple-400">as</span> f:</span>
-<span class="row">    f.write(<span class="text-indigo-600 dark:text-indigo-300">"\n"</span>.join(numbers))</span>
-<span class="row"> </span>
-<span class="row">file_path</span></code></pre>
+            <!-- breadcrumb -->
+            <div class="px-5 py-2.5 border-b border-gray-200 dark:border-gray-800 flex items-center gap-2 text-xs font-mono">
+                <button id="crumbRoot" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">phmobilenumbergenerator</button>
+                <span id="repoMeta" class="ml-auto text-gray-400 dark:text-gray-600"></span>
             </div>
 
-            <div class="px-4 py-2.5 bg-gray-200 dark:bg-gray-850 border-t border-gray-300 dark:border-gray-800 flex items-center justify-between text-xs font-mono text-gray-500 dark:text-gray-500">
-                <span>Python 3</span>
-                <span>26 lines</span>
+            <div id="fileList" class="divide-y divide-gray-100 dark:divide-gray-800"></div>
+
+            <!-- file viewer -->
+            <div id="viewer" class="hidden border-t border-gray-200 dark:border-gray-800">
+                <div class="bg-gray-50 dark:bg-gray-850 px-5 py-3 border-b border-gray-200 dark:border-gray-800 flex flex-wrap items-center gap-3">
+                    <i id="viewerIcon" class="fab fa-python text-amber-500"></i>
+                    <span id="viewerName" class="font-mono text-sm font-bold text-gray-900 dark:text-white"></span>
+                    <span id="viewerMeta" class="text-xs font-mono text-gray-500 dark:text-gray-400"></span>
+                    <div class="ml-auto flex items-center gap-2">
+                        <button onclick="copyViewer()" id="copyBtn" class="text-gray-500 hover:text-indigo-600 dark:hover:text-white transition-colors text-xs uppercase font-bold tracking-wider flex items-center gap-2">
+                            <i class="far fa-copy"></i> Copy
+                        </button>
+                        <a id="rawLink" href="phmobilenumbergenerator.py" rel="noopener" class="text-gray-500 hover:text-indigo-600 dark:hover:text-white transition-colors text-xs uppercase font-bold tracking-wider flex items-center gap-2">
+                            <i class="fas fa-up-right-from-square"></i> Raw
+                        </a>
+                        <button onclick="closeViewer()" class="text-gray-500 hover:text-rose-500 transition-colors text-xs uppercase font-bold tracking-wider flex items-center gap-2">
+                            <i class="fas fa-xmark"></i> Close
+                        </button>
+                    </div>
+                </div>
+                <div id="viewerBody" class="bg-white dark:bg-[#0d1117] max-h-[32rem] overflow-auto code-scroll text-xs font-mono leading-relaxed py-3"></div>
             </div>
-        </div>
+        </section>
+
+        <!-- ============================== DOWNLOAD ============================== -->
+        <section id="download" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-6">
+            <h2 class="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+                <i class="fas fa-download text-indigo-500"></i> Download
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+                <a href="phmobilenumbergenerator.py" download class="md:col-span-2 group flex items-center gap-4 p-5 rounded-xl border border-indigo-200 dark:border-indigo-800/60 bg-indigo-50/60 dark:bg-indigo-900/20 hover:border-indigo-400 dark:hover:border-indigo-500 transition-all">
+                    <span class="p-3.5 rounded-xl bg-white dark:bg-gray-900 text-indigo-600 dark:text-indigo-400 shadow-sm flex-shrink-0">
+                        <i class="fab fa-python text-2xl"></i>
+                    </span>
+                    <span class="min-w-0">
+                        <span class="block font-mono font-bold text-gray-900 dark:text-white">phmobilenumbergenerator.py</span>
+                        <span class="block text-sm text-gray-600 dark:text-gray-400 mt-0.5">One file, <span id="pySize">868 B</span>. Save it anywhere and run it &mdash; there is nothing to install.</span>
+                    </span>
+                    <i class="fas fa-arrow-right ml-auto text-indigo-500 group-hover:translate-x-1 transition-transform flex-shrink-0"></i>
+                </a>
+
+                <div class="p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 space-y-2">
+                    <span class="block text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">Requirements</span>
+                    <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1.5">
+                        <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-500 mt-1 text-xs"></i> Python 3, any recent version</li>
+                        <li class="flex items-start gap-2"><i class="fas fa-check text-emerald-500 mt-1 text-xs"></i> Write access to the working directory</li>
+                        <li class="flex items-start gap-2"><i class="fas fa-xmark text-gray-400 mt-1 text-xs"></i> No pip install, no third-party packages</li>
+                        <li class="flex items-start gap-2"><i class="fas fa-xmark text-gray-400 mt-1 text-xs"></i> No network access</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 p-4 flex items-start gap-3">
+                <i class="fab fa-github text-gray-500 dark:text-gray-400 mt-0.5"></i>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Also on GitHub at
+                    <a href="https://github.com/evanricafort/phmobilenumbergenerator" class="font-mono text-indigo-600 dark:text-indigo-400 hover:underline">evanricafort/phmobilenumbergenerator</a>,
+                    where the file is named <code class="font-mono text-xs">phmobilenumgenerator.py</code>. The copy served here is the
+                    current one; the two differ only by a comment.
+                </p>
+            </div>
+        </section>
+
+        <!-- ================================= RUN ================================ -->
+        <section id="run" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-6">
+            <h2 class="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+                <i class="fas fa-terminal text-indigo-500"></i> Run
+            </h2>
+
+            <div class="space-y-5">
+                <div class="flex gap-4">
+                    <span class="step-num bg-indigo-600 text-white">1</span>
+                    <div class="min-w-0 flex-1 space-y-2">
+                        <p class="font-bold text-gray-900 dark:text-white">Save the script</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Download it above, or copy it out of the viewer.</p>
+                        <pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">cd ~/Downloads</pre>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <span class="step-num bg-indigo-600 text-white">2</span>
+                    <div class="min-w-0 flex-1 space-y-2">
+                        <p class="font-bold text-gray-900 dark:text-white">Set how many you want</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Optional. Edit <span class="font-mono text-indigo-600 dark:text-indigo-300">num_numbers</span> near the top &mdash; it defaults to 1000.</p>
+                        <pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">num_numbers = 5000</pre>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <span class="step-num bg-indigo-600 text-white">3</span>
+                    <div class="min-w-0 flex-1 space-y-2">
+                        <p class="font-bold text-gray-900 dark:text-white">Run it</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">It finishes instantly and writes the file beside itself.</p>
+                        <pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">python3 phmobilenumbergenerator.py</pre>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <span class="step-num bg-indigo-600 text-white">4</span>
+                    <div class="min-w-0 flex-1 space-y-2">
+                        <p class="font-bold text-gray-900 dark:text-white">Collect the output</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">One number per line, ready to paste into a form or load as a dataset.</p>
+                        <pre class="bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-3 overflow-x-auto code-scroll font-mono text-xs text-gray-800 dark:text-indigo-300">head philippine_mobile_numbers.txt</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =============================== OUTPUT =============================== -->
+        <section id="output" class="scroll-mt-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl dark:shadow-black/50 space-y-6">
+            <h2 class="text-xl md:text-2xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
+                <i class="fas fa-list-ol text-indigo-500"></i> What it produces
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-3">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        A plain text file, <span class="font-mono text-indigo-600 dark:text-indigo-300">philippine_mobile_numbers.txt</span>,
+                        with one 10-digit number per line. Each is a three-digit network prefix followed by seven random digits,
+                        so every line starts with a 9 and looks like a real local-format mobile number.
+                    </p>
+                    <div class="overflow-x-auto code-scroll">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs uppercase text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">
+                                <tr>
+                                    <th scope="col" class="py-2 pr-4 font-semibold">Network</th>
+                                    <th scope="col" class="py-2 pr-4 font-semibold">Prefixes</th>
+                                    <th scope="col" class="py-2 font-semibold">Examples</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-gray-700 dark:text-gray-300">
+                                <tr><td class="py-2 pr-4">Globe / TM</td><td class="py-2 pr-4 font-mono">8</td><td class="py-2 font-mono text-xs text-indigo-600 dark:text-indigo-300">917, 926, 939&hellip;</td></tr>
+                                <tr><td class="py-2 pr-4">Smart / TNT</td><td class="py-2 pr-4 font-mono">23</td><td class="py-2 font-mono text-xs text-indigo-600 dark:text-indigo-300">918, 920, 963&hellip;</td></tr>
+                                <tr><td class="py-2 pr-4">DITO</td><td class="py-2 pr-4 font-mono">5</td><td class="py-2 font-mono text-xs text-indigo-600 dark:text-indigo-300">991, 993, 995&hellip;</td></tr>
+                                <tr class="font-bold"><td class="py-2 pr-4">Total</td><td class="py-2 pr-4 font-mono">36</td><td class="py-2"></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
+                    <div class="bg-gray-50 dark:bg-gray-850 px-4 py-2.5 border-b border-gray-200 dark:border-gray-800 flex items-center gap-2">
+                        <i class="fas fa-file-lines text-gray-400 dark:text-gray-500 text-xs"></i>
+                        <span class="font-mono text-xs text-gray-600 dark:text-gray-400">philippine_mobile_numbers.txt</span>
+                        <span class="ml-auto font-mono text-[10px] text-gray-400 dark:text-gray-600">1000 lines</span>
+                    </div>
+                    <pre class="bg-white dark:bg-[#0d1117] p-4 font-mono text-xs leading-relaxed text-gray-700 dark:text-gray-300 overflow-x-auto code-scroll">9387469568
+9311616030
+9201121187
+9947009647
+9658771422
+9378286599
+<span class="text-gray-400 dark:text-gray-600">&hellip;994 more</span></pre>
+                </div>
+            </div>
+
+            <div class="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-900/20 p-4 flex items-start gap-3">
+                <i class="fas fa-triangle-exclamation text-amber-500 mt-0.5"></i>
+                <p class="text-sm text-amber-800 dark:text-amber-200">
+                    The numbers are random, not checked against any registry, and not verified as unassigned. Treat them as
+                    filler for forms and datasets during Vulnerability Assessment and Penetration Testing &mdash; never as a
+                    list to actually contact.
+                </p>
+            </div>
+        </section>
 
     </main>
 
@@ -165,10 +311,16 @@
     </footer>
 
     <script>
+        /* ----------------------------- theme ----------------------------- */
         const htmlEl = document.documentElement;
         const themeIcon = document.getElementById('themeIcon');
 
         document.getElementById('year').textContent = new Date().getFullYear();
+
+        if (localStorage.getItem('theme') === 'light') {
+            htmlEl.classList.remove('dark');
+            themeIcon.className = 'fas fa-moon text-xl leading-5 w-5 h-5 text-center block';
+        }
 
         function toggleTheme() {
             if (htmlEl.classList.contains('dark')) {
@@ -182,29 +334,148 @@
             }
         }
 
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            htmlEl.classList.add('dark');
-            themeIcon.className = 'fas fa-sun text-xl leading-5 w-5 h-5 text-center block';
-        } else {
-            htmlEl.classList.remove('dark');
-            themeIcon.className = 'fas fa-moon text-xl leading-5 w-5 h-5 text-center block';
+        /* -------------------------- file browser --------------------------
+           One file, so there are no directories to walk - but the listing,
+           viewer and line numbering are the same ones the other tool pages
+           use, and the size is read from the response rather than written
+           into the markup where it would go stale. */
+        const FILES = [
+            { name: 'phmobilenumbergenerator.py', type: 'py', size: 868, desc: 'The whole tool - prefix table, generator loop, file write' }
+        ];
+
+        const ICONS = {
+            py: { cls: 'fab fa-python', color: 'text-amber-500' }
+        };
+
+        function fmtSize(n) {
+            if (n < 1024) return n + ' B';
+            if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+            return (n / 1048576).toFixed(2) + ' MB';
         }
 
-        /* textContent of the <code> is the script verbatim - the highlighting
-           spans carry no text of their own, and the line numbers are CSS
-           counters rather than characters, so this copies cleanly. */
-        document.getElementById('btnCopy').addEventListener('click', function () {
-            const source = document.getElementById('scriptSource').textContent;
-            const button = this;
-            navigator.clipboard.writeText(source).then(function () {
-                button.innerHTML = '<i class="fas fa-check"></i> <span class="hidden sm:inline">Copied</span>';
-                setTimeout(function () {
-                    button.innerHTML = '<i class="fas fa-copy"></i> <span class="hidden sm:inline">Copy</span>';
-                }, 1800);
-            });
-        });
-    </script>
+        function renderList() {
+            const list = document.getElementById('fileList');
+            list.textContent = '';
+            const bytes = FILES.reduce(function (a, e) { return a + e.size; }, 0);
+            document.getElementById('repoMeta').textContent =
+                FILES.length + (FILES.length === 1 ? ' item · ' : ' items · ') + fmtSize(bytes);
 
+            FILES.forEach(function (e) {
+                const meta = ICONS[e.type] || ICONS.py;
+                const row = document.createElement('button');
+                row.className = 'repo-row w-full text-left px-5 py-3 flex items-center gap-3 transition-colors';
+                row.dataset.path = e.name;
+
+                const icon = document.createElement('i');
+                icon.className = meta.cls + ' ' + meta.color + ' w-4 text-center flex-shrink-0';
+
+                const name = document.createElement('span');
+                name.className = 'font-mono text-sm font-medium text-gray-900 dark:text-gray-100 flex-shrink-0';
+                name.textContent = e.name;
+
+                const desc = document.createElement('span');
+                desc.className = 'text-xs text-gray-500 dark:text-gray-500 truncate hidden md:block flex-1 min-w-0';
+                desc.textContent = e.desc;
+
+                const size = document.createElement('span');
+                size.className = 'ml-auto text-xs font-mono text-gray-400 dark:text-gray-600 flex-shrink-0';
+                size.textContent = fmtSize(e.size);
+
+                row.append(icon, name, desc, size);
+                row.onclick = function () { openFile(e); };
+                list.appendChild(row);
+            });
+        }
+
+        document.getElementById('crumbRoot').onclick = function () { renderList(); closeViewer(); };
+
+        /* -------------------------- file viewer -------------------------- */
+        const viewer = document.getElementById('viewer');
+        const viewerBody = document.getElementById('viewerBody');
+        let viewerText = '';
+
+        function markActive(path) {
+            document.querySelectorAll('#fileList .repo-row').forEach(function (r) {
+                r.classList.toggle('is-active', r.dataset.path === path);
+            });
+        }
+
+        async function openFile(entry) {
+            const meta = ICONS[entry.type] || ICONS.py;
+            document.getElementById('viewerIcon').className = meta.cls + ' ' + meta.color;
+            document.getElementById('viewerName').textContent = entry.name;
+            document.getElementById('viewerMeta').textContent = fmtSize(entry.size);
+            document.getElementById('rawLink').href = entry.name;
+            viewer.classList.remove('hidden');
+            markActive(entry.name);
+
+            viewerBody.innerHTML = '<div class="p-8 text-center text-gray-500 dark:text-gray-500 font-mono text-xs">Loading ' + entry.name + ' …</div>';
+            viewer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            try {
+                const res = await fetch(entry.name, { cache: 'no-store' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const source = await res.text();
+
+                /* Report the file's real size, measured before normalising -
+                   that is what the download hands over. */
+                const actual = new Blob([source]).size;
+                document.getElementById('viewerMeta').textContent = fmtSize(actual);
+                document.getElementById('pySize').textContent = fmtSize(actual);
+
+                /* The viewer splits on \n, so CRLF would leave a carriage
+                   return on every rendered line and Copy would hand out CRLF.
+                   Normalised for display and copy; the download is untouched. */
+                viewerText = source.replace(/\r\n/g, '\n');
+                renderCode(viewerText);
+            } catch (err) {
+                viewerText = '';
+                viewerBody.innerHTML =
+                    '<div class="p-8 text-center text-rose-500 font-mono text-xs">Could not load ' + entry.name + ' (' + err.message + ')' +
+                    '<br><span class="text-gray-500">Use the download button above instead.</span></div>';
+            }
+        }
+
+        function renderCode(text) {
+            const lines = text.replace(/\t/g, '    ').replace(/\n$/, '').split('\n');
+            const wrap = document.createElement('div');
+            wrap.className = 'code-lines';
+
+            lines.forEach(function (line, i) {
+                const row = document.createElement('div');
+                row.className = 'ln-row';
+                const num = document.createElement('span');
+                num.className = 'ln-num';
+                num.textContent = String(i + 1);
+                const txt = document.createElement('span');
+                txt.className = 'ln-txt text-gray-700 dark:text-gray-300';
+                txt.textContent = line || ' ';
+                row.append(num, txt);
+                wrap.appendChild(row);
+            });
+
+            viewerBody.textContent = '';
+            viewerBody.appendChild(wrap);
+        }
+
+        function closeViewer() {
+            viewer.classList.add('hidden');
+            viewerBody.textContent = '';
+            viewerText = '';
+            markActive(null);
+        }
+
+        function copyViewer() {
+            if (!viewerText) return;
+            navigator.clipboard.writeText(viewerText);
+            const btn = document.getElementById('copyBtn');
+            btn.innerHTML = '<i class="fas fa-check text-emerald-500"></i> Copied';
+            setTimeout(function () { btn.innerHTML = '<i class="far fa-copy"></i> Copy'; }, 1400);
+        }
+
+        renderList();
+        /* The script is the point of the page, so show it straight away. */
+        openFile(FILES[0]);
+    </script>
 </body>
 </html>
