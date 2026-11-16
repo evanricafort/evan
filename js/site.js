@@ -189,17 +189,15 @@
 
      The settle step runs off a timer rather than transitionend: a cancelled
      transition -- a quick second click, a browser that interrupts -- never
-     fires the event, and the panel would be stranded part-open. */
+     fires the event, and the panel would be stranded part-open.
+
+     This one slides for everybody, prefers-reduced-motion included: the
+     site owner asked for that deliberately. The background web still honours
+     the setting. */
   function animatePanel(panel, expanded) {
     window.clearTimeout(panel.slideTimer);
 
     var travel = panel.scrollHeight;
-
-    if (reducedMotion.matches) {
-      if (!expanded) scrollClearOf(panel);
-      panel.style.maxHeight = expanded ? 'none' : '0px';
-      return;
-    }
 
     var seconds = Math.min(SLIDE_MAX_SECONDS,
       Math.max(SLIDE_MIN_SECONDS, travel / SLIDE_PIXELS_PER_SECOND));
