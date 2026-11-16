@@ -297,6 +297,10 @@ body.dark-mode .glow-text span:hover {
 
 #more {
   max-height: 0;
+  /* p carries a 5px padding-bottom site-wide. max-height caps the content
+     box, so that padding survives a collapse and leaks a sliver of the
+     first hidden entry out under the Read More link. */
+  padding: 0;
   overflow: hidden;
   transition: max-height var(--disclosure-duration) ease-in-out;
   will-change: max-height;
