@@ -306,13 +306,6 @@ body.dark-mode .glow-text span:hover {
   will-change: max-height;
 }
 
-/* Stand the toggle clear of the list. It is an inline <a>, so it needs a box
-   of its own before a top margin will hold. */
-[data-toggle-target] {
-  display: inline-block;
-  margin-top: 1.5rem;
-}
-
 /* --- Scroll-to-top plane -------------------------------------------- */
 #scrollToTopBtn {
   position: fixed;
