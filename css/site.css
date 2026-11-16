@@ -292,7 +292,8 @@ body.dark-mode .glow-text span:hover {
    length. max-height itself is set from the measured height in
    js/site.js -- a fixed ceiling would spend part of the run on empty
    space and break the symmetry. */
-:root { --disclosure-duration: 0.8s; }
+/* js/site.js overrides this per panel, timed by how far it has to fold. */
+:root { --disclosure-duration: 1.2s; }
 
 #more {
   max-height: 0;

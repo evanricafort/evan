@@ -3,6 +3,11 @@
 
   var THEME_STORAGE_KEY = 'theme';
   var LIST_DATE_KEY = 'achievements-updated';
+  // How fast a disclosure panel folds, and the bounds that keep a short
+  // list from crawling or a very long one from dragging.
+  var FOLD_PIXELS_PER_SECOND = 1800;
+  var FOLD_MIN_SECONDS = 0.6;
+  var FOLD_MAX_SECONDS = 2.4;
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   /* ============================================================
@@ -180,6 +185,15 @@
       panel.style.maxHeight = expanded ? 'none' : '0px';
       return;
     }
+
+    // A fixed duration runs a long list past far quicker than a short one --
+    // the achievements panel is several thousand pixels tall, so 0.8s of it
+    // was a blur. Timing it by distance instead keeps the fold readable
+    // whatever the list grows to, and both directions measure the same
+    // height, so they stay the same speed as each other.
+    var seconds = Math.min(FOLD_MAX_SECONDS,
+      Math.max(FOLD_MIN_SECONDS, panel.scrollHeight / FOLD_PIXELS_PER_SECOND));
+    panel.style.setProperty('--disclosure-duration', seconds.toFixed(2) + 's');
 
     panel.style.maxHeight = panel.scrollHeight + 'px';
 
