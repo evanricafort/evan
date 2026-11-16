@@ -1,0 +1,47 @@
+# Re-stamp css/js references whenever one of those files changes.
+#
+# GitHub Pages serves them with max-age=259200, so a browser keeps them for
+# three days. A Cloudflare purge cannot reach those copies -- only a different
+# URL can -- so the markup points at `site.js?v=<hash of site.js>`.
+#
+# The version is the file's own content hash, so a run over an unchanged tree
+# rewrites nothing and commits nothing. That is what stops this looping on the
+# commit it just made.
+name: Stamp asset versions
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'js/**'
+      - 'css/**'
+      - '**.html'
+      - 'scripts/stamp-assets.py'
+      - '.github/workflows/stamp-assets.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stamp-assets
+  cancel-in-progress: false
+
+jobs:
+  stamp:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: python3 scripts/stamp-assets.py
+
+      - name: Commit any new versions
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "Every reference already matches its file."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -am 'Stamp asset versions'
+          git push
