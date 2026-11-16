@@ -294,7 +294,8 @@ body.dark-mode .glow-text span:hover {
   will-change: max-height, opacity;
 }
 
-#more.show { max-height: 10000px; opacity: 1; }
+/* max-height is set from the measured height in js/site.js. */
+#more.show { opacity: 1; }
 
 /* --- Scroll-to-top plane -------------------------------------------- */
 #scrollToTopBtn {
@@ -403,11 +404,6 @@ body.dark-mode .glow-text span:hover {
   section, p, li, footer { overflow-wrap: break-word; }
   a { overflow-wrap: anywhere; }
   .container { max-width: 100%; }
-
-  /* Entries wrap to several lines here, so the desktop 10000px ceiling
-     can cut the list off. Reveal without a height animation instead. */
-  #more { transition: opacity 0.5s ease; }
-  #more.show { max-height: none; }
 
   /* These follow the pointer - there is no hover on touch, and a tap can
      otherwise leave them stuck open. */

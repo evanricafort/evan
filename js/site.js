@@ -134,6 +134,32 @@
   /* ============================================================
      "Read More" disclosures
      ============================================================ */
+  /* A fixed max-height ceiling makes the two directions look different: it
+     animates past the content on the way open, then sits still on the way
+     closed until it drops back below it. Driving max-height from the panel's
+     measured height keeps both directions the same length. */
+  function animatePanel(panel, expanded) {
+    if (reducedMotion.matches) {
+      panel.style.maxHeight = expanded ? 'none' : '0px';
+      return;
+    }
+
+    panel.style.maxHeight = panel.scrollHeight + 'px';
+
+    if (expanded) {
+      panel.addEventListener('transitionend', function settle(event) {
+        if (event.propertyName !== 'max-height') return;
+        panel.removeEventListener('transitionend', settle);
+        // Release the height once open so a resize cannot clip the list.
+        if (panel.classList.contains('show')) panel.style.maxHeight = 'none';
+      });
+      return;
+    }
+
+    panel.offsetHeight; // Flush the height above before animating away from it.
+    panel.style.maxHeight = '0px';
+  }
+
   function initDisclosures() {
     var triggers = document.querySelectorAll('[data-toggle-target]');
 
@@ -146,6 +172,7 @@
         var expanded = panel.classList.toggle('show');
         trigger.textContent = expanded ? 'Show Less' : 'Read More';
         trigger.setAttribute('aria-expanded', String(expanded));
+        animatePanel(panel, expanded);
       });
     });
   }
