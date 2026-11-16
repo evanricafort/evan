@@ -3,6 +3,11 @@
 
   var THEME_STORAGE_KEY = 'theme';
   var LIST_DATE_KEY = 'achievements-updated';
+  // How fast a disclosure panel slides, and the bounds that keep a short
+  // list from crawling or a very long one from dragging.
+  var SLIDE_PIXELS_PER_SECOND = 2500;
+  var SLIDE_MIN_SECONDS = 0.7;
+  var SLIDE_MAX_SECONDS = 2.0;
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   /* ============================================================
@@ -171,47 +176,66 @@
   /* ============================================================
      "Read More" disclosures
      ============================================================ */
-  /* The panel fades, but it still has to stop taking up space once it is
-     closed. CSS alone would drop the height the moment the class changes,
-     cutting the fade-out off before there is anything to see, so the height
-     is held here until the fade has had its time.
+  /* Slide the panel open and shut.
 
-     That wait is a timer rather than a transitionend listener: a transition
-     that gets cancelled -- a quick second click, a browser that interrupts it
-     -- never fires the event, and the panel would be left holding thousands
-     of pixels of blank page. */
+     max-height does the travelling, measured rather than capped: a fixed
+     ceiling would animate past the content on the way open and sit still on
+     the way closed, which is two different-looking motions at one duration.
+
+     The pace is set by distance, not a fixed time -- this list is thousands
+     of pixels tall, and a duration that suits a short panel runs a long one
+     past in a blur. Both directions measure the same height, so they stay
+     the same speed as each other.
+
+     The settle step runs off a timer rather than transitionend: a cancelled
+     transition -- a quick second click, a browser that interrupts -- never
+     fires the event, and the panel would be stranded part-open. */
   function animatePanel(panel, expanded) {
-    window.clearTimeout(panel.foldTimer);
+    window.clearTimeout(panel.slideTimer);
 
-    if (expanded) {
-      // Take the space up front, so there is something there to fade in.
-      panel.style.maxHeight = 'none';
-      return;
-    }
+    var travel = panel.scrollHeight;
 
     if (reducedMotion.matches) {
-      releasePanel(panel);
+      if (!expanded) scrollClearOf(panel);
+      panel.style.maxHeight = expanded ? 'none' : '0px';
       return;
     }
 
-    var fade = parseFloat(window.getComputedStyle(panel).transitionDuration) * 1000;
-    panel.foldTimer = window.setTimeout(function () {
-      if (!panel.classList.contains('show')) releasePanel(panel);
-    }, (fade || 0) + 60);
-  }
+    var seconds = Math.min(SLIDE_MAX_SECONDS,
+      Math.max(SLIDE_MIN_SECONDS, travel / SLIDE_PIXELS_PER_SECOND));
+    panel.style.setProperty('--disclosure-duration', seconds.toFixed(2) + 's');
+    panel.offsetHeight; // Settle the new duration before the height moves,
+                        // or the change can land in one recalc and not run.
 
-  function releasePanel(panel) {
-    // Giving the height back costs the page more than it has left below it, so
-    // the browser would otherwise haul the viewport up from wherever the reader
-    // is standing. Step up to the top of the list instead -- the content has
-    // already faded, so there is nothing left to watch move.
-    var room = document.documentElement.scrollHeight - panel.scrollHeight - window.innerHeight;
-    if (window.scrollY > room) {
-      var panelTop = panel.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo(0, Math.max(0, panelTop - 80));
+    if (expanded) {
+      panel.style.maxHeight = travel + 'px';
+      // Let it reflow freely once open, so a resize cannot clip the list.
+      panel.slideTimer = window.setTimeout(function () {
+        if (panel.classList.contains('show')) panel.style.maxHeight = 'none';
+      }, seconds * 1000 + 60);
+      return;
     }
 
+    // Closing needs a concrete height to travel away from; it is sitting on
+    // 'none' while open.
+    panel.style.maxHeight = travel + 'px';
+    panel.offsetHeight;
     panel.style.maxHeight = '0px';
+
+    panel.slideTimer = window.setTimeout(function () {
+      if (!panel.classList.contains('show')) scrollClearOf(panel);
+    }, seconds * 1000 + 60);
+  }
+
+  /* Giving the height back costs the page more than it has left below it, so
+     the browser hauls the viewport up from wherever the reader is standing.
+     Stepping up to the top of the list first leaves it where they put it. */
+  function scrollClearOf(panel) {
+    var room = document.documentElement.scrollHeight - window.innerHeight;
+    if (window.scrollY <= room) return;
+
+    var panelTop = panel.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo(0, Math.max(0, panelTop - 80));
   }
 
   function initDisclosures() {

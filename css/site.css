@@ -286,21 +286,21 @@ body.dark-mode .glow-text span:hover {
 }
 
 /* --- "Read More" disclosure ----------------------------------------- */
-/* The list fades in and out. Its space is taken and released in
-   js/site.js, which holds the panel open until the fade has finished --
-   collapsing the height on the class change alone would whip the content
-   away before there was anything to see fade. */
-:root { --disclosure-duration: 0.6s; }
+/* The list slides open and shut: max-height carries the height, and
+   js/site.js measures what that height should be. A fixed ceiling here
+   instead would spend part of the run animating empty space, which is what
+   made the two directions look nothing like each other.
+
+   The duration is set per panel in js/site.js, paced by how far there is to
+   travel -- a long list at a fixed duration is a blur. */
+:root { --disclosure-duration: 1.4s; }
 
 #more {
   max-height: 0;
-  opacity: 0;
   overflow: hidden;
-  transition: opacity var(--disclosure-duration) ease-in-out;
-  will-change: opacity;
+  transition: max-height var(--disclosure-duration) ease-in-out;
+  will-change: max-height;
 }
-
-#more.show { opacity: 1; }
 
 /* --- Scroll-to-top plane -------------------------------------------- */
 #scrollToTopBtn {
