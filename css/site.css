@@ -286,33 +286,21 @@ body.dark-mode .glow-text span:hover {
 }
 
 /* --- "Read More" disclosure ----------------------------------------- */
-/* An accordion: the list folds away over exactly the time it unfolded.
-   Each direction carries its own half of the curve, so closing is the
-   open played backwards rather than a different motion at the same
-   length. max-height itself is set from the measured height in
-   js/site.js -- a fixed ceiling would spend part of the run on empty
-   space and break the symmetry. */
-/* js/site.js overrides this per panel, timed by how far it has to fold. */
-:root { --disclosure-duration: 1.2s; }
+/* The list fades in and out. Its space is taken and released in
+   js/site.js, which holds the panel open until the fade has finished --
+   collapsing the height on the class change alone would whip the content
+   away before there was anything to see fade. */
+:root { --disclosure-duration: 0.6s; }
 
 #more {
   max-height: 0;
   opacity: 0;
   overflow: hidden;
-  /* Closing: ease-in, the reverse of the ease-out below. */
-  transition:
-    max-height var(--disclosure-duration) ease-in,
-    opacity var(--disclosure-duration) ease-in;
-  will-change: max-height, opacity;
+  transition: opacity var(--disclosure-duration) ease-in-out;
+  will-change: opacity;
 }
 
-#more.show {
-  opacity: 1;
-  /* Opening: ease-out. */
-  transition:
-    max-height var(--disclosure-duration) ease-out,
-    opacity var(--disclosure-duration) ease-out;
-}
+#more.show { opacity: 1; }
 
 /* --- Scroll-to-top plane -------------------------------------------- */
 #scrollToTopBtn {

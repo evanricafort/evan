@@ -3,11 +3,6 @@
 
   var THEME_STORAGE_KEY = 'theme';
   var LIST_DATE_KEY = 'achievements-updated';
-  // How fast a disclosure panel folds, and the bounds that keep a short
-  // list from crawling or a very long one from dragging.
-  var FOLD_PIXELS_PER_SECOND = 1800;
-  var FOLD_MIN_SECONDS = 0.6;
-  var FOLD_MAX_SECONDS = 2.4;
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   /* ============================================================
@@ -176,49 +171,46 @@
   /* ============================================================
      "Read More" disclosures
      ============================================================ */
-  /* A fixed max-height ceiling makes the two directions look different: it
-     animates past the content on the way open, then sits still on the way
-     closed until it drops back below it. Driving max-height from the panel's
-     measured height keeps both directions the same length. */
+  /* The panel fades, but it still has to stop taking up space once it is
+     closed. CSS alone would drop the height the moment the class changes,
+     cutting the fade-out off before there is anything to see, so the height
+     is held here until the fade has had its time.
+
+     That wait is a timer rather than a transitionend listener: a transition
+     that gets cancelled -- a quick second click, a browser that interrupts it
+     -- never fires the event, and the panel would be left holding thousands
+     of pixels of blank page. */
   function animatePanel(panel, expanded) {
-    if (reducedMotion.matches) {
-      panel.style.maxHeight = expanded ? 'none' : '0px';
-      return;
-    }
-
-    // A fixed duration runs a long list past far quicker than a short one --
-    // the achievements panel is several thousand pixels tall, so 0.8s of it
-    // was a blur. Timing it by distance instead keeps the fold readable
-    // whatever the list grows to, and both directions measure the same
-    // height, so they stay the same speed as each other.
-    var seconds = Math.min(FOLD_MAX_SECONDS,
-      Math.max(FOLD_MIN_SECONDS, panel.scrollHeight / FOLD_PIXELS_PER_SECOND));
-    panel.style.setProperty('--disclosure-duration', seconds.toFixed(2) + 's');
-
-    panel.style.maxHeight = panel.scrollHeight + 'px';
+    window.clearTimeout(panel.foldTimer);
 
     if (expanded) {
-      panel.addEventListener('transitionend', function settle(event) {
-        if (event.propertyName !== 'max-height') return;
-        panel.removeEventListener('transitionend', settle);
-        // Release the height once open so a resize cannot clip the list.
-        if (panel.classList.contains('show')) panel.style.maxHeight = 'none';
-      });
+      // Take the space up front, so there is something there to fade in.
+      panel.style.maxHeight = 'none';
       return;
     }
 
-    // Closing from the foot of a tall panel takes more height off the page
-    // than is left below it, so the browser hauls the viewport up while the
-    // panel shrinks. The two add up and the list sweeps past about twice as
-    // fast as it unfurled. Riding up deliberately instead keeps the collapse
-    // reading at the speed it opened at.
+    if (reducedMotion.matches) {
+      releasePanel(panel);
+      return;
+    }
+
+    var fade = parseFloat(window.getComputedStyle(panel).transitionDuration) * 1000;
+    panel.foldTimer = window.setTimeout(function () {
+      if (!panel.classList.contains('show')) releasePanel(panel);
+    }, (fade || 0) + 60);
+  }
+
+  function releasePanel(panel) {
+    // Giving the height back costs the page more than it has left below it, so
+    // the browser would otherwise haul the viewport up from wherever the reader
+    // is standing. Step up to the top of the list instead -- the content has
+    // already faded, so there is nothing left to watch move.
     var room = document.documentElement.scrollHeight - panel.scrollHeight - window.innerHeight;
     if (window.scrollY > room) {
       var panelTop = panel.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({ top: Math.max(0, panelTop - 80), behavior: 'smooth' });
+      window.scrollTo(0, Math.max(0, panelTop - 80));
     }
 
-    panel.offsetHeight; // Flush the height above before animating away from it.
     panel.style.maxHeight = '0px';
   }
 

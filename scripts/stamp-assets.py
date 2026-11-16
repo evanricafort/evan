@@ -16,6 +16,7 @@ import hashlib
 import io
 import pathlib
 import re
+import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -24,7 +25,12 @@ SKIP = {'.git', 'node_modules', 'vendor'}
 
 
 def digest(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()[:8]
+    # Normalise line endings first. A Windows checkout holds CRLF where the
+    # repository and CI hold LF, and hashing the raw bytes would hand the two
+    # a different version for the same file -- so CI would re-stamp after
+    # every push from Windows.
+    body = path.read_bytes().replace(b'\r\n', b'\n')
+    return hashlib.sha256(body).hexdigest()[:8]
 
 
 def stamp(page, cache):
@@ -58,11 +64,31 @@ def stamp(page, cache):
     return True
 
 
+def pages():
+    """Only what git tracks.
+
+    Scratch directories sit beside the site in a working copy, and rewriting
+    somebody's unrelated files would be a nasty surprise. Falling back to a
+    plain walk keeps this usable outside a checkout.
+    """
+    try:
+        listed = subprocess.run(
+            ['git', '-C', str(ROOT), 'ls-files', '-z', '--', '*.html'],
+            capture_output=True, check=True).stdout.decode('utf-8')
+        found = [ROOT / name for name in listed.split(chr(0)) if name]
+        if found:
+            return sorted(found)
+    except (OSError, subprocess.CalledProcessError):
+        pass
+
+    return sorted(ROOT.rglob('*.html'))
+
+
 def main():
     cache = {}
     changed = []
 
-    for page in sorted(ROOT.rglob('*.html')):
+    for page in pages():
         if SKIP & set(page.relative_to(ROOT).parts):
             continue
         if stamp(page, cache):
