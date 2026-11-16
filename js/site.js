@@ -93,6 +93,45 @@
   }
 
   /* ============================================================
+     Achievements list (data lives in js/achievements.js)
+     ============================================================ */
+  function initAchievements() {
+    var data = window.ACHIEVEMENTS;
+    var head = document.getElementById('achievements-head');
+    var more = document.getElementById('more');
+    if (!data || !head || !more) return;
+
+    var entries = data.entries || [];
+    var cut = typeof data.VISIBLE_COUNT === 'number' ? data.VISIBLE_COUNT : entries.length;
+
+    function markup(list) {
+      return list.map(function (entry) {
+        return '<strong>• ' + entry.name + '</strong> — ' + entry.detail + '<br />';
+      }).join('\n');
+    }
+
+    head.innerHTML = markup(entries.slice(0, cut));
+    more.innerHTML = markup(entries.slice(cut));
+
+    // The banner date tracks the newest entry, so adding one keeps it honest.
+    var stamp = document.getElementById('achievements-updated');
+    if (!stamp) return;
+
+    var newest = data.BASELINE_DATE || '';
+    entries.forEach(function (entry) {
+      if (entry.added && entry.added > newest) newest = entry.added;
+    });
+
+    var parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(newest);
+    if (!parts) return;
+
+    var when = new Date(Date.UTC(+parts[1], +parts[2] - 1, +parts[3]));
+    stamp.textContent = when.toLocaleDateString('en-US', {
+      month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC'
+    });
+  }
+
+  /* ============================================================
      "Read More" disclosures
      ============================================================ */
   function initDisclosures() {
@@ -640,6 +679,7 @@
   initScrollAnimations();
   initTheme();
   initTagline();
+  initAchievements();
   initDisclosures();
   initLoadingBar();
   initScrollProgress();
