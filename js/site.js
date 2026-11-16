@@ -99,6 +99,22 @@
   }
 
   /* ============================================================
+     Projects list (data lives in js/projects.js)
+     ============================================================ */
+  function initProjects() {
+    var entries = window.PROJECTS;
+    var mount = document.getElementById('projects-list');
+    if (!entries || !mount) return;
+
+    mount.innerHTML = entries.map(function (entry) {
+      return '<p><strong>' + entry.name + '</strong></p>' +
+        '<ul><li><p>' + entry.description + ' — ' +
+        '<a href="' + entry.href + '" target="_blank" rel="noopener noreferrer" ' +
+        'class="container cool-link">' + entry.label + '</a></p></li></ul>';
+    }).join('');
+  }
+
+  /* ============================================================
      Achievements list (data lives in js/achievements.js)
      ============================================================ */
   function initAchievements() {
@@ -782,6 +798,7 @@
   initScrollAnimations();
   initTheme();
   initTagline();
+  initProjects();
   initAchievements();
   initDisclosures();
   initLoadingBar();
