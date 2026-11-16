@@ -1,17 +1,23 @@
 /*
  * Achievements list for the homepage.
  *
- * To add a company: drop one entry in the array below and give it an `added`
- * date (YYYY-MM-DD). The "Last Update" line on the page shows the newest
- * `added` date it finds, so it keeps itself current -- there is nothing else
- * to edit. Entries that predate this file have no `added` date and fall back
- * to BASELINE_DATE.
+ * To add a company: drop one entry in the array below. Nothing else to edit
+ * -- the "Last Update" line on the page dates itself from the commit that
+ * last touched this file, so adding an entry moves it on its own.
+ *
+ * `added` (YYYY-MM-DD) is optional. Set it only to claim a date other than
+ * the commit's, or to keep the line honest if the page cannot reach GitHub.
+ * BASELINE_DATE covers the entries that predate this file.
  *
  * `name` and `detail` are inserted as HTML, so escape literal & as &amp;.
  */
 window.ACHIEVEMENTS = {
   // The date the page advertised when the list moved into this file.
   BASELINE_DATE: '2026-11-16',
+
+  // Where this list lives, so the page can read its own last-changed date.
+  // The time zone keeps that date the same for every visitor.
+  SOURCE: { repo: 'evanricafort/evan', path: 'js/achievements.js', timeZone: 'Asia/Manila' },
 
   // How many entries show before the "Read More" link.
   VISIBLE_COUNT: 22,

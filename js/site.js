@@ -2,6 +2,7 @@
   'use strict';
 
   var THEME_STORAGE_KEY = 'theme';
+  var LIST_DATE_KEY = 'achievements-updated';
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   /* ============================================================
@@ -113,7 +114,6 @@
     head.innerHTML = markup(entries.slice(0, cut));
     more.innerHTML = markup(entries.slice(cut));
 
-    // The banner date tracks the newest entry, so adding one keeps it honest.
     var stamp = document.getElementById('achievements-updated');
     if (!stamp) return;
 
@@ -121,14 +121,51 @@
     entries.forEach(function (entry) {
       if (entry.added && entry.added > newest) newest = entry.added;
     });
+    showDate(stamp, newest);
 
-    var parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(newest);
+    // An entry added on GitHub carries no `added` date -- copying the line
+    // above it does not produce one -- so the list dates itself from the
+    // commit that last changed it, and that wins when it is the later of
+    // the two.
+    datePublishedList(data.SOURCE, function (ymd) {
+      if (ymd > newest) showDate(stamp, ymd);
+    });
+  }
+
+  function showDate(stamp, ymd) {
+    var parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd);
     if (!parts) return;
 
     var when = new Date(Date.UTC(+parts[1], +parts[2] - 1, +parts[3]));
     stamp.textContent = when.toLocaleDateString('en-US', {
       month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC'
     });
+  }
+
+  /* Anything that goes wrong here -- offline, rate limited, a private window
+     refusing storage -- leaves the date the page already rendered. */
+  function datePublishedList(source, done) {
+    if (!source || !source.repo || !source.path || !window.fetch) return;
+
+    var cached = null;
+    try { cached = window.sessionStorage.getItem(LIST_DATE_KEY); } catch (error) { cached = null; }
+    if (cached) { done(cached); return; }
+
+    var url = 'https://api.github.com/repos/' + source.repo +
+      '/commits?per_page=1&path=' + encodeURIComponent(source.path);
+
+    window.fetch(url, { headers: { Accept: 'application/vnd.github+json' } })
+      .then(function (response) { return response.ok ? response.json() : null; })
+      .then(function (commits) {
+        if (!commits || !commits.length) return;
+
+        var ymd = new Date(commits[0].commit.committer.date)
+          .toLocaleDateString('en-CA', { timeZone: source.timeZone || 'UTC' });
+
+        try { window.sessionStorage.setItem(LIST_DATE_KEY, ymd); } catch (error) { /* not storable */ }
+        done(ymd);
+      })
+      .catch(function () { /* keep what is on the page */ });
   }
 
   /* ============================================================
