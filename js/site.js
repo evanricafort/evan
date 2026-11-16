@@ -156,6 +156,17 @@
       return;
     }
 
+    // Closing from the foot of a tall panel takes more height off the page
+    // than is left below it, so the browser hauls the viewport up while the
+    // panel shrinks. The two add up and the list sweeps past about twice as
+    // fast as it unfurled. Riding up deliberately instead keeps the collapse
+    // reading at the speed it opened at.
+    var room = document.documentElement.scrollHeight - panel.scrollHeight - window.innerHeight;
+    if (window.scrollY > room) {
+      var panelTop = panel.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top: Math.max(0, panelTop - 80), behavior: 'smooth' });
+    }
+
     panel.offsetHeight; // Flush the height above before animating away from it.
     panel.style.maxHeight = '0px';
   }

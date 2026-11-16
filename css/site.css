@@ -286,16 +286,32 @@ body.dark-mode .glow-text span:hover {
 }
 
 /* --- "Read More" disclosure ----------------------------------------- */
+/* An accordion: the list folds away over exactly the time it unfolded.
+   Each direction carries its own half of the curve, so closing is the
+   open played backwards rather than a different motion at the same
+   length. max-height itself is set from the measured height in
+   js/site.js -- a fixed ceiling would spend part of the run on empty
+   space and break the symmetry. */
+:root { --disclosure-duration: 0.8s; }
+
 #more {
   max-height: 0;
   opacity: 0;
   overflow: hidden;
-  transition: max-height 0.8s ease, opacity 0.8s ease;
+  /* Closing: ease-in, the reverse of the ease-out below. */
+  transition:
+    max-height var(--disclosure-duration) ease-in,
+    opacity var(--disclosure-duration) ease-in;
   will-change: max-height, opacity;
 }
 
-/* max-height is set from the measured height in js/site.js. */
-#more.show { opacity: 1; }
+#more.show {
+  opacity: 1;
+  /* Opening: ease-out. */
+  transition:
+    max-height var(--disclosure-duration) ease-out,
+    opacity var(--disclosure-duration) ease-out;
+}
 
 /* --- Scroll-to-top plane -------------------------------------------- */
 #scrollToTopBtn {
