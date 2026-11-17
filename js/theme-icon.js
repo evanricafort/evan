@@ -68,18 +68,26 @@
 
     var icon = toggle.querySelector('.tk-theme-icon');
     if (!icon) {
-      // Hide, never remove: the page may still hold a reference to these.
-      // Everything, not just i/svg -- googleapikeychecker's icon is an emoji
-      // in a <span>, and it showed through beside the new one.
-      var existing = toggle.querySelectorAll('*');
-      Array.prototype.forEach.call(existing, function (node) {
-        if (!node.classList.contains('tk-theme-icon')) node.classList.add('tk-theme-icon-was');
-      });
-
       icon = document.createElement('i');
       icon.setAttribute('aria-hidden', 'true');
       toggle.appendChild(icon);
     }
+
+    /* Hide whatever else the button holds -- every paint, not just the first.
+
+       Several pages swap their own icon on click with
+       `themeIcon.className = 'fas fa-moon ...'`. Assigning className replaces
+       the whole attribute, so the class we had hidden it with disappeared and
+       the page's icon came back beside ours: two suns after one click. An
+       inline display survives that, because className does not touch it.
+
+       Hidden, never removed: the page still holds references to these. */
+    var kids = toggle.querySelectorAll('*');
+    Array.prototype.forEach.call(kids, function (node) {
+      if (node === icon) return;
+      node.classList.add('tk-theme-icon-was');
+      node.style.setProperty('display', 'none', 'important');
+    });
 
     var wanted = isDark() ? SUN : MOON;
     if (icon.className !== wanted) icon.className = wanted;
