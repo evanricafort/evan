@@ -8,7 +8,6 @@
   var SLIDE_PIXELS_PER_SECOND = 2500;
   var SLIDE_MIN_SECONDS = 0.7;
   var SLIDE_MAX_SECONDS = 2.0;
-  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   /* ============================================================
      Scroll animations
@@ -536,14 +535,8 @@
       springBack: 0.014,
       damping: 0.9,
       maxDisplacement: 120,
-      calmDrift: 0.35,       /* drift multiplier under "reduce motion" */
       resizeDelay: 150
     };
-
-    /* "Reduce motion" calms the web - slower drift - but it keeps
-       moving and keeps answering the cursor, because a frozen
-       background reads as broken rather than considerate. */
-    var calm = reducedMotion.matches;
 
     var nodes = [];
     var pointer = { x: -9999, y: -9999, influence: 0, target: 0 };
@@ -617,7 +610,7 @@
 
     function step(delta) {
       var decay = Math.pow(SETTINGS.damping, delta);
-      var drift = delta * (calm ? SETTINGS.calmDrift : 1);
+      var drift = delta;
 
       for (var i = 0; i < nodes.length; i += 1) {
         var node = nodes[i];
@@ -756,11 +749,6 @@
       }, SETTINGS.resizeDelay);
     }
 
-    function applyMotionPreference() {
-      calm = reducedMotion.matches;
-      start();
-    }
-
     function releasePointer() {
       pointer.target = 0;
     }
@@ -786,13 +774,9 @@
       palette = readPalette();
     }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
-    if (typeof reducedMotion.addEventListener === 'function') {
-      reducedMotion.addEventListener('change', applyMotionPreference);
-    }
-
     resizeCanvas();
     populate();
-    applyMotionPreference();
+    start();
   }
 
   initScrollAnimations();
