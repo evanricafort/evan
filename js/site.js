@@ -526,7 +526,7 @@
       minNodes: 26,
       maxNodes: 88,
       linkDistance: 165,     /* neighbours closer than this are linked */
-      maxDrift: 0.13,        /* px per frame at 60fps */
+      maxDrift: 0.18,        /* px per frame at 60fps */
       minNodeRadius: 1,
       maxNodeRadius: 2.2,
       lineAlpha: 0.17,
