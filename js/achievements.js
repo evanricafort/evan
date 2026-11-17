@@ -86,6 +86,7 @@ window.ACHIEVEMENTS = {
     { name: "Crowdcurity", detail: "https://www.crowdcurity.com/crowdcurity/hall-of-fame/all" },
     { name: "Crowdrise", detail: "http://www.crowdrise.com/UnitedRelief-ARC (Reward ($100) Donated to Typhoon Haiyan Victims in the Philippines [2013])" },
     { name: "Cozy", detail: "https://cozy.co/security-and-privacy/" },
+    { name: "Dawn Technology", detail: "https://dawn.tech/en/responsible-disclosure" },
     { name: "Dell Secureworks", detail: "http://www.secureworks.co.uk/contact/disclosure/" },
     { name: "Deskera", detail: "https://www.deskera.com/blog/deskera-responsible-disclosure-reward-program" },
     { name: "Detectify", detail: "https://detectify.com/responsible_disclosure/hall_of_fame" },
