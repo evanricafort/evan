@@ -245,3 +245,49 @@ html.dark .tk-sitenav a.tk-sitenav-primary:hover { background: #4338ca; border-c
 /* The icon each page shipped with. Kept in the DOM so the page's own code
    can go on addressing it, just never shown. */
 .tk-theme-icon-was { display: none !important; }
+
+/* --- One dark-mode button everywhere (see js/theme-icon.js) ---------- */
+/* The pages place and size their own toggle differently: 46x46, 46x50,
+   46x66 and 48x48, sitting 32px, 38px, 47px or 70px in from the edge.
+   Forcing the geometry here puts every one in the same corner at the same
+   size without editing seventeen different headers -- and because it is
+   fixed, whatever wrapper each page used stops mattering. */
+.tk-theme-btn {
+  position: fixed !important;
+  top: 1rem !important;
+  right: 1rem !important;
+  z-index: 60 !important;
+  box-sizing: border-box !important;
+  width: 46px !important;
+  height: 46px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 9999px !important;
+  background: #ffffff !important;
+  color: #4b5563 !important;
+  border: 1px solid rgb(229, 231, 235) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1) !important;
+  /* Silences any bare text the page had in the button; the icon sets its
+     own size back. */
+  font-size: 0 !important;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.3s ease, color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.tk-theme-btn:hover { transform: scale(1.05); }
+
+html.dark .tk-theme-btn,
+html[data-theme="dark"] .tk-theme-btn {
+  background: rgb(31, 41, 55) !important;
+  color: rgb(250, 204, 21) !important;
+  border-color: rgb(55, 65, 81) !important;
+}
+
+/* Clear of the page edge on wider screens, matching where most already sat. */
+@media (min-width: 768px) {
+  .tk-theme-btn { top: 2rem !important; right: 2rem !important; }
+}

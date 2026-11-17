@@ -39,16 +39,41 @@
     return root.classList.contains('dark') || root.getAttribute('data-theme') === 'dark';
   }
 
+  /* Pick the control the reader actually sees. webarchive's #themeToggle is
+     an sr-only checkbox inside a <label>: appending an icon to an <input>
+     renders nothing, so climb to the label that wraps it. */
+  function findToggle() {
+    var candidates = document.querySelectorAll(TOGGLE);
+
+    for (var i = 0; i < candidates.length; i++) {
+      var node = candidates[i];
+      if (node.getBoundingClientRect().width < 20) {
+        var visible = node.closest('label, button, a');
+        if (visible && visible.getBoundingClientRect().width >= 20) return visible;
+        continue;
+      }
+      return node;
+    }
+
+    return null;
+  }
+
   function paint() {
-    var toggle = document.querySelector(TOGGLE);
+    var toggle = findToggle();
     if (!toggle) return;
+
+    // Geometry and colour are forced from tool-shell.css off this class, so
+    // every page's button sits in the same corner at the same size.
+    toggle.classList.add('tk-theme-btn');
 
     var icon = toggle.querySelector('.tk-theme-icon');
     if (!icon) {
       // Hide, never remove: the page may still hold a reference to these.
-      var existing = toggle.querySelectorAll('i, svg');
+      // Everything, not just i/svg -- googleapikeychecker's icon is an emoji
+      // in a <span>, and it showed through beside the new one.
+      var existing = toggle.querySelectorAll('*');
       Array.prototype.forEach.call(existing, function (node) {
-        node.classList.add('tk-theme-icon-was');
+        if (!node.classList.contains('tk-theme-icon')) node.classList.add('tk-theme-icon-was');
       });
 
       icon = document.createElement('i');
