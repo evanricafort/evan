@@ -98,6 +98,21 @@
   }
 
   /* ============================================================
+     Badges list (data lives in js/badges.js)
+     ============================================================ */
+  function initBadges() {
+    var entries = window.BADGES;
+    var mount = document.getElementById('badges-list');
+    if (!entries || !mount) return;
+
+    mount.innerHTML = entries.map(function (entry) {
+      return '<li><p><strong>' + entry.issuer + '</strong> - ' + entry.detail + ' ' +
+        '<a href="' + entry.href + '" target="_blank" rel="noopener noreferrer" ' +
+        'class="container cool-link">' + entry.label + '</a></p></li>';
+    }).join('');
+  }
+
+  /* ============================================================
      Projects list (data lives in js/projects.js)
      ============================================================ */
   function initProjects() {
@@ -782,6 +797,7 @@
   initScrollAnimations();
   initTheme();
   initTagline();
+  initBadges();
   initProjects();
   initAchievements();
   initDisclosures();
