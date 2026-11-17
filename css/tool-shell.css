@@ -41,8 +41,8 @@ html.dark {
 
 /* ── Site nav ──────────────────────────────────────────────────────────
    The Tools / Home pair at the top of every tool page. Written in plain
-   CSS rather than utility classes because four of the tools (the API key
-   checker, JWT analyzer, sorting kit and proofreader) do not load
+   CSS rather than utility classes because three of the tools (the API key
+   checker, JWT analyzer and sorting kit) do not load
    Tailwind, so utilities would come out unstyled there. Icons are inline
    SVG in the markup for the same reason - the tools variously load
    Lucide, Font Awesome or nothing, so neither can be relied on.

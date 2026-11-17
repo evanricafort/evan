@@ -11,8 +11,9 @@
  * unseen and harmless.
  *
  * Everything is re-queried from the document on each paint rather than held
- * in a variable: proofreader replaces its toggle with a cloneNode(true) copy,
- * and a held reference would point at a node no longer in the page.
+ * in a variable. A page is free to rebuild its own toggle -- one of them used
+ * to replace it with a cloneNode(true) copy -- and a held reference would then
+ * point at a node no longer in the page.
  */
 (function () {
   'use strict';
