@@ -2,7 +2,6 @@
   'use strict';
 
   var THEME_STORAGE_KEY = 'theme';
-  var LIST_DATE_KEY = 'achievements-updated';
   // How fast a disclosure panel slides, and the bounds that keep a short
   // list from crawling or a very long one from dragging.
   var SLIDE_PIXELS_PER_SECOND = 2500;
@@ -152,19 +151,14 @@
     var stamp = document.getElementById('achievements-updated');
     if (!stamp) return;
 
-    var newest = data.BASELINE_DATE || '';
+    // The date in the markup is written by CI from the last commit to touch
+    // this file (scripts/date-achievements.py), so it is already right. An
+    // `added` date on an entry still wins when it is the later of the two.
+    var newest = '';
     entries.forEach(function (entry) {
       if (entry.added && entry.added > newest) newest = entry.added;
     });
-    showDate(stamp, newest);
-
-    // An entry added on GitHub carries no `added` date -- copying the line
-    // above it does not produce one -- so the list dates itself from the
-    // commit that last changed it, and that wins when it is the later of
-    // the two.
-    datePublishedList(data.SOURCE, function (ymd) {
-      if (ymd > newest) showDate(stamp, ymd);
-    });
+    if (newest > (data.BASELINE_DATE || '')) showDate(stamp, newest);
   }
 
   function showDate(stamp, ymd) {
@@ -175,32 +169,6 @@
     stamp.textContent = when.toLocaleDateString('en-US', {
       month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC'
     });
-  }
-
-  /* Anything that goes wrong here -- offline, rate limited, a private window
-     refusing storage -- leaves the date the page already rendered. */
-  function datePublishedList(source, done) {
-    if (!source || !source.repo || !source.path || !window.fetch) return;
-
-    var cached = null;
-    try { cached = window.sessionStorage.getItem(LIST_DATE_KEY); } catch (error) { cached = null; }
-    if (cached) { done(cached); return; }
-
-    var url = 'https://api.github.com/repos/' + source.repo +
-      '/commits?per_page=1&path=' + encodeURIComponent(source.path);
-
-    window.fetch(url, { headers: { Accept: 'application/vnd.github+json' } })
-      .then(function (response) { return response.ok ? response.json() : null; })
-      .then(function (commits) {
-        if (!commits || !commits.length) return;
-
-        var ymd = new Date(commits[0].commit.committer.date)
-          .toLocaleDateString('en-CA', { timeZone: source.timeZone || 'UTC' });
-
-        try { window.sessionStorage.setItem(LIST_DATE_KEY, ymd); } catch (error) { /* not storable */ }
-        done(ymd);
-      })
-      .catch(function () { /* keep what is on the page */ });
   }
 
   /* ============================================================

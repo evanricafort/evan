@@ -17,6 +17,7 @@ on:
       - 'css/**'
       - '**.html'
       - 'scripts/stamp-assets.py'
+      - 'scripts/date-achievements.py'
       - '.github/workflows/stamp-assets.yml'
 
 permissions:
@@ -32,6 +33,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # date-achievements.py reads the log of js/achievements.js.
+          fetch-depth: 0
+
+      - run: python3 scripts/date-achievements.py
 
       - run: python3 scripts/stamp-assets.py
 
