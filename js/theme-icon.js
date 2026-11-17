@@ -1,13 +1,18 @@
 /*
  * One dark-mode icon across every tool page.
  *
- * The pages grew separately and their toggles show the icon three different
- * ways -- a Font Awesome <i>, a lucide <i data-lucide>, a pair of inline
- * <svg>s swapped by hidden. Rewriting each toggle would mean touching working
- * code on seventeen pages, so this leaves every page's own logic alone: it
- * hides whatever icon is already in the button and puts the reference one
- * (tools/spfrecordchecker) in beside it. A page that keeps setting classes or
- * toggling hidden on its original icon goes on doing so, unseen and harmless.
+ * The pages grew separately and show the toggle three different ways -- a
+ * Font Awesome <i>, a lucide <i data-lucide>, a pair of inline <svg>s swapped
+ * by hidden -- under four different button ids. Rewriting seventeen working
+ * toggles is how the sshsecurity one got broken before, so this leaves every
+ * page's own logic alone: it hides whatever icon the button already holds and
+ * puts the reference one (tools/spfrecordchecker) in beside it. A page that
+ * goes on setting classes or toggling hidden on its original icon does so
+ * unseen and harmless.
+ *
+ * Everything is re-queried from the document on each paint rather than held
+ * in a variable: proofreader replaces its toggle with a cloneNode(true) copy,
+ * and a held reference would point at a node no longer in the page.
  */
 (function () {
   'use strict';
@@ -15,13 +20,8 @@
   var FONT_AWESOME = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css';
   var SUN = 'fas fa-sun tk-theme-icon';
   var MOON = 'fas fa-moon tk-theme-icon';
-
-  function findToggle() {
-    return document.querySelector(
-      '#themeToggle, #btnThemeToggle, #themeToggleBtn, .theme-toggle-btn,' +
-      ' [onclick*="toggleTheme"], [onclick*="toggleDarkMode"]'
-    );
-  }
+  var TOGGLE = '#themeToggle, #btnThemeToggle, #themeToggleBtn, .theme-toggle-btn,' +
+    ' [onclick*="toggleTheme"], [onclick*="toggleDarkMode"]';
 
   function ensureFontAwesome() {
     if (document.querySelector('link[href*="font-awesome"]')) return;
@@ -39,35 +39,46 @@
     return root.classList.contains('dark') || root.getAttribute('data-theme') === 'dark';
   }
 
-  function start() {
-    var toggle = findToggle();
-    if (!toggle || toggle.querySelector('.tk-theme-icon')) return;
+  function paint() {
+    var toggle = document.querySelector(TOGGLE);
+    if (!toggle) return;
 
-    ensureFontAwesome();
+    var icon = toggle.querySelector('.tk-theme-icon');
+    if (!icon) {
+      // Hide, never remove: the page may still hold a reference to these.
+      var existing = toggle.querySelectorAll('i, svg');
+      Array.prototype.forEach.call(existing, function (node) {
+        node.classList.add('tk-theme-icon-was');
+      });
 
-    // Hide, never remove: the page may still be holding a reference to these.
-    var existing = toggle.querySelectorAll('i, svg');
-    Array.prototype.forEach.call(existing, function (node) {
-      node.classList.add('tk-theme-icon-was');
-    });
-
-    var icon = document.createElement('i');
-    icon.className = isDark() ? SUN : MOON;
-    icon.setAttribute('aria-hidden', 'true');
-    toggle.appendChild(icon);
-
-    function sync() {
-      icon.className = isDark() ? SUN : MOON;
+      icon = document.createElement('i');
+      icon.setAttribute('aria-hidden', 'true');
+      toggle.appendChild(icon);
     }
 
-    // The page swaps the theme however it likes; watch the result rather than
-    // the click, so this works whatever the toggle is called.
-    new MutationObserver(sync).observe(document.documentElement, {
+    var wanted = isDark() ? SUN : MOON;
+    if (icon.className !== wanted) icon.className = wanted;
+  }
+
+  function start() {
+    ensureFontAwesome();
+    paint();
+
+    // Watch the result of a theme change rather than the click, so this works
+    // whatever each page calls its toggle.
+    new MutationObserver(paint).observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['class', 'data-theme']
     });
 
-    sync();
+    // A page may rebuild its toggle on click; repaint just after one lands.
+    document.addEventListener('click', function () {
+      window.setTimeout(paint, 0);
+      window.setTimeout(paint, 250);
+    }, true);
+
+    // And once more after late scripts have finished rearranging the page.
+    window.setTimeout(paint, 600);
   }
 
   if (document.readyState === 'loading') {
